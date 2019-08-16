@@ -533,13 +533,13 @@ namespace Suprema
                         return false;
                     }
 
-                    Console.WriteLine("[{0, 3:##0}] ==> ID[{1, 10}] Type[{2, 16}] Connection mode[{3}] Ip[{4, 16}] port[{5, 5}]",
+                    Console.WriteLine("[{0, 3:##0}] ==> ID[{1, 10}] Type[{2, 16}] Connection mode[{3}] Ip[{4, 16}] port[{5, 5}] Master/Slave[{6}]",
                             idx,
                             deviceID,                            
                             API.productNameDictionary.ContainsKey((BS2DeviceTypeEnum)deviceInfo.type) ?  API.productNameDictionary[(BS2DeviceTypeEnum)deviceInfo.type] : (API.productNameDictionary[BS2DeviceTypeEnum.UNKNOWN] + "(" + deviceInfo.type + ")"),
                             (BS2ConnectionModeEnum)deviceInfo.connectionMode,
                             new IPAddress(BitConverter.GetBytes(deviceInfo.ipv4Address)).ToString(),
-                            deviceInfo.port);
+                            deviceInfo.port, deviceInfo.rs485Mode);
                 }
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
                 Console.WriteLine("Please, choose the index of the Device which you want to connect to. [-1: quit]");
