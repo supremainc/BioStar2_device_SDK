@@ -331,7 +331,7 @@ namespace Suprema
             if (Util.IsYes())
             {
                 //cbDebugExPrint = new API.CBDebugExPrint(DebugExPrint);
-                //result = (BS2ErrorCode)API.BS2_SetDebugExCallback(cbDebugExPrint, Constants.DEBUG_LOG_ALL, Constants.DEBUG_MODULE_ALL);
+                //result = (BS2ErrorCode)API.BS2_SetDebugExCallback(cbDebugExPrint, Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL);
                 //if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                 //{
                 //    Console.WriteLine("Got error({0}).", result);
@@ -340,7 +340,7 @@ namespace Suprema
 
                 const string CURRENT_DIR = ".";
                 IntPtr ptrDir = Marshal.StringToHGlobalAnsi(CURRENT_DIR);
-                result = (BS2ErrorCode)API.BS2_SetDebugFileLog(Constants.DEBUG_LOG_ALL, Constants.DEBUG_MODULE_ALL, ptrDir);
+                result = (BS2ErrorCode)API.BS2_SetDebugFileLog(Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL, ptrDir);
                 Marshal.FreeHGlobal(ptrDir);
                 if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                 {
@@ -788,6 +788,7 @@ namespace Suprema
                 case Constants.DEBUG_LOG_WARN:              return "WRN";
                 case Constants.DEBUG_LOG_INFO:              return "INF";
                 case Constants.DEBUG_LOG_TRACE:             return "TRC";
+                case Constants.DEBUG_LOG_OPERATION_ALL:     return "OPR";
                 case Constants.DEBUG_LOG_ALL:               return "ALL";
             }
 
@@ -822,7 +823,7 @@ namespace Suprema
             if (!Util.IsNo())
             {
                 cbDebugExPrint = new API.CBDebugExPrint(DebugExPrint);
-                result = (BS2ErrorCode)API.BS2_SetDebugExCallback(cbDebugExPrint, Constants.DEBUG_LOG_ALL, Constants.DEBUG_MODULE_ALL);
+                result = (BS2ErrorCode)API.BS2_SetDebugExCallback(cbDebugExPrint, Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL);
                 if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                 {
                     Console.WriteLine("SetDebugExCallback: Got error({0}).", result);

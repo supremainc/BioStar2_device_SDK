@@ -215,7 +215,7 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct BS2AuthOperation
+    public struct BS2AuthOperatorLevel
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
         public byte[] userID;
@@ -242,7 +242,7 @@ namespace Suprema
         public byte numOperators;
         public byte reserved2;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_OPERATORS)]
-        public BS2AuthOperation[] operators;
+        public BS2AuthOperatorLevel[] operators;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

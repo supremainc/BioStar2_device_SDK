@@ -469,7 +469,9 @@ typedef void (*CBDebugPrint)(char* msg);
 #define DEBUG_LOG_ERROR					(0x1 << 1)
 #define DEBUG_LOG_WARN					(0x1 << 2)
 #define DEBUG_LOG_INFO					(0x1 << 3)
-#define DEBUG_LOG_TRACE					(0x1 << 4)
+// #define DEBUG_LOG_TRACE				(0x1 << 4)
+#define DEBUG_LOG_TRACE					(0x1 << 8)		// Modified bit mask value (V2.6.3.12)
+#define DEBUG_LOG_OPERATION_ALL			(0x000000FF)	// Output support except trace logs (V2.6.3.12)
 #define DEBUG_LOG_ALL					(0xFFFFFFFF)
 typedef void (*CBDebugExPrint)(uint32_t level, uint32_t module, const char* msg);
 

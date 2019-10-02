@@ -1270,7 +1270,9 @@ namespace Suprema
         public const UInt32 DEBUG_LOG_ERROR                 = (0x1 << 1);
         public const UInt32 DEBUG_LOG_WARN                  = (0x1 << 2);
         public const UInt32 DEBUG_LOG_INFO                  = (0x1 << 3);
-        public const UInt32 DEBUG_LOG_TRACE                 = (0x1 << 4);
+        //public const UInt32 DEBUG_LOG_TRACE                 = (0x1 << 4);
+        public const UInt32 DEBUG_LOG_TRACE                 = (0x1 << 8);
+        public const UInt32 DEBUG_LOG_OPERATION_ALL         = (0x000000ff);
         public const UInt32 DEBUG_LOG_ALL                   = (0xffffffff);
     }
     #endregion

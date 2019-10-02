@@ -2910,8 +2910,8 @@ namespace Suprema
                 List<string> userIDs = new List<string>();
                 userIDs.Add(userID);
 
-                BS2AuthOperation item = Util.AllocateStructure< BS2AuthOperation>();
-                int structSize = Marshal.SizeOf(typeof(BS2AuthOperation));
+                BS2AuthOperatorLevel item = Util.AllocateStructure< BS2AuthOperatorLevel>();
+                int structSize = Marshal.SizeOf(typeof(BS2AuthOperatorLevel));
                 IntPtr operatorlevelObj = Marshal.AllocHGlobal(structSize * userIDs.Count);
                 IntPtr curOperatorlevelObj = operatorlevelObj;
                 foreach (string strUserID in userIDs)
@@ -2936,7 +2936,7 @@ namespace Suprema
             }
         }
 
-        void print(ref BS2AuthOperation operatorLevel)
+        void print(ref BS2AuthOperatorLevel operatorLevel)
         {
             Console.WriteLine(">>>> Auth Operator Level userID[{0}] level[{1}]",
                                         Encoding.UTF8.GetString(operatorLevel.userID).TrimEnd('\0'),
@@ -2988,11 +2988,11 @@ namespace Suprema
                 else if (numOperatorlevel > 0)
                 {
                     IntPtr curOperatorLevelObj = operatorlevelObj;
-                    structSize = Marshal.SizeOf(typeof(BS2AuthOperation));
+                    structSize = Marshal.SizeOf(typeof(BS2AuthOperatorLevel));
 
                     for (int idx = 0; idx < numOperatorlevel; ++idx)
                     {
-                        BS2AuthOperation item = (BS2AuthOperation)Marshal.PtrToStructure(curOperatorLevelObj, typeof(BS2AuthOperation));
+                        BS2AuthOperatorLevel item = (BS2AuthOperatorLevel)Marshal.PtrToStructure(curOperatorLevelObj, typeof(BS2AuthOperatorLevel));
                         print(ref item);
                         curOperatorLevelObj = (IntPtr)((long)curOperatorLevelObj + structSize);
                     }
@@ -3023,11 +3023,11 @@ namespace Suprema
             else if (numOperatorlevel > 0)
             {
                 IntPtr curOperatorLevelObj = operatorlevelObj;
-                int structSize = Marshal.SizeOf(typeof(BS2AuthOperation));
+                int structSize = Marshal.SizeOf(typeof(BS2AuthOperatorLevel));
 
                 for (int idx = 0; idx < numOperatorlevel; ++idx)
                 {
-                    BS2AuthOperation item = (BS2AuthOperation)Marshal.PtrToStructure(curOperatorLevelObj, typeof(BS2AuthOperation));
+                    BS2AuthOperatorLevel item = (BS2AuthOperatorLevel)Marshal.PtrToStructure(curOperatorLevelObj, typeof(BS2AuthOperatorLevel));
                     print(ref item);
                     curOperatorLevelObj = (IntPtr)((long)curOperatorLevelObj + structSize);
                 }
