@@ -1853,6 +1853,8 @@ namespace Suprema
                         face[0].faceIndex = (byte)idx;
                         Marshal.StructureToPtr(face[0], curFaceObjs, false);
                         curFaceObjs += structSize;
+
+                        Thread.Sleep(100);
                     }
 
                     cbFaceOnReadyToScan = null;
@@ -2702,6 +2704,8 @@ namespace Suprema
                         face[0].faceIndex = (byte)idx;
                         Marshal.StructureToPtr(face[0], curFaceObjs, false);
                         curFaceObjs += structSize;
+
+                        Thread.Sleep(100);
                     }
 
                     cbFaceOnReadyToScan = null;

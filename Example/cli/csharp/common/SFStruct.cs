@@ -542,7 +542,6 @@ namespace Suprema
         public byte advancedEnrollment;
         public byte showImage;
         public byte lfdLevel; //0: off, 1~3: on
-        public byte checkDuplicate;			    // [+ 2.6.4]
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public byte[] reserved3;
     }
