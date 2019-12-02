@@ -64,6 +64,7 @@ enum EN_MENU_COMM
 	MENU_COMM_GET_DEF_RES_TIMEOUT,
 	MENU_COMM_SET_DEF_RES_TIMEOUT,
 	MENU_CONF_GET_FACCONFIG,
+	MENU_ELOG_GET_EVENTSMALLBLOB,
 };
 
 std::vector<MENU_ITEM> menuInfoCommAPI =
@@ -88,6 +89,7 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 	{MENU_COMM_GET_DEF_RES_TIMEOUT,	"BS2_GetDefaultResponseTimeout"},
 	{MENU_COMM_SET_DEF_RES_TIMEOUT,	"BS2_SetDefaultResponseTimeout"},
 	{MENU_CONF_GET_FACCONFIG,		"BS2_GetFactoryConfig" },
+	{MENU_ELOG_GET_EVENTSMALLBLOB,	"BS2_GetEventSmallBlob"},
 };
 
 

@@ -48,6 +48,9 @@
     <ClInclude Include="PreDefined.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="..\Common\LogControl.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -72,6 +75,9 @@
       <Filter>BSCommon</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\Utils.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\LogControl.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
   </ItemGroup>

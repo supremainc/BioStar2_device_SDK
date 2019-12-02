@@ -414,6 +414,26 @@ typedef struct
 	BS2_ACCESS_GROUP_ID accessGroupId[BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER];
 }BS2UserSmallBlobEx;
 
+typedef struct
+{
+	uint16_t eventMask;
+	BS2_EVENT_ID id;
+	BS2EventExtInfo info;                         // valid if eventMask has BS2_EVENT_MASK_INFO
+	union
+	{
+		BS2_USER_ID userID;                       // valid if eventMask has BS2_EVENT_MASK_USER_ID
+		uint8_t cardID[BS2_CARD_DATA_SIZE];       // valid if eventMask has BS2_EVENT_MASK_CARD_ID
+		BS2_DOOR_ID doorID;                       // valid if eventMask has BS2_EVENT_MASK_DOOR_ID
+		BS2_ZONE_ID zoneID;                       // valid if eventMask has BS2_EVENT_MASK_ZONE_ID
+		BS2EventExtIoDevice ioDevice;             // valid if eventMask has BS2_EVENT_MASK_IODEVICE
+	};
+	BS2_TNA_KEY tnaKey;                           // valid if eventMask has BS2_EVENT_MASK_TNA_KEY
+	BS2_JOB_CODE jobCode;                         // valid if eventMask has BS2_EVENT_MASK_JOB_CODE
+	uint16_t imageSize;                           // valid if eventMask has BS2_EVENT_MASK_IMAGE
+	uint8_t* imageObj;                            // valid if eventMask has BS2_EVENT_MASK_IMAGE
+	uint8_t reserved;
+}BS2EventSmallBlob;
+
 typedef uint32_t BS2_CONFIG_MASK;
 
 #pragma pack()
@@ -927,6 +947,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAuthOperatorLevelEx(void* cont
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllAuthOperatorLevelEx(void* context, BS2_DEVICE_ID deviceId);
 
 
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlob(void* context, BS2_DEVICE_ID deviceId, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobFromDir(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
 
 #ifdef __cplusplus
 }

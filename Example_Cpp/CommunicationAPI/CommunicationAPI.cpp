@@ -3,6 +3,7 @@
 #include "CommunicationAPI.h"
 #include "../Common/Utils.h"
 #include "../Common/CommControl.h"
+#include "../Common/LogControl.h"
 
 
 extern void TRACE(const char* fmt, ...);
@@ -112,7 +113,7 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	bool menuBreak = false;
-	while (BS_SDK_SUCCESS != sdkResult || !menuBreak)
+	while (!menuBreak)
 	{
 		uint32_t selected = showMenu(menuInfoTop);
 		switch (selected)
@@ -413,6 +414,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 	int selectedTop(0);
 	CommControl cm(context);
 	ConfigControl cc(context);
+	LogControl lc(context);
 
 	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
@@ -482,6 +484,10 @@ int runAPIs(void* context, const DeviceList& deviceList)
 		case MENU_CONF_GET_FACCONFIG:
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = cc.getFactoryConfig(id, facConfig);
+			break;
+		case MENU_ELOG_GET_EVENTSMALLBLOB:
+			id = selectDeviceID(deviceList, true, false);
+			sdkResult = lc.getLogSmallBlob(id);
 			break;
 		default:
 			break;

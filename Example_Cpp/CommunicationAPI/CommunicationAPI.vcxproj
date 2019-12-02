@@ -155,6 +155,7 @@ copy /y $(SolutionDir)Lib\Window\lib\x86\*.dll $(OutDir)</Command>
     <ClInclude Include="..\Common\ConfigControl.h" />
     <ClInclude Include="..\Common\DeviceControl.h" />
     <ClInclude Include="..\Common\DeviceList.h" />
+    <ClInclude Include="..\Common\LogControl.h" />
     <ClInclude Include="..\Common\Utils.h" />
     <ClInclude Include="CommunicationAPI.h" />
     <ClInclude Include="PreDefined.h" />
@@ -167,6 +168,7 @@ copy /y $(SolutionDir)Lib\Window\lib\x86\*.dll $(OutDir)</Command>
     <ClCompile Include="..\Common\ConfigControl.cpp" />
     <ClCompile Include="..\Common\DeviceControl.cpp" />
     <ClCompile Include="..\Common\DeviceList.cpp" />
+    <ClCompile Include="..\Common\LogControl.cpp" />
     <ClCompile Include="..\Common\Utils.cpp" />
     <ClCompile Include="CommunicationAPI.cpp" />
     <ClCompile Include="stdafx.cpp">
