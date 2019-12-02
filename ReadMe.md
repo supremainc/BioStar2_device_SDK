@@ -11,10 +11,10 @@ BioStar2 Device SDK development framework allows developers to seamlessly integr
 ### Get Started
 
 SDK supports the following platforms:
-* [Windows 32-bit](https://github.com/supremainc/BioStar2_device_SDK/SDK/Lib/Window/lib/x86)
-* [Windows 64-bit](https://github.com/supremainc/BioStar2_device_SDK/SDK/Lib/Window/lib/x64)
-* [Ubuntu 16.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/SDK/Lib/Linux/lib/x86)
-* [Ubuntu 16.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/SDK/Lib/Linux/lib/x64)
+* [Windows 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Window/lib/x86)
+* [Windows 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Window/lib/x64)
+* [Ubuntu 16.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x86)
+* [Ubuntu 16.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x64)
 
 ### Learn More About The BioStar2 Device SDK
 
@@ -27,7 +27,7 @@ Learn how to create a context for device management and connect devices. [Watch 
 ### Example
 
 The SDK currently being distributed comes with C # examples. This github provides additional C ++ examples. 
-[C++Example](https://github.com/supremainc/BioStar2_device_SDK/Example_Cpp)(Write in Visual C++ 2015)
+[C++Example](https://github.com/supremainc/BioStar2_device_SDK/tree/master/Example_Cpp)(Write in Visual C++ 2015)
 
 ### Release Notes
 
