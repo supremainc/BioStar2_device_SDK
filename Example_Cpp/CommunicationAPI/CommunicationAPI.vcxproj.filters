@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="BSCommon">
+      <UniqueIdentifier>{fbc7d767-3b08-4257-8a5e-cb068a822c39}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CommControl.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\BS2Context.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\ConfigControl.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\DeviceControl.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\DeviceList.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Utils.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="CommunicationAPI.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PreDefined.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CommunicationAPI.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\BS2Context.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommControl.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\ConfigControl.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\DeviceControl.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\DeviceList.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Utils.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

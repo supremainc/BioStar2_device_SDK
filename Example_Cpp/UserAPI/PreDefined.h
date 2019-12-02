@@ -1,0 +1,62 @@
+#include "stdafx.h"
+
+#define MAX_RECV_LOG_AMOUNT		32768
+#define MAX_SIZE_IMAGE_LOG		50 * 1024
+
+
+enum
+{
+	CONN_TYPE_SEARCH_N_CONN = 1,	// SDK to Device connection (UDP Search and connection)
+	CONN_TYPE_DIRECT_IPADDR = 2,	// SDK to Device connection (Direct connect with IP address)
+	CONN_TYPE_LISTEN_N_ACCEPT = 3,	// Device to SDK connection
+};
+
+enum
+{
+	MAX_ENROLL_USER_FACELITE = 3000,
+	MAX_ENROLL_USER_FACESTATION2 = 3000,
+	MAX_ENROLL_USER_XPASS20 = 40000,
+};
+
+const char* DEVICE_NAME[] =
+{
+	"",				// 0x00
+
+	"BEPL",			// BS2_DEVICE_TYPE_BIOENTRY_PLUS		= 0x01,
+	"BE",			// BS2_DEVICE_TYPE_BIOENTRY_W			= 0x02,
+	"BLN",			// BS2_DEVICE_TYPE_BIOLITE_NET			= 0x03,
+	"Xps",			// BS2_DEVICE_TYPE_XPASS				= 0x04,
+	"XpsS2",		// BS2_DEVICE_TYPE_XPASS_S2				= 0x05,
+	"SIO2",			// BS2_DEVICE_TYPE_SECURE_IO_2			= 0x06,
+	"DM20",			// BS2_DEVICE_TYPE_DOOR_MODULE_20		= 0x07,
+	"BS2",			// BS2_DEVICE_TYPE_BIOSTATION_2			= 0x08,
+	"BSA2",			// BS2_DEVICE_TYPE_BIOSTATION_A2		= 0x09,
+	"FS2",			// BS2_DEVICE_TYPE_FACESTATION_2		= 0x0A,
+	"IO",			// BS2_DEVICE_TYPE_IO_DEVICE			= 0x0B,
+	"BSL2",			// BS2_DEVICE_TYPE_BIOSTATION_L2		= 0x0C,
+	"BEW2",			// BS2_DEVICE_TYPE_BIOENTRY_W2			= 0x0D,
+	"CST40",		// BS2_DEVICE_TYPE_CORESTATION_40		= 0x0E,
+	"OM",			// BS2_DEVICE_TYPE_OUTPUT_MODULE		= 0x0F,
+	"IM",			// BS2_DEVICE_TYPE_INPUT_MODULE			= 0x10,
+	"BEP2",			// BS2_DEVICE_TYPE_BIOENTRY_P2			= 0x11,
+	"BLN2",			// BS2_DEVICE_TYPE_BIOLITE_N2			= 0x12,
+	"Xps2",			// BS2_DEVICE_TYPE_XPASS2				= 0x13,
+	"XpsS3",		// BS2_DEVICE_TYPE_XPASS_S3				= 0x14,
+	"BER2",			// BS2_DEVICE_TYPE_BIOENTRY_R2			= 0x15,
+	"XpsD2",		// BS2_DEVICE_TYPE_XPASS_D2				= 0x16,
+	"DM21",			// BS2_DEVICE_TYPE_DOOR_MODULE_21		= 0x17,
+	"XpsD2K",		// BS2_DEVICE_TYPE_XPASS_D2_KEYPAD		= 0x18,
+	"FL",			// BS2_DEVICE_TYPE_FACELITE				= 0x19,
+	"Xps2K",		// BS2_DEVICE_TYPE_XPASS2_KEYPAD		= 0x1A,
+
+	"Unknown1B",	// 0x1B
+	"Unknown1C",	// 0x1C
+	"Unknown1D",	// 0x1D
+	"Unknown1E",	// 0x1E
+	"Unknown1F",	// 0x1F
+};
+
+const char* CONNECT_MODE[] =
+{
+	"S2D", "D2S"
+};
