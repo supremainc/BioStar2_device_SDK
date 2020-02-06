@@ -60,3 +60,18 @@ The SDK currently being distributed comes with C # examples. This github provide
 Refer to API BS2_FactoryReset
 
 **4.** Fixed a problem where the connection would be terminated normally if the device was disconnected and the packet was exchanged in the SDK without closing the connection yet.
+
+
+### Release Notes (Beta)
+
+### V2.6.3.23 released 02/06/2020:
+**1.** Fixed a problem where SDK may crash on Linux.
+
+### V2.6.3.22 released 02/01/2020:
+**1.** Fixes a problem where SDK will not detect disconnection when device disconnection is repeated.
+
+### V2.6.3.21 released 01/15/2020:
+**1.** Fixed BS_SDK_ERROR_NOT_SUPPORTED error when calling BS2_GetCardModel in BLN2-PAB model.
+
+### V2.6.3.20 released 01/14/2020:
+**1.** Fixes a problem where BS_SDK_INVALID_CODE_SIGN error occurs when upgrading SIO2 firmware.
