@@ -33,6 +33,55 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 
+### V2.6.4.1 released 02/25/2020:
+
+**New Features**
+
+**1.** The API retrieving logs filtered by Event Mask so that you can use memory efficiently than before.
+* Structure BS2EventSmallBlob has been added
+* API BS2_GetLogSmallBlob has been added
+* API BS2_GetLogSmallBlobFromDir has been added
+
+**2.** DesFire Advanced format setting is now supported.
+* Structure BS2SimpleDeviceInfoEx has been added
+* Structure BS2DesFireCardConfigEx has been added
+* API BS2_GetDesFireCardConfigEx has been added
+* API BS2_SetDesFireCardConfigEx has been added
+
+**3.** Card type selection is available so that you can select/deselect the card type you want to read fro the device.
+* Structure BS2SystemConfig has been added
+* API BS2_SetSystemConfig has been added
+
+**4.** Duplicate fingerprint and face check is available.
+* Structure BS2FaceConfig has been added
+* API BS2_GetFingerprintConfig has been added
+* API BS2_SetFingerprintConfig has been added
+* Structure BS2FingerprintConfig has been added
+* API BS2_GetFaceConfig has been added
+* API BS2_SetFaceConfig has been added
+
+**Modified Features**
+
+**1.** Fixed the issue of device malfunctioning and rebooting when BS2Job.numJobs in BS2UserBlobEx exceeds the maximum value 16.
+* Refer to structure BS2UserBlobEx
+* Refer to API BS2_VerifyUserEx
+* Refer to API BS2_IdentifyUserEx
+* Refer to API BS2_EnrolUserEx
+* Refer to API BS2_VerifyUserSmallEx
+* Refer to API BS2_IdentifyUserSmallEx
+* Refer to API BS2_EnrollUserSmallEx
+
+**2.** Fixed the issue of BioStation 2 not available for user images.
+
+**3.** Fixed the error BS_SDK_INVALID_CODE_SIGN when upgrading SIO2.
+
+**4.** Fixed the error BS_SDK_ERROR_NOT_SUPPORTED when calling BS2_GetCardModel for BLN2-PAB.
+* Refer to API BS2_GetCardModel
+
+**5.** Fixed the issue that SDK doesn't recognize device disconnection when the device is constantly disconnected.
+
+**6.** Fixed the issue of Linux SDK crash.
+
 ### V2.6.3.16 released 11/04/2019:
 
 **Modified features**

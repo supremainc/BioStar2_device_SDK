@@ -433,6 +433,12 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetDstConfig(IntPtr context, UInt32 deviceId, ref BS2DstConfig config);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetDesFireCardConfigEx(IntPtr context, UInt32 deviceId, out BS2DesFireCardConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetDesFireCardConfigEx(IntPtr context, UInt32 deviceId, ref BS2DesFireCardConfigEx config);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Door API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetDoor(IntPtr context, UInt32 deviceId, IntPtr doorIds, UInt32 doorIdCount, out IntPtr doorObj, out UInt32 numDoor);

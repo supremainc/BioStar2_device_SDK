@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include <time.h>
 #include <fstream>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 #include "../Common/Utils.h"
 
 #define STR2INT(x)			isdigit(x.c_str()[0]) ? atoi(x.c_str()) : 0;
@@ -32,18 +35,18 @@ string Utils::getIPAddress(uint32_t ip)
 string Utils::convertTimeUTC2String(uint32_t utcTime)
 {
 	time_t tmp(utcTime);
-	struct tm stTime;
+	struct tm* stTime;
 
-	gmtime_s(&stTime, &tmp);
+	stTime = gmtime(&tmp);
 
 	char buff[128] = { 0, };
 	sprintf(buff, "%04d-%02d-%02d %02d:%02d:%02d",
-		stTime.tm_year + 1900,
-		stTime.tm_mon + 1,
-		stTime.tm_mday,
-		stTime.tm_hour,
-		stTime.tm_min,
-		stTime.tm_sec);
+		stTime->tm_year + 1900,
+		stTime->tm_mon + 1,
+		stTime->tm_mday,
+		stTime->tm_hour,
+		stTime->tm_min,
+		stTime->tm_sec);
 
 	return buff;
 }
@@ -146,4 +149,39 @@ vector<string> Utils::tokenizeString(const string& data, const char delimiter)
 		result.push_back(tokenized);
 
 	return result;
+}
+
+string Utils::getEventString(const BS2Event& event, int32_t timezone)
+{
+	char buffer[1024] = { 0, };
+	switch (event.code & BS2_EVENT_MASK)
+	{
+	case BS2_EVENT_USER_ENROLL_SUCCESS:
+	case BS2_EVENT_USER_ENROLL_FAIL:
+	case BS2_EVENT_USER_UPDATE_SUCCESS:
+	case BS2_EVENT_USER_UPDATE_FAIL:
+	case BS2_EVENT_USER_DELETE_SUCCESS:
+	case BS2_EVENT_USER_DELETE_FAIL:
+		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s)",
+			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server");
+		break;
+
+	default:
+		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s)",
+			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID);
+		break;
+	}
+
+	return buffer;
+}
+
+string Utils::getHexaString(const uint8_t* data, uint32_t size)
+{
+	stringstream ss;
+	ss << hex;
+
+	for (uint32_t index = 0; index < size; index++)
+		ss << setw(2) << setfill('0') << (int)data[index];
+
+	return ss.str();
 }

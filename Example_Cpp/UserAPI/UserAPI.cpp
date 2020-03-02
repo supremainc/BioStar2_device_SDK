@@ -19,10 +19,9 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		char buffer[1024] = { 0, };
-		sprintf(buffer, "Event log received> Device(%d) mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s)",
-			id, event->mainCode, event->subCode, event->dateTime + timezone, event->deviceID, event->userID);
-		cout << buffer << endl;
+		stringstream buf;
+		buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(*event, timezone);
+		cout << buf.str() << endl;
 	}
 }
 
@@ -428,7 +427,6 @@ int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone)
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char buffer[1024] = { 0, };
 	BS2Event* logObj = NULL;
 	uint32_t numOfLog = 0;
 
@@ -440,9 +438,9 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			for (uint32_t index = 0; index < numOfLog; ++index)
 			{
 				BS2Event& event = logObj[index];
-				sprintf(buffer, "Device(%d) mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s)",
-					id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID);
-				cout << buffer << endl;
+				stringstream buf;
+				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
+				cout << buf.str() << endl;
 
 				if (event.image & 0x01)
 				{

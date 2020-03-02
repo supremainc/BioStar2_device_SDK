@@ -662,13 +662,14 @@ namespace Suprema
                 userID = "unknown";
             }
 
-            return String.Format("Log => device[{0, 10}] : timestamp[{1}] event id[{2, 10}] event code[{3}] userID[{4}] image[{5}]",
+            return String.Format("Log => device[{0, 10}] : timestamp[{1}] event id[{2, 10}] event code[{3}] userID[{4}] image[{5}] where[{6}]",
                                 eventLog.deviceID,
                                 eventTime.ToString("yyyy-MM-dd HH:mm:ss"),
                                 eventLog.id,
                                 (BS2EventCodeEnum)eventLog.code,
                                 userID,
-                                Convert.ToBoolean(eventLog.image & (byte)BS2EventImageBitPos.BS2_IMAGEFIELD_POS_IMAGE));
+                                Convert.ToBoolean(eventLog.image & (byte)BS2EventImageBitPos.BS2_IMAGEFIELD_POS_IMAGE),
+                                Convert.ToBoolean(eventLog.param) ? "Device" : "Server");
         }
 
         private static string GetUserIdAndTnaKeyMsg(BS2Event eventLog)

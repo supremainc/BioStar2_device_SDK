@@ -100,7 +100,8 @@ typedef struct {
 	BS2_BOOL quickEnrollment;			///< 1 byte
 
 	BS2_FACE_PREVIEW_OPTION previewOption;			///< 1 byte
-	uint8_t reserved[3];						///< 2 bytes (reserved)
+	BS2_BOOL checkDuplicate;			///< 1 byte
+	uint8_t reserved[2];						///< 2 bytes (reserved)
 
 	uint8_t reserved2[26];						///< 26 bytes (reserved)
 } BS2FaceConfig;

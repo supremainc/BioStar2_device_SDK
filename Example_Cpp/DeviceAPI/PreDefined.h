@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#pragma once
 
 #define MAX_RECV_LOG_AMOUNT		32768
 #define MAX_SIZE_IMAGE_LOG		50 * 1024

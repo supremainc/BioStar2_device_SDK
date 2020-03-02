@@ -18,10 +18,9 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		char buffer[1024] = { 0, };
-		sprintf(buffer, "Event log received> Device(%d) mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s)",
-			id, event->mainCode, event->subCode, event->dateTime + timezone, event->deviceID, event->userID);
-		cout << buffer << endl;
+		stringstream buf;
+		buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(*event, timezone);
+		cout << buf.str() << endl;
 	}
 }
 
@@ -366,6 +365,31 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_REM_ALLAUTH_OPRLEVELEX:
 			break;
 
+		case MENU_DEV_GET_FINGERPRINTCONFIG:
+			sdkResult = getFingerprintConfig(context, id);
+			break;
+		case MENU_DEV_SET_FINGERPRINTCONFIG: 
+			sdkResult = setFingerprintConfig(context, id);
+			break;
+		case MENU_DEV_GET_FACECONFIG:
+			sdkResult = getFaceConfig(context, id);
+			break;
+		case MENU_DEV_SET_FACECONFIG:
+			sdkResult = setFaceConfig(context, id);
+			break;
+		case MENU_DEV_GET_SYSTEMCONFIG:
+			sdkResult = getSystemConfig(context, id);
+			break;
+		case MENU_DEV_SET_SYSTEMCONFIG:
+			sdkResult = setSystemConfig(context, id);
+			break;
+		case MENU_DEV_GET_DESFIRECONFIGEX:
+			sdkResult = getDesFireCardConfigEx(context, id);
+			break;
+		case MENU_DEV_SET_DESFIRECONFIGEX:
+			sdkResult = setDesFireCardConfigEx(context, id);
+			break;
+
 		default:
 			break;
 		}
@@ -470,9 +494,9 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			for (uint32_t index = 0; index < numOfLog; ++index)
 			{
 				BS2Event& event = logObj[index];
-				sprintf(buffer, "Device(%d) mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s)",
-					id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID);
-				cout << buffer << endl;
+				stringstream buf;
+				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
+				cout << buf.str() << endl;
 
 				if (event.image & 0x01)
 				{
@@ -532,4 +556,117 @@ BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info)
 		printf("%u - (S)\n", info.slaveDevices_[index]);
 
 	return Utils::getInput<BS2_DEVICE_ID>("Select ID:");
+}
+
+int getFingerprintConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2FingerprintConfig config = { 0, };
+
+	return cc.getFingerprintConfig(id, config);
+}
+
+int setFingerprintConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2FingerprintConfig config = { 0, };
+
+	int sdkResult = cc.getFingerprintConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		char checkDuplicate = Utils::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
+		config.checkDuplicate = ('y' == checkDuplicate || 'Y' == checkDuplicate);
+		sdkResult = cc.setFingerprintConfig(id, config);
+	}
+
+	return sdkResult;
+}
+
+int getFaceConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2FaceConfig config = { 0, };
+	return cc.getFaceConfig(id, config);
+}
+
+int setFaceConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2FaceConfig config = { 0, };
+	int sdkResult = cc.getFaceConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		char checkDuplicate = Utils::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
+		config.checkDuplicate = ('y' == checkDuplicate || 'Y' == checkDuplicate);
+		sdkResult = cc.setFaceConfig(id, config);
+	}
+
+	return sdkResult;
+}
+
+int getSystemConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2SystemConfig config = { 0, };
+	return cc.getSystemConfig(id, config);
+}
+
+int setSystemConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2SystemConfig config = {0,};
+	int sdkResult = cc.getSystemConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		string msg = "Please enter the card combination you wish to set.\r\n";
+		msg += "    DEFAULT : 0xFFFFFFFF\r\n";
+		msg += "    BLE : 0x00000200\r\n";
+		msg += "    NFC : 0x00000100\r\n";
+		msg += "    SEOS : 0x00000080\r\n";
+		msg += "    SR_SE : 0x00000040\r\n";
+		msg += "    DESFIRE_EV1 : 0x00000020\r\n";
+		msg += "    CLASSIC_PLUS : 0x00000010\r\n";
+		msg += "    ICLASS : 0x00000008\r\n";
+		msg += "    MIFARE_FELICA : 0x00000004\r\n";
+		msg += "    HIDPROX : 0x00000002\r\n";
+		msg += "    EM : 0x00000001\r\n";
+		uint32_t cardTypes = Utils::getInput<uint32_t>(msg);
+		cardTypes |= CARD_OPERATION_USE;		// Card operation apply
+		config.useCardOperationMask = cardTypes;
+
+		TRACE("CardType:0x%08x", config.useCardOperationMask);
+
+		sdkResult = cc.setSystemConfig(id, config);
+	}
+
+	return sdkResult;
+}
+
+int getDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2DesFireCardConfigEx config = { 0, };
+	return cc.getDesFireCardConfigEx(id, config);
+}
+
+int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2DesFireCardConfigEx config = { 0, };
+	int sdkResult = cc.getDesFireCardConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		config.desfireAppKey.appMasterKey[0] = 0x01;
+		config.desfireAppKey.appMasterKey[1] = 0xFE;
+		config.desfireAppKey.fileReadKeyNumber = 1;
+		config.desfireAppKey.fileReadKey[0] = 0x01;
+		config.desfireAppKey.fileReadKey[1] = 0xFE;
+		config.desfireAppKey.fileWriteKeyNumber = 2;
+		config.desfireAppKey.fileWriteKey[0] = 0x01;
+		config.desfireAppKey.fileWriteKey[1] = 0xFE;
+
+		sdkResult = cc.setDesFireCardConfigEx(id, config);
+	}
+
+	return sdkResult;
 }

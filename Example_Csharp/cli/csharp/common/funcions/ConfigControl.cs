@@ -44,6 +44,12 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DstConfig", getDstConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DstConfig", setDstConfig));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get SystemConfig", getSystemConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set SystemConfig", setSystemConfig));
+
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get InputConfig", getInputConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set InputConfig", setInputConfig));
 
@@ -978,6 +984,163 @@ namespace Suprema
             }
         }
 
+        public void getDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2DesFireCardConfigEx config;
+
+            Console.WriteLine("Trying to get DesFire card configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetDesFireCardConfigEx(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2DesFireCardConfigEx config = Util.AllocateStructure<BS2DesFireCardConfigEx>();
+
+            Console.WriteLine("Enter the hexadecimal application master key for DesFireCardConfigEx. [KEY1-KEY2-...-KEY16]");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.desfireAppKey.appMasterKey);
+
+            Console.WriteLine("Enter the hexadecimal file read key. [KEY1-KEY2-...-KEY16]");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.desfireAppKey.fileReadKey);
+
+            Console.WriteLine("Enter the file read key index.");
+            Console.Write(">>>> ");
+            config.desfireAppKey.fileReadKeyNumber = (byte)Util.GetInput();
+
+            Console.WriteLine("Enter the hexadecimal file write key. [KEY1-KEY2-...-KEY16]");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.desfireAppKey.fileWriteKey);
+
+            Console.WriteLine("Enter the file write key index.");
+            Console.Write(">>>> ");
+            config.desfireAppKey.fileWriteKeyNumber = (byte)Util.GetInput();
+
+            Console.WriteLine("Trying to set DesFire card configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetDesFireCardConfigEx(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Set DesFire card configuration succeeded");
+            }
+        }
+
+        void enterSmartcardKey(byte[] dst)
+        {
+            int index = 0;
+            string[] keys = Console.ReadLine().Split('-');
+            foreach (string key in keys)
+            {
+                dst[index++] = Convert.ToByte(key, 16);
+                if (index > dst.Length)
+                {
+                    return;
+                }
+            }
+
+            for (; index < dst.Length; ++index)
+            {
+                dst[index] = 0xFF;
+            }
+        }
+
+        void getSystemConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2SystemConfig config;
+            Console.WriteLine("Trying to get SystemConfig");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSystemConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(config);
+            }
+        }
+
+        public void setSystemConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2SystemConfig config = Util.AllocateStructure<BS2SystemConfig>();
+
+            Console.WriteLine("Enter a timezone in seconds. [Ex. Seoul: 32400 (= 9 * 60 * 60)]");
+            Console.Write(">>>> ");
+            config.timezone = Util.GetInput();
+
+            Console.WriteLine("Do you want to synchronize time with server? [y/n]");
+            Console.Write(">>>> ");
+            config.syncTime = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to use interphone? [y/n]");
+            Console.Write(">>>> ");
+            config.useInterphone = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to use OSDP secure key? [y/n]");
+            Console.Write(">>>> ");
+            config.keyEncrypted = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to use job codes? [y/n]");
+            Console.Write(">>>> ");
+            config.useJobCode = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to use alphanumeric ID? [y/n]");
+            Console.Write(">>>> ");
+            config.useAlphanumericID = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Enter frequency of camera [1: 50Hz, 2: 60Hz]");
+            Console.Write(">>>> ");
+            config.cameraFrequency = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Do you want to use security tamper? [y/n]");
+            Console.Write(">>>> ");
+            config.secureTamper = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to change the type of card the device reads? [y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                Console.WriteLine("Enter the card combination you wish to set.");
+                Console.WriteLine("    DEFAULT : 0xFFFFFFFF");
+                Console.WriteLine("    BLE : 0x00000200");
+                Console.WriteLine("    NFC : 0x00000100");
+                Console.WriteLine("    SEOS : 0x00000080");
+                Console.WriteLine("    SR_SE : 0x00000040");
+                Console.WriteLine("    DESFIRE_EV1 : 0x00000020");
+                Console.WriteLine("    CLASSIC_PLUS : 0x00000010");
+                Console.WriteLine("    ICLASS : 0x00000008");
+                Console.WriteLine("    MIFARE_FELICA : 0x00000004");
+                Console.WriteLine("    HIDPROX : 0x00000002");
+                Console.WriteLine("    EM : 0x00000001");
+                Console.Write(">>>> ");
+
+                UInt32 defaultMask = 0xFFFFFFFF;
+                config.useCardOperationMask = (UInt32)Util.GetInput(defaultMask);
+                config.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_USE; // Card operation apply
+            }
+            else
+            {
+                config.useCardOperationMask = (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_DEFAULT;
+            }
+
+            Console.WriteLine("Trying to set System configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetSystemConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
         public void getInputConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2InputConfig config;
@@ -1263,7 +1426,6 @@ namespace Suprema
             }
         }
 
-
         void print(IntPtr sdkContext, BS2DstConfig config)
         {
             Console.WriteLine(">>>> Daylight saving time configuration ");
@@ -1289,6 +1451,35 @@ namespace Suprema
                 Console.WriteLine("             |--minute : {0}", config.schedules[idx].endTime.minute);
                 Console.WriteLine("             |--second : {0}", config.schedules[idx].endTime.second);
             }
+            Console.WriteLine("<<<< ");
+        }
+
+        void print(BS2DesFireCardConfigEx config)
+        {
+            Console.WriteLine(">>>> DesFire card configuration ");
+            Console.WriteLine("     |--appMasterKey : {0}", config.desfireAppKey.appMasterKey);
+            Console.WriteLine("     |--fileReadKey : {0}", config.desfireAppKey.fileReadKey);
+            Console.WriteLine("     |--fileWriteKey : {0}", config.desfireAppKey.fileWriteKey);
+            Console.WriteLine("     |--fileReadKeyNumber : {0}", config.desfireAppKey.fileReadKeyNumber);
+            Console.WriteLine("     +--fileWriteKeyNumber : {0}", config.desfireAppKey.fileWriteKeyNumber);
+            Console.WriteLine("<<<< ");
+        }
+
+        void print(BS2SystemConfig config)
+        {
+            Console.WriteLine(">>>> System configuration ");
+            Console.WriteLine("     |--timezone : {0}", config.timezone);
+            Console.WriteLine("     |--syncTime : {0}", config.syncTime);
+            Console.WriteLine("     |--serverSync : {0}", config.serverSync);
+            Console.WriteLine("     |--deviceLocked : {0}", config.deviceLocked);
+            Console.WriteLine("     |--useInterphone : {0}", config.useInterphone);
+            //Console.WriteLine("     |--useUSBConnection : {0}", config.useUSBConnection);
+            Console.WriteLine("     |--keyEncrypted : {0}", config.keyEncrypted);
+            Console.WriteLine("     |--useJobCode : {0}", config.useJobCode);
+            Console.WriteLine("     |--useAlphanumericID : {0}", config.useAlphanumericID);
+            Console.WriteLine("     |--cameraFrequency : {0}", config.cameraFrequency);
+            Console.WriteLine("     |--secureTamper : {0}", config.secureTamper);
+            Console.WriteLine("     +--useCardOperationMask : {0}", config.useCardOperationMask);
             Console.WriteLine("<<<< ");
         }
 
@@ -1373,6 +1564,7 @@ namespace Suprema
             Console.WriteLine("     |--enrollTimeout : {0}", config.enrollTimeout);
             Console.WriteLine("     |--lfdLevel : {0}", config.lfdLevel);
             Console.WriteLine("     |--quickEnrollment : {0}", config.quickEnrollment);
+            Console.WriteLine("     |--checkDuplicate : {0}", config.checkDuplicate);
             Console.WriteLine("     |--previewOption : {0}", config.previewOption);
 
             Console.WriteLine("<<<< ");

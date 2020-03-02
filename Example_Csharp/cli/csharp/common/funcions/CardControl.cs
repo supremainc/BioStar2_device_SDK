@@ -291,7 +291,9 @@ namespace Suprema
                         }
                     }
 
-                    Array.Copy(fingerprint.data, 0, smartCard.credentials.templateData, idx*smartCard.header.templateSize, smartCard.header.templateSize);
+                    // Fixes a problem when issuing AOC cards.
+                    //Array.Copy(fingerprint.data, 0, smartCard.credentials.templateData, idx*smartCard.header.templateSize, smartCard.header.templateSize);
+                    Array.Copy(fingerprint.data, 0, smartCard.credentials.templateData, idx * BS2Environment.BS2_FINGER_TEMPLATE_SIZE, BS2Environment.BS2_FINGER_TEMPLATE_SIZE);
                 }
 
                 Console.WriteLine("Is it duress finger? [0 : Normal(default), 1 : Duress]");

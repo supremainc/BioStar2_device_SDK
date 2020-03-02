@@ -57,6 +57,7 @@ enum {
 	BS2_CONFIG_MASK_RS485_EX		= 0x10000000,	///< RS485 Extended configuration
 	BS2_CONFIG_MASK_CARD_EX			= 0x20000000,	///< Extended Card configuration
 	BS2_CONFIG_MASK_DST_EX			= 0x40000000,	///< Daylight Saving configuration
+	BS2_CONFIG_MASK_DESFIRE_CARD_EX	= 0x80000000,	///< Extended DesFire Card configuration
 };
 
 //Custom => [IPv6 Cfg]

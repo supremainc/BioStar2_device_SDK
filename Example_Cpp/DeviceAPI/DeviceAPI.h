@@ -42,6 +42,15 @@ enum EN_MENU_DEV
 	MENU_DEV_SET_AUTH_OPRLEVELEX,
 	MENU_DEV_REM_AUTH_OPRLEVELEX,
 	MENU_DEV_REM_ALLAUTH_OPRLEVELEX,
+
+	MENU_DEV_GET_FINGERPRINTCONFIG,
+	MENU_DEV_SET_FINGERPRINTCONFIG,
+	MENU_DEV_GET_FACECONFIG,
+	MENU_DEV_SET_FACECONFIG,
+	MENU_DEV_GET_SYSTEMCONFIG,
+	MENU_DEV_SET_SYSTEMCONFIG,
+	MENU_DEV_GET_DESFIRECONFIGEX,
+	MENU_DEV_SET_DESFIRECONFIGEX,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -64,6 +73,15 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_AUTH_OPRLEVELEX,	"BS2_SetAuthOperatorLevelEx" },
 	{MENU_DEV_REM_AUTH_OPRLEVELEX,	"BS2_RemoveAuthOperatorLevelEx" },
 	{MENU_DEV_REM_ALLAUTH_OPRLEVELEX,"BS2_RemoveAllAuthOperatorLevelEx" },
+
+	{MENU_DEV_GET_FINGERPRINTCONFIG,"BS2_GetFingerprintConfig"},
+	{MENU_DEV_SET_FINGERPRINTCONFIG,"BS2_SetFingerprintConfig"},
+	{MENU_DEV_GET_FACECONFIG,		"BS2_GetFaceConfig"},
+	{MENU_DEV_SET_FACECONFIG,		"BS2_SetFaceConfig"},
+	{MENU_DEV_GET_SYSTEMCONFIG,		"BS2_GetSystemConfig"},
+	{MENU_DEV_SET_SYSTEMCONFIG,		"BS2_SetSystemConfig"},
+	{MENU_DEV_GET_DESFIRECONFIGEX,	"BS2_GetDesFireCardConfigEx"},
+	{MENU_DEV_SET_DESFIRECONFIGEX,	"BS2_SetDesFireCardConfigEx"},
 };
 
 
@@ -85,3 +103,11 @@ int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
 int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
 BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
+int getFingerprintConfig(void* context, BS2_DEVICE_ID id);
+int setFingerprintConfig(void* context, BS2_DEVICE_ID id);
+int getFaceConfig(void* context, BS2_DEVICE_ID id);
+int setFaceConfig(void* context, BS2_DEVICE_ID id);
+int getSystemConfig(void* context, BS2_DEVICE_ID id);
+int setSystemConfig(void* context, BS2_DEVICE_ID id);
+int getDesFireCardConfigEx(void* context, BS2_DEVICE_ID id);
+int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id);

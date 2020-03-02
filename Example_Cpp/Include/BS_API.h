@@ -209,11 +209,12 @@ typedef struct
 {
 	enum
 	{
-		BS2_SUPPORT_RS485EX = 0x00000001,
-		BS2_SUPPORT_CARDEX  = 0x00000002,
-		BS2_SUPPORT_DST     = 0x00000004,
+		BS2_SUPPORT_RS485EX 	= 0x00000001,
+		BS2_SUPPORT_CARDEX  	= 0x00000002,
+		BS2_SUPPORT_DST     	= 0x00000004,
+		BS2_SUPPORT_DESFIREEX	= 0x00000008,
 
-		BS2_SUPPORT_ALL     = BS2_SUPPORT_RS485EX | BS2_SUPPORT_CARDEX | BS2_SUPPORT_DST,
+		BS2_SUPPORT_ALL     	= BS2_SUPPORT_RS485EX | BS2_SUPPORT_CARDEX | BS2_SUPPORT_DST | BS2_SUPPORT_DESFIREEX,
 	};
 
 	uint32_t supported;
@@ -644,6 +645,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRS485ConfigEx(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSupportedConfigMask(void* context, BS2_DEVICE_ID deviceId, BS2_CONFIG_MASK* configMask);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDstConfig(void* context, BS2_DEVICE_ID deviceId, BS2DstConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDstConfig(void* context, BS2_DEVICE_ID deviceId, BS2DstConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDesFireCardConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2DesFireCardConfigEx* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDesFireCardConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2DesFireCardConfigEx* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);

@@ -131,7 +131,8 @@ typedef struct {
 	BS2_BOOL showImage;							///< 1 byte
 	BS2_FINGER_LFD_LEVEL lfdLevel;		///< 1 byte [0: off, 1~3: on]
 
-	uint8_t reserved3[32];						///< 32 bytes (reserved)
+	BS2_BOOL checkDuplicate;				///< 1 byte
+	uint8_t reserved3[31];						///< 31 bytes (reserved)
 } BS2FingerprintConfig;
 
 #endif	// __BS2_FINGERPRINT_CONFIG_H__

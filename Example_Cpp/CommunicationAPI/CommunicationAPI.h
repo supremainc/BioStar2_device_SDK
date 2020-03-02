@@ -1,10 +1,14 @@
 #pragma once
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#endif
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
 #include <array>
-#include <Windows.h>
 #include "PreDefined.h"
 #include "BS_Errno.h"
 #include "../Common/BS2Context.h"
@@ -65,6 +69,7 @@ enum EN_MENU_COMM
 	MENU_COMM_SET_DEF_RES_TIMEOUT,
 	MENU_CONF_GET_FACCONFIG,
 	MENU_ELOG_GET_EVENTSMALLBLOB,
+	MENU_USER_ENROLL_FACE,
 };
 
 std::vector<MENU_ITEM> menuInfoCommAPI =
@@ -90,6 +95,7 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 	{MENU_COMM_SET_DEF_RES_TIMEOUT,	"BS2_SetDefaultResponseTimeout"},
 	{MENU_CONF_GET_FACCONFIG,		"BS2_GetFactoryConfig" },
 	{MENU_ELOG_GET_EVENTSMALLBLOB,	"BS2_GetEventSmallBlob"},
+	{MENU_USER_ENROLL_FACE,			"BS2_EnrolUser"},
 };
 
 

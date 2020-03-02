@@ -30,6 +30,17 @@ int ConfigControl::getSystemConfig(BS2_DEVICE_ID id, BS2SystemConfig& config)
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetSystemConfig call failed: %d", sdkResult);
 
+	print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setSystemConfig(BS2_DEVICE_ID id, const BS2SystemConfig& config)
+{
+	int sdkResult = BS2_SetSystemConfig(context_, id, const_cast<BS2SystemConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetSystemConfig call failed: %d", sdkResult);
+
 	return sdkResult;
 }
 
@@ -85,6 +96,66 @@ int ConfigControl::getFactoryConfig(BS2_DEVICE_ID id, BS2FactoryConfig& config)
 	return sdkResult;
 }
 
+int ConfigControl::getFingerprintConfig(BS2_DEVICE_ID id, BS2FingerprintConfig& config)
+{
+	int sdkResult = BS2_GetFingerprintConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetFingerprintConfig call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setFingerprintConfig(BS2_DEVICE_ID id, const BS2FingerprintConfig& config)
+{
+	int sdkResult = BS2_SetFingerprintConfig(context_, id, const_cast<BS2FingerprintConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetFingerprintConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getFaceConfig(BS2_DEVICE_ID id, BS2FaceConfig& config)
+{
+	int sdkResult = BS2_GetFaceConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetFaceConfig call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setFaceConfig(BS2_DEVICE_ID id, const BS2FaceConfig& config)
+{
+	int sdkResult = BS2_SetFaceConfig(context_, id, const_cast<BS2FaceConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetFaceConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getDesFireCardConfigEx(BS2_DEVICE_ID id, BS2DesFireCardConfigEx& config)
+{
+	int sdkResult = BS2_GetDesFireCardConfigEx(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetDesFireCardConfigEx call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setDesFireCardConfigEx(BS2_DEVICE_ID id, const BS2DesFireCardConfigEx& config)
+{
+	int sdkResult = BS2_SetDesFireCardConfigEx(context_, id, const_cast<BS2DesFireCardConfigEx*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetDesFireCardConfigEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -121,6 +192,25 @@ int ConfigControl::updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mod
 		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
 
 	return sdkResult;
+}
+
+void ConfigControl::print(const BS2SystemConfig& config)
+{
+	TRACE("==[BS2SystemConfig]==");
+	TRACE("timezone:%d", config.timezone);
+	TRACE("syncTime:%d", config.syncTime);
+	TRACE("serverSync:%d", config.serverSync);
+	TRACE("deviceLocked:%d", config.deviceLocked);
+	TRACE("useInterphone:%d", config.useInterphone);
+
+	//TRACE("useUSBConnection:%d", config.useUSBConnection);
+	TRACE("keyEncrypted:%d", config.keyEncrypted);
+	TRACE("useJobCode:%d", config.useJobCode);
+	TRACE("useAlphanumericID:%d", config.useAlphanumericID);
+
+	TRACE("cameraFrequency:%u", config.cameraFrequency);
+	TRACE("secureTamper:%d", config.secureTamper);
+	TRACE("useCardOperationMask:0x%08x", config.useCardOperationMask);
 }
 
 void ConfigControl::print(const BS2DisplayConfig& config)
@@ -162,7 +252,6 @@ void ConfigControl::print(const BS2IpConfig& config)
 	TRACE("sslServerPort:%u", config.sslServerPort);
 }
 
-
 void ConfigControl::print(const BS2FactoryConfig& config)
 {
 	TRACE("==[BS2FactoryConfig]==");
@@ -179,4 +268,44 @@ void ConfigControl::print(const BS2FactoryConfig& config)
 		config.bscoreVer.major, config.bscoreVer.minor, config.bscoreVer.ext, config.bscoreRev);
 	TRACE("firmwareVer:%d.%d.%d(%s)",
 		config.firmwareVer.major, config.firmwareVer.minor, config.firmwareVer.ext, config.firmwareRev);
+}
+
+void ConfigControl::print(const BS2FingerprintConfig& config)
+{
+	TRACE("==[BS2FingerprintConfig]==");
+	TRACE("securityLevel:%u", config.securityLevel);
+	TRACE("fastMode:%u", config.fastMode);
+	TRACE("sensitivity:%u", config.sensitivity);
+	TRACE("sensorMode:%u", config.sensorMode);
+	TRACE("templateFormat:%u", config.templateFormat);
+	TRACE("scanTimeout:%u", config.scanTimeout);
+	TRACE("successiveScan:%u", config.successiveScan);
+	TRACE("advancedEnrollment:%u", config.advancedEnrollment);
+	TRACE("showImage;%u", config.showImage);
+	TRACE("lfdLevel:%u", config.lfdLevel);
+	TRACE("checkDuplicate:%u", config.checkDuplicate);
+}
+
+void ConfigControl::print(const BS2FaceConfig& config)
+{
+	TRACE("==[BS2FaceConfig]==");
+	TRACE("securityLevel:%u", config.securityLevel);
+	TRACE("lightCondition:%u", config.lightCondition);
+	TRACE("enrollThreshold:%u", config.enrollThreshold);
+	TRACE("detectSensitivity:%u", config.detectSensitivity);
+	TRACE("enrollTimeout:%u", config.enrollTimeout);
+	TRACE("lfdLevel:%u", config.lfdLevel);
+	TRACE("quickEnrollment:%u", config.quickEnrollment);
+	TRACE("previewOption:%u", config.previewOption);
+	TRACE("checkDuplicate:%u", config.checkDuplicate);
+}
+
+void ConfigControl::print(const BS2DesFireCardConfigEx& config)
+{
+	TRACE("==[BS2DesFireCardConfigEx]==");
+	TRACE("appMasterKey:%s", Utils::getHexaString(config.desfireAppKey.appMasterKey, 16).c_str());	// maybe 0
+	TRACE("fileReadKey:%s", Utils::getHexaString(config.desfireAppKey.fileReadKey, 16).c_str());	// maybe 0
+	TRACE("fileWriteKey:%s", Utils::getHexaString(config.desfireAppKey.fileWriteKey, 16).c_str());	// maybe 0
+	TRACE("fileReadKeyNumber:%u", config.desfireAppKey.fileReadKeyNumber);
+	TRACE("fileWriteKeyNumber:%u", config.desfireAppKey.fileWriteKeyNumber);
 }

@@ -4,6 +4,7 @@
 #include "../Common/Utils.h"
 #include "../Common/CommControl.h"
 #include "../Common/LogControl.h"
+#include "../Common/UserControl.h"
 
 
 extern void TRACE(const char* fmt, ...);
@@ -17,10 +18,9 @@ static DeviceList deviceList;
 void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 {
 	int32_t timezone = deviceList.getTimezone(id);
-	char buffer[1024] = { 0, };
-	sprintf(buffer, "Event log received> Device(%d) mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s)",
-		id, event->mainCode, event->subCode, event->dateTime + timezone, event->deviceID, event->userID);
-	cout << buffer << endl;
+	stringstream buf;
+	buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(*event, timezone);
+	cout << buf.str() << endl;
 }
 
 
@@ -89,7 +89,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 	return true;
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
 	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
@@ -416,6 +416,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 	CommControl cm(context);
 	ConfigControl cc(context);
 	LogControl lc(context);
+	UserControl uc(context);
 
 	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
@@ -489,6 +490,10 @@ int runAPIs(void* context, const DeviceList& deviceList)
 		case MENU_ELOG_GET_EVENTSMALLBLOB:
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = lc.getLogSmallBlob(id);
+			break;
+		case MENU_USER_ENROLL_FACE:
+			id = selectDeviceID(deviceList, true, false);
+			sdkResult = uc.enrollUser(id);
 			break;
 		default:
 			break;
@@ -610,7 +615,6 @@ int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone)
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char buffer[1024] = { 0, };
 	BS2Event* logObj = NULL;
 	uint32_t numOfLog = 0;
 
@@ -622,9 +626,9 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			for (uint32_t index = 0; index < numOfLog; ++index)
 			{
 				BS2Event& event = logObj[index];
-				sprintf(buffer, "Device(%d) mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s)",
-					id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID);
-				cout << buffer << endl;
+				stringstream buf;
+				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
+				cout << buf.str() << endl;
 
 				if (event.image & 0x01)
 				{
@@ -676,7 +680,6 @@ int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* 
 
 	return sdkResult;
 }
-
 
 #if 0
 DWORD WINAPI onWaiting(LPVOID lpParam)

@@ -1,5 +1,10 @@
 #include "stdafx.h"
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
+#else
+#include <stdarg.h>
+#endif
+
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -21,7 +26,11 @@ void TRACE(const char* fmt, ...)
 	vsprintf(buffer, fmt, fmtList);
 	va_end(fmtList);
 	buffer[strlen(buffer)] = '\n';
+#if defined(OS_WIN32) || defined(OS_WIN64)
 	::OutputDebugStringA(buffer);
+#else
+	cout << buffer;
+#endif
 }
 
 

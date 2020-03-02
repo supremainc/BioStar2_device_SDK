@@ -21,6 +21,21 @@
 #include "../BS2Types.h"
 #include "BS2DisplayConfig.h"
 
+enum {
+    CARD_OPERATION_MASK_DEFAULT			= 0xFFFFFFFF,
+	CARD_OPERATION_USE					= 0x80000000,
+	CARD_OPERATION_MASK_BLE				= 0x00000200,
+	CARD_OPERATION_MASK_NFC				= 0x00000100,
+	CARD_OPERATION_MASK_SEOS			= 0x00000080,
+	CARD_OPERATION_MASK_SR_SE			= 0x00000040,
+	CARD_OPERATION_MASK_DESFIRE_EV1		= 0x00000020,
+	CARD_OPERATION_MASK_CLASSIC_PLUS	= 0x00000010,
+	CARD_OPERATION_MASK_ICLASS			= 0x00000008,
+	CARD_OPERATION_MASK_MIFARE_FELICA	= 0x00000004,
+	CARD_OPERATION_MASK_HIDPROX			= 0x00000002,
+	CARD_OPERATION_MASK_EM				= 0x00000001
+};
+
 /**
  *	BS2SystemConfig
  */
@@ -48,7 +63,8 @@ typedef struct {
 	BS2_BOOL secureTamper;                               ///< 1 byte
 	BS2_BOOL reserved0;                                  ///< 1 byte   (write protected)
 	uint8_t reserved[2];                                 ///< 2 bytes
-	uint8_t reserved2[20];                               ///< 20 bytes (reserved)
+	uint32_t useCardOperationMask;			   			 ///< 4 Bytes (bitmask , no use 0 postion bit - 0~30 bit, valid data- 31 bit)
+	uint8_t reserved2[16];                               ///< 20 bytes (reserved)
 } BS2SystemConfig;
 
 #endif	// __BS2_SYSTEM_CONFIG_H__

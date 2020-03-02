@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <sstream>
+#include "BS_API.h"
 
 
 template <typename T>
@@ -33,6 +34,10 @@ public:
 	static std::vector<T> tokenizeInteger(const std::string& data, const char delimiter = ' ');
 	template <typename T>
 	static T str2int(const std::string& data);
+
+	static std::string getEventString(const BS2Event& event, int32_t timezone);
+
+	static std::string getHexaString(const uint8_t* data, uint32_t size);
 };
 
 template <typename T>

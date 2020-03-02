@@ -210,7 +210,8 @@ namespace Suprema
         public byte reserved0;                  // write protected
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public byte[] reserved;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+        public UInt32 useCardOperationMask;     // [+2.6.4]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public byte[] reserved2;
     }
 
@@ -542,7 +543,8 @@ namespace Suprema
         public byte advancedEnrollment;
         public byte showImage;
         public byte lfdLevel; //0: off, 1~3: on
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte checkDuplicate;    // [+2.6.4]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]
         public byte[] reserved3;
     }
 
@@ -999,7 +1001,8 @@ namespace Suprema
         public byte	quickEnrollment;			// [+ 2.6.4]
         public byte previewOption;			    // [+ 2.6.4]
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte checkDuplicate;             // [+ 2.6.4]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public byte[] reserved;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 26)]
         public byte[] reserved2;
