@@ -521,6 +521,15 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int UserControl::getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, uint32_t* width, uint32_t* height)
+{
+	int sdkResult = BS2_GetLastFingerprintImage(context_, id, imageObj, width, height);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetLastFingerprintImage call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int UserControl::removeUser(BS2_DEVICE_ID id)
 {
 	string uid = Utils::getInput<string>("Please enter a user ID:");

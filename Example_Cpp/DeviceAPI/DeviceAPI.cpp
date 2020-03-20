@@ -42,7 +42,7 @@ void onDeviceDisconnected(BS2_DEVICE_ID id)
 }
 
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	// Create SDK context and initialize
 	sdkContext = BS2Context::getInstance()->initSDK();
@@ -494,6 +494,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			for (uint32_t index = 0; index < numOfLog; ++index)
 			{
 				BS2Event& event = logObj[index];
+				latestIndex = event.id;
 				stringstream buf;
 				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
 				cout << buf.str() << endl;

@@ -7,11 +7,46 @@
 #include "BS_API.h"
 
 
+#define BITMAP_SIGNATURE			0x4D42
+#define BITMAP_SIGNATURE_SIZE		14
+
+
+typedef struct __BITMAPINFOHEADER
+{
+	unsigned long	biSize;
+	long			biWidth;
+	long			biHeight;
+	unsigned short	biPlanes;
+	unsigned short	biBitCount;
+	unsigned long	biCompression;
+	unsigned long	biSizeImage;
+	long			biXPelsPerMeter;
+	long			biYPelsPerMeter;
+	unsigned long	biClrUsed;
+	unsigned long	biClrImportant;
+} BITMAPINFOHEADER_;
+
+typedef struct __RGBQUAD
+{
+	unsigned char	rgbBlue;
+	unsigned char	rgbGreen;
+	unsigned char	rgbRed;
+	unsigned char	rgbReserved;
+} RGBQUAD_;
+
+typedef struct __BITMAPINFO
+{
+	BITMAPINFOHEADER_   bmiHeader;
+	RGBQUAD_            bmiColors[1];
+} BITMAPINFO_;
+
+
 template <typename T>
 struct ArrayDeleter
 {
 	void operator() (T* ptr) { delete[] ptr; }
 };
+
 
 class Utils
 {
@@ -38,6 +73,11 @@ public:
 	static std::string getEventString(const BS2Event& event, int32_t timezone);
 
 	static std::string getHexaString(const uint8_t* data, uint32_t size);
+
+	static int saveBMP(FILE* fp, unsigned char* data, int width, int height);
+
+private:
+	static void writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits);
 };
 
 template <typename T>

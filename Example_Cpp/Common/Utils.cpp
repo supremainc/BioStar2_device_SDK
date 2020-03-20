@@ -185,3 +185,70 @@ string Utils::getHexaString(const uint8_t* data, uint32_t size)
 
 	return ss.str();
 }
+
+void Utils::writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits)
+{
+	buf[0] = 'B';
+	buf[1] = 'M';
+	buf[2] = (unsigned char)(type & 0xff);
+	buf[3] = (unsigned char)(type >> 8);
+	buf[4] = 0; //(unsigned char)(type >> 16);
+	buf[5] = 0; //(unsigned char)(type >> 24);
+	buf[6] = 0;
+	buf[7] = 0;
+	buf[8] = 0;
+	buf[9] = 0;
+	buf[10] = (unsigned char)(off_bits & 0xff);
+	buf[11] = (unsigned char)(off_bits >> 8);
+	buf[12] = (unsigned char)(off_bits >> 16);
+	buf[13] = (unsigned char)(off_bits >> 24);
+}
+
+int Utils::saveBMP(FILE* fp, unsigned char* data, int width, int height)
+{
+	int newWidth = (width + 3) / 4 * 4;
+	const int infoSize = sizeof(BITMAPINFOHEADER_) + sizeof(RGBQUAD_) * 256;
+	int imageSize = infoSize + newWidth * height;
+
+	unsigned char sign[BITMAP_SIGNATURE_SIZE];
+	writeBMPSign(sign, BITMAP_SIGNATURE, BITMAP_SIGNATURE_SIZE + imageSize,
+		(unsigned long)(BITMAP_SIGNATURE_SIZE + infoSize));
+
+	BITMAPINFO_* image = (BITMAPINFO_*)calloc(imageSize, 1);
+	if (image == NULL)
+		return 0;
+
+	image->bmiHeader.biSize = sizeof(BITMAPINFOHEADER_);
+	image->bmiHeader.biWidth = newWidth;
+	image->bmiHeader.biHeight = height;
+	image->bmiHeader.biPlanes = 1;
+	image->bmiHeader.biBitCount = 8;
+	image->bmiHeader.biCompression = 0L;
+	image->bmiHeader.biSizeImage = width * height;
+	image->bmiHeader.biXPelsPerMeter = 0;
+	image->bmiHeader.biYPelsPerMeter = 0;
+	image->bmiHeader.biClrUsed = 0;
+	image->bmiHeader.biClrImportant = 0;
+	for (int k = 0; k < 256; k++)
+	{
+		image->bmiColors[k].rgbRed = image->bmiColors[k].rgbGreen
+									= image->bmiColors[k].rgbBlue
+									= (unsigned char)(k);
+	}
+
+	unsigned char* buf = ((unsigned char*)image) + infoSize;
+	unsigned char* pos = data + (height - 1) * width;
+	for (int i = height - 1; i >= 0; i--)
+	{
+		memcpy(buf, pos, width);
+		buf += newWidth;
+		pos -= width;
+	}
+
+	fwrite(sign, BITMAP_SIGNATURE_SIZE, 1, fp);
+	fwrite(image, imageSize, 1, fp);
+
+	free(image);
+
+	return 1;
+}

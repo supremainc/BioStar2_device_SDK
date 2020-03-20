@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include <sstream>
-#include <gtest/gtest.h>
+//#include <gtest/gtest.h>
 #include "UserAPI.h"
 #include "../Common/Utils.h"
 #include "../Common/CommControl.h"
@@ -42,12 +42,12 @@ void onDeviceDisconnected(BS2_DEVICE_ID id)
 	TRACE("Device(%d) disconnected", id);
 }
 
-TEST(SampleTest, SampeTest_Bool)
-{
-	EXPECT_EQ(1, true);
-}
+//TEST(SampleTest, SampeTest_Bool)
+//{
+//	EXPECT_EQ(1, true);
+//}
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	//::testing::InitGoogleTest();
 	//return RUN_ALL_TESTS();
@@ -329,6 +329,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_ENR_USR:
 			sdkResult = uc.enrollUser(id);
 			break;
+		case MENU_USR_GET_LASTFPIMAGE:
+			sdkResult = getLastFingerprintImage(uc, id);
+			break;
 		case MENU_USR_REM_USR:
 			sdkResult = uc.removeUser(id);
 			break;
@@ -432,12 +435,14 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 
 	do
 	{
+		numOfLog = 0;
 		sdkResult = BS2_GetLog(context, id, latestIndex, MAX_RECV_LOG_AMOUNT, &logObj, &numOfLog);
 		if (BS_SDK_SUCCESS == sdkResult)
 		{
 			for (uint32_t index = 0; index < numOfLog; ++index)
 			{
 				BS2Event& event = logObj[index];
+				latestIndex = event.id;
 				stringstream buf;
 				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
 				cout << buf.str() << endl;
@@ -500,4 +505,46 @@ BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info)
 		printf("%u - (S)\n", info.slaveDevices_[index]);
 
 	return Utils::getInput<BS2_DEVICE_ID>("Select ID:");
+}
+
+int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id)
+{
+	uint8_t* imageObj = NULL;
+	uint32_t width = 0;
+	uint32_t height = 0;
+
+	int sdkResult = uc.getLastFingerprintImage(id, &imageObj, &width, &height);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (0 < width * height)
+	{
+		string fileName = Utils::getInput<string>("Please insert image file name:");
+		if (0 < fileName.size())
+		{
+			FILE* fp = fopen(fileName.c_str(), "wb");
+			if (NULL != fp)
+			{
+				if (0 < Utils::saveBMP(fp, imageObj, width, height))
+					TRACE("File write success: %s", fileName.c_str());
+				else
+					TRACE("File write failed: %s", fileName.c_str());
+			}
+			else
+				TRACE("File open failed: %s", fileName.c_str());
+
+			fclose(fp);
+		}
+	}
+	else
+	{
+		TRACE("File has not size.");
+	}
+
+	if (imageObj)
+	{
+		BS2_ReleaseObject(imageObj);
+	}
+
+	return sdkResult;
 }

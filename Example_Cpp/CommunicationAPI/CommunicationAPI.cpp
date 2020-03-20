@@ -626,6 +626,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			for (uint32_t index = 0; index < numOfLog; ++index)
 			{
 				BS2Event& event = logObj[index];
+				latestIndex = event.id;
 				stringstream buf;
 				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
 				cout << buf.str() << endl;

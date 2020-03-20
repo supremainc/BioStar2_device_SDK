@@ -1,10 +1,14 @@
 #pragma once
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#endif
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
 #include <array>
-#include <Windows.h>
 #include "PreDefined.h"
 #include "BS_Errno.h"
 #include "../Common/BS2Context.h"
@@ -29,6 +33,7 @@ enum EN_MENU_DEV
 	MENU_USR_GET_USR,
 	MENU_USR_GET_ALLUSR,
 	MENU_USR_ENR_USR,
+	MENU_USR_GET_LASTFPIMAGE,
 	MENU_USR_REM_USR,
 	MENU_USR_REM_ALLUSR,
 };
@@ -39,6 +44,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_GET_USR,				"Get user from device" },
 	{MENU_USR_GET_ALLUSR,			"Get all users from device" },
 	{MENU_USR_ENR_USR,				"Enroll user to device" },
+	{MENU_USR_GET_LASTFPIMAGE,		"Get last fingerprint image from device"},
 	{MENU_USR_REM_USR,				"Remove a user " },
 	{MENU_USR_REM_ALLUSR,			"Remove all users" },
 };
@@ -62,3 +68,4 @@ int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
 int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
 BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
+int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id);
