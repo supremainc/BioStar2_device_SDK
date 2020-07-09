@@ -24,6 +24,7 @@
 *.plg
 *.ldb
 *.asp
+*.bmp
 **/Debug
 **/Release
 **/*.tlog
