@@ -2,7 +2,7 @@
 #include <iostream>
 #include "ConfigControl.h"
 #include "BS_Errno.h"
-#include "Utils.h"
+#include "Utility.h"
 
 
 extern void TRACE(const char* fmt, ...);
@@ -303,9 +303,9 @@ void ConfigControl::print(const BS2FaceConfig& config)
 void ConfigControl::print(const BS2DesFireCardConfigEx& config)
 {
 	TRACE("==[BS2DesFireCardConfigEx]==");
-	TRACE("appMasterKey:%s", Utils::getHexaString(config.desfireAppKey.appMasterKey, 16).c_str());	// maybe 0
-	TRACE("fileReadKey:%s", Utils::getHexaString(config.desfireAppKey.fileReadKey, 16).c_str());	// maybe 0
-	TRACE("fileWriteKey:%s", Utils::getHexaString(config.desfireAppKey.fileWriteKey, 16).c_str());	// maybe 0
+	TRACE("appMasterKey:%s", Utility::getHexaString(config.desfireAppKey.appMasterKey, 16).c_str());	// maybe 0
+	TRACE("fileReadKey:%s", Utility::getHexaString(config.desfireAppKey.fileReadKey, 16).c_str());	// maybe 0
+	TRACE("fileWriteKey:%s", Utility::getHexaString(config.desfireAppKey.fileWriteKey, 16).c_str());	// maybe 0
 	TRACE("fileReadKeyNumber:%u", config.desfireAppKey.fileReadKeyNumber);
 	TRACE("fileWriteKeyNumber:%u", config.desfireAppKey.fileWriteKeyNumber);
 }

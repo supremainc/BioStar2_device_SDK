@@ -48,7 +48,7 @@
     <ClInclude Include="..\Common\UserControl.h">
       <Filter>BSCommon</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\Utils.h">
+    <ClInclude Include="..\Common\Utility.h">
       <Filter>BSCommon</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,7 +77,7 @@
     <ClCompile Include="..\Common\UserControl.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\Utils.cpp">
+    <ClCompile Include="..\Common\Utility.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
   </ItemGroup>

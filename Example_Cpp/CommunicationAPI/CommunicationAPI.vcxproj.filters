@@ -39,9 +39,6 @@
     <ClInclude Include="..\Common\DeviceList.h">
       <Filter>BSCommon</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\Utils.h">
-      <Filter>BSCommon</Filter>
-    </ClInclude>
     <ClInclude Include="CommunicationAPI.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -52,6 +49,9 @@
       <Filter>BSCommon</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\UserControl.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Utility.h">
       <Filter>BSCommon</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,13 +77,13 @@
     <ClCompile Include="..\Common\DeviceList.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\Utils.cpp">
-      <Filter>BSCommon</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\LogControl.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\UserControl.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Utility.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
   </ItemGroup>

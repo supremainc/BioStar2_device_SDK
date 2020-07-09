@@ -4,14 +4,14 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-#include "../Common/Utils.h"
+#include "../Common/Utility.h"
 
 #define STR2INT(x)			isdigit(x.c_str()[0]) ? atoi(x.c_str()) : 0;
 
 
 using namespace std;
 
-string Utils::getLine(string msg)
+string Utility::getLine(string msg)
 {
 	cout << "==> " << msg << " ";
 	string line;
@@ -20,7 +20,7 @@ string Utils::getLine(string msg)
 	return line;
 }
 
-string Utils::getIPAddress(uint32_t ip)
+string Utility::getIPAddress(uint32_t ip)
 {
 	char buf[16] = { 0, };
 	sprintf(buf, "%u.%u.%u.%u",
@@ -32,7 +32,7 @@ string Utils::getIPAddress(uint32_t ip)
 	return buf;
 }
 
-string Utils::convertTimeUTC2String(uint32_t utcTime)
+string Utility::convertTimeUTC2String(uint32_t utcTime)
 {
 	time_t tmp(utcTime);
 	struct tm* stTime;
@@ -51,7 +51,7 @@ string Utils::convertTimeUTC2String(uint32_t utcTime)
 	return buff;
 }
 
-uint32_t Utils::convertTimeString2UTC(string time)
+uint32_t Utility::convertTimeString2UTC(string time)
 {
 	int32_t year = STR2INT(time.substr(0, 4));
 	int32_t month = STR2INT(time.substr(5, 2));
@@ -77,7 +77,7 @@ uint32_t Utils::convertTimeString2UTC(string time)
 	return static_cast<uint32_t>(lTime);
 }
 
-uint32_t Utils::getResourceSize(string file)
+uint32_t Utility::getResourceSize(string file)
 {
 	if (0 == file.size())
 		return 0;
@@ -91,7 +91,7 @@ uint32_t Utils::getResourceSize(string file)
 	return len;
 }
 
-bool Utils::getResourceFromFile(string file, shared_ptr<uint8_t> buffer, uint32_t size)
+bool Utility::getResourceFromFile(string file, shared_ptr<uint8_t> buffer, uint32_t size)
 {
 	if (0 == file.size() || !buffer)
 		return false;
@@ -108,7 +108,7 @@ bool Utils::getResourceFromFile(string file, shared_ptr<uint8_t> buffer, uint32_
 	return true;
 }
 
-bool Utils::setResourceToFile(string file, shared_ptr<uint8_t> buffer, uint32_t size)
+bool Utility::setResourceToFile(string file, shared_ptr<uint8_t> buffer, uint32_t size)
 {
 	if (0 == file.size() || !buffer || 0 == size)
 		return false;
@@ -121,7 +121,7 @@ bool Utils::setResourceToFile(string file, shared_ptr<uint8_t> buffer, uint32_t 
 	return true;
 }
 
-string Utils::replaceSlashToPeriod(const string& source)
+string Utility::replaceSlashToPeriod(const string& source)
 {
 	const string findStr = "/";
 	const string replaceStr = ".";
@@ -140,7 +140,7 @@ string Utils::replaceSlashToPeriod(const string& source)
 	return resultStr;
 }
 
-vector<string> Utils::tokenizeString(const string& data, const char delimiter)
+vector<string> Utility::tokenizeString(const string& data, const char delimiter)
 {
 	vector<string> result;
 	string tokenized;
@@ -151,7 +151,7 @@ vector<string> Utils::tokenizeString(const string& data, const char delimiter)
 	return result;
 }
 
-string Utils::getEventString(const BS2Event& event, int32_t timezone)
+string Utility::getEventString(const BS2Event& event, int32_t timezone)
 {
 	char buffer[1024] = { 0, };
 	switch (event.code & BS2_EVENT_MASK)
@@ -175,7 +175,7 @@ string Utils::getEventString(const BS2Event& event, int32_t timezone)
 	return buffer;
 }
 
-string Utils::getHexaString(const uint8_t* data, uint32_t size)
+string Utility::getHexaString(const uint8_t* data, uint32_t size)
 {
 	stringstream ss;
 	ss << hex;
@@ -186,7 +186,7 @@ string Utils::getHexaString(const uint8_t* data, uint32_t size)
 	return ss.str();
 }
 
-void Utils::writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits)
+void Utility::writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits)
 {
 	buf[0] = 'B';
 	buf[1] = 'M';
@@ -204,7 +204,7 @@ void Utils::writeBMPSign(unsigned char* buf, unsigned short type, unsigned long 
 	buf[13] = (unsigned char)(off_bits >> 24);
 }
 
-int Utils::saveBMP(FILE* fp, unsigned char* data, int width, int height)
+int Utility::saveBMP(FILE* fp, unsigned char* data, int width, int height)
 {
 	int newWidth = (width + 3) / 4 * 4;
 	const int infoSize = sizeof(BITMAPINFOHEADER_) + sizeof(RGBQUAD_) * 256;

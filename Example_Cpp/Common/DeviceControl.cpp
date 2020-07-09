@@ -6,7 +6,7 @@
 #include "DeviceControl.h"
 #include "UserControl.h"
 #include "BS_Errno.h"
-#include "../Common/Utils.h"
+#include "../Common/Utility.h"
 #include "../Common/ConfigControl.h"
 
 #define CAST_UINT32(x)				static_cast<uint32_t>(x)
@@ -76,7 +76,7 @@ int DeviceControl::getSpecifiedDeviceInfo(BS2_DEVICE_ID id)
 
 	msg << "Retrieve device info. What do you want?\n";
 	msg << "[1 : BS2SimpleDeviceInfo, 2 : BS2SimpleDeviceInfoEx, 3 : BS2IPv6DeviceInfo]";
-	uint32_t selected = Utils::getInput<uint32_t>(msg.str());
+	uint32_t selected = Utility::getInput<uint32_t>(msg.str());
 	switch (selected)
 	{
 	case BS2_SPECIFIED_DEVICE_INFO_SIMPLE:
@@ -120,15 +120,15 @@ int DeviceControl::getDeviceTime(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetDeviceTime call failed: %d", sdkResult);
 
-	cout << "Device: " << id << ", Time: " << Utils::convertTimeUTC2String(currTime) << endl;
+	cout << "Device: " << id << ", Time: " << Utility::convertTimeUTC2String(currTime) << endl;
 
 	return sdkResult;
 }
 
 int DeviceControl::setDeviceTime(BS2_DEVICE_ID id)
 {
-	string inputTime = Utils::getLine("Please enter a time [YYYY-MM-DD HH:MM:SS] ?");
-	BS2_TIMESTAMP currTime = Utils::convertTimeString2UTC(inputTime);
+	string inputTime = Utility::getLine("Please enter a time [YYYY-MM-DD HH:MM:SS] ?");
+	BS2_TIMESTAMP currTime = Utility::convertTimeString2UTC(inputTime);
 
 	int sdkResult = BS2_SetDeviceTime(context_, id, currTime);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -202,12 +202,12 @@ int DeviceControl::unlockDevice(BS2_DEVICE_ID id)
 
 int DeviceControl::upgradeFirmware(BS2_DEVICE_ID id)
 {
-	string file = Utils::getLine("Enter the path and name of firmware:");
+	string file = Utility::getLine("Enter the path and name of firmware:");
 
 	int sdkResult = BS_SDK_SUCCESS;
-	uint32_t fileLen = Utils::getResourceSize(file);
+	uint32_t fileLen = Utility::getResourceSize(file);
 	shared_ptr<uint8_t> buffer(new uint8_t[fileLen], ArrayDeleter<uint8_t>());
-	if (0 < fileLen && Utils::getResourceFromFile(file, buffer, fileLen))
+	if (0 < fileLen && Utility::getResourceFromFile(file, buffer, fileLen))
 	{
 		sdkResult = BS2_UpgradeFirmware(context_, id, buffer.get(), fileLen, 0, onUpgrade);
 		if (BS_SDK_SUCCESS != sdkResult)
@@ -243,9 +243,9 @@ int DeviceControl::updateResource(BS2_DEVICE_ID id)
 		return sdkResult;
 	
 	string sampleImage = ".\\sampleImage_480x854.png";
-	uint32_t fileLen = Utils::getResourceSize(sampleImage);
+	uint32_t fileLen = Utility::getResourceSize(sampleImage);
 	shared_ptr<uint8_t> buffer(new uint8_t[fileLen], ArrayDeleter<uint8_t>());
-	if (0 < fileLen && Utils::getResourceFromFile(sampleImage, buffer, fileLen))
+	if (0 < fileLen && Utility::getResourceFromFile(sampleImage, buffer, fileLen))
 	{
 		BS2ResourceElement res = { 0, };
 		res.type = BS2_RESOURCE_TYPE_IMAGE;
@@ -267,13 +267,13 @@ int DeviceControl::getAuthOperatorLevelEx(BS2_DEVICE_ID id)
 {
 	stringstream msg;
 	msg << "Please enter operators UID. ex)ID1 ID2 ID3 ...\n";
-	string inStrArrOprs = Utils::getLine(msg.str());
+	string inStrArrOprs = Utility::getLine(msg.str());
 	int sdkResult = BS_SDK_ERROR_CANNOT_FIND_OPERATOR;
 
 	if (0 < inStrArrOprs.size())
 	{
 		BS2UIDArray arr;
-		vector<string> listOprs = Utils::tokenizeString(inStrArrOprs);
+		vector<string> listOprs = Utility::tokenizeString(inStrArrOprs);
 		arr.append(listOprs);
 
 		uint32_t inNumOfOpr = arr.getSize();

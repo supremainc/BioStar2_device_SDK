@@ -48,7 +48,7 @@ struct ArrayDeleter
 };
 
 
-class Utils
+class Utility
 {
 public:
 	template <typename T>
@@ -81,7 +81,7 @@ private:
 };
 
 template <typename T>
-inline T Utils::getInput(std::string msg)
+inline T Utility::getInput(std::string msg)
 {
 	std::cout << "==> " << msg << " ";
 	T value;
@@ -91,7 +91,7 @@ inline T Utils::getInput(std::string msg)
 }
 
 template <typename T>
-inline std::vector<T> Utils::tokenizeInteger(const std::string& data, const char delimiter)
+inline std::vector<T> Utility::tokenizeInteger(const std::string& data, const char delimiter)
 {
 	std::vector<T> result;
 	std::string tokenized;
@@ -106,7 +106,7 @@ inline std::vector<T> Utils::tokenizeInteger(const std::string& data, const char
 }
 
 template <typename T>
-inline T Utils::str2int(const std::string& data)
+inline T Utility::str2int(const std::string& data)
 {
 	if (data.size() == 0)
 		return (T)0;

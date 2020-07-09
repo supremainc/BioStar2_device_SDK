@@ -5,7 +5,7 @@
 #include <memory>
 #include "LogControl.h"
 #include "BS_Errno.h"
-#include "../Common/Utils.h"
+#include "../Common/Utility.h"
 
 #define CAST_UINT32(x)				static_cast<uint32_t>(x)
 

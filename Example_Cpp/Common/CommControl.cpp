@@ -2,7 +2,7 @@
 #include <iostream>
 #include "CommControl.h"
 #include "BS_Errno.h"
-#include "../Common/Utils.h"
+#include "../Common/Utility.h"
 
 
 extern void TRACE(const char* fmt, ...);
@@ -355,7 +355,7 @@ int CommControl::setKeepAliveTimeout()
 {
 	const long MILLI_SEC = 1000;
 
-	long sec = Utils::getInput<long>("How many seconds?");
+	long sec = Utility::getInput<long>("How many seconds?");
 	sec *= MILLI_SEC;
 
 	int sdkResult = BS2_SetKeepAliveTimeout(context_, sec);
@@ -380,7 +380,7 @@ int CommControl::getServerPort()
 
 int CommControl::setServerPort()
 {
-	BS2_PORT port = Utils::getInput<BS2_PORT>("Server V4 port:");
+	BS2_PORT port = Utility::getInput<BS2_PORT>("Server V4 port:");
 
 	int sdkResult = BS2_SetServerPort(context_, port);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -404,7 +404,7 @@ int CommControl::getSSLServerPort()
 
 int CommControl::setSSLServerPort()
 {
-	BS2_PORT port = Utils::getInput<BS2_PORT>("Server SSL V4 port:");
+	BS2_PORT port = Utility::getInput<BS2_PORT>("Server SSL V4 port:");
 
 	int sdkResult = BS2_SetSSLServerPort(context_, port);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -441,7 +441,7 @@ int CommControl::isAutoConnection()
 
 int CommControl::setAutoConnection()
 {
-	char input = Utils::getInput<char>("Do you want to enable auto connection? [y/n]");
+	char input = Utility::getInput<char>("Do you want to enable auto connection? [y/n]");
 	int enable = (input == 'y' || input == 'Y') ? 1 : 0;
 
 	int sdkResult = BS2_SetAutoConnection(context_, enable);
@@ -466,7 +466,7 @@ int CommControl::getEnableIPV4()
 
 int CommControl::setEnableIPV4()
 {
-	char input = Utils::getInput<char>("Do you want to enable IPV4 connection mode? [y/n]");
+	char input = Utility::getInput<char>("Do you want to enable IPV4 connection mode? [y/n]");
 	int enable = (input == 'y' || input == 'Y') ? 1 : 0;
 
 	int sdkResult = BS2_SetEnableIPV4(context_, enable);
@@ -491,7 +491,7 @@ int CommControl::getEnableIPV6()
 
 int CommControl::setEnableIPV6()
 {
-	char input = Utils::getInput<char>("Do you want to enable IPV6 connection mode? [y/n]");
+	char input = Utility::getInput<char>("Do you want to enable IPV6 connection mode? [y/n]");
 	int enable = (input == 'y' || input == 'Y') ? 1 : 0;
 
 	int sdkResult = BS2_SetEnableIPV6(context_, enable);
@@ -516,7 +516,7 @@ int CommControl::getServerPortIPV6()
 
 int CommControl::setServerPortIPV6()
 {
-	BS2_PORT port = Utils::getInput<BS2_PORT>("Server V6 port:");
+	BS2_PORT port = Utility::getInput<BS2_PORT>("Server V6 port:");
 
 	int sdkResult = BS2_SetServerPortIPV6(context_, port);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -540,7 +540,7 @@ int CommControl::getSSLServerPortIPV6()
 
 int CommControl::setSSLServerPortIPV6()
 {
-	BS2_PORT port = Utils::getInput<BS2_PORT>("Server SSL V6 port:");
+	BS2_PORT port = Utility::getInput<BS2_PORT>("Server SSL V6 port:");
 
 	int sdkResult = BS2_SetSSLServerPortIPV6(context_, port);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -571,7 +571,7 @@ int CommControl::setDefaultResponseTimeout()
 {
 	const long MILLI_SEC = 1000;
 
-	long sec = Utils::getInput<long>("How many seconds?");
+	long sec = Utility::getInput<long>("How many seconds?");
 	sec *= MILLI_SEC;
 
 	int sdkResult = BS2_SetDefaultResponseTimeout(context_, sec);

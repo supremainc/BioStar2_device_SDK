@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <sstream>
 #include "CommunicationAPI.h"
-#include "../Common/Utils.h"
+#include "../Common/Utility.h"
 #include "../Common/CommControl.h"
 #include "../Common/LogControl.h"
 #include "../Common/UserControl.h"
@@ -19,7 +19,7 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 {
 	int32_t timezone = deviceList.getTimezone(id);
 	stringstream buf;
-	buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(*event, timezone);
+	buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(*event, timezone);
 	cout << buf.str() << endl;
 }
 
@@ -92,7 +92,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+	//BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
 
 	// Create SDK context and initialize
 	sdkContext = BS2Context::getInstance()->initSDK();
@@ -173,7 +173,7 @@ int searchAndConnect(void* context, DeviceList& deviceList)
 	if (MENU_TOP_BREAK != (selected = getSelectedIndex()) && selected <= searchedList.size())
 	{
 		uint32_t ip = searchedList[selected - 1].ipv4Address;
-		string ipAddr = Utils::getIPAddress(ip);
+		string ipAddr = Utility::getIPAddress(ip);
 		BS2_PORT port = searchedList[selected - 1].port;
 		BS2_DEVICE_ID id = searchedList[selected - 1].id;
 		BS2_DEVICE_TYPE type = searchedList[selected - 1].type;
@@ -203,8 +203,8 @@ int connectViaIP(void* context, DeviceList& deviceList)
 	DeviceControl dc(context);
 	ConfigControl cc(context);
 	CommControl cm(context);
-	string ip = Utils::getInput<string>("Device IP:");
-	BS2_PORT port = Utils::getInput<BS2_PORT>("Port:");
+	string ip = Utility::getInput<string>("Device IP:");
+	BS2_PORT port = Utility::getInput<BS2_PORT>("Port:");
 	BS2_DEVICE_ID id = 0;
 
 	TRACE("Now connect to device (IP:%s, Port:%u)", ip.c_str(), port);
@@ -236,11 +236,11 @@ int connectViaIP(void* context, DeviceList& deviceList)
 int connectSlave(void* context, DeviceList& deviceList)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utils::getInput<char>("Do you want to find slave devices? [y/n]");
+	char selected = Utility::getInput<char>("Do you want to find slave devices? [y/n]");
 	if ('y' == selected || 'Y' == selected)
 	{
 		displayConnectedDevices(deviceList);
-		BS2_DEVICE_ID masterID = Utils::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
+		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 
 		if (!deviceList.findDevice(masterID))
 		{
@@ -276,11 +276,11 @@ int connectSlave(void* context, DeviceList& deviceList)
 int connectWiegand(void* context, DeviceList& deviceList)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utils::getInput<char>("Do you want to find wiegand devices? [y/n]");
+	char selected = Utility::getInput<char>("Do you want to find wiegand devices? [y/n]");
 	if ('y' == selected || 'Y' == selected)
 	{
 		displayConnectedDevices(deviceList);
-		BS2_DEVICE_ID masterID = Utils::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
+		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 
 		if (!deviceList.findDevice(masterID))
 		{
@@ -299,7 +299,7 @@ int connectWiegand(void* context, DeviceList& deviceList)
 
 uint32_t getSelectedIndex()
 {
-	return Utils::getInput<uint32_t>("Select ID:");
+	return Utility::getInput<uint32_t>("Select ID:");
 }
 
 int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
@@ -334,7 +334,7 @@ int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveI
 {
 	stringstream msg;
 	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
-	uint32_t chSelected = Utils::getInput<uint32_t>(msg.str());
+	uint32_t chSelected = Utility::getInput<uint32_t>(msg.str());
 	switch (chSelected)
 	{
 	case RS485_HOST_CH_0:
@@ -406,7 +406,7 @@ int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegand
 BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave, bool includeWiegand)
 {
 	displayConnectedDevices(deviceList, includeSlave, includeWiegand);
-	return Utils::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
+	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 }
 
 int runAPIs(void* context, const DeviceList& deviceList)
@@ -514,9 +514,9 @@ void displayDeviceList(const vector<BS2SimpleDeviceInfo>& devices)
 		printf("%2u - Device:%10u, IP:%-15s, Port:%u, Connected:%-15s, Mode:%s, Type:%-10s, DualID:%u\n",
 			++index,
 			info.id,
-			Utils::getIPAddress(info.ipv4Address).c_str(),
+			Utility::getIPAddress(info.ipv4Address).c_str(),
 			info.port,
-			(info.connectedIP == 0xFFFFFFFF) ? "" : Utils::getIPAddress(info.connectedIP).c_str(),
+			(info.connectedIP == 0xFFFFFFFF) ? "" : Utility::getIPAddress(info.connectedIP).c_str(),
 			CONNECT_MODE[info.connectionMode],
 			DEVICE_NAME[info.type],
 			info.dualIDSupported);
@@ -574,7 +574,7 @@ void displayConnectedDevices(const DeviceList& devices, bool includeSlave, bool 
 		printf("[%c] Device:%10u, IP:%-15s, Port:%u, Type:%-10s (M)\n",
 			it->second->connected_ ? '+' : '-',
 			it->second->id_,
-			Utils::getIPAddress(it->second->ip_).c_str(),
+			Utility::getIPAddress(it->second->ip_).c_str(),
 			it->second->port_,
 			DEVICE_NAME[it->second->type_]);
 
@@ -628,7 +628,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
 				stringstream buf;
-				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
+				buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(event, timezone);
 				cout << buf.str() << endl;
 
 				if (event.image & 0x01)
@@ -690,7 +690,7 @@ DWORD WINAPI onWaiting(LPVOID lpParam)
 	while (true)
 	{
 		Sleep(1000);
-		char cont = Utils::getInput<char>("Press 'c' continue calling APIs");
+		char cont = Utility::getInput<char>("Press 'c' continue calling APIs");
 
 		if (cont == 'q' || cont == 'Q')
 			break;

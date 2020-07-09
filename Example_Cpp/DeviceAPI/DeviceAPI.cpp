@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <sstream>
 #include "DeviceAPI.h"
-#include "../Common/Utils.h"
+#include "../Common/Utility.h"
 #include "../Common/CommControl.h"
 
 
@@ -19,7 +19,7 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	{
 		int32_t timezone = deviceInfo.timezone_;
 		stringstream buf;
-		buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(*event, timezone);
+		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(*event, timezone);
 		cout << buf.str() << endl;
 	}
 }
@@ -105,8 +105,8 @@ int connectViaIP(void* context, DeviceInfo& device)
 	DeviceControl dc(context);
 	ConfigControl cc(context);
 	CommControl cm(context);
-	string ip = Utils::getInput<string>("Device IP:");
-	BS2_PORT port = Utils::getInput<BS2_PORT>("Port:");
+	string ip = Utility::getInput<string>("Device IP:");
+	BS2_PORT port = Utility::getInput<BS2_PORT>("Port:");
 	BS2_DEVICE_ID id = 0;
 
 	TRACE("Now connect to device (IP:%s, Port:%u)", ip.c_str(), port);
@@ -142,7 +142,7 @@ int connectViaIP(void* context, DeviceInfo& device)
 int connectSlave(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utils::getInput<char>("Do you want to find slave devices? [y/n]");
+	char selected = Utility::getInput<char>("Do you want to find slave devices? [y/n]");
 	if ('y' == selected || 'Y' == selected)
 	{
 		BS2_DEVICE_ID slaveID = 0;
@@ -171,7 +171,7 @@ int connectSlave(void* context, DeviceInfo& device)
 int connectWiegand(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utils::getInput<char>("Do you want to find wiegand devices? [y/n]");
+	char selected = Utility::getInput<char>("Do you want to find wiegand devices? [y/n]");
 	if ('y' == selected || 'Y' == selected)
 	{
 		BS2_DEVICE_ID wiegandID = 0;
@@ -185,7 +185,7 @@ int connectWiegand(void* context, DeviceInfo& device)
 
 uint32_t getSelectedIndex()
 {
-	return Utils::getInput<uint32_t>("Select ID:");
+	return Utility::getInput<uint32_t>("Select ID:");
 }
 
 int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
@@ -220,7 +220,7 @@ int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveI
 {
 	stringstream msg;
 	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
-	uint32_t chSelected = Utils::getInput<uint32_t>(msg.str());
+	uint32_t chSelected = Utility::getInput<uint32_t>(msg.str());
 	switch (chSelected)
 	{
 	case RS485_HOST_CH_0:
@@ -409,9 +409,9 @@ void displayDeviceList(const vector<BS2SimpleDeviceInfo>& devices)
 		printf("%2u - Device:%10u, IP:%-15s, Port:%u, Connected:%-15s, Mode:%s, Type:%-10s, DualID:%u\n",
 			++index,
 			info.id,
-			Utils::getIPAddress(info.ipv4Address).c_str(),
+			Utility::getIPAddress(info.ipv4Address).c_str(),
 			info.port,
-			(info.connectedIP == 0xFFFFFFFF) ? "" : Utils::getIPAddress(info.connectedIP).c_str(),
+			(info.connectedIP == 0xFFFFFFFF) ? "" : Utility::getIPAddress(info.connectedIP).c_str(),
 			CONNECT_MODE[info.connectionMode],
 			DEVICE_NAME[info.type],
 			info.dualIDSupported);
@@ -496,7 +496,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
 				stringstream buf;
-				buf << "Device(" << std::to_string(id) << ") " << Utils::getEventString(event, timezone);
+				buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(event, timezone);
 				cout << buf.str() << endl;
 
 				if (event.image & 0x01)
@@ -556,7 +556,7 @@ BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info)
 	for (uint32_t index = 0; index < info.slaveDevices_.size(); index++)
 		printf("%u - (S)\n", info.slaveDevices_[index]);
 
-	return Utils::getInput<BS2_DEVICE_ID>("Select ID:");
+	return Utility::getInput<BS2_DEVICE_ID>("Select ID:");
 }
 
 int getFingerprintConfig(void* context, BS2_DEVICE_ID id)
@@ -575,7 +575,7 @@ int setFingerprintConfig(void* context, BS2_DEVICE_ID id)
 	int sdkResult = cc.getFingerprintConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
-		char checkDuplicate = Utils::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
+		char checkDuplicate = Utility::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
 		config.checkDuplicate = ('y' == checkDuplicate || 'Y' == checkDuplicate);
 		sdkResult = cc.setFingerprintConfig(id, config);
 	}
@@ -597,7 +597,7 @@ int setFaceConfig(void* context, BS2_DEVICE_ID id)
 	int sdkResult = cc.getFaceConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
-		char checkDuplicate = Utils::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
+		char checkDuplicate = Utility::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
 		config.checkDuplicate = ('y' == checkDuplicate || 'Y' == checkDuplicate);
 		sdkResult = cc.setFaceConfig(id, config);
 	}
@@ -631,7 +631,7 @@ int setSystemConfig(void* context, BS2_DEVICE_ID id)
 		msg += "    MIFARE_FELICA : 0x00000004\r\n";
 		msg += "    HIDPROX : 0x00000002\r\n";
 		msg += "    EM : 0x00000001\r\n";
-		uint32_t cardTypes = Utils::getInput<uint32_t>(msg);
+		uint32_t cardTypes = Utility::getInput<uint32_t>(msg);
 		cardTypes |= CARD_OPERATION_USE;		// Card operation apply
 		config.useCardOperationMask = cardTypes;
 

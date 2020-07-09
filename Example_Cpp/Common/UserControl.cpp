@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "UserControl.h"
 #include "BS_Errno.h"
-#include "../Common/Utils.h"
+#include "../Common/Utility.h"
 #include "../Common/ConfigControl.h"
 
 
@@ -45,7 +45,7 @@ void UserControl::onReadyToScan(BS2_DEVICE_ID id, uint32_t sequence)
 
 int UserControl::getUser(BS2_DEVICE_ID id)
 {
-	string uid = Utils::getInput<string>("Please enter a user ID :");
+	string uid = Utility::getInput<string>("Please enter a user ID :");
 	if (BS2_USER_ID_SIZE < uid.size())
 	{
 		TRACE("User ID is too big.");
@@ -57,7 +57,7 @@ int UserControl::getUser(BS2_DEVICE_ID id)
 	stringstream msg;
 	msg << "What do you want :\n";
 	msg << "[1: User header, 2: Card, 3: Finger, 4: Face]";
-	short maskType = Utils::getInput<short>(msg.str());
+	short maskType = Utility::getInput<short>(msg.str());
 
 	int sdkResult = BS2_GetDeviceInfo(context_, id, &deviceInfo);
 	if (BS_SDK_SUCCESS == sdkResult)
@@ -216,7 +216,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	BS2UserPhoto& photo = userBlob.user_photo;
 	stringstream msg;
 
-	string uid = Utils::getInput<string>("Please enter a user ID:");
+	string uid = Utility::getInput<string>("Please enter a user ID:");
 	if (BS2_USER_ID_SIZE < uid.size())
 	{
 		TRACE("User ID is too big.");
@@ -226,7 +226,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (deviceInfo.userNameSupported)
 	{
-		string name = Utils::getInput<string>("Enter your name:");
+		string name = Utility::getInput<string>("Enter your name:");
 		if (BS2_USER_NAME_SIZE < uid.size())
 		{
 			TRACE("User name is too long.");
@@ -236,18 +236,18 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	}
 
 	{
-		string inputTime = Utils::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
-		BS2_TIMESTAMP startTime = Utils::convertTimeString2UTC(inputTime);
+		string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
+		BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
 		setting.startTime = startTime;
 
-		inputTime = Utils::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
-		BS2_TIMESTAMP endTime = Utils::convertTimeString2UTC(inputTime);
+		inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
+		BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
 		setting.endTime = endTime;
 	}
 
 	if (deviceInfo.pinSupported)
 	{
-		string pinString = Utils::getInput<string>("Enter the PIN code:");
+		string pinString = Utility::getInput<string>("Enter the PIN code:");
 		if (BS2_USER_PIN_SIZE < pinString.size())
 		{
 			TRACE("PIN code is too long");
@@ -266,7 +266,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		msg.str("");
 		msg << "Enter the biometric authentication mode\n";
 		msg << "[1: Biometric only, 2: Biometric+PIN]";
-		int fingerAuthMode = Utils::getInput<int>(msg.str());
+		int fingerAuthMode = Utility::getInput<int>(msg.str());
 		switch (fingerAuthMode)
 		{
 		case 1:
@@ -286,7 +286,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		msg.str("");
 		msg << "Enter the card authentication mode\n";
 		msg << "[1: Card only, 2: Card+Biometric, 3: Card+PIN, 4: Card+(Biometric/PIN), 5: Card+Biometric+PIN]";
-		int cardAuthMode = Utils::getInput<int>(msg.str());
+		int cardAuthMode = Utility::getInput<int>(msg.str());
 		switch (cardAuthMode)
 		{
 		case 1:
@@ -314,7 +314,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		msg.str("");
 		msg << "Enter the ID authentication mode\n";
 		msg << "[1: ID+Biometric, 2: ID+PIN, 3: ID+(Biometric/PIN), 4: ID+Biometric+PIN]";
-		int idAuthMode = Utils::getInput<int>(msg.str());
+		int idAuthMode = Utility::getInput<int>(msg.str());
 		switch (idAuthMode)
 		{
 		case 1:
@@ -339,7 +339,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		msg.str("");
 		msg << "Enter the security level for this user\n";
 		msg << "[0: Default, 1: Lower, 2: Low, 3: Normal, 4: High, 5, Higher]";
-		int securityLevel = Utils::getInput<int>(msg.str());
+		int securityLevel = Utility::getInput<int>(msg.str());
 		switch (securityLevel)
 		{
 		case BS2_USER_SECURITY_LEVEL_DEFAULT:
@@ -358,11 +358,11 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (deviceInfo.userPhotoSupported)
 	{
-		char profileImage = Utils::getInput<char>("Do you want to register a profile image? [y/n]");
+		char profileImage = Utility::getInput<char>("Do you want to register a profile image? [y/n]");
 		if ('y' == profileImage || 'Y' == profileImage)
 		{
-			string imagePath = Utils::getInput<string>("Enter the profile image path and name:");
-			uint32_t size = Utils::getResourceSize(imagePath);
+			string imagePath = Utility::getInput<string>("Enter the profile image path and name:");
+			uint32_t size = Utility::getResourceSize(imagePath);
 			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
 
 			while (BS2_USER_PHOTO_SIZE < size)
@@ -370,11 +370,11 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 				msg.str("");
 				msg << "Image is to big.\n";
 				msg << "Re-enter an image smaller than 16384 byte:";
-				imagePath = Utils::getInput<string>(msg.str());
-				size = Utils::getResourceSize(imagePath);
+				imagePath = Utility::getInput<string>(msg.str());
+				size = Utility::getResourceSize(imagePath);
 			}
 
-			if (Utils::getResourceFromFile(imagePath, buffer, size))
+			if (Utility::getResourceFromFile(imagePath, buffer, size))
 			{
 				photo.size = size;
 				memcpy(photo.data, buffer.get(), size);
@@ -382,16 +382,16 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		}
 	}
 
-	char flag = Utils::getInput<char>("Do you want register access group ID? [y/n]");
+	char flag = Utility::getInput<char>("Do you want register access group ID? [y/n]");
 	if ('y' == flag || 'Y' == flag)
 	{
 		msg.str("");
 		msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
-		string inStrAGID = Utils::getLine(msg.str());
+		string inStrAGID = Utility::getLine(msg.str());
 		if (0 == inStrAGID.size())
 			return BS_SDK_ERROR_CANNOT_FIND_ACCESS_GROUP;
 
-		vector<string> listID = Utils::tokenizeString(inStrAGID);
+		vector<string> listID = Utility::tokenizeString(inStrAGID);
 		if (listID.size() < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER)
 		{
 			uint32_t index(0);
@@ -407,12 +407,12 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		msg.str("");
 		msg << "Please enter a authentication group ID.\n";
 		msg << "This is used for face authentication. [0: Not using]";
-		uint32_t authGroupID = Utils::getInput<uint32_t>(msg.str());
+		uint32_t authGroupID = Utility::getInput<uint32_t>(msg.str());
 		user.authGroupID = authGroupID;
 	}
 
 	{
-		flag = Utils::getInput<char>("Do you want to overwrite the user if it exist? [y/n]");
+		flag = Utility::getInput<char>("Do you want to overwrite the user if it exist? [y/n]");
 		user.flag = (flag == 'y' || flag == 'Y') ? BS2_USER_FLAG_CREATED | BS2_USER_FLAG_UPDATED : BS2_USER_FLAG_CREATED;
 	}
 
@@ -422,10 +422,10 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (deviceInfo.cardSupported)
 	{
-		flag = Utils::getInput<char>("Do you want scan card? [y/n]");
+		flag = Utility::getInput<char>("Do you want scan card? [y/n]");
 		if ('y' == flag || 'Y' == flag)
 		{
-			uint32_t numCard = Utils::getInput<uint32_t>("How many cards would you like to register?");
+			uint32_t numCard = Utility::getInput<uint32_t>("How many cards would you like to register?");
 			BS2CSNCard* ptrCard = new BS2CSNCard[numCard];
 			if (ptrCard)
 			{
@@ -456,10 +456,10 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (deviceInfo.fingerSupported)
 	{
-		flag = Utils::getInput<char>("Do you want scan fingerprint? [y/n]");
+		flag = Utility::getInput<char>("Do you want scan fingerprint? [y/n]");
 		if ('y' == flag || 'Y' == flag)
 		{
-			uint32_t numFinger = Utils::getInput<uint32_t>("How many fingers would you like to register?");
+			uint32_t numFinger = Utility::getInput<uint32_t>("How many fingers would you like to register?");
 			BS2Fingerprint* ptrFinger = new BS2Fingerprint[numFinger];
 			if (ptrFinger)
 			{
@@ -482,10 +482,10 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (deviceInfo.faceSupported)
 	{
-		flag = Utils::getInput<char>("Do you want scan face? [y/n]");
+		flag = Utility::getInput<char>("Do you want scan face? [y/n]");
 		if ('y' == flag || 'Y' == flag)
 		{
-			uint32_t numFace = Utils::getInput<uint32_t>("How many face would you like to register?");
+			uint32_t numFace = Utility::getInput<uint32_t>("How many face would you like to register?");
 			BS2Face* ptrFace = new BS2Face[numFace];
 			if (ptrFace)
 			{
@@ -532,7 +532,7 @@ int UserControl::getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, u
 
 int UserControl::removeUser(BS2_DEVICE_ID id)
 {
-	string uid = Utils::getInput<string>("Please enter a user ID:");
+	string uid = Utility::getInput<string>("Please enter a user ID:");
 	if (BS2_USER_ID_SIZE < uid.size())
 	{
 		TRACE("User ID is too big.");
@@ -618,7 +618,7 @@ void UserControl::print(const BS2UserPhoto& photo)
 	{
 		shared_ptr<uint8_t> buffer(new uint8_t[photo.size], ArrayDeleter<uint8_t>());
 		memcpy(buffer.get(), photo.data, photo.size);
-		Utils::setResourceToFile("c:\\temp\\temp.jpg", buffer, photo.size);
+		Utility::setResourceToFile("c:\\temp\\temp.jpg", buffer, photo.size);
 	}
 }
 

@@ -15,7 +15,6 @@ public:
 public:
 	int getLogSmallBlob(BS2_DEVICE_ID id);
 
-
 private:
 	void print(const BS2EventSmallBlob* logs, uint32_t numLog);
 	void print(const BS2EventExtInfo& info);

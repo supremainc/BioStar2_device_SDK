@@ -156,7 +156,7 @@ copy /y $(SolutionDir)Lib\Window\lib\x86\*.dll $(OutDir)</Command>
     <ClInclude Include="..\Common\DeviceControl.h" />
     <ClInclude Include="..\Common\DeviceList.h" />
     <ClInclude Include="..\Common\UserControl.h" />
-    <ClInclude Include="..\Common\Utils.h" />
+    <ClInclude Include="..\Common\Utility.h" />
     <ClInclude Include="DeviceAPI.h" />
     <ClInclude Include="PreDefined.h" />
     <ClInclude Include="stdafx.h" />
@@ -169,7 +169,7 @@ copy /y $(SolutionDir)Lib\Window\lib\x86\*.dll $(OutDir)</Command>
     <ClCompile Include="..\Common\DeviceControl.cpp" />
     <ClCompile Include="..\Common\DeviceList.cpp" />
     <ClCompile Include="..\Common\UserControl.cpp" />
-    <ClCompile Include="..\Common\Utils.cpp" />
+    <ClCompile Include="..\Common\Utility.cpp" />
     <ClCompile Include="DeviceAPI.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
