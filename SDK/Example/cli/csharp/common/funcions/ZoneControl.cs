@@ -67,6 +67,12 @@ namespace Suprema
                 functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Interlock zone", setInterlockZone));
                 functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Interlock zone alarm", setInterlockZoneAlarm));
                 functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove Interlock zone", removeInterlockZone));
+
+                functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get lift scheduled lock/unlock zone", getLiftLockUnlockZone));
+                functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get lift scheduled lock/unlock zone status", getLiftLockUnlockZoneStatus));
+                functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set lift scheduled lock/unlock zone", setLiftLockUnlockZone));
+                functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set lift scheduled lock/unlock zone alarm", setLiftLockUnlockZoneAlarm));
+                functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove lift scheduled lock/unlock zone", removeLiftLockUnlockZone));
             }
 
             return functionList;
@@ -1803,6 +1809,250 @@ namespace Suprema
             removeZone(sdkContext, deviceID, "Interlock", API.BS2_RemoveAllInterlockZone, API.BS2_RemoveInterlockZone);
         }
 
+        void getLiftLockUnlockZone(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            getZone<BS2LiftLockUnlockZone>(sdkContext, deviceID, "Lift lock/unlock", API.BS2_GetAllLiftLockUnlockZone, API.BS2_GetLiftLockUnlockZone, print);
+        }
+
+        void getLiftLockUnlockZoneStatus(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            getZoneStatus(sdkContext, deviceID, "Lift lock/unlock", API.BS2_GetLiftLockUnlockZoneStatus);
+        }
+
+        void setLiftLockUnlockZone(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            Console.WriteLine("How many Lift lock/unlock zones do you want to set? [1(default)]");
+            Console.Write(">>>> ");
+            char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
+            int amount = Util.GetInput(1);
+            List<BS2LiftLockUnlockZone> slulList = new List<BS2LiftLockUnlockZone>();
+
+            for (int idx = 0; idx < amount; ++idx)
+            {
+                BS2LiftLockUnlockZone zone = Util.AllocateStructure<BS2LiftLockUnlockZone>();
+
+                Console.WriteLine("Enter a value for Lift lock/unlock zone[{0}]", idx);
+                Console.WriteLine("  Enter the ID for the zone which you want to set");
+                Console.Write("  >>>> ");
+                zone.zoneID = (UInt32)Util.GetInput();
+                Console.WriteLine("  Enter the name for the zone which you want to set");
+                Console.Write("  >>>> ");
+                string zoneName = Console.ReadLine();
+                if (zoneName.Length == 0)
+                {
+                    Console.WriteLine("  [Warning] Name of zone will be displayed as empty.");
+                }
+                else if (zoneName.Length > BS2Environment.BS2_MAX_ZONE_NAME_LEN)
+                {
+                    Console.WriteLine("  Name of zone should less than {0} words.", BS2Environment.BS2_MAX_ZONE_NAME_LEN);
+                    return;
+                }
+                else
+                {
+                    byte[] zoneNameArray = Encoding.UTF8.GetBytes(zoneName);
+                    Array.Clear(zone.name, 0, BS2Environment.BS2_MAX_ZONE_NAME_LEN);
+                    Array.Copy(zoneNameArray, zone.name, zoneNameArray.Length);
+                }
+
+                Console.WriteLine("  Enter the ID of access schedule to lock this Lift lock/unlock zone: [{0}(default) : {1}]", (UInt32)BS2ScheduleIDEnum.ALWAYS, BS2ScheduleIDEnum.ALWAYS);
+                Console.Write("  >>>> ");
+                zone.lockScheduleID = Util.GetInput((UInt32)BS2ScheduleIDEnum.ALWAYS);
+
+                Console.WriteLine("  Enter the ID of access schedule to unlock this Lift lock/unlock zone: [{0}(default) : {1}]", (UInt32)BS2ScheduleIDEnum.NEVER, BS2ScheduleIDEnum.NEVER);
+                Console.Write("  >>>> ");
+                zone.unlockScheduleID = Util.GetInput((UInt32)BS2ScheduleIDEnum.NEVER);
+
+                Console.WriteLine("  Do you want to activate this Lift lock/unlock zone? [Y/n]");
+                Console.Write("  >>>> ");
+                if (Util.IsYes())
+                {
+                    zone.disabled = 0;
+                }
+                else
+                {
+                    zone.disabled = 1;
+                }
+
+                zone.alarmed = 0;
+
+                for (int loop = 0; loop < BS2Environment.BS2_MAX_LIFT_LOCK_UNLOCK_ALARM_ACTION; ++loop)
+                {
+                    zone.alarm[loop].deviceID = 0;
+                    zone.alarm[loop].type = (byte)BS2ActionTypeEnum.NONE;
+                    zone.alarm[loop].stopFlag = 0;
+                    zone.alarm[loop].delay = 0;
+                }
+
+                Console.WriteLine("  How many alarms for this Lift lock/unlock do you want to set? [0(default)-{0}]", BS2Environment.BS2_MAX_LIFT_LOCK_UNLOCK_ALARM_ACTION);
+                Console.Write("  >>>> ");
+                int alarmCount = Util.GetInput(0);
+                BS2BuzzerAction buzzer = Util.AllocateStructure<BS2BuzzerAction>();
+
+                for (int loop = 0; loop < alarmCount; ++loop)
+                {
+                    Console.WriteLine("  Enter the device ID which you want to run this alarm");
+                    Console.Write("  >>>> ");
+                    zone.alarm[loop].deviceID = (UInt32)Util.GetInput();
+
+                    // We are assuming buzzer control. Of course you can do the other action.
+                    zone.alarm[loop].type = (byte)BS2ActionTypeEnum.BUZZER;
+
+                    buzzer.count = 5;
+                    Console.WriteLine("  Enter the type of buzzer tone.[{0} : {1}, {2} : {3}, {4} : {5}, {6}(default) : {7}]",
+                                    (byte)BS2BuzzerToneEnum.OFF,
+                                    BS2BuzzerToneEnum.OFF,
+                                    (byte)BS2BuzzerToneEnum.LOW,
+                                    BS2BuzzerToneEnum.LOW,
+                                    (byte)BS2BuzzerToneEnum.MIDDLE,
+                                    BS2BuzzerToneEnum.MIDDLE,
+                                    (byte)BS2BuzzerToneEnum.HIGH,
+                                    BS2BuzzerToneEnum.HIGH);
+                    Console.Write("  >>>> ");
+                    buzzer.signal[0].tone = Util.GetInput((byte)BS2BuzzerToneEnum.HIGH);
+
+                    Console.WriteLine("  Do you want to set the fade out effect for this Lift lock/unlock zone? [y/N]");
+                    Console.Write("  >>>> ");
+                    if (Util.IsNo())
+                    {
+                        buzzer.signal[0].fadeout = 0;
+                    }
+                    else
+                    {
+                        buzzer.signal[0].fadeout = 1;
+                    }
+
+                    Console.WriteLine("  Enter the duration of buzzer for this Lift lock/unlock zone: [{100}(default)]");
+                    Console.Write("  >>>> ");
+                    buzzer.signal[0].duration = (UInt16)Util.GetInput((UInt16)100);
+
+                    Console.WriteLine("  How many waiting for to a next action?[100(default)]");
+                    Console.Write("  >>>> ");
+                    buzzer.signal[0].delay = Util.GetInput((UInt16)100);
+
+                    byte[] inputActionArray = Util.ConvertTo<BS2BuzzerAction>(ref buzzer);
+                    Array.Clear(zone.alarm[loop].actionUnion, 0, zone.alarm[loop].actionUnion.Length);
+                    Array.Copy(inputActionArray, zone.alarm[loop].actionUnion, inputActionArray.Length);
+                }
+
+                Console.WriteLine("  Enter the number of Lift-Floor informations that make up the zone.");
+                Console.Write("  >>>> ");
+                zone.numLifts = Util.GetInput((byte)1);
+                for (int index = 0; index < zone.numLifts; index++)
+                {
+                    Console.WriteLine("  Enter the lift ID of the floors.");
+                    Console.Write("  >>>> ");
+                    zone.lifts[index].liftID = (UInt32)Util.GetInput();
+
+                    Console.WriteLine("  Enter all the floor indices (array index) to be composed of the zone among the floors of the currently set lift.");
+                    Console.WriteLine("  Perhaps you have set floors by calling BS2_SetLift. [POS_1, POS_2, ...]");
+                    Console.Write("  >>>> ");
+                    string[] floorIndices = Console.ReadLine().Split(delimiterChars);
+
+                    foreach (string pos in floorIndices)
+                    {
+                        if (0 < pos.Length)
+                        {
+                            byte item;
+                            if (byte.TryParse(pos, out item))
+                            {
+                                if (zone.lifts[index].numFloors + 1 >= 256)
+                                {
+                                    Console.WriteLine("[Warning] The count of floors should less than {0}.", 255);
+                                    break;
+                                }
+                                zone.lifts[index].floorIndices[zone.lifts[index].numFloors] = item;
+                                zone.lifts[index].numFloors++;
+                            }
+                        }
+                    }
+                }
+
+                zone.numBypassGroups = 0;
+                if (zone.lockScheduleID > (UInt32)BS2ScheduleIDEnum.NEVER)
+                {
+                    Console.WriteLine("  Enter the ID of the access group which can bypass this Lift lock/unlock zone: [ID_1,ID_2 ...]");
+                    Console.Write("  >>>> ");
+                    string[] accessGroupIDs = Console.ReadLine().Split(delimiterChars);
+
+                    foreach (string accessGroupID in accessGroupIDs)
+                    {
+                        if (accessGroupID.Length > 0)
+                        {
+                            UInt32 item;
+                            if (UInt32.TryParse(accessGroupID, out item))
+                            {
+                                if (zone.numBypassGroups + 1 >= BS2Environment.BS2_MAX_BYPASS_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE)
+                                {
+                                    Console.WriteLine("[Warning] The count of access group ID should less than {0}.", BS2Environment.BS2_MAX_BYPASS_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE);
+                                    break;
+                                }
+
+                                zone.bypassGroupIDs[zone.numBypassGroups] = item;
+                                zone.numBypassGroups++;
+                            }
+                        }
+                    }
+                }
+
+                zone.numUnlockGroups = 0;
+                if (zone.unlockScheduleID > (UInt32)BS2ScheduleIDEnum.NEVER)
+                {
+                    Console.WriteLine("  Enter the ID of the access group which can unlock this Lift lock/unlock zone: [ID_1,ID_2 ...]");
+                    Console.Write("  >>>> ");
+                    string[] accessGroupIDs = Console.ReadLine().Split(delimiterChars);
+
+                    foreach (string accessGroupID in accessGroupIDs)
+                    {
+                        if (accessGroupID.Length > 0)
+                        {
+                            UInt32 item;
+                            if (UInt32.TryParse(accessGroupID, out item))
+                            {
+                                if (zone.numUnlockGroups + 1 >= BS2Environment.BS2_MAX_UNLOCK_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE)
+                                {
+                                    Console.WriteLine("[Warning] The count of access group ID should less than {0}.", BS2Environment.BS2_MAX_UNLOCK_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE);
+                                    break;
+                                }
+
+                                zone.unlockGroupIDs[zone.numUnlockGroups] = item;
+                                zone.numUnlockGroups++;
+                            }
+                        }
+                    }
+                }
+
+                slulList.Add(zone);
+            }
+
+            int structSize = Marshal.SizeOf(typeof(BS2LiftLockUnlockZone));
+            IntPtr slulListObj = Marshal.AllocHGlobal(structSize * slulList.Count);
+            IntPtr curSlulListObj = slulListObj;
+            foreach (BS2LiftLockUnlockZone item in slulList)
+            {
+                Marshal.StructureToPtr(item, curSlulListObj, false);
+                curSlulListObj = (IntPtr)((long)curSlulListObj + structSize);
+            }
+
+            Console.WriteLine("Trying to set Lift lock/unlock zone to device.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetLiftLockUnlockZone(sdkContext, deviceID, slulListObj, (UInt32)slulList.Count);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            Marshal.FreeHGlobal(slulListObj);
+        }
+
+        void setLiftLockUnlockZoneAlarm(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            setZoneAlarm(sdkContext, deviceID, "Lift lock/unlock", API.BS2_SetLiftLockUnlockZoneAlarm);
+        }
+
+        void removeLiftLockUnlockZone(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            removeZone(sdkContext, deviceID, "Lift lock/unlock", API.BS2_RemoveAllLiftLockUnlockZone, API.BS2_RemoveLiftLockUnlockZone);
+        }
+
         void print(IntPtr sdkContext, BS2AntiPassbackZone zone)
         {
             Console.WriteLine(">>>> APB Zone ID[{0, 10}] name[{1}]", zone.zoneID, Encoding.UTF8.GetString(zone.name).TrimEnd('\0'));
@@ -2040,6 +2290,38 @@ namespace Suprema
             Console.WriteLine(preIndented + "      |-- onDuration: {0}", data.signal.onDuration);
             Console.WriteLine(preIndented + "      |-- offDuration: {0}", data.signal.offDuration);
             Console.WriteLine(preIndented + "      |-- delay: {0}", data.signal.delay);
+        }
+
+        void print(IntPtr sdkContext, BS2LiftLockUnlockZone zone)
+        {
+            Console.WriteLine(">>>> Lift Lock/Unlock Zone ID[{0, 10}] name[{1}]", zone.zoneID, Encoding.UTF8.GetString(zone.name).TrimEnd('\0'));
+            Console.WriteLine("     |--lockScheduleID[{0}]", zone.lockScheduleID);
+            Console.WriteLine("     |--unlockScheduleID[{0}]", zone.unlockScheduleID);
+            Console.WriteLine("     |--disabled[{0}]", Convert.ToBoolean(zone.disabled));
+            Console.WriteLine("     |--alarmed[{0}]", Convert.ToBoolean(zone.alarmed));
+            Console.WriteLine("     |--alarm");
+            for (int idx = 0; idx < BS2Environment.BS2_MAX_LIFT_LOCK_UNLOCK_ALARM_ACTION; ++idx)
+            {
+                BS2ActionTypeEnum actionType = (BS2ActionTypeEnum)zone.alarm[idx].type;
+                Console.WriteLine("     |  |--ID[{0}] Type[{1}] {2}", zone.alarm[idx].deviceID, (BS2ActionTypeEnum)zone.alarm[idx].type, Util.getActionMsg(zone.alarm[idx]));
+            }
+            Console.WriteLine("     |--lift floors");
+            for (byte idx = 0; idx < zone.numLifts; ++idx)
+            {
+                Console.WriteLine("     |  |--lift ID[{0}]", zone.lifts[idx]);
+                for (byte fidx = 0; fidx < zone.lifts[idx].numFloors; fidx++)
+                    Console.WriteLine("     |  |  |--floor array pos[{0}]", zone.lifts[idx].floorIndices[fidx]);
+            }
+            Console.WriteLine("     |--bypassGroupIDs");
+            for (byte idx = 0; idx < zone.numBypassGroups; ++idx)
+            {
+                Console.WriteLine("     |  |--bypass group ID[{0}]", zone.bypassGroupIDs[idx]);
+            }
+            Console.WriteLine("     |--unlockGroupIDs");
+            for (byte idx = 0; idx < zone.numUnlockGroups; ++idx)
+            {
+                Console.WriteLine("     |  |--unlock group ID[{0}]", zone.unlockGroupIDs[idx]);
+            }
         }
     }
 }

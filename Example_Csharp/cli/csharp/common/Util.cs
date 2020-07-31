@@ -226,6 +226,15 @@ namespace Suprema
 
         }
 
+        public static byte[] StringToByte(int allocSize, string source)
+        {
+            byte[] result = new byte[allocSize];
+            Array.Clear(result, 0, result.Length);
+            byte[] sourceByte = Encoding.UTF8.GetBytes(source);
+            int copySize = Math.Min(allocSize, sourceByte.Length);
+            Buffer.BlockCopy(sourceByte, 0, result, 0, copySize);
+            return result;
+        }
 
         public static T ConvertTo<T>(byte[] src)
         {

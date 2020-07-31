@@ -105,6 +105,7 @@
 //Util errors
 #define BS_SDK_ERROR_NOT_SUPPORTED                          -600
 #define BS_SDK_ERROR_TIMEOUT                                -601
+#define BS_SDK_ERROR_CANNOT_SET_TIME                        -602
 
 //Database errors
 #define BS_SDK_ERROR_INVALID_DATA_FILE                      -700
@@ -235,7 +236,8 @@
 #define BS_SDK_ERROR_HARD_TIMED_APB_VIOLATION               -1204
 #define BS_SDK_ERROR_SOFT_TIMED_APB_VIOLATION               -1205
 #define BS_SDK_ERROR_SCHEDULED_LOCK_VIOLATION               -1206
-#define BS_SDK_ERROR_SCHEDULED_UNLOCK_VIOLATION             -1207
+#define BS_SDK_ERROR_SCHEDULED_UNLOCK_VIOLATION             (DEPRECATED_MAC)-1207
+#define BS_SDK_ERROR_INTRUSION_ALARM_VIOLATION              -1207
 #define BS_SDK_ERROR_SET_FIRE_ALARM                         -1208
 #define BS_SDK_ERROR_TIMED_APB_ZONE_FULL                    -1209
 #define BS_SDK_ERROR_FIRE_ALARM_ZONE_FULL                   -1210
@@ -300,6 +302,9 @@
 #define BS_SDK_ERROR_SSL_INVALID_KEY                        -3006
 #define BS_SDK_ERROR_SSL_VERIFY_KEY                         -3007
 
+// Mobile access
+#define BS_SDK_ERROR_MOBILE_PORTAL                          -3100
+
 #define BS_SDK_ERROR_NULL_POINTER                           -10000
 #define BS_SDK_ERROR_UNINITIALIZED                          -10001
 #define BS_SDK_ERROR_CANNOT_RUN_SERVICE                     -10002
@@ -312,5 +317,12 @@
 #define BS_SDK_ERROR_INVALID_FILE_FORMAT					-10009
 #define BS_SDK_ERROR_INVALID_SCHEDULE_ID					-10010
 #define BS_SDK_ERROR_UNKNOWN_FINGER_TEMPLATE                -10011
+
+// Mobile access (defined from SDK)
+#define BS_SDK_ERROR_MOBILE_STATUS_FAULT                    -10100
+#define BS_SDK_ERROR_MOBILE_NO_RESPONSE                     -10101
+#define BS_SDK_ERROR_MOBILE_NOT_LOGIN						-10103
+#define BS_SDK_ERROR_MOBILE_ADD_DEVICE_FAULT                -10104
+#define BS_SDK_ERROR_MOBILE_DEVICE_NOT_FOUND				-10105
 
 #endif /* CORE_JNI_SRC_BS_ERRNO_H_ */

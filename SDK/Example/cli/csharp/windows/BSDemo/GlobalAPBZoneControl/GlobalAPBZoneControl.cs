@@ -198,7 +198,7 @@ namespace Suprema
                 return functionList;
             }
 
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Start global apb zone", StarGlobalAPBZone));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Start global apb zone", StartGlobalAPBZone));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Show connected device list", ShowConnectionDeviceList));
 
             return functionList;
@@ -227,7 +227,7 @@ namespace Suprema
             API.BS2_ReleaseObject(deviceObjList);
         }
         
-        public void StarGlobalAPBZone(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        public void StartGlobalAPBZone(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             zoneManager = new GlobalAPBZoneManager();
 
@@ -264,7 +264,8 @@ namespace Suprema
                 UInt32 indexOfReader;
                 if (UInt32.TryParse(readerIndexs[idx], out indexOfReader) && indexOfReader < numDevice)
                 {
-                    zoneManager.inDeviceIDs.Add(connectedDeviceIDs[indexOfReader]);
+                    if (BS2ErrorCode.BS_SDK_SUCCESS == (BS2ErrorCode)API.BS2_ConnectDevice(sdkContext, connectedDeviceIDs[indexOfReader]))
+                        zoneManager.inDeviceIDs.Add(connectedDeviceIDs[indexOfReader]);
                 }
                 else
                 {
@@ -281,12 +282,15 @@ namespace Suprema
                 UInt32 indexOfReader;
                 if (UInt32.TryParse(readerIndexs[idx], out indexOfReader) && indexOfReader < numDevice)
                 {
-                    if (!zoneManager.inDeviceIDs.Contains(connectedDeviceIDs[indexOfReader]))
-                        zoneManager.outDeviceIDs.Add(connectedDeviceIDs[indexOfReader]);
-                    else
+                    if (BS2ErrorCode.BS_SDK_SUCCESS == (BS2ErrorCode)API.BS2_ConnectDevice(sdkContext, connectedDeviceIDs[indexOfReader]))
                     {
-                        Console.WriteLine("Got error(index({0}) is IN device already.).", readerIndexs[idx]);
-                        return;
+                        if (!zoneManager.inDeviceIDs.Contains(connectedDeviceIDs[indexOfReader]))
+                            zoneManager.outDeviceIDs.Add(connectedDeviceIDs[indexOfReader]);
+                        else
+                        {
+                            Console.WriteLine("Got error(index({0}) is IN device already.).", readerIndexs[idx]);
+                            return;
+                        }
                     }
                 }
                 else

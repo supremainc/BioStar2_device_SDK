@@ -1188,6 +1188,7 @@ namespace Suprema
         private API.OnReadyToScan cbCardOnReadyToScan = null;
         private API.OnReadyToScan cbFingerOnReadyToScan = null;
         private API.OnReadyToScan cbFaceOnReadyToScan = null;
+        private API.OnUserPhrase cbOnUserPhrase = null;
 
         private DataBaseHandler dbHandler = new DataBaseHandler();
         private IntPtr sdkContext;
@@ -1221,6 +1222,9 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Del Auth Operator Level Ex", delAuthOperatorLevelEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Del All Auth Operator Level Ex", delAllAuthOperatorLevelEx));
 			//<=
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Activate user phrase", activateUserPhrase));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Deactivate user phrase", deactivateUserPhrase));
 
             return functionList;
         }
@@ -3098,6 +3102,76 @@ namespace Suprema
                 Console.WriteLine("Got error({0}).", result);
             }
         }    
-		//<=    
+		//<=
+
+        public void onUserPhrase(UInt32 deviceId, UInt16 seq, string userID)
+        {
+            string privateMsg = "SvrMsg-" + userID;
+            byte[] uidArray = Util.StringToByte(BS2Environment.BS2_USER_ID_SIZE, privateMsg);
+
+            IntPtr uid = Marshal.AllocHGlobal(BS2Environment.BS2_USER_ID_SIZE);
+            Marshal.Copy(uidArray, 0, uid, uidArray.Length);
+
+            int handleResult = (int)BS2ErrorCode.BS_SDK_SUCCESS;
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_ResponseUserPhrase(sdkContext, deviceId, seq, handleResult, uid);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            Marshal.FreeHGlobal(uid);
+        }
+
+        public void activateUserPhrase(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2DisplayConfig config;
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetDisplayConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+            
+            config.useUserPhrase = Convert.ToByte(true);
+            config.queryUserPhrase = Convert.ToByte(true);
+
+            result = (BS2ErrorCode)API.BS2_SetDisplayConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            this.sdkContext = sdkContext;
+            cbOnUserPhrase = new API.OnUserPhrase(onUserPhrase);
+            result = (BS2ErrorCode)API.BS2_SetUserPhraseHandler(sdkContext, cbOnUserPhrase);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Try authentication.");
+        }
+
+        public void deactivateUserPhrase(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            cbOnUserPhrase = null;
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetUserPhraseHandler(sdkContext, cbOnUserPhrase);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+        }
+
+        void print(BS2DisplayConfig config)
+        {
+            Console.WriteLine(">>>> Display configuration ");            
+            Console.WriteLine("     |--useUserPhrase : {0}", config.useUserPhrase);            
+            Console.WriteLine("     |--queryUserPhrase : {0}", config.queryUserPhrase);
+            Console.WriteLine("<<<< ");
+        }
     }
 }

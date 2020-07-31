@@ -17,6 +17,7 @@ namespace Suprema
     {
         public static Dictionary<BS2DeviceTypeEnum, string> productNameDictionary = new Dictionary<BS2DeviceTypeEnum, string>()
         {
+            {BS2DeviceTypeEnum.UNKNOWN,         "Unknown Device"},
             {BS2DeviceTypeEnum.BIOENTRY_PLUS,   "BioEntry Plus"},
             {BS2DeviceTypeEnum.BIOENTRY_W,      "BioEntry W"},
             {BS2DeviceTypeEnum.BIOLITE_NET,     "BioLite Net"},
@@ -44,7 +45,8 @@ namespace Suprema
             {BS2DeviceTypeEnum.XPASS_D2_KEYPAD, "XPass D2 Keypad"},
             {BS2DeviceTypeEnum.FACELITE,        "FaceLite"},
             {BS2DeviceTypeEnum.XPASS2_KEYPAD,   "XPass 2 Keypad"},
-            {BS2DeviceTypeEnum.UNKNOWN,         "Unknown Device"},
+            {BS2DeviceTypeEnum.XPASS_D2_REV,    "XPass D2 Rev"},
+            {BS2DeviceTypeEnum.XPASS_D2_KEYPAD_REV, "XPass D2 Keypad Rev"},
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -84,6 +86,9 @@ namespace Suprema
         public delegate void OnIdentifyUser(UInt32 deviceId, UInt16 seq, byte format, IntPtr templateData, UInt32 templateSize);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnUserPhrase(UInt32 deviceId, UInt16 seq, string userID);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int IsAcceptableUserID(string uid);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -113,6 +118,12 @@ namespace Suprema
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void OnCheckGlobalAPBViolation(UInt32 deviceId, UInt16 seq, string userID_1, string userID_2, bool isDualAuth);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnCheckGlobalAPBViolationByDoorOpen(UInt32 deviceId, UInt16 seq, string userID_1, string userID_2, bool isDualAuth);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnUpdateGlobalAPBViolationByDoorOpen(UInt32 deviceId, UInt16 seq, string userID_1, string userID_2, bool isDualAuth);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static IntPtr BS2_AllocateContext();
@@ -588,6 +599,12 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_IdentifyUserEx(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, ref BS2UserBlobEx userBlob);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetUserPhraseHandler(IntPtr context, OnUserPhrase cbOnQuery);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_ResponseUserPhrase(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, IntPtr userPhrase);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< User API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetUserDatabaseInfo(IntPtr context, UInt32 deviceId, out UInt32 numUsers, out UInt32 numCards, out UInt32 numFingers, out UInt32 numFaces, IsAcceptableUserID cbIsAcceptableUserID);
@@ -676,6 +693,12 @@ namespace Suprema
         extern public static int BS2_CheckGlobalAPBViolation(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, UInt32 zoneID);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetGlobalAPBViolationByDoorOpenHandler(IntPtr context, OnCheckGlobalAPBViolationByDoorOpen ptrCheck, OnUpdateGlobalAPBViolationByDoorOpen ptrUpdate);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_CheckGlobalAPBViolationByDoorOpen(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, UInt32 zoneID);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetTimedAntiPassbackZone(IntPtr context, UInt32 deviceId, IntPtr zoneIds, UInt32 zoneIdCount, out IntPtr zoneObj, out UInt32 numZone);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -752,6 +775,30 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_RemoveAllScheduledLockUnlockZone(IntPtr context, UInt32 deviceId);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLiftLockUnlockZone(IntPtr context, UInt32 deviceId, IntPtr zoneIds, UInt32 zoneIdCount, out IntPtr zoneObj, out UInt32 numZone);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetAllLiftLockUnlockZone(IntPtr context, UInt32 deviceId, out IntPtr zoneObj, out UInt32 numZone);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLiftLockUnlockZoneStatus(IntPtr context, UInt32 deviceId, IntPtr zoneIds, UInt32 zoneIdCount, out IntPtr zoneStatusObj, out UInt32 numZoneStatus);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetAllLiftLockUnlockZoneStatus(IntPtr context, UInt32 deviceId, out IntPtr zoneStatusObj, out UInt32 numZoneStatus);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetLiftLockUnlockZone(IntPtr context, UInt32 deviceId, IntPtr zones, UInt32 zoneCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetLiftLockUnlockZoneAlarm(IntPtr context, UInt32 deviceId, byte alarmed, IntPtr zoneIds, UInt32 zoneIdCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_RemoveLiftLockUnlockZone(IntPtr context, UInt32 deviceId, IntPtr zoneIds, UInt32 zoneIdCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_RemoveAllLiftLockUnlockZone(IntPtr context, UInt32 deviceId);
 
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Face API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]

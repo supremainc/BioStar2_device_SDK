@@ -118,7 +118,7 @@ typedef struct {
 	uint8_t timeFormat;			///< 1 byte
 	uint8_t homeFormation;		///< 1 byte
 	BS2_BOOL useUserPhrase;		///< 1 byte
-	uint8_t reserved[1];		///< 1 byte (packing)
+	BS2_BOOL queryUserPhrase;		///< 1 byte
 
 	uint8_t shortcutHome[BS2_MAX_SHORTCUT_HOME];	///< 8 bytes
 	uint8_t tnaIcon[BS2_MAX_TNA_KEY];		///< 16 bytes : tnaIcon

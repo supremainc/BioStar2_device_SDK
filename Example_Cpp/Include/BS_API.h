@@ -66,6 +66,7 @@
 #include "BSCommon/data/BS2AuthGroup.h"
 #include "BSCommon/data/BS2IntrusionAlarmZone.h"
 #include "BSCommon/data/BS2InterlockZone.h"
+#include "BSCommon/data/BS2LiftLockUnlockZone.h"
 #include "BSCommon/data/BS2Operator.h" //[Admin 1000] 
 #include "BSCommon/protocol/BS2UdpDiscover.h"
 #include "BSCommon/protocol/BS2SystemInfo.h"
@@ -454,6 +455,9 @@ typedef void (*OnIdentifyUser)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, BS2_F
 typedef int (*IsAcceptableUserID)(const char* uid);
 typedef void(*OnSendRootCA)(BS2_DEVICE_ID deviceId, int result);
 typedef void (*OnCheckGlobalAPBViolation)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID_1, const char* userID_2, bool isDualAuth);
+typedef void (*OnCheckGlobalAPBViolationByDoorOpen)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID_1, const char* userID_2, bool isDualAuth);
+typedef void (*OnUpdateGlobalAPBViolationByDoorOpen)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID_1, const char* userID_2, bool isDualAuth);
+typedef void (*OnUserPhrase)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID);
 
 typedef uint32_t (*PreferMethod)(BS2_DEVICE_ID deviceID);
 typedef const char* (*GetRootCaFilePath)(BS2_DEVICE_ID deviceID);
@@ -485,6 +489,7 @@ typedef void (*CBDebugPrint)(char* msg);
 #define DEBUG_MODULE_API				(DEBUG_API)
 #define DEBUG_MODULE_MISC				(0x1 << 7)
 #define DEBUG_MODULE_PACKET				(0x1 << 8)
+#define DEBUG_MOBILEACCESS				(0x1 << 9)
 #define DEBUG_MODULE_ALL				(DEBUG_ALL)
 #define DEBUG_LOG_FATAL					(0x1 << 0)
 #define DEBUG_LOG_ERROR					(0x1 << 1)
@@ -747,6 +752,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnrollUser(void* context, BS2_DEVICE
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveUser(void* context, BS2_DEVICE_ID deviceId, char* uids, uint32_t uidCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllUser(void* context, BS2_DEVICE_ID deviceId);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSupportedUserMask(void* context, BS2_DEVICE_ID deviceId, BS2_USER_MASK* userMask);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetUserPhraseHandler(void* context, OnUserPhrase ptrQuery);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ResponseUserPhrase(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, const BS2_USER_PHRASE userPhrase);
 
 // Wiegand api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchWiegandDevices(void* context, BS2_DEVICE_ID deviceId, BS2_DEVICE_ID** wiegandDeviceObj, uint32_t* numWiegandDevice);
@@ -856,6 +863,16 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetInterlockZoneAlarm(void* context,
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveInterlockZone(void* context, BS2_DEVICE_ID deviceId, BS2_ZONE_ID* zoneIds, uint32_t zoneIdCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllInterlockZone(void* context, BS2_DEVICE_ID deviceId);
 
+//LiftLockUnlockZone
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLiftLockUnlockZone(void* context, BS2_DEVICE_ID deviceId, BS2_ZONE_ID* zoneIds, uint32_t zoneIdCount, BS2LiftLockUnlockZone** zoneObj, uint32_t* numZone);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllLiftLockUnlockZone(void* context, BS2_DEVICE_ID deviceId, BS2LiftLockUnlockZone** zoneObj, uint32_t* numZone);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLiftLockUnlockZoneStatus(void* context, BS2_DEVICE_ID deviceId, BS2_ZONE_ID* zoneIds, uint32_t zoneIdCount, BS2ZoneStatus** zoneStatusObj, uint32_t* numZoneStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllLiftLockUnlockZoneStatus(void* context, BS2_DEVICE_ID deviceId, BS2ZoneStatus** zoneStatusObj, uint32_t* numZoneStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetLiftLockUnlockZone(void* context, BS2_DEVICE_ID deviceId, BS2LiftLockUnlockZone* zones, uint32_t zoneCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetLiftLockUnlockZoneAlarm(void* context, BS2_DEVICE_ID deviceId, uint8_t alarmed, BS2_ZONE_ID* zoneIds, uint32_t zoneIdCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveLiftLockUnlockZone(void* context, BS2_DEVICE_ID deviceId, BS2_ZONE_ID* zoneIds, uint32_t zoneIdCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllLiftLockUnlockZone(void* context, BS2_DEVICE_ID deviceId);
+
 //Ethernet Zone
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceZoneMasterConfig(void* context, BS2_DEVICE_ID deviceId, BS2DeviceZoneMasterConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDeviceZoneMasterConfig(void* context, BS2_DEVICE_ID deviceId, const BS2DeviceZoneMasterConfig* config);
@@ -882,6 +899,9 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllDeviceZoneAGEntranceLimit(v
 
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetCheckGlobalAPBViolationHandler(void* context, OnCheckGlobalAPBViolation ptrCheckGlobalAPBViolation);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_CheckGlobalAPBViolation(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, BS2_ZONE_ID zoneID);
+
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetGlobalAPBViolationByDoorOpenHandler(void* context, OnCheckGlobalAPBViolationByDoorOpen ptrCheck, OnUpdateGlobalAPBViolationByDoorOpen ptrUpdate);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_CheckGlobalAPBViolationByDoorOpen(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, BS2_ZONE_ID zoneID);
 
 // Encryption Key
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDataEncryptKey(void* context, BS2_DEVICE_ID deviceId, BS2EncryptKey* keyInfo);
@@ -952,6 +972,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllAuthOperatorLevelEx(void* c
 
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlob(void* context, BS2_DEVICE_ID deviceId, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobFromDir(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
+
 
 #ifdef __cplusplus
 }

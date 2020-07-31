@@ -92,7 +92,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	//BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
 
 	// Create SDK context and initialize
 	sdkContext = BS2Context::getInstance()->initSDK();

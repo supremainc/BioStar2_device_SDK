@@ -276,18 +276,6 @@ namespace Suprema
         BS_SDK_ERROR_CANNOT_UPGRADE                         = -2003,
         BS_SDK_ERROR_DEVICE_LOCKED                          = -2004,
         BS_SDK_ERROR_CANNOT_SEND_TO_SERVER                  = -2005,
-        BS_SDK_ERROR_NULL_POINTER                           = -10000,
-        BS_SDK_ERROR_UNINITIALIZED                          = -10001,
-        BS_SDK_ERROR_CANNOT_RUN_SERVICE                     = -10002,
-        BS_SDK_ERROR_CANCELED                               = -10003,
-        BS_SDK_ERROR_EXIST                                  = -10004,
-        BS_SDK_ERROR_ENCRYPT                                = -10005,
-        BS_SDK_ERROR_DECRYPT                                = -10006,
-        BS_SDK_ERROR_DEVICE_BUSY							= -10007,
-        BS_SDK_ERROR_INTERNAL                               = -10008,
-        BS_SDK_ERROR_INVALID_FILE_FORMAT                    = -10009,
-        BS_SDK_ERROR_INVALID_SCHEDULE_ID                    = -10010,
-        BS_SDK_ERROR_UNKNOWN_FINGER_TEMPLATE                = -10011,
 
         //SSL
         BS_SDK_ERROR_SSL_INIT                                = -3000,
@@ -299,6 +287,18 @@ namespace Suprema
         BS_SDK_ERROR_SSL_INVALID_KEY                         = -3006,
         BS_SDK_ERROR_SSL_VERIFY_KEY                          = -3007,
 
+        BS_SDK_ERROR_NULL_POINTER                            = -10000,
+        BS_SDK_ERROR_UNINITIALIZED                           = -10001,
+        BS_SDK_ERROR_CANNOT_RUN_SERVICE                      = -10002,
+        BS_SDK_ERROR_CANCELED                                = -10003,
+        BS_SDK_ERROR_EXIST                                   = -10004,
+        BS_SDK_ERROR_ENCRYPT                                 = -10005,
+        BS_SDK_ERROR_DECRYPT                                 = -10006,
+        BS_SDK_ERROR_DEVICE_BUSY							 = -10007,
+        BS_SDK_ERROR_INTERNAL                                = -10008,
+        BS_SDK_ERROR_INVALID_FILE_FORMAT                     = -10009,
+        BS_SDK_ERROR_INVALID_SCHEDULE_ID                     = -10010,
+        BS_SDK_ERROR_UNKNOWN_FINGER_TEMPLATE                 = -10011,
     }
 
     [Flags]
@@ -494,6 +494,8 @@ namespace Suprema
     [Flags]
     public enum BS2DeviceTypeEnum
     {
+        UNKNOWN         = 0x00,
+
         BIOENTRY_PLUS   = 0x01,
         BIOENTRY_W      = 0x02,
         BIOLITE_NET     = 0x03,
@@ -521,9 +523,11 @@ namespace Suprema
         XPASS_D2_KEYPAD = 0x18,
         FACELITE        = 0x19,
         XPASS2_KEYPAD   = 0x1A,
+        XPASS_D2_REV    = 0x1B,     // [+2.7]
+        XPASS_D2_KEYPAD_REV = 0x1C, // [+2.7]
 
-        TYPE_MAX        = XPASS2_KEYPAD,
-        UNKNOWN         = 0xFF,
+        TYPE_MAX        = XPASS_D2_KEYPAD_REV,
+        //UNKNOWN         = 0xFF,
     }
 
     [Flags]

@@ -58,8 +58,20 @@ public:
 	int removeUser(BS2_DEVICE_ID id);
 	int removeAllUser(BS2_DEVICE_ID id);
 
+	int updateCardTypeCRC(BS2SmartCardData& card);
+	int updateCardCRC(BS2SmartCardData& card);
+	int getPinCode(std::string plainText, uint8_t* cipherText);
+	int scanTemplate(BS2_DEVICE_ID id, uint8_t* fpTemplate);
+	int scanCard(BS2_DEVICE_ID id, uint8_t* card);
+	int scanCard(BS2_DEVICE_ID id, BS2Card* card);
+	int writeCard(BS2_DEVICE_ID id, const BS2SmartCardData* card);
+	int eraseCard(BS2_DEVICE_ID id);
+
+	void print(const BS2Card& card);
 
 private:
+	void dumpHexa(const uint8_t* data, uint32_t size);
+
 	void print(const BS2UserBlob& userBlob);
 	void printHeader(const BS2UserBlob& userBlob);
 	void print(const BS2User& user);
@@ -68,6 +80,12 @@ private:
 	void print(const BS2CSNCard* card, uint8_t numCard);
 	void print(const BS2Fingerprint* finger, uint8_t numFinger);
 	void print(const BS2Face* face, uint8_t numFace);
+
+	void printCardSmartHeader(const BS2SmartCardHeader& header);
+	void printCardSmartCredential(const BS2SmartCardCredentials& cred);
+	void printCardAOC(const BS2AccessOnCardData& aoc);
+	void printCardSmart(const BS2SmartCardData& card);
+	void printCardCSN(const BS2CSNCard& card);
 
 
 private:

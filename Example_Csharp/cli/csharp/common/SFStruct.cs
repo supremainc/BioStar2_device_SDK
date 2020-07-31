@@ -122,6 +122,8 @@ namespace Suprema
 
         public const int BS2_ENC_KEY_SIZE = 32;
 
+        public const int BS2_MOBILE_ACCESS_KEY_SIZE = 124;
+
         #region DEVICE_ZONE_SUPPORTED
         public const int BS2_TCP_DEVICE_ZONE_MASTER_PORT_DEFAULT = 51214;
         public const int BS2_MAX_DEVICE_ZONE = 8;
@@ -157,6 +159,11 @@ namespace Suprema
         public static readonly string DEFAULT_MULTICAST_IPV6_ADDRESS = All_routers_in_the_site_local;
         public static readonly string DEFAULT_BROADCAST_IPV4_ADDRESS = "255.255.255.255";
         //<=
+
+	    public const int BS2_MAX_LIFT_LOCK_UNLOCK_ALARM_ACTION = 5;
+	    public const int BS2_MAX_LIFTS_IN_LIFT_LOCK_UNLOCK_ZONE = 32;
+	    public const int BS2_MAX_BYPASS_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE = 16;
+	    public const int BS2_MAX_UNLOCK_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE = 16;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -296,7 +303,7 @@ namespace Suprema
         public byte timeFormat;
         public byte homeFormation;
         public byte useUserPhrase;
-        public byte reserved;
+        public byte queryUserPhrase;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_SHORTCUT_HOME)]
         public byte[] shortcutHome;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_TNA_KEY)]
@@ -1285,7 +1292,8 @@ namespace Suprema
         public UInt32 deviceID;
         public byte port;
         public byte switchType;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte apbUseDoorSensor;	// [+2.7.0]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
         public byte[] reserved;
     }
 
@@ -1885,6 +1893,44 @@ namespace Suprema
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_BYPASS_GROUPS_IN_SCHEDULED_LOCK_UNLOCK_ZONE)]
         public UInt32[] bypassGroupIDs;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_UNLOCK_GROUPS_IN_SCHEDULED_LOCK_UNLOCK_ZONE)]
+        public UInt32[] unlockGroupIDs;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2LiftFloors
+    {
+        public UInt32 liftID;
+        public UInt16 numFloors;
+        public UInt16 reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        public byte[] floorIndices;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2LiftLockUnlockZone
+    {
+        public UInt32 zoneID;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_ZONE_NAME_LEN)]
+        public byte[] name;
+        public UInt32 unlockScheduleID;
+        public UInt32 lockScheduleID;
+        public byte numLifts;
+        public byte numBypassGroups;
+        public byte numUnlockGroups;
+        public byte unused;
+        public byte disabled;
+        public byte alarmed;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public byte[] reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_LIFT_LOCK_UNLOCK_ALARM_ACTION)]
+        public BS2Action[] alarm;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved2;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_LIFTS_IN_LIFT_LOCK_UNLOCK_ZONE)]
+        public BS2LiftFloors[] lifts;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_BYPASS_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE)]
+        public UInt32[] bypassGroupIDs;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_UNLOCK_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE)]
         public UInt32[] unlockGroupIDs;
     }
 

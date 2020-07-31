@@ -1,4 +1,3 @@
-//Custom => [IPv6]
 /**
  *  Network (IP) Configuration
  *
@@ -52,4 +51,3 @@ typedef struct {
 } BS2IPV6Config;							///< 
 
 #endif	// __BS2_IPV6_CONFIG_H__
-//Custom <=

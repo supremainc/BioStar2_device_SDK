@@ -90,8 +90,9 @@ typedef struct {
 typedef struct {
 	BS2_DEVICE_ID	deviceID;		///< 4 bytes
 	uint8_t			port;			///< 1 byte : 1 ~ 16
-	BS2_SWITCH_TYPE			switchType;		///< 0 = N/O, 1 = N/C
-	uint8_t			reserved[2];	///< 2 bytes (packing)
+	BS2_SWITCH_TYPE			switchType;		///< 0 = N/O, 1 = N/C	
+	uint8_t					apbUseDoorSensor;	
+	uint8_t			reserved[1];	///< 2 bytes (packing)
 } BS2DoorSensor;
 
 /**

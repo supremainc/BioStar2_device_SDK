@@ -36,6 +36,9 @@ enum EN_MENU_DEV
 	MENU_USR_GET_LASTFPIMAGE,
 	MENU_USR_REM_USR,
 	MENU_USR_REM_ALLUSR,
+	MENU_USR_SMARTCARD_SCAN,
+	MENU_USR_SMARTCARD_WRITE,
+	MENU_USR_SMARTCARD_ERASE,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -47,6 +50,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_GET_LASTFPIMAGE,		"Get last fingerprint image from device"},
 	{MENU_USR_REM_USR,				"Remove a user " },
 	{MENU_USR_REM_ALLUSR,			"Remove all users" },
+	{MENU_USR_SMARTCARD_SCAN,		"Smartcard scan"},
+	{MENU_USR_SMARTCARD_WRITE,		"Smartcard write"},
+	{MENU_USR_SMARTCARD_ERASE,		"Smartcard erase"},
 };
 
 
@@ -69,3 +75,6 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
 BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
 int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id);
+int scanCard(UserControl& uc, BS2_DEVICE_ID id);
+int writeCard(UserControl& uc, BS2_DEVICE_ID id);
+int eraseCard(UserControl& uc, BS2_DEVICE_ID id);

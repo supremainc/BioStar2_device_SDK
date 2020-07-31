@@ -79,6 +79,7 @@ void connectTestDevice(void* context)
 
 	// Retrieve bulk logs.
 	CommControl cm(context);
+#if RETRIVE_BULK_LOGS
 	sdkResult = getAllLogsFromDevice(sdkContext, deviceInfo.id_, deviceInfo.timezone_);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
@@ -86,6 +87,7 @@ void connectTestDevice(void* context)
 		cm.disconnectDevice(deviceInfo.id_);
 		return;
 	}
+#endif
 
 	// Set callback for realtime logs
 	sdkResult = BS2_StartMonitoringLog(sdkContext, deviceInfo.id_, onLogReceived);
@@ -338,6 +340,15 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_REM_ALLUSR:
 			sdkResult = uc.removeAllUser(id);
 			break;
+		case MENU_USR_SMARTCARD_SCAN:
+			sdkResult = scanCard(uc, id);
+			break;
+		case MENU_USR_SMARTCARD_WRITE:
+			sdkResult = writeCard(uc, id);
+			break;
+		case MENU_USR_SMARTCARD_ERASE:
+			sdkResult = eraseCard(uc, id);
+			break;
 		default:
 			break;
 		}
@@ -547,4 +558,115 @@ int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id)
 	}
 
 	return sdkResult;
+}
+
+int scanCard(UserControl& uc, BS2_DEVICE_ID id)
+{
+	BS2Card card = { 0, };
+	int sdkResult = uc.scanCard(id, &card);
+	if (BS_SDK_SUCCESS == sdkResult)
+		uc.print(card);
+
+	return sdkResult;
+}
+
+int writeCard(UserControl& uc, BS2_DEVICE_ID id)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+	BS2SmartCardData card = { 0, };
+
+	uint32_t uid(0);
+	uint8_t cardBuff[BS2_CARD_DATA_SIZE] = { 0, };
+	unsigned char* ptrUID = NULL;
+	string msg = "Please select a card input type. [1. Scan from device, 2: Set user ID]";
+	uint32_t cardInput = Utility::getInput<uint32_t>(msg);
+	switch (cardInput)
+	{
+	case 1:
+		cout << "Now scan your card." << endl;
+		sdkResult = uc.scanCard(id, cardBuff);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		memcpy(card.cardID, cardBuff, BS2_CARD_DATA_SIZE);
+		break;
+
+	case 2:
+	default:
+		uid = Utility::getInput<uint32_t>("Please enter a user ID:");
+		ptrUID = (unsigned char*)&uid;
+		for (int i = 0; i < sizeof(uid); i++)
+		{
+			card.cardID[BS2_CARD_DATA_SIZE - i - 1] = ptrUID[i];
+		}
+		break;
+	}
+
+	string pinString = Utility::getInput<string>("Enter the PIN code:");
+	if (BS2_USER_PIN_SIZE < pinString.size())
+	{
+		TRACE("PIN code is too long");
+		return BS_SDK_ERROR_INVALID_PARAM;
+	}
+
+	sdkResult = uc.getPinCode(pinString, card.credentials.pin);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	uint8_t fpTemplate[BS2_FINGER_TEMPLATE_SIZE] = { 0, };
+	cout << "Now scan your fingerprint." << endl;
+	sdkResult = uc.scanTemplate(id, fpTemplate);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	memcpy(card.credentials.templateData, fpTemplate, BS2_FINGER_TEMPLATE_SIZE);
+	card.header.duressMask = false;
+
+	char flag = Utility::getInput<char>("Do you want register access group ID? [y/n]");
+	if ('y' == flag || 'Y' == flag)
+	{
+		stringstream msg;
+		msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
+		string inStrAGID = Utility::getLine(msg.str());
+		if (0 == inStrAGID.size())
+			return BS_SDK_ERROR_CANNOT_FIND_ACCESS_GROUP;
+
+		vector<string> listID = Utility::tokenizeString(inStrAGID);
+		if (listID.size() < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER)
+		{
+			uint32_t index(0);
+			for (auto groupID : listID)
+			{
+				BS2_ACCESS_GROUP_ID gid = atoi(groupID.c_str());
+				card.accessOnData.accessGroupID[index++] = gid;
+			}
+		}
+	}
+
+	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
+	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
+	card.accessOnData.startTime = startTime;
+
+	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
+	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
+	card.accessOnData.endTime = endTime;
+
+	card.header.cardType = BS2_CARD_TYPE_ACCESS;
+	card.header.numOfTemplate = 1;
+	card.header.templateSize = BS2_FINGER_TEMPLATE_SIZE;
+	card.header.issueCount = 1;
+	card.header.cardAuthMode = BS2_AUTH_MODE_CARD_BIOMETRIC_OR_PIN;
+	card.header.useAlphanumericID = false;
+
+	if (BS_SDK_SUCCESS != uc.updateCardTypeCRC(card) ||
+		BS_SDK_SUCCESS != uc.updateCardCRC(card))
+		return sdkResult;
+
+	return uc.writeCard(id, &card);
+}
+
+int eraseCard(UserControl& uc, BS2_DEVICE_ID id)
+{
+	cout << "Now erase your card" << endl;
+	return uc.eraseCard(id);
 }

@@ -323,6 +323,11 @@ namespace Suprema
                     Console.WriteLine("  Enter the switch type of the door sensor on this door: [0: normally open, 1: normally closed].");
                     Console.Write("  >>>> ");
                     door.sensor.switchType = Util.GetInput(0);
+
+                    // [+ V2.7.0]
+                    Console.WriteLine("  When using Global APB, do you want to use the door sensor to check whether the user has entered or not? [y/n]");
+                    Console.Write("  >>>> ");
+                    door.sensor.apbUseDoorSensor = Util.IsYes() ? (byte)1 : (byte)0;
                 }
 
                 Console.WriteLine("  Does this door has a exit button? [Y/n]");
@@ -702,7 +707,7 @@ namespace Suprema
             Console.WriteLine("     |--entryDeviceID[{0}]", door.entryDeviceID);
             Console.WriteLine("     |--exitDeviceID[{0}]", door.exitDeviceID);
             Console.WriteLine("     |--relay[ioDeviceID[{0}] port[{1}]]", door.relay.deviceID, door.relay.port);
-            Console.WriteLine("     |--sensor[ioDeviceID[{0}] port[{1}] switchType[{2}]]", door.sensor.deviceID, door.sensor.port, (BS2SwitchTypeEnum)door.sensor.switchType);
+            Console.WriteLine("     |--sensor[ioDeviceID[{0}] port[{1}] switchType[{2}]], apbUseDoorSensor[{3}]", door.sensor.deviceID, door.sensor.port, (BS2SwitchTypeEnum)door.sensor.switchType, door.sensor.apbUseDoorSensor);
             Console.WriteLine("     |--exitButton[ioDeviceID[{0}] port[{1}] switchType[{2}]]", door.button.deviceID, door.button.port, (BS2SwitchTypeEnum)door.button.switchType);
             Console.WriteLine("     |--autoLockTimeout[{0}ms]", door.autoLockTimeout);
             Console.WriteLine("     |--heldOpenTimeout[{0}ms]", door.heldOpenTimeout);

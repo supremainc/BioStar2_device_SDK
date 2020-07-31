@@ -555,6 +555,119 @@ int UserControl::removeAllUser(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int UserControl::updateCardTypeCRC(BS2SmartCardData& card)
+{
+	uint16_t crc = 0xFFFF;
+	int sdkResult = BS2_ComputeCRC16CCITT((unsigned char*)&card.header.cardType, sizeof(BS2SmartCardData) - offsetof(BS2SmartCardHeader, cardType), &crc);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_ComputeCRC16CCITT call failed: %d", sdkResult);
+
+	card.header.cardCRC = crc;
+
+	return sdkResult;
+}
+
+int UserControl::updateCardCRC(BS2SmartCardData& card)
+{
+	uint16_t crc = 0xFFFF;
+	int sdkResult = BS2_ComputeCRC16CCITT((unsigned char*)&card.header.cardCRC, sizeof(BS2SmartCardHeader) - offsetof(BS2SmartCardHeader, cardCRC), &crc);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_ComputeCRC16CCITT call failed: %d", sdkResult);
+
+	card.header.hdrCRC = crc;
+
+	return sdkResult;
+}
+
+int UserControl::getPinCode(string plainText, uint8_t* cipherText)
+{
+	int sdkResult = BS2_MakePinCode(context_, const_cast<char*>(plainText.c_str()), cipherText);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_MakePinCode call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int UserControl::scanTemplate(BS2_DEVICE_ID id, uint8_t* fpTemplate)
+{
+	if (!fpTemplate)
+		return BS_SDK_ERROR_INVALID_PARAM;
+
+	BS2Fingerprint finger = { 0, };
+RESCAN:
+	int sdkResult = BS2_ScanFingerprint(context_, id, &finger, 0, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScan);
+	if (BS_SDK_ERROR_EXTRACTION_LOW_QUALITY == sdkResult)
+	{
+		TRACE("Low quality fingerprints were scanned.");
+		TRACE("Scan again.");
+		goto RESCAN;
+	}
+	else if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_ScanFingerprint call failed: %d", sdkResult);
+	else
+		memcpy(fpTemplate, finger.data[0], BS2_FINGER_TEMPLATE_SIZE);
+
+	return sdkResult;
+}
+
+int UserControl::scanCard(BS2_DEVICE_ID id, uint8_t* card)
+{
+	if (!card)
+		return BS_SDK_ERROR_INVALID_PARAM;
+
+	BS2Card tempCard = { 0, };
+	int sdkResult = BS2_ScanCard(context_, id, &tempCard, onReadyToScan);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_ScanCard call failed: %d", sdkResult);
+	else
+	{
+		if (tempCard.isSmartCard)
+			memcpy(card, tempCard.smartCard.cardID, BS2_CARD_DATA_SIZE);
+		else
+			memcpy(card, tempCard.card.data, BS2_CARD_DATA_SIZE);
+	}
+
+	return sdkResult;
+}
+
+int UserControl::scanCard(BS2_DEVICE_ID id, BS2Card* card)
+{
+	int sdkResult = BS2_ScanCard(context_, id, card, onReadyToScan);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_ScanCard call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int UserControl::writeCard(BS2_DEVICE_ID id, const BS2SmartCardData* card)
+{
+	int sdkResult = BS2_WriteCard(context_, id, const_cast<BS2SmartCardData*>(card));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_WriteCard call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int UserControl::eraseCard(BS2_DEVICE_ID id)
+{
+	int sdkResult = BS2_EraseCard(context_, id);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_EraseCard call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+void UserControl::dumpHexa(const uint8_t* data, uint32_t size)
+{
+	if (NULL == data || size == 0)
+		return;
+
+	TRACE("---2---4---6---8--10--12--14--16--18--20--22--24--26--28--30--32--34--36--38--40");
+	for (uint32_t index = 0; index < size; index++)
+		printf("%02x", data[index]);
+	cout << endl;
+}
+
 void UserControl::print(const BS2UserBlob& userBlob)
 {
 	TRACE("==[BS2UserBlob]==");
@@ -664,4 +777,64 @@ void UserControl::print(const BS2Face* face, uint8_t numFace)
 		//	//}
 		//}
 	}
+}
+
+void UserControl::print(const BS2Card& card)
+{
+	TRACE("==[BS2Card]==");
+	TRACE("isSmartCard:%s", card.isSmartCard ? "Smart" : "CSN");
+	if (card.isSmartCard)
+		printCardSmart(card.smartCard);
+	else
+		printCardCSN(card.card);
+}
+
+void UserControl::printCardSmartHeader(const BS2SmartCardHeader& header)
+{
+	TRACE("==[BS2SmartCardHeader]==");
+	TRACE("hdrCRC:%u", header.hdrCRC);
+	TRACE("cardCRC:%u", header.cardCRC);
+	TRACE("cardType:%u", header.cardType);
+	TRACE("numOfTemplate:%u", header.numOfTemplate);
+	TRACE("templateSize:%u", header.templateSize);
+	TRACE("issueCount:%u", header.issueCount);
+	TRACE("duressMask:%u", header.duressMask);
+	TRACE("cardAuthMode:0x%x", header.cardAuthMode);
+	TRACE("useAlphanumericID:%u", header.useAlphanumericID);
+}
+
+void UserControl::printCardSmartCredential(const BS2SmartCardCredentials& cred)
+{
+	TRACE("==[BS2SmartCardCredentials]==");
+}
+
+void UserControl::printCardAOC(const BS2AccessOnCardData& aoc)
+{
+	TRACE("==[BS2AccessOnCardData]==");
+	for (int i = 0; i < BS2_SMART_CARD_MAX_ACCESS_GROUP_COUNT; i++)
+	{
+		if (0 == aoc.accessGroupID[i])
+			break;
+		cout << aoc.accessGroupID[i] << ",";
+	}
+	cout << endl;
+	TRACE("startTime:%u", aoc.startTime);
+	TRACE("endTime:%u", aoc.endTime);
+}
+
+void UserControl::printCardSmart(const BS2SmartCardData& card)
+{
+	TRACE("==[BS2SmartCardData]==");
+	printCardSmartHeader(card.header);
+	dumpHexa(card.cardID, BS2_CARD_DATA_SIZE);
+	printCardSmartCredential(card.credentials);
+	printCardAOC(card.accessOnData);
+}
+
+void UserControl::printCardCSN(const BS2CSNCard& card)
+{
+	TRACE("==[BS2CSNCard]==");
+	TRACE("type:%u", card.type);
+	TRACE("size:%u", card.size);
+	dumpHexa(card.data, BS2_CARD_DATA_SIZE);
 }
