@@ -33,6 +33,56 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 
+### V2.7.0.0 released 07/21/2020:
+
+**New Features**
+
+**1.** Device XPass D2 Revision, XPass D2 Keypad Revision are supported.
+
+**2.** Lift lock/unlock zone which works based on schedules regardless of access group is supported.
+  * Structure BS2LiftFloors has been added
+  * Structure BS2LiftLockUnlockZone has been added
+  * API BS2_GetLiftLockUnlockZone has been added
+  * API BS2_GetAllLiftLockUnlockZone has been added
+  * API BS2_GetLiftLockUnlockZoneStatus has been added
+  * API BS2_GetAllLiftLockUnlockZoneStatus has been added
+  * API BS2_SetLiftLockUnlockZone has been added
+  * API BS2_SetLiftLockUnlockZoneAlarm has been added
+  * API BS2_RemoveLiftLockUnlockZone has been added
+  * API BS2_RemoveAllLiftLockUnlockZone has been added
+
+**3.** User phrase feature that you can request the user phrase(private message) to the server is supported.
+  * Structure BS2DisplayConfig has been added
+  * API BS2_SetUserPhraseHandler has been added
+  * API BS2_ResponseUserPhrase has been added
+
+**4.** Global APB By Door Open is supported.
+Global APB By Door Open has two steps; i) User authentication ii) Actual access based on the door sensor 
+You can figure out the user who actually doesn't go in even after successful authentication and the door unlock using this feature.
+  * Structure BS2DoorSensor has been added
+  * API BS2_SetGlobalAPBViolationByDoorOpenHandler has been added
+  * API BS2_CheckGlobalAPBViolationByDoorOpen has been added
+
+**Modified Features**
+
+**1.** Fixed the issue that the device returns BS_SDK_ERROR_CANNOT_FIND_DEVICE after successful connection due to corrupted communication key exchange. (Only some latest FW)
+
+**2.** Fixed the issue that SDK can't process received packets from the device with IPv6 connection mode.
+  * Structure BS2UserBlobEx has been added
+  * API BS2_VerifyUserEx has been added
+  * API BS2_IdentifyUserEx has been added
+  * API BS2_EnrolUserEx has been added
+  * API BS2_VerifyUserSmallEx has been added
+  * API BS2_IdentifyUserSmallEx has been added
+  * API BS2_EnrollUserSmallEx has been added
+
+**3.** Fixed the issue with the error BS2_SDK_ERROR_INVALID_PACKET when received log from the device due to the image log larger than 16KB.
+  * API BS2_GetLogBlob has been added
+  * API BS2_GetLogSmallBlob has been added
+  * API BS2_GetLogBlobFromDir has been added
+  * API BS2_GetLogSmallBlobFromDir has been added
+  * API BS2_GetImageLog has been added
+
 ### V2.6.4.1 released 02/25/2020:
 
 **New Features**
