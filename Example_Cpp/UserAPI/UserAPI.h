@@ -31,8 +31,11 @@ enum EN_MENU_DEV
 {
 	MENU_USR_BREAK = MENU_BREAK,
 	MENU_USR_GET_USR,
+	MENU_USR_GET_USR_FACEEX,
 	MENU_USR_GET_ALLUSR,
+	MENU_USR_GET_ALLUSR_FACEEX,
 	MENU_USR_ENR_USR,
+	MENU_USR_ENR_USR_FACEEX,
 	MENU_USR_GET_LASTFPIMAGE,
 	MENU_USR_REM_USR,
 	MENU_USR_REM_ALLUSR,
@@ -45,8 +48,11 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 {
 	{MENU_USR_BREAK,				"Exit"},
 	{MENU_USR_GET_USR,				"Get user from device" },
+	{MENU_USR_GET_USR_FACEEX,		"Get FaceEx user from device" },
 	{MENU_USR_GET_ALLUSR,			"Get all users from device" },
+	{MENU_USR_GET_ALLUSR_FACEEX,	"Get all users from FaceEx device" },
 	{MENU_USR_ENR_USR,				"Enroll user to device" },
+	{MENU_USR_ENR_USR_FACEEX,		"Enroll user to FaceEx device"},
 	{MENU_USR_GET_LASTFPIMAGE,		"Get last fingerprint image from device"},
 	{MENU_USR_REM_USR,				"Remove a user " },
 	{MENU_USR_REM_ALLUSR,			"Remove all users" },

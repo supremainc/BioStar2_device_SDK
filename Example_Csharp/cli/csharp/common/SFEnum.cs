@@ -386,6 +386,23 @@ namespace Suprema
     }
 
     [Flags]
+    public enum BS2FaceEnrollThreshold
+    {
+        THRESHOLD_0 = 0,
+        THRESHOLD_1 = 1,
+        THRESHOLD_2 = 2,
+        THRESHOLD_3 = 3,
+        THRESHOLD_4 = 4,
+        THRESHOLD_5 = 5,
+        THRESHOLD_6 = 6,
+        THRESHOLD_7 = 7,
+        THRESHOLD_8 = 8,
+        THRESHOLD_9 = 9,
+
+    	THRESHOLD_DEFAULT = THRESHOLD_4,
+    }
+
+    [Flags]
     public enum BS2FingerAuthModeEnum
     {
         NONE = 255,	///< Authentication mode is not defined
@@ -393,6 +410,7 @@ namespace Suprema
 
         BIOMETRIC_ONLY = 0,
         BIOMETRIC_PIN = 1,
+        NUM_OF_BIOMETRIC_AUTH_MODE = 2,
     }
 
     [Flags]
@@ -401,8 +419,9 @@ namespace Suprema
         NONE = 255,	///< Authentication mode is not defined
         PROHIBITED = 254,	///< Authentication mode is prohibited
 
-        BIOMETRIC_ONLY = 0,
-        BIOMETRIC_PIN = 1,
+        BIOMETRIC_ONLY = BS2FingerAuthModeEnum.BIOMETRIC_ONLY,
+        BIOMETRIC_PIN = BS2FingerAuthModeEnum.BIOMETRIC_PIN,
+        NUM_OF_BIOMETRIC_AUTH_MODE = BS2FingerAuthModeEnum.NUM_OF_BIOMETRIC_AUTH_MODE,
     }
 
     [Flags]
@@ -411,11 +430,12 @@ namespace Suprema
         NONE = 255,	///< Authentication mode is not defined
         PROHIBITED = 254,	///< Authentication mode is prohibited
 
-        CARD_ONLY = 2,
+        CARD_ONLY = BS2FaceAuthModeEnum.NUM_OF_BIOMETRIC_AUTH_MODE,     // 2
         CARD_BIOMETRIC = 3,
         CARD_PIN = 4,
         CARD_BIOMETRIC_OR_PIN = 5,
         CARD_BIOMETRIC_PIN = 6,
+        NUM_OF_CARD_AUTH_MODE = 7,
     }
 
     [Flags]
@@ -424,10 +444,87 @@ namespace Suprema
         NONE = 255,	///< Authentication mode is not defined
         PROHIBITED = 254,	///< Authentication mode is prohibited
 
-        ID_BIOMETRIC = 7,
+        ID_BIOMETRIC = BS2CardAuthModeEnum.NUM_OF_CARD_AUTH_MODE,       // 7
         ID_PIN = 8,
         ID_BIOMETRIC_OR_PIN = 9,
         ID_BIOMETRIC_PIN = 10,
+        NUM_OF_ID_AUTH_MODE = 11,
+    }
+
+    // F2 support
+    [Flags]
+    public enum BS2ExtFaceAuthModeEnum
+    {
+        NONE = 255,	///< Authentication mode is not defined
+        PROHIBITED = 254,	///< Authentication mode is prohibited
+
+        EXT_FACE_ONLY = BS2IDAuthModeEnum.NUM_OF_ID_AUTH_MODE,    // 11
+	    EXT_FACE_FINGERPRINT = 12,
+	    EXT_FACE_PIN = 13,
+	    EXT_FACE_FINGERPRINT_OR_PIN = 14,
+	    EXT_FACE_FINGERPRINT_PIN = 15,
+        NUM_OF_EXT_FACE_AUTH_MODE = 16,
+    }
+
+    [Flags]
+    public enum BS2ExtFingerprintAuthModeEnum
+    {
+        NONE = 255,	///< Authentication mode is not defined
+        PROHIBITED = 254,	///< Authentication mode is prohibited
+
+        EXT_FINGERPRINT_ONLY = BS2ExtFaceAuthModeEnum.NUM_OF_EXT_FACE_AUTH_MODE,        // 16
+	    EXT_FINGERPRINT_FACE = 17,
+	    EXT_FINGERPRINT_PIN = 18,
+	    EXT_FINGERPRINT_FACE_OR_PIN = 19,
+	    EXT_FINGERPRINT_FACE_PIN = 20,
+        NUM_OF_EXT_FINGERPRINT_AUTH_MODE = 21,
+    }
+
+    [Flags]
+    public enum BS2ExtCardAuthModeEnum
+    {
+        NONE = 255,	///< Authentication mode is not defined
+        PROHIBITED = 254,	///< Authentication mode is prohibited
+
+        EXT_CARD_ONLY = BS2ExtFingerprintAuthModeEnum.NUM_OF_EXT_FINGERPRINT_AUTH_MODE,     // 21
+	    EXT_CARD_FACE = 22,
+	    EXT_CARD_FINGERPRINT = 23,
+	    EXT_CARD_PIN = 24,
+	    EXT_CARD_FACE_OR_FINGERPRINT = 25,
+	    EXT_CARD_FACE_OR_PIN = 26,
+	    EXT_CARD_FINGERPRINT_OR_PIN = 27,
+	    EXT_CARD_FACE_OR_FINGERPRINT_OR_PIN = 28,
+	    EXT_CARD_FACE_FINGERPRINT = 29,
+	    EXT_CARD_FACE_PIN = 30,
+	    EXT_CARD_FINGERPRINT_FACE = 31,
+	    EXT_CARD_FINGERPRINT_PIN = 32,
+	    EXT_CARD_FACE_OR_FINGERPRINT_PIN = 33,
+	    EXT_CARD_FACE_FINGERPRINT_OR_PIN = 34,
+	    EXT_CARD_FINGERPRINT_FACE_OR_PIN = 35,
+        NUM_OF_EXT_CARD_AUTH_MODE = 36,
+    }
+
+    [Flags]
+    public enum BS2ExtIDAuthModeEnum
+    {
+        NONE = 255,	///< Authentication mode is not defined
+        PROHIBITED = 254,	///< Authentication mode is prohibited
+
+        EXT_ID_FACE = BS2ExtCardAuthModeEnum.NUM_OF_EXT_CARD_AUTH_MODE,     // 36
+        EXT_ID_FINGERPRINT = 37,
+        EXT_ID_PIN = 38,
+        EXT_ID_FACE_OR_FINGERPRINT = 39,
+        EXT_ID_FACE_OR_PIN = 40,
+        EXT_ID_FINGERPRINT_OR_PIN = 41,
+        EXT_ID_FACE_OR_FINGERPRINT_OR_PIN = 42,
+        EXT_ID_FACE_FINGERPRINT = 43,
+        EXT_ID_FACE_PIN = 44,
+        EXT_ID_FINGERPRINT_FACE = 45,
+        EXT_ID_FINGERPRINT_PIN = 46,
+        EXT_ID_FACE_OR_FINGERPRINT_PIN = 47,
+        EXT_ID_FACE_FINGERPRINT_OR_PIN = 48,
+        EXT_ID_FINGERPRINT_FACE_OR_PIN = 49,
+        NUM_OF_EXT_ID_AUTH_MODE = 50,
     }
 
     [Flags]
@@ -443,7 +540,7 @@ namespace Suprema
         QUALITY_LOW = 20,
         QUALITY_STANDARD = 40,
         QUALITY_HIGH = 60,
-        UALITY_HIGHEST = 80,
+        QUALITY_HIGHEST = 80,
     }
 
     [Flags]
@@ -525,8 +622,10 @@ namespace Suprema
         XPASS2_KEYPAD   = 0x1A,
         XPASS_D2_REV    = 0x1B,     // [+2.7]
         XPASS_D2_KEYPAD_REV = 0x1C, // [+2.7]
+        FACESTATION_F2_FP = 0x1D,   // FSF2 support
+        FACESTATION_F2 = 0x1E,      // FSF2 support
 
-        TYPE_MAX        = XPASS_D2_KEYPAD_REV,
+        TYPE_MAX        = FACESTATION_F2,
         //UNKNOWN         = 0xFF,
     }
 
@@ -936,6 +1035,9 @@ namespace Suprema
         FACE = 0x0080,                   // BS2FaceTemplate
         ACCESS_GROUP = 0x0100,           // BS2_ACCESS_GROUP_ID
         JOB = 0x0200,                    // BS2Job
+        PHRASE = 0x0400,                 // BS2_USER_PHRASE
+        FACE_EX = 0x0800,                // BS2FaceExWarped, BS2FaceExUnwarped
+        SETTING_EX = 0x1000,             // BS2UserSettingEx
         ALL = 0xFFFF,                    // 4 bytes
     }
 
@@ -1384,5 +1486,19 @@ namespace Suprema
         CARD_OPERATION_MASK_MIFARE_FELICA = 0x00000004,
         CARD_OPERATION_MASK_HIDPROX = 0x00000002,
         CARD_OPERATION_MASK_EM = 0x00000001,
+    }
+
+    [Flags]
+    public enum BS2SupportedInfoMask : uint
+    {
+        BS2_SUPPORT_RS485EX = 0x00000001,
+        BS2_SUPPORT_CARDEX = 0x00000002,
+        BS2_SUPPORT_DST = 0x00000004,
+        BS2_SUPPORT_DESFIREEX = 0x00000008,
+        BS2_SUPPORT_FACE_EX = 0x00000010,       // F2 support
+
+        BS2_SUPPORT_FINGER_SCAN = 0x00010000,
+        BS2_SUPPORT_FACE_SCAN = 0x00020000,
+        BS2_SUPPORT_FACE_EX_SCAN = 0x00040000,
     }
 }

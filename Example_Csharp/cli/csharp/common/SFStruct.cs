@@ -122,6 +122,18 @@ namespace Suprema
 
         public const int BS2_ENC_KEY_SIZE = 32;
 
+        // F2 support
+        public const int BS2_MAX_NUM_OF_EXT_AUTH_MODE = 128;
+
+        public const int BS2_FACE_EX_TEMPLATE_SIZE = 552;
+	    public const int BS2_VISUAL_TEMPLATES_PER_FACE_EX = 10;
+	    public const int BS2_IR_TEMPLATES_PER_FACE_EX = 10;
+	    public const int BS2_MAX_TEMPLATES_PER_FACE_EX = BS2_VISUAL_TEMPLATES_PER_FACE_EX + BS2_IR_TEMPLATES_PER_FACE_EX;
+
+        public const int BS2_MAX_WARPED_IMAGE_LENGTH = 40 * 1024;
+        public const int BS2_MAX_WARPED_IR_IMAGE_LENGTH = 30 * 1024;
+        // F2 support
+
         public const int BS2_MOBILE_ACCESS_KEY_SIZE = 124;
 
         #region DEVICE_ZONE_SUPPORTED
@@ -251,6 +263,73 @@ namespace Suprema
         public byte reserved2;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_OPERATORS)]
         public BS2AuthOperatorLevel[] operators;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2AuthConfigExt
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_NUM_OF_EXT_AUTH_MODE)]
+        public UInt32[] extAuthSchedule;
+        public byte useGlobalAPB;
+        public byte globalAPBFailAction;
+	    public byte useGroupMatching;
+        public byte reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved2;
+        public byte usePrivateAuth;
+        public byte faceDetectionLevel;
+        public byte useServerMatching;
+        public byte useFullAccess;
+        public byte matchTimeout;
+        public byte authTimeout;
+        public byte numOperators;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+        public byte[] reserved3;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_OPERATORS)]
+        public BS2AuthOperatorLevel[] operators;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        public byte[] reserved4;
+	}
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2FaceConfigExt
+    {
+        public byte thermalCheckMode;
+        public byte maskCheckMode;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved;
+
+        public byte thermalFormat;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved2;
+
+        public UInt16 thermalThreshold;
+        public byte maskDetectionLevel;
+        public byte auditTemperature;
+
+        public byte useRejectSound;
+        public byte useOverlapThermal;
+        public byte reserved4;
+        public byte faceCheckOrder;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2ThermalCameraROI
+    {
+        public UInt16 x;
+        public UInt16 y;
+        public UInt16 width;
+        public UInt16 height;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2ThermalCameraConfig
+    {
+        public byte distance;
+        public byte emissionRate;
+        public BS2ThermalCameraROI roi;
+        public byte useBodyCompensation;
+        public sbyte compensationTemperature;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -997,6 +1076,20 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2FaceWidth
+    {
+        public UInt16 min;
+        public UInt16 max;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2SearchRange
+    {
+        public UInt16 x;
+        public UInt16 width;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2FaceConfig
     {
         public byte securityLevel;
@@ -1009,9 +1102,11 @@ namespace Suprema
         public byte previewOption;			    // [+ 2.6.4]
 
         public byte checkDuplicate;             // [+ 2.6.4]
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        public byte[] reserved;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 26)]
+        public byte operationMode;              // [+ 2.7.1]        FSF2 support
+        public byte maxRotation;                // [+ 2.7.1]        FSF2 support
+        public BS2FaceWidth faceWidth;          // [+ 2.7.1]        FSF2 support
+        public BS2SearchRange searchRange;      // [+ 2.7.1]        FSF2 support
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
         public byte[] reserved2;
     }
 
@@ -1425,6 +1520,14 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2SimpleDeviceInfoEx
+    {
+        public UInt32 supported;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2User
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
@@ -1436,7 +1539,11 @@ namespace Suprema
         public byte numFingers;
         public byte numFaces;
         public byte reserved;
+#if OLD_CODE
         public UInt32 fingerChecksum;
+#else
+        public UInt32 authGroupID;
+#endif
         public UInt32 faceChecksum;
     }
 
@@ -1586,6 +1693,23 @@ namespace Suprema
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_EVENT_MAX_IMAGE_SIZE)]
         public byte[] image;
         public byte reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2EventSmallBlobEx
+    {
+        public UInt16 eventMask;
+        public UInt32 id;
+        public BS2EventExtInfo info;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] objectID; //BS2EventExtUnion
+
+        public byte tnaKey;
+        public UInt32 jobCode;
+        public UInt16 imageSize;
+        public IntPtr imageObj;
+        public byte reserved;
+	    public UInt32 temperature;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -2374,4 +2498,80 @@ namespace Suprema
         public UInt32[] accessGroupId;
     }
     //<=
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2UserSettingEx
+    {
+        public byte faceAuthMode;
+        public byte fingerprintAuthMode;
+        public byte cardAuthMode;
+        public byte idAuthMode;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 28)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2TemplateEx
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_FACE_EX_TEMPLATE_SIZE)]
+        public byte[] data;
+        public byte isIR;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2FaceExWarped
+    {
+        public byte faceIndex;
+        public byte numOfTemplate;
+        public byte flag;
+        public byte reserved;
+        public UInt32 imageLen;
+        public UInt16 irImageLen;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public byte[] unused;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_WARPED_IMAGE_LENGTH)]
+        public byte[] imageData;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_WARPED_IR_IMAGE_LENGTH)]
+        public byte[] irImageData;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_TEMPLATES_PER_FACE_EX)]
+        public BS2TemplateEx[] templateEx;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2FaceExUnwarped
+    {
+        public byte faceIndex;
+        public byte numOfTemplate;
+        public byte flag;
+        public byte reserved;
+        public UInt32 imageLen;
+        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 82808)]
+        //public byte[] image;
+        //public IntPtr image;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2UserFaceExBlob
+    {
+        public BS2User user;
+        public BS2UserSetting setting;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_NAME_LEN)]
+        public byte[] name;
+        public IntPtr user_photo_obj;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_PIN_HASH_SIZE)]
+        public byte[] pin;
+        public IntPtr cardObjs;
+        public IntPtr fingerObjs;
+        public IntPtr faceObjs;
+        public BS2Job job;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_PHRASE_SIZE)]
+        public byte[] phrase;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_ACCESS_GROUP_PER_USER)]
+        public UInt32[] accessGroupId;
+
+        public BS2UserSettingEx settingEx;
+        public IntPtr faceExObjs;
+    }
 }

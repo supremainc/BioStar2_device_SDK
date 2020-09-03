@@ -32,27 +32,32 @@ enum {
 };
 
 typedef struct {
-	uint16_t hdrCRC;
-	uint16_t cardCRC;
-	BS2_CARD_TYPE cardType;                           // Can operate in BS2_CARD_TYPE_SECURE or BS2_CARD_TYPE_ACCESS.
-	uint8_t numOfTemplate;
-	uint16_t templateSize;                            // The valid range is BS2_SMART_CARD_MIN_TEMPLATE_SIZE to BS2_FINGER_TEMPLATE_SIZE.	
-	uint16_t issueCount;
-	uint8_t duressMask;
-	uint8_t cardAuthMode;
-	uint8_t useAlphanumericID;
-	uint8_t reserved[3];
+	uint16_t hdrCRC;				///< 2 bytes
+	uint16_t cardCRC;				///< 2 bytes
+
+	BS2_CARD_TYPE cardType;			///< 1 byte, Can operate in BS2_CARD_TYPE_SECURE or BS2_CARD_TYPE_ACCESS.
+	uint8_t numOfTemplate;			///< 1 byte
+	uint16_t templateSize;			///< 2 bytes, BS2_SMART_CARD_MIN_TEMPLATE_SIZE ~ BS2_FINGER_TEMPLATE_SIZE, or BS2_FACE_TEMPLATE_SIZE
+
+	uint16_t issueCount;			///< 2 bytes
+	uint8_t duressMask;				///< 1 byte
+	uint8_t cardAuthMode;			///< 1 byte
+
+	uint8_t useAlphanumericID;		///< 1 byte
+	uint8_t cardAuthModeEx;			///< 1 byte : for FaceStation F2 only
+	uint8_t numOfFaceTemplate;		///< 1 byte : for FaceStation F2 only
+	uint8_t reserved[1];			///< 1 byte (packing)
 } BS2SmartCardHeader;
 
 typedef struct {
-	uint8_t pin[BS2_PIN_HASH_SIZE];
-	uint8_t templateData[BS2_SMART_CARD_MAX_TEMPLATE_COUNT * BS2_FINGER_TEMPLATE_SIZE];
+	uint8_t pin[BS2_PIN_HASH_SIZE];		///< 32 bytes
+	uint8_t templateData[BS2_SMART_CARD_MAX_TEMPLATE_COUNT * BS2_FINGER_TEMPLATE_SIZE];		///< 4 * 384 bytes
 } BS2SmartCardCredentials;
 
 typedef struct {
-	uint16_t accessGroupID[BS2_SMART_CARD_MAX_ACCESS_GROUP_COUNT];
-	BS2_DATETIME startTime;
-	BS2_DATETIME endTime;
+	uint16_t accessGroupID[BS2_SMART_CARD_MAX_ACCESS_GROUP_COUNT];		///< 2 * 16 bytes
+	BS2_DATETIME startTime;		///< 4 bytes
+	BS2_DATETIME endTime;			///< 4 bytes
 } BS2AccessOnCardData;
 
 typedef struct {

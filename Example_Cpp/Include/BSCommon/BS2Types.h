@@ -56,7 +56,7 @@ typedef __int64 int64_t;
 
 enum {
 	BS2_IPV4_ADDR_SIZE		= 16,
-	BS2_IPV6_ADDR_SIZE 		= 40, //Custom => [IPv6] <=
+	BS2_IPV6_ADDR_SIZE 		= 40,
 	BS2_URL_SIZE		= 256,
 	BS2_USER_ID_SIZE		= 32,			///< Alpha-numeric
 
@@ -84,9 +84,10 @@ typedef uint32_t	BS2_TICK;
 typedef uint32_t	BS2_TIMESTAMP;
 typedef uint32_t	BS2_DATETIME;
 typedef uint32_t	BS2_VERSION;
+typedef uint32_t	BS2_TEMPERATURE;
 typedef char		BS2_USER_ID[BS2_USER_ID_SIZE];
 typedef char		BS2_IPV4_ADDR[BS2_IPV4_ADDR_SIZE];
-typedef char		BS2_IPV6_ADDR[BS2_IPV6_ADDR_SIZE]; //Custom => [IPv6] <=
+typedef char		BS2_IPV6_ADDR[BS2_IPV6_ADDR_SIZE];
 typedef char		BS2_URL[BS2_URL_SIZE];
 typedef uint16_t	BS2_PORT;
 typedef uint32_t	BS2_CHECKSUM;
@@ -151,8 +152,10 @@ enum {
 	BS2_DEVICE_TYPE_XPASS2_KEYPAD		= 0x1A,
 	BS2_DEVICE_TYPE_XPASS_D2_REV		= 0x1B,
 	BS2_DEVICE_TYPE_XPASS_D2_KEYPAD_REV	= 0x1C,
+	BS2_DEVICE_TYPE_FACESTATION_F2_FP	= 0x1D,
+	BS2_DEVICE_TYPE_FACESTATION_F2		= 0x1E,
 
-	BS2_DEVICE_TYPE_MAX = BS2_DEVICE_TYPE_XPASS_D2_KEYPAD_REV,
+	BS2_DEVICE_TYPE_MAX = BS2_DEVICE_TYPE_FACESTATION_F2,
 };
 
 // Deprecated in V2.6.0. Instead, use the BS2_DEVICE_TYPE_CORESTATION_40

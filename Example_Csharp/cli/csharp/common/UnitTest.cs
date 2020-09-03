@@ -243,7 +243,7 @@ namespace Suprema
         }
 
         public void run()
-        {            
+        {
             UInt32 deviceID = 0;
             IntPtr versionPtr = API.BS2_Version();
             //bool bSsl = false;
@@ -533,7 +533,7 @@ namespace Suprema
                         return false;
                     }
 
-                    Console.WriteLine("[{0, 3:##0}] ==> ID[{1, 10}] Type[{2, 16}] Connection mode[{3}] Ip[{4, 16}] port[{5, 5}] Master/Slave[{6}]",
+                    Console.WriteLine("[{0, 3:##0}] ==> ID[{1, 10}] Type[{2, 20}] Connection mode[{3}] Ip[{4, 16}] port[{5, 5}] Master/Slave[{6}]",
                             idx,
                             deviceID,                            
                             API.productNameDictionary.ContainsKey((BS2DeviceTypeEnum)deviceInfo.type) ?  API.productNameDictionary[(BS2DeviceTypeEnum)deviceInfo.type] : (API.productNameDictionary[BS2DeviceTypeEnum.UNKNOWN] + "(" + deviceInfo.type + ")"),

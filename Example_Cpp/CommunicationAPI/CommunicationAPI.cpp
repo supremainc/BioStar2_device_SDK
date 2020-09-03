@@ -23,6 +23,15 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	cout << buf.str() << endl;
 }
 
+// Thermal supported callback
+void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE temperature)
+{
+	int32_t timezone = deviceList.getTimezone(id);
+	stringstream buf;
+	buf << "Device(" << std::to_string(id) << ") " << Utility::getEventStringWithThermal(*event, timezone, temperature);
+	cout << buf.str() << endl;
+}
+
 
 void onDeviceAccepted(BS2_DEVICE_ID id)
 {
@@ -42,9 +51,10 @@ void onDeviceConnected(BS2_DEVICE_ID id)
 	if (!getDeviceLogs(id, timezone))
 		return;
 
-	int sdkResult = BS2_StartMonitoringLog(sdkContext, id, onLogReceived);
+	//int sdkResult = BS2_StartMonitoringLog(sdkContext, id, onLogReceived);
+	int sdkResult = BS2_StartMonitoringLogEx(sdkContext, id, onLogReceivedEx);
 	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_StartMonitoringLog call failed: %d", sdkResult);
+		TRACE("BS2_StartMonitoringLogEx call failed: %d", sdkResult);
 
 	if (!deviceList.findDevice(id))
 	{
@@ -491,6 +501,9 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = lc.getLogSmallBlob(id);
 			break;
+		case MENU_ELOG_GET_EVENTSMALLBLOBEX:
+			id = selectDeviceID(deviceList, true, false);
+			sdkResult = lc.getLogSmallBlobEx(id);
 		case MENU_USER_ENROLL_FACE:
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = uc.enrollUser(id);

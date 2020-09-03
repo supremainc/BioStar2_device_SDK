@@ -52,8 +52,8 @@ const char* DEVICE_NAME[] =
 
 	"Unknown1B",	// 0x1B
 	"Unknown1C",	// 0x1C
-	"Unknown1D",	// 0x1D
-	"Unknown1E",	// 0x1E
+	"FSF2-FP",		// BS2_DEVICE_TYPE_FACESTATION_F2_FP	= 0x1D,
+	"FSF2",			// BS2_DEVICE_TYPE_FACESTATION_F2		= 0x1E,
 	"Unknown1F",	// 0x1F
 };
 

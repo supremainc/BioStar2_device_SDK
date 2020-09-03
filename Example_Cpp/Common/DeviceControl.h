@@ -32,6 +32,7 @@ public:
 	int removeAuthOperatorLevelEx(BS2_DEVICE_ID id);
 	int getAllAuthOperatorLevelEx(BS2_DEVICE_ID id);
 	int removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id);
+	int extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx);
 
 
 private:
@@ -39,6 +40,7 @@ private:
 	void print(const BS2SimpleDeviceInfoEx& info);
 	void print(const BS2IPv6DeviceInfo& info);
 	void print(const BS2AuthOperatorLevel& opr);
+	void print(const BS2TemplateEx& templateEx);
 	static void onUpgrade(BS2_DEVICE_ID id, uint32_t percent);
 
 

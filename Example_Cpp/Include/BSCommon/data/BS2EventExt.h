@@ -26,6 +26,7 @@ enum {
 	BS2_EVENT_MASK_TNA_KEY                        = (0x1 << 6), // Returns payload data : BS2_TNA_KEY (1 byte)
 	BS2_EVENT_MASK_JOB_CODE                       = (0x1 << 7), // Returns payload data : BS2_JOB_CODE (4 bytes)
 	BS2_EVENT_MASK_IMAGE                          = (0x1 << 8), // Returns payload data : uint8_t[BS2_EVENT_MAX_IMAGE_SIZE]  (16384 bytes, jpg 16/24 bits image)
+	BS2_EVENT_MASK_TEMPERATURE                    = (0x1 << 9), // Returns payload data : BS2_TEMPERATURE (4 bytes)
 
 	BS2_EVENT_MASK_ALL                            = 0xFFFF,
 };

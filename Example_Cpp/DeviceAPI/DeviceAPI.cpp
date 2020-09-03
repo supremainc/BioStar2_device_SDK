@@ -4,6 +4,7 @@
 #include "../Common/Utility.h"
 #include "../Common/CommControl.h"
 
+#pragma warning(disable:4800)
 
 extern void TRACE(const char* fmt, ...);
 using namespace std;
@@ -20,6 +21,18 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 		int32_t timezone = deviceInfo.timezone_;
 		stringstream buf;
 		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(*event, timezone);
+		cout << buf.str() << endl;
+	}
+}
+
+// Thermal supported callback
+void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE temperature)
+{
+	if (deviceInfo.id_ == id)
+	{
+		int32_t timezone = deviceInfo.timezone_;
+		stringstream buf;
+		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventStringWithThermal(*event, timezone, temperature);
 		cout << buf.str() << endl;
 	}
 }
@@ -71,6 +84,7 @@ void connectTestDevice(void* context)
 
 	// Retrieve bulk logs.
 	CommControl cm(context);
+#if RETRIVE_BULK_LOGS
 	sdkResult = getAllLogsFromDevice(sdkContext, deviceInfo.id_, deviceInfo.timezone_);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
@@ -78,11 +92,13 @@ void connectTestDevice(void* context)
 		cm.disconnectDevice(deviceInfo.id_);
 		return;
 	}
+#endif
 
 	// Set callback for realtime logs
-	sdkResult = BS2_StartMonitoringLog(sdkContext, deviceInfo.id_, onLogReceived);
+	//sdkResult = BS2_StartMonitoringLog(sdkContext, deviceInfo.id_, onLogReceived);
+	sdkResult = BS2_StartMonitoringLogEx(sdkContext, deviceInfo.id_, onLogReceivedEx);
 	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_StartMonitoringLog call failed: %d", sdkResult);
+		TRACE("BS2_StartMonitoringLogEx call failed: %d", sdkResult);
 
 	connectSlave(context, deviceInfo);
 	connectWiegand(context, deviceInfo);
@@ -389,7 +405,27 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_DESFIRECONFIGEX:
 			sdkResult = setDesFireCardConfigEx(context, id);
 			break;
-
+		case MENU_DEV_GET_AUTHCONFIGEX:
+			sdkResult = getAuthConfigEx(context, id);
+			break;
+		case MENU_DEV_SET_AUTHCONFIGEX:
+			sdkResult = setAuthConfigEx(context, id);
+			break;
+		case MENU_DEV_GET_FACECONFIGEX:
+			sdkResult = getFaceConfigEx(context, id);
+			break;
+		case MENU_DEV_SET_FACECONFIGEX:
+			sdkResult = setFaceConfigEx(context, id);
+			break;
+		case MENU_DEV_GET_THERMALCAMERACONFIG:
+			sdkResult = getThermalCameraConfig(context, id);
+			break;
+		case MENU_DEV_SET_THERMALCAMERACONFIG:
+			sdkResult = setThermalCameraConfig(context, id);
+			break;
+		case MENU_DEV_EXTRACT_TEMPLATE_FACEEX:
+			sdkResult = extractTemplateFaceEx(context, id);
+			break;
 		default:
 			break;
 		}
@@ -670,4 +706,294 @@ int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
 	}
 
 	return sdkResult;
+}
+
+int getAuthConfigEx(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2AuthConfigExt config = { 0, };
+	return cc.getAuthConfigEx(id, config);
+}
+
+int setAuthConfigEx(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2AuthConfigExt config = { 0, };
+	const int EXIT_MENU = 999;
+	uint32_t mode(0);
+
+	int sdkResult = cc.getAuthConfigEx(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	do
+	{
+		stringstream msg;
+		msg << "Register FaceEx authentication mode" << endl;
+		msg << " 11. Face" << endl;
+		msg << " 12. Face + Fingerprint" << endl;
+		msg << " 13. Face + PIN" << endl;
+		msg << " 14. Face + Fingerprint/PIN" << endl;
+		msg << " 15. Face + Fingerprint + PIN" << endl;
+		msg << "999. No more changes." << endl;
+		msg << ">> ";
+
+		mode = Utility::getInput<uint32_t>(msg.str());
+		if (BS2_EXT_AUTH_MODE_FACE_ONLY <= mode && mode <= BS2_EXT_AUTH_MODE_FACE_FINGERPRINT_PIN)
+		{
+			stringstream msgSel;
+			msgSel << "Set On/Off" << endl;
+			msgSel << " 0. Off (No time)" << endl;
+			msgSel << " 1. On (Always)" << endl;
+			msgSel << " >> ";
+
+			uint32_t onoff = Utility::getInput<uint32_t>(msgSel.str());
+			switch (onoff)
+			{
+			case 0:
+			case 1:
+				config.extAuthSchedule[mode] = onoff;
+				break;
+			}
+		}
+	} while (mode != EXIT_MENU);
+
+	do
+	{
+		stringstream msg;
+		msg << "Register Fingerprint authentication mode" << endl;
+		msg << " 16. Fingerprint" << endl;
+		msg << " 17. Fingerprint + Face" << endl;
+		msg << " 18. Fingerprint + PIN" << endl;
+		msg << " 19. Fingerprint + Face/PIN" << endl;
+		msg << " 20. Fingerprint + Face + PIN" << endl;
+		msg << "999. No more changes." << endl;
+		msg << ">> ";
+
+		mode = Utility::getInput<uint32_t>(msg.str());
+		if (BS2_EXT_AUTH_MODE_FINGERPRINT_ONLY <= mode && mode <= BS2_EXT_AUTH_MODE_FINGERPRINT_FACE_PIN)
+		{
+			stringstream msgSel;
+			msgSel << "Set On/Off" << endl;
+			msgSel << " 0. Off (No time)" << endl;
+			msgSel << " 1. On (Always)" << endl;
+			msgSel << " >> ";
+
+			uint32_t onoff = Utility::getInput<uint32_t>(msgSel.str());
+			switch (onoff)
+			{
+			case 0:
+			case 1:
+				config.extAuthSchedule[mode] = onoff;
+				break;
+			}
+		}
+	} while (mode != EXIT_MENU);
+
+	do
+	{
+		stringstream msg;
+		msg << "Register Card authentication mode" << endl;
+		msg << " 21. Card" << endl;
+		msg << " 22. Card + Face" << endl;
+		msg << " 23. Card + Fingerprint" << endl;
+		msg << " 24. Card + PIN" << endl;
+		msg << " 25. Card + Face/Fingerprint" << endl;
+		msg << " 26. Card + Face/PIN" << endl;
+		msg << " 27. Card + Fingerprint/PIN" << endl;
+		msg << " 28. Card + Face/Fingerprint/PIN" << endl;
+		msg << " 29. Card + Face + Fingerprint" << endl;
+		msg << " 30. Card + Face + PIN" << endl;
+		msg << " 31. Card + Fingerprint + Face" << endl;
+		msg << " 32. Card + Fingerprint + PIN" << endl;
+		msg << " 33. Card + Face/Fingerprint + PIN" << endl;
+		msg << " 34. Card + Face + Fingerprint/PIN" << endl;
+		msg << " 35. Card + Fingerprint + Face/PIN" << endl;
+		msg << "999. No more changes." << endl;
+		msg << ">> ";
+
+		mode = Utility::getInput<uint32_t>(msg.str());
+		if (BS2_EXT_AUTH_MODE_CARD_ONLY <= mode && mode <= BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_FACE_OR_PIN)
+		{
+			stringstream msgSel;
+			msgSel << "Set On/Off" << endl;
+			msgSel << " 0. Off (No time)" << endl;
+			msgSel << " 1. On (Always)" << endl;
+			msgSel << " >> ";
+
+			uint32_t onoff = Utility::getInput<uint32_t>(msgSel.str());
+			switch (onoff)
+			{
+			case 0:
+			case 1:
+				config.extAuthSchedule[mode] = onoff;
+				break;
+			}
+		}
+	} while (mode != EXIT_MENU);
+
+	do
+	{
+		stringstream msg;
+		msg << "Register ID authentication mode" << endl;
+		msg << " 36. ID + Face" << endl;
+		msg << " 37. ID + Fingerprint" << endl;
+		msg << " 38. ID + PIN" << endl;
+		msg << " 39. ID + Face/Fingerprint" << endl;
+		msg << " 40. ID + Face/PIN" << endl;
+		msg << " 41. ID + Fingerprint/PIN" << endl;
+		msg << " 42. ID + Face/Fingerprint/PIN" << endl;
+		msg << " 43. ID + Face + Fingerprint" << endl;
+		msg << " 44. ID + Face + PIN" << endl;
+		msg << " 45. ID + Fingerprint + Face" << endl;
+		msg << " 46. ID + Fingerprint + PIN" << endl;
+		msg << " 47. ID + Face/Fingerprint + PIN" << endl;
+		msg << " 48. ID + Face + Fingerprint/PIN" << endl;
+		msg << " 49. ID + Fingerprint + Face/PIN" << endl;
+		msg << "999. No more changes." << endl;
+		msg << ">> ";
+
+		mode = Utility::getInput<uint32_t>(msg.str());
+		if (BS2_EXT_AUTH_MODE_ID_FACE <= mode && mode <= BS2_EXT_AUTH_MODE_ID_FINGERPRINT_FACE_OR_PIN)
+		{
+			stringstream msgSel;
+			msgSel << "Set On/Off" << endl;
+			msgSel << " 0. Off (No time)" << endl;
+			msgSel << " 1. On (Always)" << endl;
+			msgSel << " >> ";
+
+			uint32_t onoff = Utility::getInput<uint32_t>(msgSel.str());
+			switch (onoff)
+			{
+			case 0:
+			case 1:
+				config.extAuthSchedule[mode] = onoff;
+				break;
+			}
+		}
+	} while (mode != EXIT_MENU);
+
+	string msg = "Insert global APB option. (0: Not use, 1: Use)";
+	config.useGlobalAPB = (BS2_BOOL)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert global APB fail action. (0: Not use, 1: Soft APB, 2: Hard APB)";
+	config.globalAPBFailAction = (BS2_GLOBAL_APB_FAIL_ACTION_TYPE)Utility::getInput<uint32_t>(msg);
+
+	msg = "Using group matching. (0: Not use, 1: Use)";
+	config.useGroupMatching = (BS2_BOOL)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert private authentication. (0: Not use, 1: Use)";
+	config.usePrivateAuth = (BS2_BOOL)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert face detection level. (0: Not use, 1: Normal mode, 2: Strict mode)";
+	config.faceDetectionLevel = (BS2_FACE_DETECTION_LEVEL)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert server matching option. (0: Not use, 1: Use)";
+	config.useServerMatching = (BS2_BOOL)Utility::getInput<uint32_t>(msg);
+
+	msg = "Using full access. (0: Not use, 1: Use)";
+	config.useFullAccess = (BS2_BOOL)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert matching timeout in seconds";
+	config.matchTimeout = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert authentication timeout in seconds";
+	config.authTimeout = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	config.numOperators = 0;
+
+	return cc.setAuthConfigEx(id, config);
+}
+
+int getFaceConfigEx(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2FaceConfigExt config = { 0, };
+	return cc.getFaceConfigEx(id, config);
+}
+
+int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2FaceConfigExt config = { 0, };
+	string msg;
+	stringstream strmsg;
+
+	msg = "Insert thermal check mode. (0: Not use, 1: Hard, 2: Soft)";
+	config.thermalCheckMode = (BS2_FACE_CHECK_MODE)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert mask check mode. (0: Not use, 1: Hard, 2: Soft)";
+	config.maskCheckMode = (BS2_FACE_CHECK_MODE)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert thermal format. (0: Fahrenheit, 1: Celsius)";
+	config.thermalFormat = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert high temperature value in Celsius. (30.0 ~ 45.0กษ)";
+	float threshold = Utility::getInput<float>(msg);
+	config.thermalThreshold = (uint16_t)(threshold * 100);
+
+	msg = "Insert mask detection level. (0: Not use, 1: Normal, 2: High, 3: Very high)";
+	config.maskDetectionLevel = (BS2_MASK_DETECTION_LEVEL)Utility::getInput<uint32_t>(msg);
+
+	msg = "Do you want to record the temperature in the event log? [y/n]";
+	config.auditTemperature = Utility::isYes(msg);
+
+	msg = "Do you want to use reject sound? [y/n]";
+	config.useRejectSound = Utility::isYes(msg);
+
+	msg = "Do you want to use overlapped thermal? [y/n]";
+	config.useOverlapThermal = Utility::isYes(msg);
+
+	strmsg << "Insert face check order." << endl;
+	strmsg << " 0: Face check after auth [default]" << endl;
+	strmsg << " 1: Face check before auth" << endl;
+	strmsg << " 2: Face check without auth";
+	config.faceCheckOrder = (BS2_FACE_CHECK_ORDER)Utility::getInput<uint32_t>(strmsg.str());
+
+	return cc.setFaceConfigEx(id, config);
+}
+
+int getThermalCameraConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2ThermalCameraConfig config = { 0, };
+	return cc.getThermalCameraConfig(id, config);
+}
+
+int setThermalCameraConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2ThermalCameraConfig config = { 0, };
+	string msg;
+
+	msg = "Insert camera distance from user. (cm. Recommend: 70)";
+	config.distance = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Insert emission rate. (95/97/98, Recommend: 98)";
+	config.emissionRate = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	cout << "Insert ROI(Region of interest)." << endl;
+	msg = "x:";
+	config.roi.x = (uint16_t)Utility::getInput<uint32_t>(msg);
+	msg = "y:";
+	config.roi.y = (uint16_t)Utility::getInput<uint32_t>(msg);
+	msg = "width:";
+	config.roi.width = (uint16_t)Utility::getInput<uint32_t>(msg);
+	msg = "height:";
+	config.roi.height = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Do you want to use body compensation [y/n]";
+	config.useBodyCompensation = Utility::isYes(msg);
+
+	msg = "Insert compensation temperature *10. If you want -4.5กษ, it is -45. (-50 ~ 50)";
+	config.compensationTemperature = (int8_t)Utility::getInput<int32_t>(msg);
+
+	return cc.setThermalCameraConfig(id, config);
+}
+
+int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)
+{
+	DeviceControl dc(context);
+	BS2TemplateEx templateEx = {0,};
+	return dc.extractTemplateFaceEx(id, templateEx);
 }

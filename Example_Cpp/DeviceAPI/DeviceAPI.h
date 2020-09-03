@@ -51,6 +51,13 @@ enum EN_MENU_DEV
 	MENU_DEV_SET_SYSTEMCONFIG,
 	MENU_DEV_GET_DESFIRECONFIGEX,
 	MENU_DEV_SET_DESFIRECONFIGEX,
+	MENU_DEV_GET_AUTHCONFIGEX,
+	MENU_DEV_SET_AUTHCONFIGEX,
+	MENU_DEV_GET_FACECONFIGEX,
+	MENU_DEV_SET_FACECONFIGEX,
+	MENU_DEV_GET_THERMALCAMERACONFIG,
+	MENU_DEV_SET_THERMALCAMERACONFIG,
+	MENU_DEV_EXTRACT_TEMPLATE_FACEEX,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -82,6 +89,13 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_SYSTEMCONFIG,		"BS2_SetSystemConfig"},
 	{MENU_DEV_GET_DESFIRECONFIGEX,	"BS2_GetDesFireCardConfigEx"},
 	{MENU_DEV_SET_DESFIRECONFIGEX,	"BS2_SetDesFireCardConfigEx"},
+	{MENU_DEV_GET_AUTHCONFIGEX,		"BS2_GetAuthConfigEx"},
+	{MENU_DEV_SET_AUTHCONFIGEX,		"BS2_SetAuthConfigEx"},
+	{MENU_DEV_GET_FACECONFIGEX,		"BS2_GetFaceConfigEx"},
+	{MENU_DEV_SET_FACECONFIGEX,		"BS2_SetFaceConfigEx"},
+	{MENU_DEV_GET_THERMALCAMERACONFIG,	"BS2_GetThermalCameraConfig"},
+	{MENU_DEV_SET_THERMALCAMERACONFIG,	"BS2_SetThermalCameraConfig"},
+	{MENU_DEV_EXTRACT_TEMPLATE_FACEEX,	"BS2_ExtractTemplateFaceEx"}
 };
 
 
@@ -111,3 +125,10 @@ int getSystemConfig(void* context, BS2_DEVICE_ID id);
 int setSystemConfig(void* context, BS2_DEVICE_ID id);
 int getDesFireCardConfigEx(void* context, BS2_DEVICE_ID id);
 int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id);
+int getAuthConfigEx(void* context, BS2_DEVICE_ID id);
+int setAuthConfigEx(void* context, BS2_DEVICE_ID id);
+int getFaceConfigEx(void* context, BS2_DEVICE_ID id);
+int setFaceConfigEx(void* context, BS2_DEVICE_ID id);
+int getThermalCameraConfig(void* context, BS2_DEVICE_ID id);
+int setThermalCameraConfig(void* context, BS2_DEVICE_ID id);
+int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id);

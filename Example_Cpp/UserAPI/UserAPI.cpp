@@ -26,6 +26,19 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 }
 
 
+// Thermal supported callback
+void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE temperature)
+{
+	if (deviceInfo.id_ == id)
+	{
+		int32_t timezone = deviceInfo.timezone_;
+		stringstream buf;
+		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventStringWithThermal(*event, timezone, temperature);
+		cout << buf.str() << endl;
+	}
+}
+
+
 void onDeviceConnected(BS2_DEVICE_ID id)
 {
 	if (deviceInfo.id_ == id)
@@ -90,7 +103,8 @@ void connectTestDevice(void* context)
 #endif
 
 	// Set callback for realtime logs
-	sdkResult = BS2_StartMonitoringLog(sdkContext, deviceInfo.id_, onLogReceived);
+	//sdkResult = BS2_StartMonitoringLog(sdkContext, deviceInfo.id_, onLogReceived);
+	sdkResult = BS2_StartMonitoringLogEx(sdkContext, deviceInfo.id_, onLogReceivedEx);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_StartMonitoringLog call failed: %d", sdkResult);
 
@@ -325,11 +339,20 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_GET_USR:
 			sdkResult = uc.getUser(id);
 			break;
+		case MENU_USR_GET_USR_FACEEX:
+			sdkResult = uc.getUserFaceEx(id);
+			break;
 		case MENU_USR_GET_ALLUSR:
 			sdkResult = uc.getAllUser(id);
 			break;
+		case MENU_USR_GET_ALLUSR_FACEEX:
+			sdkResult = uc.getAllUserFaceEx(id);
+			break;
 		case MENU_USR_ENR_USR:
 			sdkResult = uc.enrollUser(id);
+			break;
+		case MENU_USR_ENR_USR_FACEEX:
+			sdkResult = uc.enrollUserFaceEx(id);
 			break;
 		case MENU_USR_GET_LASTFPIMAGE:
 			sdkResult = getLastFingerprintImage(uc, id);

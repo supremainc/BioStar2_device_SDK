@@ -71,10 +71,13 @@ public:
 	static T str2int(const std::string& data);
 
 	static std::string getEventString(const BS2Event& event, int32_t timezone);
+	static std::string getEventStringWithThermal(const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature);
 
 	static std::string getHexaString(const uint8_t* data, uint32_t size);
-
 	static int saveBMP(FILE* fp, unsigned char* data, int width, int height);
+
+	static BS2_BOOL isYes(std::string msg);
+	static BS2_BOOL isNo(std::string msg);
 
 private:
 	static void writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits);

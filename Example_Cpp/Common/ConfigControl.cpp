@@ -156,6 +156,66 @@ int ConfigControl::setDesFireCardConfigEx(BS2_DEVICE_ID id, const BS2DesFireCard
 	return sdkResult;
 }
 
+int ConfigControl::getAuthConfigEx(BS2_DEVICE_ID id, BS2AuthConfigExt& config)
+{
+	int sdkResult = BS2_GetAuthConfigExt(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetAuthConfigExt call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setAuthConfigEx(BS2_DEVICE_ID id, const BS2AuthConfigExt& config)
+{
+	int sdkResult = BS2_SetAuthConfigExt(context_, id, const_cast<BS2AuthConfigExt*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetAuthConfigExt call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getFaceConfigEx(BS2_DEVICE_ID id, BS2FaceConfigExt& config)
+{
+	int sdkResult = BS2_GetFaceConfigExt(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetFaceConfigExt call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setFaceConfigEx(BS2_DEVICE_ID id, const BS2FaceConfigExt& config)
+{
+	int sdkResult = BS2_SetFaceConfigExt(context_, id, const_cast<BS2FaceConfigExt*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetFaceConfigExt call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getThermalCameraConfig(BS2_DEVICE_ID id, BS2ThermalCameraConfig& config)
+{
+	int sdkResult = BS2_GetThermalCameraConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetThermalCameraConfig call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setThermalCameraConfig(BS2_DEVICE_ID id, const BS2ThermalCameraConfig& config)
+{
+	int sdkResult = BS2_SetThermalCameraConfig(context_, id, const_cast<BS2ThermalCameraConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetThermalCameraConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -308,4 +368,88 @@ void ConfigControl::print(const BS2DesFireCardConfigEx& config)
 	TRACE("fileWriteKey:%s", Utility::getHexaString(config.desfireAppKey.fileWriteKey, 16).c_str());	// maybe 0
 	TRACE("fileReadKeyNumber:%u", config.desfireAppKey.fileReadKeyNumber);
 	TRACE("fileWriteKeyNumber:%u", config.desfireAppKey.fileWriteKeyNumber);
+}
+
+void ConfigControl::print(const BS2AuthConfigExt& config)
+{
+	TRACE("==[BS2AuthConfigExt]==");
+	TRACE("+--extAuthSchedule");
+	TRACE("   +--Face : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FACE_ONLY]);
+	TRACE("   |--Face + Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FACE_FINGERPRINT]);
+	TRACE("   |--Face + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FACE_PIN]);
+	TRACE("   |--Face + Fingerprint/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FACE_FINGERPRINT_OR_PIN]);
+	TRACE("   |--Face + Fingerprint + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FACE_FINGERPRINT_PIN]);
+	TRACE("   +--Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FINGERPRINT_ONLY]);
+	TRACE("   |--Fingerprint + Face : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FINGERPRINT_FACE]);
+	TRACE("   |--Fingerprint + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FINGERPRINT_PIN]);
+	TRACE("   |--Fingerprint + Face/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FINGERPRINT_FACE_OR_PIN]);
+	TRACE("   |--Fingerprint + Face + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_FINGERPRINT_FACE_PIN]);
+	TRACE("   +--Card : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_ONLY]);
+	TRACE("   |--Card + Face : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE]);
+	TRACE("   |--Card + Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FINGERPRINT]);
+	TRACE("   |--Card + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_PIN]);
+	TRACE("   |--Card + Face/Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT]);
+	TRACE("   |--Card + Face/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE_OR_PIN]);
+	TRACE("   |--Card + Fingerprint/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_OR_PIN]);
+	TRACE("   |--Card + Face/Fingerprint/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT_OR_PIN]);
+	TRACE("   |--Card + Face + Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE_FINGERPRINT]);
+	TRACE("   |--Card + Face + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE_PIN]);
+	TRACE("   |--Card + Fingerprint + Face : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_FACE]);
+	TRACE("   |--Card + Fingerprint + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_PIN]);
+	TRACE("   |--Card + Face/Fingerprint + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT_PIN]);
+	TRACE("   |--Card + Face + Fingerprint/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FACE_FINGERPRINT_OR_PIN]);
+	TRACE("   |--Card + Fingerprint + Face/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_FACE_OR_PIN]);
+	TRACE("   +--ID + Face : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE]);
+	TRACE("   |--ID + Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FINGERPRINT]);
+	TRACE("   |--ID + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_PIN]);
+	TRACE("   |--ID + Face/Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT]);
+	TRACE("   |--ID + Face/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE_OR_PIN]);
+	TRACE("   |--ID + Fingerprint/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FINGERPRINT_OR_PIN]);
+	TRACE("   |--ID + Face/Fingerprint/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT_OR_PIN]);
+	TRACE("   |--ID + Face + Fingerprint : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE_FINGERPRINT]);
+	TRACE("   |--ID + Face + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE_PIN]);
+	TRACE("   |--ID + Fingerprint + Face : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FINGERPRINT_FACE]);
+	TRACE("   |--ID + Fingerprint + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FINGERPRINT_PIN]);
+	TRACE("   |--ID + Face/Fingerprint + PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT_PIN]);
+	TRACE("   |--ID + Face + Fingerprint/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FACE_FINGERPRINT_OR_PIN]);
+	TRACE("   |--ID + Fingerprint + Face/PIN : %u", config.extAuthSchedule[BS2_EXT_AUTH_MODE_ID_FINGERPRINT_FACE_OR_PIN]);
+	TRACE("+--useGlobalAPB : %u", config.useGlobalAPB);
+	TRACE("|--globalAPBFailAction : %u", config.globalAPBFailAction);
+	TRACE("|--useGroupMatching : %u", config.useGroupMatching);
+	TRACE("|--usePrivateAuth : %u", config.usePrivateAuth);
+	TRACE("|--faceDetectionLevel : %u", config.faceDetectionLevel);
+	TRACE("|--useServerMatching : %u", config.useServerMatching);
+	TRACE("|--useFullAccess : %u", config.useFullAccess);
+	TRACE("|--matchTimeout : %u", config.matchTimeout);
+	TRACE("|--authTimeout : %u", config.authTimeout);
+	TRACE("+--numOperators : %u", config.numOperators);
+}
+
+void ConfigControl::print(const BS2FaceConfigExt& config)
+{
+	TRACE("==[BS2FaceConfigExt]==");
+	TRACE("+--thermalCheckMode : %u", config.thermalCheckMode);
+	TRACE("|--maskCheckMode : %u", config.maskCheckMode);
+	TRACE("|--thermalFormat : %u", config.thermalFormat);
+	float temper = (float)config.thermalThreshold / 100.0;
+	TRACE("|--thermalThreshold : %.2f¡É", temper);
+	TRACE("|--maskDetectionLevel : %u", config.maskDetectionLevel);
+	TRACE("|--auditTemperature : %u", config.auditTemperature);
+	TRACE("|--useRejectSound : %u", config.useRejectSound);
+	TRACE("|--useOverlapThermal : %u", config.useOverlapThermal);
+	TRACE("+--faceCheckOrder : %u", config.faceCheckOrder);
+}
+
+void ConfigControl::print(const BS2ThermalCameraConfig& config)
+{
+	TRACE("==[BS2ThermalCameraConfig]==");
+	TRACE("+--distance : %u", config.distance);
+	TRACE("|--emissionRate : %u", config.emissionRate);
+	TRACE("+--roi");
+	TRACE("   |--x : %u", config.roi.x);
+	TRACE("   |--y : %u", config.roi.y);
+	TRACE("   |--width : %u", config.roi.width);
+	TRACE("   +--height : %u", config.roi.height);
+	TRACE("+--useBodyCompensation : %u", config.useBodyCompensation);
+	TRACE("+--compensationTemperature : %d", config.compensationTemperature);
 }

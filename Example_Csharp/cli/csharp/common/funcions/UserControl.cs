@@ -33,7 +33,7 @@ namespace Suprema
             SQLiteConnection connection = new SQLiteConnection(dbPath);
             connection.Open();
 
-            SQLiteCommand cmd = new SQLiteCommand("CREATE TABLE IF NOT EXISTS User(id CHAR(32) NOT NULL, formatVersion INTEGER, flag INTEGER, version INTEGER, fingerChecksum INTEGER, faceChecksum INTEGER, PRIMARY KEY(id))", connection);
+            SQLiteCommand cmd = new SQLiteCommand("CREATE TABLE IF NOT EXISTS User(id CHAR(32) NOT NULL, formatVersion INTEGER, flag INTEGER, version INTEGER, authGroupID INTEGER, faceChecksum INTEGER, PRIMARY KEY(id))", connection);
             cmd.ExecuteNonQuery();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS BS2UserSetting(userID CHAR(32), startTime INTEGER, endTime INTEGER, fingerAuthMode INTEGER, cardAuthMode INTEGER, idAuthMode INTEGER, securityLevel INTEGER, FOREIGN KEY(userID) REFERENCES User(id) ON DELETE CASCADE)";
             cmd.ExecuteNonQuery();
@@ -55,7 +55,7 @@ namespace Suprema
             cmd.ExecuteNonQuery();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS BS2Job(userID CHAR(32), code INTEGER, label CHAR(48), FOREIGN KEY(userID) REFERENCES User(id) ON DELETE CASCADE)";
             cmd.ExecuteNonQuery();
-            cmd.CommandText = "CREATE VIEW IF NOT EXISTS BS2User AS SELECT User.id AS userID, User.formatVersion, User.flag, User.version, User.fingerChecksum, User.faceChecksum, (SELECT COUNT(BS2CSNCard.userID) FROM BS2CSNCard WHERE BS2CSNCARD.userID = User.id) AS numCards, (SELECT COUNT(BS2Fingerprint.userID) FROM BS2Fingerprint WHERE BS2Fingerprint.userID = User.id) as numFingers, (SELECT COUNT(BS2Face.userID) FROM BS2Face WHERE BS2Face.userID = User.id) AS numFaces FROM User";
+            cmd.CommandText = "CREATE VIEW IF NOT EXISTS BS2User AS SELECT User.id AS userID, User.formatVersion, User.flag, User.version, User.authGroupID, User.faceChecksum, (SELECT COUNT(BS2CSNCard.userID) FROM BS2CSNCard WHERE BS2CSNCARD.userID = User.id) AS numCards, (SELECT COUNT(BS2Fingerprint.userID) FROM BS2Fingerprint WHERE BS2Fingerprint.userID = User.id) as numFingers, (SELECT COUNT(BS2Face.userID) FROM BS2Face WHERE BS2Face.userID = User.id) AS numFaces FROM User";
             cmd.ExecuteNonQuery();
 
             return connection;
@@ -81,7 +81,7 @@ namespace Suprema
 
         public bool GetUserList(ref BS2SimpleDeviceInfo deviceInfo, ref List<BS2User> userList)
         {
-            SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, fingerChecksum, faceChecksum, numCards, numFingers, numFaces FROM BS2User", connection);
+            SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, authGroupID, faceChecksum, numCards, numFingers, numFaces FROM BS2User", connection);
             SQLiteDataReader rdr = cmd.ExecuteReader();
 
             userList.Clear();
@@ -96,7 +96,7 @@ namespace Suprema
                 user.formatVersion = Convert.ToByte(rdr[1]);
                 user.flag = Convert.ToByte(rdr[2]);
                 user.version = Convert.ToUInt16(rdr[3]);
-                user.fingerChecksum = Convert.ToUInt32(rdr[4]);
+                user.authGroupID = Convert.ToUInt32(rdr[4]);
                 user.faceChecksum = Convert.ToUInt32(rdr[5]);
 
                 if (Convert.ToBoolean(deviceInfo.cardSupported))
@@ -161,7 +161,7 @@ namespace Suprema
                 byte[] uid = Encoding.UTF8.GetBytes(userID);
                 Array.Copy(uid, 0, targetUser.userID, 0, uid.Length);
 
-                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, fingerChecksum, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
+                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, authGroupID, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@userIDParam", targetUser.userID);
                 SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -171,7 +171,7 @@ namespace Suprema
                     targetUser.formatVersion = Convert.ToByte(rdr[1]);
                     targetUser.flag = Convert.ToByte(rdr[2]);
                     targetUser.version = Convert.ToUInt16(rdr[3]);
-                    targetUser.fingerChecksum = Convert.ToUInt32(rdr[4]);
+                    targetUser.authGroupID = Convert.ToUInt32(rdr[4]);
                     targetUser.faceChecksum = Convert.ToUInt32(rdr[5]);
 
                     if (Convert.ToBoolean(deviceInfo.cardSupported))
@@ -434,7 +434,7 @@ namespace Suprema
                 byte[] uid = Encoding.UTF8.GetBytes(userID);
                 Array.Copy(uid, 0, targetUser.userID, 0, uid.Length);
 
-                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, fingerChecksum, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
+                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, authGroupID, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@userIDParam", targetUser.userID);
                 SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -444,7 +444,7 @@ namespace Suprema
                     targetUser.formatVersion = Convert.ToByte(rdr[1]);
                     targetUser.flag = Convert.ToByte(rdr[2]);
                     targetUser.version = Convert.ToUInt16(rdr[3]);
-                    targetUser.fingerChecksum = Convert.ToUInt32(rdr[4]);
+                    targetUser.authGroupID = Convert.ToUInt32(rdr[4]);
                     targetUser.faceChecksum = Convert.ToUInt32(rdr[5]);
 
                     if (Convert.ToBoolean(deviceInfo.cardSupported))
@@ -753,12 +753,12 @@ namespace Suprema
         {
             SQLiteTransaction transaction = connection.BeginTransaction();
 
-            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, fingerChecksum, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @fingerChecksumParam, @faceChecksumParam)", connection);
+            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, authGroupID, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @authGroupIDParam, @faceChecksumParam)", connection);
             cmd.Parameters.AddWithValue("@userIDParam", userBlob.user.userID);
             cmd.Parameters.AddWithValue("@formatVersionParam", userBlob.user.formatVersion);
             cmd.Parameters.AddWithValue("@flagParam", userBlob.user.flag);
             cmd.Parameters.AddWithValue("@versionParam", userBlob.user.version);
-            cmd.Parameters.AddWithValue("@fingerChecksumParam", userBlob.user.fingerChecksum);
+            cmd.Parameters.AddWithValue("@authGroupIDParam", userBlob.user.authGroupID);
             cmd.Parameters.AddWithValue("@faceChecksumParam", userBlob.user.faceChecksum);
 
             if (cmd.ExecuteNonQuery() < 1)
@@ -948,12 +948,12 @@ namespace Suprema
         {
             SQLiteTransaction transaction = connection.BeginTransaction();
 
-            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, fingerChecksum, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @fingerChecksumParam, @faceChecksumParam)", connection);
+            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, authGroupID, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @authGroupIDParam, @faceChecksumParam)", connection);
             cmd.Parameters.AddWithValue("@userIDParam", userBlob.user.userID);
             cmd.Parameters.AddWithValue("@formatVersionParam", userBlob.user.formatVersion);
             cmd.Parameters.AddWithValue("@flagParam", userBlob.user.flag);
             cmd.Parameters.AddWithValue("@versionParam", userBlob.user.version);
-            cmd.Parameters.AddWithValue("@fingerChecksumParam", userBlob.user.fingerChecksum);
+            cmd.Parameters.AddWithValue("@authGroupIDParam", userBlob.user.authGroupID);
             cmd.Parameters.AddWithValue("@faceChecksumParam", userBlob.user.faceChecksum);
 
             if (cmd.ExecuteNonQuery() < 1)
@@ -1213,6 +1213,9 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Insert a userEx into database", insertUserIntoDatabaseEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Insert a userEx into device", insertUserIntoDeviceEx));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Insert a FaceEx user into device (directly)", insertFaceExUserDirectly));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get a FaceEx user from device (directly)", getFaceExUserDirectly));
+
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get supported User Mask", getUserMask));
 
             //[Admin 1000]
@@ -1374,7 +1377,7 @@ namespace Suprema
             userBlob.user.version = 0;
             userBlob.user.formatVersion = 0;
             userBlob.user.faceChecksum = 0;
-            userBlob.user.fingerChecksum = 0;
+            userBlob.user.authGroupID = 0;
             userBlob.user.numCards = 0;
             userBlob.user.numFingers = 0;
             userBlob.user.numFaces = 0;
@@ -1863,7 +1866,7 @@ namespace Suprema
 
                     cbFaceOnReadyToScan = null;
                 }
-            }           
+            }
 
 #if false //TODO TBD 
             if (Convert.ToBoolean(deviceInfo.faceSupported))
@@ -2250,7 +2253,7 @@ namespace Suprema
             userBlob.user.version = 0;
             userBlob.user.formatVersion = 0;
             userBlob.user.faceChecksum = 0;
-            userBlob.user.fingerChecksum = 0;
+            userBlob.user.authGroupID = 0;
             userBlob.user.numCards = 0;
             userBlob.user.numFingers = 0;
             userBlob.user.numFaces = 0;
@@ -3101,8 +3104,931 @@ namespace Suprema
             {
                 Console.WriteLine("Got error({0}).", result);
             }
-        }    
-		//<=
+        }
+		//<=    
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Ex
+        public void getFaceExUserDirectly(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            bool pinSupported = Convert.ToBoolean(deviceInfo.pinSupported);
+            bool nameSupported = Convert.ToBoolean(deviceInfo.userNameSupported);
+            bool photoSupported = Convert.ToBoolean(deviceInfo.userPhotoSupported);
+            bool cardSupported = Convert.ToBoolean(deviceInfo.cardSupported);
+	        bool fingerScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN;
+	        bool faceExScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN;
+            BS2_USER_MASK userMask = (UInt32)BS2UserMaskEnum.DATA | (UInt32)BS2UserMaskEnum.SETTING;
+
+            IntPtr uid = IntPtr.Zero;
+	        UInt32 numUser = 1;
+
+	        Console.WriteLine("Please enter a user ID:");
+	        Console.Write(">> ");
+	        string userID = Console.ReadLine();
+            if (userID.Length == 0)
+            {
+                Console.WriteLine("The user id can not be empty.");
+                return;
+            }
+            else if (userID.Length > BS2Environment.BS2_USER_ID_SIZE)
+            {
+                Console.WriteLine("The user id should less than {0} words.", BS2Environment.BS2_USER_ID_SIZE);
+                return;
+            }
+            else
+            {
+                //TODO Alphabet user id is not implemented yet.
+                UInt32 numID;
+                if (!UInt32.TryParse(userID, out numID))
+                {
+                    Console.WriteLine("The user id should be a numeric.");
+                    return;
+                }
+
+                uid = Marshal.AllocHGlobal(BS2Environment.BS2_USER_ID_SIZE);
+                byte[] userIDArray = Util.StringToByte(BS2Environment.BS2_USER_ID_SIZE, userID);
+                Marshal.Copy(userIDArray, 0, uid, userIDArray.Length);
+            }
+
+	        Console.WriteLine("Get a [1: User header, 2: Card, 3: Finger, 4: FaceEx]");
+	        Console.Write(">> ");
+	        ushort maskType = Util.GetInput(4);
+
+	        switch (maskType)
+	        {
+	        case 1:
+		        userMask |= (UInt32)BS2UserMaskEnum.ACCESS_GROUP;
+		        if (nameSupported)
+			        userMask |= (UInt32)BS2UserMaskEnum.NAME;
+		        if (pinSupported)
+			        userMask |= (UInt32)BS2UserMaskEnum.PIN;
+		        if (photoSupported)
+			        userMask |= (UInt32)BS2UserMaskEnum.PHOTO;
+		        break;
+	        case 2:
+		        if (cardSupported)
+			        userMask |= (UInt32)BS2UserMaskEnum.CARD;
+		        break;
+	        case 3:
+		        if (fingerScanSupported)
+			        userMask |= (UInt32)BS2UserMaskEnum.FINGER;
+		        break;
+	        case 4:
+		        if (faceExScanSupported)
+			        userMask |= ((UInt32)BS2UserMaskEnum.SETTING_EX | (UInt32)BS2UserMaskEnum.FACE_EX);
+		        break;
+	        default:
+		        break;
+	        }
+
+            Console.WriteLine("Trying to get user list.");
+            BS2UserFaceExBlob[] userBlobs = new BS2UserFaceExBlob[numUser];
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetUserDatasFaceEx(sdkContext, deviceID, uid, numUser, userBlobs, userMask);
+            if (result == BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                for (UInt32 index = 0; index < numUser; index++)
+                {
+                    print(userBlobs[index]);
+
+                    if (userBlobs[index].cardObjs != IntPtr.Zero)
+                        API.BS2_ReleaseObject(userBlobs[index].cardObjs);
+                    if (userBlobs[index].fingerObjs != IntPtr.Zero)
+                        API.BS2_ReleaseObject(userBlobs[index].fingerObjs);
+                    if (userBlobs[index].faceObjs != IntPtr.Zero)
+                        API.BS2_ReleaseObject(userBlobs[index].faceObjs);
+                    if (userBlobs[index].faceExObjs != IntPtr.Zero)
+                        API.BS2_ReleaseObject(userBlobs[index].faceExObjs);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            if (uid != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(uid);
+            }
+        }
+
+        public void insertFaceExUserDirectly(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            bool pinSupported = Convert.ToBoolean(deviceInfo.pinSupported);
+            bool nameSupported = Convert.ToBoolean(deviceInfo.userNameSupported);
+            bool cardSupported = Convert.ToBoolean(deviceInfo.cardSupported);
+	        bool fingerScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN;
+	        bool faceScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_SCAN;
+	        bool faceExScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN;
+
+            BS2UserFaceExBlob[] userBlob = Util.AllocateStructureArray<BS2UserFaceExBlob>(1);
+            userBlob[0].cardObjs = IntPtr.Zero;
+            userBlob[0].fingerObjs = IntPtr.Zero;
+            userBlob[0].faceObjs = IntPtr.Zero;
+            userBlob[0].user_photo_obj = IntPtr.Zero;
+            userBlob[0].faceExObjs = IntPtr.Zero;
+
+            BS2ErrorCode sdkResult = BS2ErrorCode.BS_SDK_SUCCESS;
+
+	        Console.WriteLine("Please enter a user ID:");
+	        Console.Write(">> ");
+	        string userID = Console.ReadLine();
+            if (userID.Length == 0)
+            {
+                Console.WriteLine("The user id can not be empty.");
+                return;
+            }
+            else if (userID.Length > BS2Environment.BS2_USER_ID_SIZE)
+            {
+                Console.WriteLine("The user id should less than {0} words.", BS2Environment.BS2_USER_ID_SIZE);
+                return;
+            }
+            else
+            {
+                //TODO Alphabet user id is not implemented yet.
+                UInt32 uid;
+                if (!UInt32.TryParse(userID, out uid))
+                {
+                    Console.WriteLine("The user id should be a numeric.");
+                    return;
+                }
+
+                byte[] userIDArray = Encoding.UTF8.GetBytes(userID);
+                Array.Clear(userBlob[0].user.userID, 0, BS2Environment.BS2_USER_ID_SIZE);
+                Array.Copy(userIDArray, userBlob[0].user.userID, userIDArray.Length);
+            }
+
+            Array.Clear(userBlob[0].name, 0, BS2Environment.BS2_USER_NAME_LEN);
+	        if (nameSupported)
+	        {
+		        Console.WriteLine("Enter your name:");
+	            Console.Write(">> ");
+		        string name = Console.ReadLine();
+                if (name.Length > BS2Environment.BS2_USER_NAME_LEN)
+                {
+                    Console.WriteLine("The user name should less than {0} words.", BS2Environment.BS2_USER_NAME_LEN);
+                    return;
+                }
+                else
+                {
+                    byte[] nameArray = Encoding.UTF8.GetBytes(name);
+                    Array.Copy(nameArray, userBlob[0].name, nameArray.Length);
+                }
+	        }
+
+            Console.WriteLine("When is this user valid from? [default(Today), yyyy-MM-dd HH:mm:ss]");
+            Console.Write(">> ");
+            if (!Util.GetTimestamp("yyyy-MM-dd HH:mm:ss", 0, out userBlob[0].setting.startTime))
+            {
+                return;
+            }
+
+            Console.WriteLine("When is this user valid to? [default(Today), yyyy-MM-dd HH:mm:ss]");
+            Console.Write(">> ");
+            if (!Util.GetTimestamp("yyyy-MM-dd HH:mm:ss", 0, out userBlob[0].setting.endTime))
+            {
+                return;
+            }
+
+            Array.Clear(userBlob[0].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
+	        if (pinSupported)
+	        {
+		        Console.WriteLine("Enter the PIN code:");
+	            Console.Write(">> ");
+		        string pinString = Console.ReadLine();
+		        if (BS2Environment.BS2_PIN_HASH_SIZE < pinString.Length)
+		        {
+			        Console.WriteLine("PIN code is too long");
+			        return;
+		        }
+
+                IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pinString);
+                IntPtr pinCode = Marshal.AllocHGlobal(BS2Environment.BS2_PIN_HASH_SIZE);
+		        sdkResult = (BS2ErrorCode)API.BS2_MakePinCode(sdkContext, ptrChar, pinCode);
+		        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+		        {
+			        Console.WriteLine("BS2_MakePinCode call failed: {0}", sdkResult);
+			        return;
+		        }
+
+                Marshal.Copy(pinCode, userBlob[0].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
+                Marshal.FreeHGlobal(ptrChar);
+                Marshal.FreeHGlobal(pinCode);
+	        }
+
+            Console.WriteLine("Do you want to register private auth mode? [y/n]");
+            Console.Write(">> ");
+            if (Util.IsYes())
+	        {
+		        if (fingerScanSupported || faceScanSupported)
+		        {
+			        Console.WriteLine("Enter the biometric authentication mode");
+			        Console.WriteLine(" 0: Not use");
+			        Console.WriteLine(" 1: Biometric only");
+			        Console.WriteLine(" 2: Biometric+PIN");
+                    Console.Write(">> ");
+			        int fingerAuthMode = Util.GetInput(0);
+			        switch (fingerAuthMode)
+			        {
+			        case 1:
+				        userBlob[0].setting.fingerAuthMode = (byte)BS2FingerAuthModeEnum.BIOMETRIC_ONLY;
+				        break;
+			        case 2:
+				        userBlob[0].setting.fingerAuthMode = pinSupported ? (byte)BS2FingerAuthModeEnum.BIOMETRIC_PIN : (byte)BS2FingerAuthModeEnum.BIOMETRIC_ONLY;
+				        break;
+			        default:
+				        userBlob[0].setting.fingerAuthMode = (byte)BS2FingerAuthModeEnum.NONE;
+				        break;
+			        }
+		        }
+
+		        if (0 < deviceInfo.cardSupported)
+		        {
+			        Console.WriteLine("Enter the card authentication mode");
+			        Console.WriteLine(" 0: Not use");
+			        Console.WriteLine(" 1: Card only");
+			        Console.WriteLine(" 2: Card+Biometric");
+			        Console.WriteLine(" 3: Card+PIN");
+			        Console.WriteLine(" 4: Card+(Biometric/PIN)");
+			        Console.WriteLine(" 5: Card+Biometric+PIN");
+                    Console.Write(">> ");
+			        int cardAuthMode = Util.GetInput(0);
+			        switch (cardAuthMode)
+			        {
+			        case 1:
+				        userBlob[0].setting.cardAuthMode = (byte)BS2CardAuthModeEnum.CARD_ONLY;
+				        break;
+			        case 2:
+				        userBlob[0].setting.cardAuthMode = (fingerScanSupported || faceScanSupported) ? (byte)BS2CardAuthModeEnum.CARD_BIOMETRIC : (byte)BS2CardAuthModeEnum.CARD_ONLY;
+				        break;
+			        case 3:
+				        userBlob[0].setting.cardAuthMode = pinSupported ? (byte)BS2CardAuthModeEnum.CARD_PIN : (byte)BS2CardAuthModeEnum.CARD_ONLY;
+				        break;
+			        case 4:
+				        userBlob[0].setting.cardAuthMode = (fingerScanSupported || faceScanSupported || pinSupported) ? (byte)BS2CardAuthModeEnum.CARD_BIOMETRIC_OR_PIN : (byte)BS2CardAuthModeEnum.CARD_ONLY;
+				        break;
+			        case 5:
+				        userBlob[0].setting.cardAuthMode = (fingerScanSupported || faceScanSupported || pinSupported) ? (byte)BS2CardAuthModeEnum.CARD_BIOMETRIC_PIN : (byte)BS2CardAuthModeEnum.CARD_ONLY;
+				        break;
+			        default:
+				        userBlob[0].setting.cardAuthMode = (byte)BS2CardAuthModeEnum.NONE;
+				        break;
+			        }
+		        }
+
+		        {
+			        Console.WriteLine("Enter the ID authentication mode");
+			        Console.WriteLine(" 0: Not use");
+			        Console.WriteLine(" 1: ID+Biometric");
+			        Console.WriteLine(" 2: ID+PIN");
+			        Console.WriteLine(" 3: ID+(Biometric/PIN)");
+			        Console.WriteLine(" 4: ID+Biometric+PIN");
+                    Console.Write(">> ");
+			        int idAuthMode = Util.GetInput(0);
+			        switch (idAuthMode)
+			        {
+			        case 1:
+				        userBlob[0].setting.idAuthMode = (fingerScanSupported || faceScanSupported) ? (byte)BS2IDAuthModeEnum.ID_BIOMETRIC : (byte)BS2IDAuthModeEnum.NONE;
+				        break;
+			        case 2:
+				        userBlob[0].setting.idAuthMode = pinSupported ? (byte)BS2IDAuthModeEnum.ID_PIN : (byte)BS2IDAuthModeEnum.NONE;
+				        break;
+			        case 3:
+				        userBlob[0].setting.idAuthMode = (fingerScanSupported || faceScanSupported || pinSupported) ? (byte)BS2IDAuthModeEnum.ID_BIOMETRIC_OR_PIN : (byte)BS2IDAuthModeEnum.NONE;
+				        break;
+			        case 4:
+				        userBlob[0].setting.idAuthMode = (fingerScanSupported || faceScanSupported || pinSupported) ? (byte)BS2IDAuthModeEnum.ID_BIOMETRIC_PIN : (byte)BS2IDAuthModeEnum.NONE;
+				        break;
+			        default:
+				        userBlob[0].setting.idAuthMode = (byte)BS2IDAuthModeEnum.NONE;
+				        break;
+			        }
+		        }
+	        }
+
+            Console.WriteLine("Do you want to register private auth-ex mode? [y/n]");
+            Console.Write(">> ");
+            if (Util.IsYes())
+	        {
+		        if (faceExScanSupported)
+		        {
+			        Console.WriteLine("Enter the FaceEx authentication mode");
+			        Console.WriteLine(" 0: Not use");
+			        Console.WriteLine(" 1: Face");
+			        Console.WriteLine(" 2: Face + Fingerprint");
+			        Console.WriteLine(" 3: Face + PIN");
+			        Console.WriteLine(" 4: Face + Fingerprint / PIN");
+			        Console.WriteLine(" 5: Face + Fingerprint + PIN");
+                    Console.Write(">> ");
+			        int faceAuthMode = Util.GetInput(0);
+			        switch (faceAuthMode)
+			        {
+			        case 1:
+				        userBlob[0].settingEx.faceAuthMode = (byte)BS2ExtFaceAuthModeEnum.EXT_FACE_ONLY;
+				        break;
+			        case 2:
+				        userBlob[0].settingEx.faceAuthMode = fingerScanSupported ? (byte)BS2ExtFaceAuthModeEnum.EXT_FACE_FINGERPRINT : (byte)BS2ExtFaceAuthModeEnum.NONE;
+				        break;
+			        case 3:
+				        userBlob[0].settingEx.faceAuthMode = pinSupported ? (byte)BS2ExtFaceAuthModeEnum.EXT_FACE_PIN : (byte)BS2ExtFaceAuthModeEnum.NONE;
+				        break;
+			        case 4:
+				        userBlob[0].settingEx.faceAuthMode = (fingerScanSupported && pinSupported) ? (byte)BS2ExtFaceAuthModeEnum.EXT_FACE_FINGERPRINT_OR_PIN : (byte)BS2ExtFaceAuthModeEnum.NONE;
+				        break;
+			        case 5:
+				        userBlob[0].settingEx.faceAuthMode = (fingerScanSupported && pinSupported) ? (byte)BS2ExtFaceAuthModeEnum.EXT_FACE_FINGERPRINT_PIN : (byte)BS2ExtFaceAuthModeEnum.NONE;
+				        break;
+			        default:
+				        userBlob[0].settingEx.faceAuthMode = (byte)BS2ExtFaceAuthModeEnum.NONE;
+				        break;
+			        }
+		        }
+
+		        if (fingerScanSupported)
+		        {
+			        Console.WriteLine("Enter the Fingerprint authentication mode");;
+			        Console.WriteLine(" 0: Not use");
+			        Console.WriteLine(" 1: Fingerprint");
+			        Console.WriteLine(" 2: Fingerprint + Face");
+			        Console.WriteLine(" 3: Fingerprint + PIN");
+			        Console.WriteLine(" 4: Fingerprint + Face/PIN");
+			        Console.WriteLine(" 5: Fingerprint + Face + PIN");
+                    Console.Write(">> ");
+			        int fingerAuthMode = Util.GetInput(0);
+			        switch (fingerAuthMode)
+			        {
+			        case 1:
+				        userBlob[0].settingEx.fingerprintAuthMode = (byte)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_ONLY;
+				        break;
+			        case 2:
+				        userBlob[0].settingEx.fingerprintAuthMode = faceExScanSupported ? (byte)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_FACE : (byte)BS2ExtFingerprintAuthModeEnum.NONE;
+				        break;
+			        case 3:
+				        userBlob[0].settingEx.fingerprintAuthMode = pinSupported ? (byte)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_PIN : (byte)BS2ExtFingerprintAuthModeEnum.NONE;
+				        break;
+			        case 4:
+				        userBlob[0].settingEx.fingerprintAuthMode = (faceExScanSupported && pinSupported) ? (byte)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_FACE_OR_PIN : (byte)BS2ExtFingerprintAuthModeEnum.NONE;
+				        break;
+			        case 5:
+				        userBlob[0].settingEx.fingerprintAuthMode = (faceExScanSupported && pinSupported) ? (byte)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_FACE_PIN : (byte)BS2ExtFingerprintAuthModeEnum.NONE;
+				        break;
+			        default:
+				        userBlob[0].settingEx.fingerprintAuthMode = (byte)BS2ExtFingerprintAuthModeEnum.NONE;
+				        break;
+			        }
+		        }
+
+		        if (cardSupported)
+		        {
+			        Console.WriteLine("Enter the Card authentication mode");
+			        Console.WriteLine(" 0: Not use");
+			        Console.WriteLine(" 1: Card");
+			        Console.WriteLine(" 2: Card + Face");
+			        Console.WriteLine(" 3: Card + Fingerprint");
+			        Console.WriteLine(" 4: Card + PIN");
+			        Console.WriteLine(" 5: Card + Face/Fingerprint");
+			        Console.WriteLine(" 6: Card + Face/PIN");
+			        Console.WriteLine(" 7: Card + Fingerprint/PIN");
+			        Console.WriteLine(" 8: Card + Face/Fingerprint/PIN");
+			        Console.WriteLine(" 9: Card + Face + Fingerprint");
+			        Console.WriteLine("10: Card + Face + PIN");
+			        Console.WriteLine("11: Card + Fingerprint + Face");
+			        Console.WriteLine("12: Card + Fingerprint + PIN");
+			        Console.WriteLine("13: Card + Face/Fingerprint + PIN");
+			        Console.WriteLine("14: Card + Face + Fingerprint/PIN");
+			        Console.WriteLine("15: Card + Fingerprint + Face/PIN");
+                    Console.Write(">> ");
+			        int cardAuthMode = Util.GetInput(0);
+			        switch (cardAuthMode)
+			        {
+			        case 1:
+				        userBlob[0].settingEx.cardAuthMode = (byte)BS2ExtCardAuthModeEnum.EXT_CARD_ONLY;
+				        break;
+			        case 2:
+				        userBlob[0].settingEx.cardAuthMode = faceExScanSupported ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 3:
+				        userBlob[0].settingEx.cardAuthMode = fingerScanSupported ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 4:
+				        userBlob[0].settingEx.cardAuthMode = pinSupported ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 5:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_FINGERPRINT : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 6:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 7:
+				        userBlob[0].settingEx.cardAuthMode = (fingerScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_OR_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 8:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_FINGERPRINT_OR_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 9:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_FINGERPRINT : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 10:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 11:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_FACE : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 12:
+				        userBlob[0].settingEx.cardAuthMode = (fingerScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 13:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_FINGERPRINT_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 14:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_FINGERPRINT_OR_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        case 15:
+				        userBlob[0].settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_FACE_OR_PIN : (byte)BS2ExtCardAuthModeEnum.NONE;
+				        break;
+			        default:
+				        userBlob[0].settingEx.cardAuthMode = (byte)BS2ExtCardAuthModeEnum.NONE;
+                        break;
+			        }
+		        }	// cardAuthMode
+
+		        {
+			        Console.WriteLine("Enter the ID authentication mode");
+			        Console.WriteLine(" 0: Not use");
+			        Console.WriteLine(" 1: ID + Face");
+			        Console.WriteLine(" 2: ID + Fingerprint");
+			        Console.WriteLine(" 3: ID + PIN");
+			        Console.WriteLine(" 4: ID + Face/Fingerprint");
+			        Console.WriteLine(" 5: ID + Face/PIN");
+			        Console.WriteLine(" 6: ID + Fingerprint/PIN");
+			        Console.WriteLine(" 7: ID + Face/Fingerprint/PIN");
+			        Console.WriteLine(" 8: ID + Face + Fingerprint");
+			        Console.WriteLine(" 9: ID + Face + PIN");
+			        Console.WriteLine("10: ID + Fingerprint + Face");
+			        Console.WriteLine("11: ID + Fingerprint + PIN");
+			        Console.WriteLine("12: ID + Face/Fingerprint + PIN");
+			        Console.WriteLine("13: ID + Face + Fingerprint/PIN");
+			        Console.WriteLine("14: ID + Fingerprint + Face/PIN");
+                    Console.Write(">> ");
+			        int idAuthMode = Util.GetInput(0);
+			        switch (idAuthMode)
+			        {
+			        case 1:
+				        userBlob[0].settingEx.idAuthMode = faceExScanSupported ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 2:
+				        userBlob[0].settingEx.idAuthMode = fingerScanSupported ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 3:
+				        userBlob[0].settingEx.idAuthMode = pinSupported ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 4:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_FINGERPRINT : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 5:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 6:
+				        userBlob[0].settingEx.idAuthMode = (fingerScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_OR_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 7:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_FINGERPRINT_OR_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 8:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE_FINGERPRINT : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 9:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 10:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_FACE : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 11:
+				        userBlob[0].settingEx.idAuthMode = (fingerScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 12:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_FINGERPRINT_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 13:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FACE_FINGERPRINT_OR_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        case 14:
+				        userBlob[0].settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && pinSupported) ? (byte)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_FACE_OR_PIN : (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        default:
+				        userBlob[0].settingEx.idAuthMode = (byte)BS2ExtIDAuthModeEnum.NONE;
+				        break;
+			        }
+		        }	// idAuthMode
+	        }
+
+	        {
+		        Console.WriteLine("Enter the security level for this user");
+		        Console.WriteLine("[0: Default, 1: Lower, 2: Low, 3: Normal, 4: High, 5, Higher]");
+                Console.Write(">> ");
+                userBlob[0].setting.securityLevel = Util.GetInput((byte)BS2UserSecurityLevelEnum.DEFAULT);
+	        }
+
+            Array.Clear(userBlob[0].accessGroupId, 0, BS2Environment.BS2_MAX_ACCESS_GROUP_PER_USER);
+            Console.WriteLine("Do you want to register access group ID? [y/n]");
+            Console.Write(">> ");
+            if (Util.IsYes())
+	        {
+		        Console.WriteLine("Please enter access group IDs. ex)ID1 ID2 ID3 ...");
+                Console.Write(">> ");
+                int accessGroupIdIndex = 0;
+                char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
+                string[] accessGroupIDs = Console.ReadLine().Split(delimiterChars);
+
+                foreach (string accessGroupID in accessGroupIDs)
+                {
+                    if (accessGroupID.Length > 0)
+                    {
+                        UInt32 item;
+                        if (UInt32.TryParse(accessGroupID, out item))
+                        {
+                            userBlob[0].accessGroupId[accessGroupIdIndex++] = item;
+                        }
+                    }
+                }
+	        }
+
+	        {
+		        Console.WriteLine("Please enter a authentication group ID.");
+		        Console.WriteLine("This is used for face authentication. [0: Not using]");
+                Console.Write(">> ");
+		        userBlob[0].user.authGroupID = (UInt32)Util.GetInput(0);
+	        }
+
+	        {
+		        Console.WriteLine("Do you want to overwrite the user if it exist? [y/n]");
+                Console.Write(">> ");
+                userBlob[0].user.flag = (byte)(Util.IsYes() ? BS2UserFlagEnum.CREATED | BS2UserFlagEnum.UPDATED : BS2UserFlagEnum.CREATED);
+	        }
+
+            userBlob[0].user.numCards = 0;
+            userBlob[0].user.numFingers = 0;
+            userBlob[0].user.numFaces = 0;
+
+	        if (cardSupported)
+	        {
+		        Console.WriteLine("Do you want to scan card? [y/n]");
+                Console.Write(">> ");
+		        if (Util.IsYes())
+		        {
+			        Console.WriteLine("How many cards would you like to register?");
+                    Console.Write(">> ");
+                    int numOfCard = Util.GetInput(1);
+                    if (0 < numOfCard)
+                    {
+                        int structSize = Marshal.SizeOf(typeof(BS2CSNCard));
+                        BS2Card card = Util.AllocateStructure<BS2Card>();
+			            userBlob[0].cardObjs = Marshal.AllocHGlobal(structSize + numOfCard);
+                        IntPtr curCardObjs = userBlob[0].cardObjs;
+                        cbCardOnReadyToScan = new API.OnReadyToScan(ReadyToScanForCard);
+
+				        for (int index = 0; index < numOfCard;)
+				        {
+					        sdkResult = (BS2ErrorCode)API.BS2_ScanCard(sdkContext, deviceID, out card, cbCardOnReadyToScan);
+					        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+						        Console.WriteLine("BS2_ScanCard call failed: %d", sdkResult);
+					        else
+					        {
+						        if (Convert.ToBoolean(card.isSmartCard))
+						        {
+							        Console.WriteLine("CSN card only supported.");
+						        }
+						        else
+						        {
+							        Marshal.Copy(card.cardUnion, 0, curCardObjs, structSize);
+                                    curCardObjs += structSize;
+                                    userBlob[0].user.numCards++;
+						            index++;
+						        }
+					        }
+				        }
+                        cbCardOnReadyToScan = null;
+			        }
+		        }
+	        }
+
+	        if (fingerScanSupported)
+	        {
+		        Console.WriteLine("Do you want to scan fingerprint? [y/n]");
+                Console.Write(">> ");
+		        if (Util.IsYes())
+		        {
+			        Console.WriteLine("How many fingers would you like to register?");
+                    Console.Write(">> ");
+                    int numOfFinger = Util.GetInput(1);
+			        if (0 < numOfFinger)
+                    {
+                        int structSize = Marshal.SizeOf(typeof(BS2Fingerprint));
+			            BS2Fingerprint fingerprint = Util.AllocateStructure<BS2Fingerprint>();
+			            userBlob[0].fingerObjs = Marshal.AllocHGlobal(structSize * numOfFinger);
+                        IntPtr curFingerObjs = userBlob[0].fingerObjs;
+                        cbFingerOnReadyToScan = new API.OnReadyToScan(ReadyToScanForFinger);
+
+				        for (int index = 0; index < numOfFinger; index++)
+				        {
+					        for (UInt32 templateIndex = 0; templateIndex < BS2Environment.BS2_TEMPLATE_PER_FINGER;)
+					        {
+						        sdkResult = (BS2ErrorCode)API.BS2_ScanFingerprint(sdkContext, deviceID, ref fingerprint, templateIndex, (UInt32)BS2FingerprintQualityEnum.QUALITY_HIGHEST, (byte)BS2FingerprintTemplateFormatEnum.FORMAT_SUPREMA, cbFingerOnReadyToScan);
+						        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+							        Console.WriteLine("BS2_ScanFingerprint call failed: %d", sdkResult);
+						        else
+							        templateIndex++;
+					        }
+
+                            userBlob[0].user.numFingers++;
+                            fingerprint.index = (byte)index;
+
+                            Marshal.StructureToPtr(fingerprint, curFingerObjs, false);
+                            curFingerObjs += structSize;
+				        }
+
+                        cbFingerOnReadyToScan = null;
+			        }
+		        }
+	        }
+
+            bool unwarpedMemory = false;
+	        if (faceScanSupported)
+	        {
+			    Console.WriteLine("Do you want to scan face? [y/n]");
+                Console.Write(">> ");
+		        if (Util.IsYes())
+                {
+                    Console.WriteLine("How many face would you like to register?");
+                    Console.Write(">> ");
+                    int numOfFace = Util.GetInput(1);
+                    if (0 < numOfFace)
+                    {
+                        int structSize = Marshal.SizeOf(typeof(BS2Face));
+                        BS2Face[] face = Util.AllocateStructureArray<BS2Face>(1);
+                        userBlob[0].faceObjs = Marshal.AllocHGlobal(structSize * numOfFace);
+			            IntPtr curFaceObjs = userBlob[0].faceObjs;
+			            cbFaceOnReadyToScan = new API.OnReadyToScan(ReadyToScanForFace);
+
+                        for (int index = 0; index < numOfFace;)
+				        {
+					        sdkResult = (BS2ErrorCode)API.BS2_ScanFace(sdkContext, deviceID, face, (byte)BS2FaceEnrollThreshold.THRESHOLD_DEFAULT, cbFaceOnReadyToScan);
+					        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+						        Console.WriteLine("BS2_ScanFace call failed: %d", sdkResult);
+					        else
+					        {
+                                userBlob[0].user.numFaces++;
+						        index++;
+                                face[0].faceIndex = (byte)index;
+                                Marshal.StructureToPtr(face[0], curFaceObjs, false);
+                                curFaceObjs += structSize;
+
+                                Thread.Sleep(100);
+					        }
+				        }
+
+                        cbFaceOnReadyToScan = null;
+			        }
+		        }
+	        }
+	        else if (faceExScanSupported)
+	        {
+		        Console.WriteLine("Do you want to scan faceEx? [y/n]");
+		        Console.Write(">> ");
+                if (Util.IsYes())
+		        {
+			        Console.WriteLine("How many faceEx would you like to register?");
+		            Console.Write(">> ");
+			        int numOfFace = Util.GetInput(1);
+			        if (0 < numOfFace)
+			        {
+                        int structSize = Marshal.SizeOf(typeof(BS2FaceExWarped));
+                        BS2FaceExWarped[] faceEx = Util.AllocateStructureArray<BS2FaceExWarped>(1);
+				        userBlob[0].faceExObjs = Marshal.AllocHGlobal(structSize * numOfFace);
+                        IntPtr curFaceExObjs = userBlob[0].faceExObjs;
+                        cbFaceOnReadyToScan = new API.OnReadyToScan(ReadyToScanForFace);
+
+				        for (int index = 0; index < numOfFace;)
+				        {
+					        sdkResult = (BS2ErrorCode)API.BS2_ScanFaceEx(sdkContext, deviceID, faceEx, (byte)BS2FaceEnrollThreshold.THRESHOLD_DEFAULT, cbFaceOnReadyToScan);
+					        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+						        Console.WriteLine("BS2_ScanFaceEx call failed: %d", sdkResult);
+					        else
+					        {
+                                userBlob[0].user.numFaces++;
+						        index++;
+                                faceEx[0].faceIndex = (byte)index;
+                                Marshal.StructureToPtr(faceEx[0], curFaceExObjs, false);
+                                curFaceExObjs += structSize;
+
+                                Thread.Sleep(100);
+					        }
+				        }
+
+                        cbFaceOnReadyToScan = null;
+			        }
+		        }
+		        else
+		        {
+			        Console.WriteLine("Do you want to register from image? [y/n]");
+			        Console.Write(">> ");
+			        if (Util.IsYes())
+			        {
+				        Console.WriteLine("Enter the face image path and name:");
+			            Console.Write(">> ");
+				        string imagePath = Console.ReadLine();
+
+                        if (!File.Exists(imagePath))
+                        {
+                            Console.WriteLine("Invalid file path");
+                            return;
+                        }
+
+                        Image faceImage = Image.FromFile(imagePath);
+                        if (!faceImage.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Jpeg))
+                        {
+                            Console.WriteLine("Invalid image file format");
+                            return;
+                        }
+                        
+                        IntPtr imageData = IntPtr.Zero;
+				        UInt32 imageLen = 0;
+                        if (Util.LoadBinary(imagePath, out imageData, out imageLen))
+                        {
+                            if (0 == imageLen)
+                            {
+                                Console.WriteLine("Empty image file");
+                                return;
+                            }
+
+                            int structHeaderSize = Marshal.SizeOf(typeof(BS2FaceExUnwarped));
+                            int totalSize = structHeaderSize + (int)imageLen;
+                            userBlob[0].faceExObjs = Marshal.AllocHGlobal(totalSize);
+                            IntPtr curFaceExObjs = userBlob[0].faceExObjs;
+
+                            BS2FaceExUnwarped unwarped = Util.AllocateStructure<BS2FaceExUnwarped>();
+                            unwarped.flag = 0;
+                            unwarped.imageLen = imageLen;
+
+				            Marshal.StructureToPtr(unwarped, curFaceExObjs, false);
+				            curFaceExObjs += structHeaderSize;
+
+                            CopyMemory(curFaceExObjs, imageData, imageLen);
+
+                            userBlob[0].user.numFaces = 1;
+                            unwarpedMemory = true;
+				        }
+			        }
+		        }
+	        }
+
+	        sdkResult = (BS2ErrorCode)API.BS2_EnrollUserFaceEx(sdkContext, deviceID, userBlob, 1, 1);
+	        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+		        Console.WriteLine("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
+
+	        if (userBlob[0].cardObjs != IntPtr.Zero)
+		        Marshal.FreeHGlobal(userBlob[0].cardObjs);
+
+	        if (userBlob[0].fingerObjs != IntPtr.Zero)
+		        Marshal.FreeHGlobal(userBlob[0].fingerObjs);
+
+	        if (userBlob[0].faceObjs != IntPtr.Zero)
+		        Marshal.FreeHGlobal(userBlob[0].faceObjs);
+
+	        if (userBlob[0].faceExObjs != IntPtr.Zero)
+	        {
+                if (unwarpedMemory)
+                    Marshal.FreeHGlobal(userBlob[0].faceExObjs);
+	        }
+        }
+
+        void print(BS2UserFaceExBlob userBlob)
+        {
+            Console.WriteLine(">>>> BS2UserFaceExBlob");
+            Console.WriteLine("     +--user");
+            Console.WriteLine("     |  +--userID[{0}]", Encoding.Default.GetString(userBlob.user.userID));
+            Console.WriteLine("     |  |--flag[{0}]", userBlob.user.flag);
+            Console.WriteLine("     |  |--numCards[{0}]", userBlob.user.numCards);
+            Console.WriteLine("     |  |--numFingers[{0}]", userBlob.user.numFingers);
+            Console.WriteLine("     |  +--numFaces[{0}]", userBlob.user.numFaces);
+            Console.WriteLine("     +--setting");
+            Console.WriteLine("     |  +--startTime[{0}]", userBlob.setting.startTime);
+            Console.WriteLine("     |  |--endTime[{0}]", userBlob.setting.endTime);
+            Console.WriteLine("     |  |--fingerAuthMode[{0}]", userBlob.setting.fingerAuthMode);
+            Console.WriteLine("     |  |--cardAuthMode[{0}]", userBlob.setting.cardAuthMode);
+            Console.WriteLine("     |  |--idAuthMode[{0}]", userBlob.setting.idAuthMode);
+            Console.WriteLine("     |  +--securityLevel[{0}]", userBlob.setting.securityLevel);
+            Console.WriteLine("     +--card");
+            printCard(userBlob.cardObjs, userBlob.user.numCards);
+            Console.WriteLine("     +--finger");
+            printFinger(userBlob.fingerObjs, userBlob.user.numFingers);
+            Console.WriteLine("     +--face");
+            printFace(userBlob.faceObjs, userBlob.user.numFaces);
+            Console.WriteLine("     +--settingEx");
+            Console.WriteLine("     |  +--faceAuthMode[{0}]", userBlob.settingEx.faceAuthMode);
+            Console.WriteLine("     |  |--fingerprintAuthMode[{0}]", userBlob.settingEx.fingerprintAuthMode);
+            Console.WriteLine("     |  |--cardAuthMode[{0}]", userBlob.settingEx.cardAuthMode);
+            Console.WriteLine("     |  +--idAuthMode[{0}]", userBlob.settingEx.idAuthMode);
+            Console.WriteLine("     +--faceEx");
+            printFaceEx(userBlob.faceExObjs, userBlob.user.numFaces);
+        }
+
+        void printCard(IntPtr cardObjs, byte numOfCard)
+        {
+            if (cardObjs != IntPtr.Zero && 0 < numOfCard)
+            {
+                Type structType = typeof(BS2CSNCard);
+                int structSize = Marshal.SizeOf(structType);
+                IntPtr curItem = cardObjs;
+                for (int i = 0; i < numOfCard; i++)
+                {
+                    BS2CSNCard card = (BS2CSNCard)Marshal.PtrToStructure(curItem, structType);
+
+                    Console.WriteLine("     |  +--type_{0}[{1}]", i, card.type);
+                    Console.WriteLine("     |  |--size_{0}[{1}]", i, card.size);
+                    Console.WriteLine("     |  +--data_{0}[{1}]", i, BitConverter.ToString(card.data));
+
+                    curItem += structSize;
+                }
+
+                return;
+            }
+
+            Console.WriteLine("     |  +--empty");
+        }
+
+        void printFinger(IntPtr fingerObjs, byte numOfFinger)
+        {
+            if (fingerObjs != IntPtr.Zero && 0 < numOfFinger)
+            {
+                Type structType = typeof(BS2Fingerprint);
+                int structSize = Marshal.SizeOf(structType);
+                IntPtr curItem = fingerObjs;
+                for (int i = 0; i < numOfFinger; i++)
+                {
+                    BS2Fingerprint item = (BS2Fingerprint)Marshal.PtrToStructure(curItem, structType);
+
+                    Console.WriteLine("     |  +--index_{0}[{1}]", i, item.index);
+                    Console.WriteLine("     |  +--flag_{0}[{1}]", i, item.flag);
+
+                    curItem += structSize;
+                }
+
+                return;
+            }
+
+            Console.WriteLine("     |  +--empty");
+        }
+
+        void printFace(IntPtr faceObjs, byte numOfFace)
+        {
+            if (faceObjs != IntPtr.Zero && 0 < numOfFace)
+            {
+                Type structType = typeof(BS2Face);
+                int structSize = Marshal.SizeOf(structType);
+                IntPtr curItem = faceObjs;
+                for (int i = 0; i < numOfFace; i++)
+                {
+                    BS2Face item = (BS2Face)Marshal.PtrToStructure(curItem, structType);
+
+                    Console.WriteLine("     |  +--faceIndex_{0}[{1}]", i, item.faceIndex);
+                    Console.WriteLine("     |  |--numOfTemplate_{0}[{1}]", i, item.numOfTemplate);
+                    Console.WriteLine("     |  |--flag_{0}[{1}]", i, item.flag);
+                    Console.WriteLine("     |  +--imageLen_{0}[{1}]", i, item.imageLen);
+
+                    curItem += structSize;
+                }
+
+                return;
+            }
+
+            Console.WriteLine("     |  +--empty");
+        }
+
+        void printFaceEx(IntPtr faceExObjs, byte numOfFace)
+        {
+            if (faceExObjs != IntPtr.Zero && 0 < numOfFace)
+            {
+                Type structType = typeof(BS2FaceExWarped);
+                int structSize = Marshal.SizeOf(structType);
+                IntPtr curItem = faceExObjs;
+                for (int i = 0; i < numOfFace; i++)
+                {
+                    BS2FaceExWarped item = (BS2FaceExWarped)Marshal.PtrToStructure(curItem, structType);
+
+                    Console.WriteLine("     |  +--faceIndex_{0}[{1}]", i, item.faceIndex);
+                    Console.WriteLine("     |  |--numOfTemplate_{0}[{1}]", i, item.numOfTemplate);
+                    Console.WriteLine("     |  |--flag_{0}[{1}]", i, item.flag);
+                    Console.WriteLine("     |  |--imageLen_{0}[{1}]", i, item.imageLen);
+                    Console.WriteLine("     |  +--irImageLen_{0}[{1}]", i, item.irImageLen);
+
+                    curItem += structSize;
+                }
+
+                return;
+            }
+
+            Console.WriteLine("     |  +--empty");
+        }
 
         public void onUserPhrase(UInt32 deviceId, UInt16 seq, string userID)
         {
@@ -3173,5 +4099,8 @@ namespace Suprema
             Console.WriteLine("     |--queryUserPhrase : {0}", config.queryUserPhrase);
             Console.WriteLine("<<<< ");
         }
+
+        [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
+        public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
     }
 }

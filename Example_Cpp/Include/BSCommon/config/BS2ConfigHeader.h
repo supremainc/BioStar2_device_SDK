@@ -60,13 +60,12 @@ enum {
 	BS2_CONFIG_MASK_DESFIRE_CARD_EX	= 0x80000000,	///< Extended DesFire Card configuration
 };
 
-//Custom => [IPv6 Cfg]
-enum {
-	BS2_CONFIG_MASK_EX_NONE			= 0x0000,
-	BS2_CONFIG_MASK_EX_RS485_ITSELF = 0x0001,		///< Rs485 ItSelf configuration
-	BS2_CONFIG_MASK_EX_IPV6         = 0x0002,		///< TCP/IPv6 configuration
-};
-//Custom <=
+// Moved to BS2ConfigHeaderEx.h
+// enum {
+// 	BS2_CONFIG_MASK_EX_NONE			= 0x0000,
+// 	BS2_CONFIG_MASK_EX_RS485_ITSELF = 0x0001,		///< Rs485 ItSelf configuration
+// 	BS2_CONFIG_MASK_EX_IPV6         = 0x0002,		///< TCP/IPv6 configuration
+// };
 
 // Deprecated in V2.x.x. Instead, use the BS2_CONFIG_MASK_TNA_EXT
 #define BS2_CONFIG_MASK_TNA			(DEPRECATED_ENUM)BS2_CONFIG_MASK_TNA

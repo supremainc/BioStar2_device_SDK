@@ -16,6 +16,18 @@ enum {
 	BS2_FACE_ENROLL_TIMEOUT_MIN = 30,
 	BS2_FACE_ENROLL_TIMEOUT_MAX = 60,
 	BS2_FACE_ENROLL_TIMEOUT_DEFAULT = 60,
+
+	BS2_FACE_EX_ENROLL_TIMEOUT_MIN = 10,
+	BS2_FACE_EX_ENROLL_TIMEOUT_MAX = 20,
+	BS2_FACE_EX_ENROLL_TIMEOUT_DEFAULT = 20,
+
+	BS2_MAX_ROTATION_DEFAULT = 15,
+
+	BS2_FACE_WIDTH_MIN_DEFAULT = 66,
+	BS2_FACE_WIDTH_MAX_DEFAULT = 250,
+
+	BS2_FACE_SEARCH_RANGE_X_DEFAULT = 144,
+	BS2_FACE_SEARCH_RANGE_WIDTH_DEFAULT = 432,
 };
 
 typedef uint8_t BS2_FACE_SECURITY_LEVEL;
@@ -74,7 +86,8 @@ enum {
 	BS2_FACE_LFD_LEVEL_MIDDLE,
 	BS2_FACE_LFD_LEVEL_HIGH,
 
-	BS2_FACE_LFD_LEVEL_DEFAULT = BS2_FACE_LFD_LEVEL_OFF,
+	BS2_FACE_LFD_LEVEL_DEFAULT = BS2_FACE_LFD_LEVEL_OFF,		// FS2, FL
+	BS2_FACE_EX_LFD_LEVEL_DEFAULT = BS2_FACE_LFD_LEVEL_LOW,		// F2
 };
 
 typedef uint8_t BS2_FACE_LFD_LEVEL;
@@ -89,6 +102,16 @@ enum {
 
 typedef uint8_t BS2_FACE_PREVIEW_OPTION;
 
+enum {
+	BS2_FACE_OPERATION_MODE_FUSION,
+	BS2_FACE_OPERATION_MODE_VISUAL_ONLY,
+	BS2_FACE_OPERATION_MODE_VISUAL_AND_IR_FD_ONLY,
+
+	BS2_FACE_OPERATION_MODE_DEFAULT = BS2_FACE_OPERATION_MODE_FUSION,
+};
+
+typedef uint8_t BS2_FACE_OPERATION_MODE;
+
 typedef struct {
 	BS2_FACE_SECURITY_LEVEL securityLevel;	///< 1 byte
 	BS2_FACE_LIGHT_CONDITON lightCondition;			///< 1 byte
@@ -101,9 +124,20 @@ typedef struct {
 
 	BS2_FACE_PREVIEW_OPTION previewOption;			///< 1 byte
 	BS2_BOOL checkDuplicate;			///< 1 byte
-	uint8_t reserved[2];						///< 2 bytes (reserved)
+	BS2_FACE_OPERATION_MODE operationMode;			///< 1 byte
+	uint8_t maxRotation;						///< 1 byte
 
-	uint8_t reserved2[26];						///< 26 bytes (reserved)
+	struct {
+		uint16_t min;
+		uint16_t max;
+	} faceWidth;		///< 4 bytes
+
+	struct {
+		uint16_t x;
+		uint16_t width;
+	} searchRange;		///< 4 bytes
+
+	uint8_t unused[18];						///< 18 bytes (reserved)
 } BS2FaceConfig;
 
 #endif	// __BS2_FACE_CONFIG_H__

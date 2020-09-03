@@ -28,6 +28,12 @@ public:
 	int setFaceConfig(BS2_DEVICE_ID id, const BS2FaceConfig& config);
 	int getDesFireCardConfigEx(BS2_DEVICE_ID id, BS2DesFireCardConfigEx& config);
 	int setDesFireCardConfigEx(BS2_DEVICE_ID id, const BS2DesFireCardConfigEx& config);
+	int getAuthConfigEx(BS2_DEVICE_ID id, BS2AuthConfigExt& config);
+	int setAuthConfigEx(BS2_DEVICE_ID id, const BS2AuthConfigExt& config);
+	int getFaceConfigEx(BS2_DEVICE_ID id, BS2FaceConfigExt& config);
+	int setFaceConfigEx(BS2_DEVICE_ID id, const BS2FaceConfigExt& config);
+	int getThermalCameraConfig(BS2_DEVICE_ID id, BS2ThermalCameraConfig& config);
+	int setThermalCameraConfig(BS2_DEVICE_ID id, const BS2ThermalCameraConfig& config);
 
 	int updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode = BS2_CONNECTION_MODE_SERVER_TO_DEVICE);
 	int updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mode = BS2_RS485_MODE_DEFAULT);
@@ -40,6 +46,9 @@ private:
 	void print(const BS2FingerprintConfig& config);
 	void print(const BS2FaceConfig& config);
 	void print(const BS2DesFireCardConfigEx& config);
+	void print(const BS2AuthConfigExt& config);
+	void print(const BS2FaceConfigExt& config);
+	void print(const BS2ThermalCameraConfig& config);
 
 
 private:

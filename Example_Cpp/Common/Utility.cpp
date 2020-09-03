@@ -175,6 +175,31 @@ string Utility::getEventString(const BS2Event& event, int32_t timezone)
 	return buffer;
 }
 
+string Utility::getEventStringWithThermal(const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature)
+{
+	char buffer[1024] = { 0, };
+	float temper = (float)temperature / 100.0;
+	switch (event.code & BS2_EVENT_MASK)
+	{
+	case BS2_EVENT_USER_ENROLL_SUCCESS:
+	case BS2_EVENT_USER_ENROLL_FAIL:
+	case BS2_EVENT_USER_UPDATE_SUCCESS:
+	case BS2_EVENT_USER_UPDATE_FAIL:
+	case BS2_EVENT_USER_DELETE_SUCCESS:
+	case BS2_EVENT_USER_DELETE_FAIL:
+		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s) temperature(%.2f¡É)",
+			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
+		break;
+
+	default:
+		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) temperature(%.2f¡É)",
+			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, temper);
+		break;
+	}
+
+	return buffer;
+}
+
 string Utility::getHexaString(const uint8_t* data, uint32_t size)
 {
 	stringstream ss;
@@ -251,4 +276,16 @@ int Utility::saveBMP(FILE* fp, unsigned char* data, int width, int height)
 	free(image);
 
 	return 1;
+}
+
+BS2_BOOL Utility::isYes(string msg)
+{
+	char selected = Utility::getInput<char>(msg);
+	return (selected == 'y' || selected == 'Y');
+}
+
+BS2_BOOL Utility::isNo(string msg)
+{
+	char selected = Utility::getInput<char>(msg);
+	return (selected == 'n' || selected == 'N');
 }

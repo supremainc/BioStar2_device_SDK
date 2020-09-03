@@ -48,6 +48,30 @@ int LogControl::getLogSmallBlob(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int LogControl::getLogSmallBlobEx(BS2_DEVICE_ID id)
+{
+	uint16_t mask = BS2_EVENT_MASK_USER_ID | BS2_EVENT_MASK_TEMPERATURE;
+	const uint32_t FROM_FIRST = 0;
+	BS2_EVENT_ID eID = FROM_FIRST;
+	uint32_t amount(0), numLog(0);
+	BS2EventSmallBlobEx* blobObj = NULL;
+
+	int sdkResult = BS2_GetLogSmallBlobEx(context_, id, mask, eID, amount, &blobObj, &numLog);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetLogSmallBlobEx call failed: %d", sdkResult);
+
+	print(blobObj, numLog);
+
+	if (blobObj)
+	{
+		if (blobObj->imageObj)
+			BS2_ReleaseObject(blobObj->imageObj);
+
+		BS2_ReleaseObject(blobObj);
+	}
+	return sdkResult;
+}
+
 void LogControl::print(const BS2EventSmallBlob* logs, uint32_t numLog)
 {
 	for (uint32_t index = 0; index < numLog; index++)
@@ -59,8 +83,33 @@ void LogControl::print(const BS2EventSmallBlob* logs, uint32_t numLog)
 		TRACE("userID : %s", logs[index].userID);
 		TRACE("tnaKey : %u", logs[index].tnaKey);
 		TRACE("jobCode : %u", logs[index].jobCode);
-		TRACE("imageSize : %u", logs[index].imageSize);
-		TRACE("imageObj : %p", logs[index].imageObj);
+		if (0 < logs[index].imageSize)
+		{
+			TRACE("imageSize : %u", logs[index].imageSize);
+			TRACE("imageObj : %p", logs[index].imageObj);
+		}
+		TRACE("============================>>");
+	}
+}
+
+void LogControl::print(const BS2EventSmallBlobEx* logs, uint32_t numLog)
+{
+	for (uint32_t index = 0; index < numLog; index++)
+	{
+		TRACE("==[BS2EventSmallBlob(%u)]==", index);
+		TRACE("eventMask : %u", logs[index].eventMask);
+		TRACE("id : %u", logs[index].id);
+		print(logs[index].info);
+		TRACE("userID : %s", logs[index].userID);
+		TRACE("tnaKey : %u", logs[index].tnaKey);
+		TRACE("jobCode : %u", logs[index].jobCode);
+		if (0 < logs[index].imageSize)
+		{
+			TRACE("imageSize : %u", logs[index].imageSize);
+			TRACE("imageObj : %p", logs[index].imageObj);
+		}
+		float temper = (float)logs[index].temperature / 100.0;
+		TRACE("temperature : %.2f¡É", temper);
 		TRACE("============================>>");
 	}
 }
@@ -68,9 +117,8 @@ void LogControl::print(const BS2EventSmallBlob* logs, uint32_t numLog)
 void LogControl::print(const BS2EventExtInfo& info)
 {
 	TRACE("==[BS2EventExtInfo]==");
-	TRACE("dateTime : %u", info.dateTime);
-	TRACE("deviceID : %u", info.deviceID);
-	TRACE("mainCode : %u", info.mainCode);
-	TRACE("subCode : %u", info.subCode);
-	TRACE("============================>>");
+	TRACE("  dateTime : %u", info.dateTime);
+	TRACE("  deviceID : %u", info.deviceID);
+	TRACE("  mainCode : %u", info.mainCode);
+	TRACE("  subCode : %u", info.subCode);
 }

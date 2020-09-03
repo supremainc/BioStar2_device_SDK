@@ -13,6 +13,7 @@ namespace Suprema
     public class LogControl : FunctionModule
     {
         private API.OnLogReceived cbOnLogReceived = null; //To prevent garbage collection
+        private API.OnLogReceivedEx cbOnLogReceivedEx = null;
 
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
@@ -30,6 +31,7 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Monitoring log", monitoringLog));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get image log", getImageLog));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get logBlob", getLogBlob));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("get logsmallblobEx", getLogSmallBlobWithTemperature));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Synchronization between local and device log", syncLocalAndDeviceLog));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Filtering log since event Id", getFilteredLogSinceEventId));
             return functionList;
@@ -296,6 +298,14 @@ namespace Suprema
 
         void monitoringLog(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            Console.WriteLine("Do you want to display the temperature in the real-time log? [y/n]");
+            if (Util.IsYes())
+            {
+                monitoringLogEx(sdkContext, deviceID, isMasterDevice);
+                return;
+            }
+
+            cbOnLogReceivedEx = null;
             cbOnLogReceived = new API.OnLogReceived(RealtimeLogReceived);
             Console.WriteLine("Trying to activate log monitoring.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_StartMonitoringLog(sdkContext, deviceID, cbOnLogReceived);
@@ -318,6 +328,33 @@ namespace Suprema
             }
 
             cbOnLogReceived = null;
+        }
+
+        void monitoringLogEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            cbOnLogReceived = null;
+            cbOnLogReceivedEx = new API.OnLogReceivedEx(RealtimeLogReceivedEx);
+            Console.WriteLine("Trying to activate log monitoringEx.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_StartMonitoringLogEx(sdkContext, deviceID, cbOnLogReceivedEx);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            Console.WriteLine("Press ESC to stop log monitoring.");
+            while (Console.ReadKey(true).Key != ConsoleKey.Escape)
+            {
+                Thread.Sleep(100);
+            }
+
+            Console.WriteLine("Trying to deactivate log monitoring.");
+            result = (BS2ErrorCode)API.BS2_StopMonitoringLog(sdkContext, deviceID);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            cbOnLogReceivedEx = null;
         }
 
         void getImageLog(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -516,6 +553,77 @@ namespace Suprema
             while (getAllLog);
         }
 
+        void getLogSmallBlobWithTemperature(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            const UInt32 defaultLogPageSize = 1024;
+            Type structureType = typeof(BS2EventSmallBlobEx);
+            int structSize = Marshal.SizeOf(structureType);
+            bool getAllLog = false;
+            UInt32 lastEventId = 0;
+            UInt32 amount;
+            IntPtr outEventLogObjs = IntPtr.Zero;
+            UInt32 outNumEventLogs = 0;
+
+            Console.WriteLine("What is the ID of the last log which you have? [0: None]");
+            Console.Write(">>>> ");
+            lastEventId = Util.GetInput((UInt32)0);
+            Console.WriteLine("How many logs do you want to get? [0: All]");
+            Console.Write(">>>> ");
+            amount = Util.GetInput((UInt32)0);
+
+            if (amount == 0)
+            {
+                getAllLog = true;
+                amount = defaultLogPageSize;
+            }
+
+            do
+            {
+                outEventLogObjs = IntPtr.Zero;
+                BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetLogSmallBlobEx(sdkContext, deviceID, (ushort)BS2EventMaskEnum.ALL, lastEventId, amount, out outEventLogObjs, out outNumEventLogs);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                    break;
+                }
+
+                if (outNumEventLogs > 0)
+                {
+                    IntPtr curEventLogObjs = outEventLogObjs;
+                    for (UInt32 idx = 0; idx < outNumEventLogs; idx++)
+                    {
+                        BS2EventSmallBlobEx eventLog = (BS2EventSmallBlobEx)Marshal.PtrToStructure(curEventLogObjs, structureType);
+
+                        DateTime eventTime = Util.ConvertFromUnixTimestamp(eventLog.info.dateTime);
+
+                        byte[] userID = new byte[BS2Environment.BS2_USER_ID_SIZE];
+                        Array.Clear(userID, 0, BS2Environment.BS2_USER_ID_SIZE);
+                        Array.Copy(eventLog.objectID, userID, userID.Length);
+                        float threshold = (float)eventLog.temperature / 100.0F;
+
+                        Console.WriteLine("Got log(idx[{0}], timestamp[{1}], event id[{2}], userID[{3}], jobcode[{4}], temperature[{5}])."
+                                                    , idx
+                                                    , eventTime.ToString("yyyy-MM-dd HH:mm:ss")
+                                                    , eventLog.id
+                                                    , System.Text.Encoding.ASCII.GetString(userID).TrimEnd('\0')
+                                                    , eventLog.jobCode
+                                                    , threshold);
+
+                        curEventLogObjs += structSize;
+                        lastEventId = eventLog.id;
+                    }
+
+                    API.BS2_ReleaseObject(outEventLogObjs);
+                }
+
+                if (outNumEventLogs < defaultLogPageSize)
+                {
+                    break;
+                }
+            }
+            while (getAllLog);
+        }
+
         void syncLocalAndDeviceLog(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             UInt32 lastEventId = 0;
@@ -605,6 +713,16 @@ namespace Suprema
             {
                 BS2Event eventLog = (BS2Event)Marshal.PtrToStructure(log, typeof(BS2Event));
                 Console.WriteLine(Util.GetLogMsg(eventLog));
+            }
+        }
+
+        private void RealtimeLogReceivedEx(UInt32 deviceID, IntPtr log, UInt32 temperature)
+        {
+            if (log != IntPtr.Zero)
+            {
+                BS2Event eventLog = (BS2Event)Marshal.PtrToStructure(log, typeof(BS2Event));
+              	float temper = (float)temperature / 100.0F;
+                Console.WriteLine("{0} temperature[{1}]", Util.GetLogMsg(eventLog), temper);
             }
         }
 
