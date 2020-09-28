@@ -65,7 +65,7 @@ void BS2Context::releaseInstance()
 }
 
 
-void* BS2Context::initSDK()
+void* BS2Context::initSDK(BS2_PORT port)
 {
 	TRACE("Version:%s", BS2_Version());
 
@@ -76,7 +76,14 @@ void* BS2Context::initSDK()
 		return NULL;
 	}
 
-	int sdkResult = BS_SDK_SUCCESS;
+	int sdkResult = setServerPort(port);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		BS2_ReleaseContext(context_);
+		context_ = NULL;
+		return NULL;
+	}
+
 	sdkResult = BS2_Initialize(context_);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
@@ -103,6 +110,17 @@ int BS2Context::setDeviceEventListener(OnDeviceAccepted fpAccepted, OnDeviceConn
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_SetDeviceEventListener call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int BS2Context::setServerPort(BS2_PORT port)
+{
+	int sdkResult = BS2_SetServerPort(context_, port);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetServerPort call failed: %d", sdkResult);
 	}
 
 	return sdkResult;

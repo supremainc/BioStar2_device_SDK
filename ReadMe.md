@@ -33,6 +33,79 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 
+### V2.7.1.1 released 09/22/2020:
+
+**New Features**
+
+**1.** FaceStation F2 is supported, user related structures & API are added.
+* Structure BS2UserSettingEx has been added
+* Structure BS2TemplateEx has been added
+* Structure BS2FaceEx has been added
+* Structure BS2UserFaceExBlob has been added
+* API BS2_ScanFaceEx has been added
+* API BS2_ExtraceTemplateFaceEx has been added
+* API BS2_EnrollUserFaceEx has been added
+* API BS2_GetUserInfosFaceEx has been added
+* API BS2_GetUserDatasFaceEx has been added
+
+**2.** Several authentication modes for FaceStation F2 have been added, and you can configure with API and structure below.
+* Structure BS2AuthConfigExt has been added
+* API BS2_GetAuthConfigExt has been added
+* API BS2_SetAuthConfigExt has been added
+
+**3.** You can extract template by jpg image from FaceStation F2. The template file can be stored on AoC.
+* Structure BS2SmartCardHeader has been added
+* API BS2_ExtraceTemplateFaceEx has been added
+
+**4.** Thermal camera - Facial temperature & Mask detection can be configured with API & structure below.
+* Structure BS2FaceConfigExt has been added
+* API BS2_GetFaceConfigExt has been added
+* API BS2_SetFaceConfigExt has been added
+
+**5.** Thermal camera information structure and configurable API are available.
+* Structure BS2ThermalCameraConfig has been added
+* API BS2_GetThermalCameraConfig has been added
+* API BS2_SetThermalCameraConfig has been added
+
+**6.** New event log structure & API to support temperature information have been added.
+* Callback function OnLogReceivedEx has been added
+* Structure BS2EventSmallBlobEx has been added
+* API BS2_StartMonitoringLogEx has been added
+* API BS2_GetLogSmallBlobEx has been added
+* API BS2_GetLogSmallBlobExFromDir has been added
+
+**7.**​ User-defined PIN encryption key can be changed, and the PIN can be extracted with APIs.
+* API BS2_SetDataEncryptKey has been added
+* API BS2_MakePinCodeWithKey has been added
+
+
+**Modified features**
+
+**1.** A structure is modified to support FaceStation F2's configuration.
+* Structure BS2FaceConfig has been added
+
+**2.** Masking information of some API retrieving user information with userMask has been added. (Refer to userMask parameter for each API)
+* API BS2_GetUserDatas has been added
+* API BS2_GetUserDatasEx has been added
+* API BS2_GetSupportedUserMask has been added
+* API BS2_GetUserSmallDatas has been added
+* API BS2_GetUserSmallDatasEx has been added
+* API BS2_GetUserDatasFromDir has been added
+* API BS2_GetUserDatasExFromDir has been added
+* API BS2_GetUserSmallDatasFromDir has been added
+* API BS2_GetUserSmallDatasExFromDir has been added
+* API BS2_GetUserInfosFaceEx has been added
+* API BS2_GetUserDatasFaceEx has been added
+
+**3.** In the past, parameters like fingerSupported, faceSupported were used meaning fingerprint authentication(matching) or facial authentication(matching).
+This was confusing because FaceStation2 or returned fingerSupported = true.
+From 2.7.1, additional information fingerScanSupported and faceScanSupported is supported to provide more accurate information.
+With this, FaceStation2 returns fingerScanSupported = false.
+* API BS2_GetDeviceInfoEx has been added
+* Structure BS2SimpleDeviceInfoEx has been added
+
+**4.** For security reasons, support for the function BS2_GetDataEncryptKey has been deprecated.
+
 ### V2.7.0.0 released 07/21/2020:
 
 **New Features**
@@ -162,73 +235,6 @@ Refer to API BS2_FactoryReset
 
 
 ### Release Notes (Beta)
-
-### V2.7.1.0 released 08/21/2020:
-
-**New Features**
-
-**1.** FaceStation F2 is supported, user related structures & API are added.
-* Structure BS2UserSettingEx has been added
-* Structure BS2TemplateEx has been added
-* Structure BS2FaceEx has been added
-* Structure BS2UserFaceExBlob has been added
-* API BS2_ScanFaceEx has been added
-* API BS2_ExtraceTemplateFaceEx has been added
-* API BS2_EnrollUserFaceEx has been added
-* API BS2_GetUserInfosFaceEx has been added
-* API BS2_GetUserDatasFaceEx has been added
-
-**2.** Several authentication modes for FaceStation F2 have been added, and you can configure with API and structure below.
-* Structure BS2AuthConfigExt has been added
-* API BS2_GetAuthConfigExt has been added
-* API BS2_SetAuthConfigExt has been added
-
-**3.** You can extract template by jpg image from FaceStation F2. The template file can be stored on AoC.
-* Structure BS2SmartCardHeader has been added
-* API BS2_ExtraceTemplateFaceEx has been added
-
-**4.** Thermal camera - Facial temperature & Mask detection can be configured with API & structure below.
-* Structure BS2FaceConfigExt has been added
-* API BS2_GetFaceConfigExt has been added
-* API BS2_SetFaceConfigExt has been added
-
-**5.** Thermal camera information structure and configurable API are available.
-* Structure BS2ThermalCameraConfig has been added
-* API BS2_GetThermalCameraConfig has been added
-* API BS2_SetThermalCameraConfig has been added
-
-**6.** New event log structure & API to support temperature information have been added.
-* Callback function OnLogReceivedEx has been added
-* Structure BS2EventSmallBlobEx has been added
-* API BS2_StartMonitoringLogEx has been added
-* API BS2_GetLogSmallBlobEx has been added
-* API BS2_GetLogSmallBlobExFromDir has been added
- 
-
-**Modified features**
-
-**1.** A structure is modified to support FaceStation F2's configuration.
-* Structure BS2FaceConfig has been added
-
-**2.** Masking information of some API retrieving user information with userMask has been added. (Refer to userMask parameter for each API)
-* API BS2_GetUserDatas has been added
-* API BS2_GetUserDatasEx has been added
-* API BS2_GetSupportedUserMask has been added
-* API BS2_GetUserSmallDatas has been added
-* API BS2_GetUserSmallDatasEx has been added
-* API BS2_GetUserDatasFromDir has been added
-* API BS2_GetUserDatasExFromDir has been added
-* API BS2_GetUserSmallDatasFromDir has been added
-* API BS2_GetUserSmallDatasExFromDir has been added
-* API BS2_GetUserInfosFaceEx has been added
-* API BS2_GetUserDatasFaceEx has been added
-
-**3.** In the past, parameters like fingerSupported, faceSupported were used meaning fingerprint authentication(matching) or facial authentication(matching).
-This was confusing because FaceStation2 or returned fingerSupported = true.
-From 2.7.1, additional information fingerScanSupported and faceScanSupported is supported to provide more accurate information.
-With this, FaceStation2 returns fingerScanSupported = false.
-* API BS2_GetDeviceInfoEx has been added
-* Structure BS2SimpleDeviceInfoEx has been added
 
 ### V2.6.3.23 released 02/06/2020:
 **1.** Fixed a problem where SDK may crash on Linux.

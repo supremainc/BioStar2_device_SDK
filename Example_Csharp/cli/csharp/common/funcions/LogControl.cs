@@ -599,7 +599,7 @@ namespace Suprema
                         byte[] userID = new byte[BS2Environment.BS2_USER_ID_SIZE];
                         Array.Clear(userID, 0, BS2Environment.BS2_USER_ID_SIZE);
                         Array.Copy(eventLog.objectID, userID, userID.Length);
-                        float threshold = (float)eventLog.temperature / 100.0F;
+                        float temperature = (float)eventLog.temperature / 100.0F;
 
                         Console.WriteLine("Got log(idx[{0}], timestamp[{1}], event id[{2}], userID[{3}], jobcode[{4}], temperature[{5}])."
                                                     , idx
@@ -607,7 +607,7 @@ namespace Suprema
                                                     , eventLog.id
                                                     , System.Text.Encoding.ASCII.GetString(userID).TrimEnd('\0')
                                                     , eventLog.jobCode
-                                                    , threshold);
+                                                    , temperature);
 
                         curEventLogObjs += structSize;
                         lastEventId = eventLog.id;

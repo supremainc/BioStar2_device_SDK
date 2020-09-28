@@ -39,6 +39,9 @@ enum {
 	BS2_USER_MASK_ACCESS_GROUP	= 0x0100,
 	BS2_USER_MASK_JOB	          = 0x0200,
 	BS2_USER_MASK_PHRASE	      = 0x0400,
+	BS2_USER_MASK_FACE_EX			= 0x0800,
+	BS2_USER_MASK_SETTING_EX		= 0x1000,
+
 	BS2_USER_MASK_ALL			= 0xFFFF,
 };
 
@@ -49,8 +52,8 @@ typedef uint32_t BS2_USER_MASK;
  */
 enum {
 	BS2_USER_PIN_SIZE		= 32,			///< 16 byte -> 32 byte hash value
-	BS2_USER_NAME_SIZE		= 48 * 4,		///< UTF-8 Encoding
-	BS2_USER_PHOTO_SIZE		= 16 * 1024,
+	BS2_USER_NAME_SIZE		= BS2_USER_NAME_LEN,
+	BS2_USER_PHOTO_SIZE		= BS2_USER_IMAGE_SIZE,
 	BS2_MAX_JOB_SIZE = 16,
 	BS2_MAX_JOBLABEL_LEN = 16 * 3,
 	BS2_USER_PHRASE_SIZE		= 32 * 4,		///< UTF-8 Encoding
@@ -171,9 +174,9 @@ typedef struct {
 	BS2_DATETIME		startTime;			///< 4 bytes
 	BS2_DATETIME		endTime;			///< 4 bytes
 
-	uint8_t				fingerAuthMode;		///< 1 byte
-	uint8_t				cardAuthMode;		///< 1 byte
-	uint8_t				idAuthMode;			///< 1 byte
+	uint8_t				fingerAuthMode;		///< 1 byte : BS2_AUTH_MODE_NONE, BS2_AUTH_MODE_PROHIBITED, BS2_AUTH_MODE_BIOMETRIC_...
+	uint8_t				cardAuthMode;		///< 1 byte : BS2_AUTH_MODE_NONE, BS2_AUTH_MODE_PROHIBITED, BS2_AUTH_MODE_CARD_...
+	uint8_t				idAuthMode;			///< 1 byte : BS2_AUTH_MODE_NONE, BS2_AUTH_MODE_PROHIBITED, BS2_AUTH_MODE_ID_...
 	uint8_t				securityLevel;		///< 1 byte
 
 	// Optional Information (varies by mask)
@@ -189,5 +192,14 @@ typedef struct {
 	BS2Job	jobs;		///< User job codes
 	*/
 } BS2UserSetting;
+
+typedef struct {
+	uint8_t             faceAuthMode;           ///< 1 byte : BS2_AUTH_MODE_NONE, BS2_AUTH_MODE_PROHIBITED, BS2_EXT_AUTH_MODE_FACE_...
+	uint8_t             fingerprintAuthMode;    ///< 1 byte : BS2_AUTH_MODE_NONE, BS2_AUTH_MODE_PROHIBITED, BS2_EXT_AUTH_MODE_FINGERPRINT_...
+	uint8_t             cardAuthMode;           ///< 1 byte : BS2_AUTH_MODE_NONE, BS2_AUTH_MODE_PROHIBITED, BS2_EXT_AUTH_MODE_CARD_...
+	uint8_t             idAuthMode;             ///< 1 byte : BS2_AUTH_MODE_NONE, BS2_AUTH_MODE_PROHIBITED, BS2_EXT_AUTH_MODE_ID_...
+
+	uint8_t             reserved[28];           ///< 28 bytes (packing)
+} BS2UserSettingEx;
 
 #endif	// __BS2_USER_H__

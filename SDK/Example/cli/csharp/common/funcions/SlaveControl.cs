@@ -566,7 +566,7 @@ namespace Suprema
                 user[0].user.version = 0;
                 user[0].user.formatVersion = 0;
                 user[0].user.faceChecksum = 0;
-                user[0].user.fingerChecksum = 0;
+                user[0].user.authGroupID = 0;
                 user[0].user.numCards = 1;
                 user[0].user.numFingers = 0;
                 user[0].user.numFaces = 0;

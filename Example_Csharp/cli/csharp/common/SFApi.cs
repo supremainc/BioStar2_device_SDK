@@ -590,6 +590,9 @@ namespace Suprema
         extern public static int BS2_MakePinCode(IntPtr context, IntPtr salt, [In, Out] IntPtr pinCode);
 
         [DllImport("BS_SDK_V2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_MakePinCodeWithKey(IntPtr context, IntPtr salt, [In, Out] IntPtr pinCode, ref BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_ComputeCRC16CCITT(IntPtr data, UInt32 dataLen, ref UInt16 crc);
 
         [DllImport("BS_SDK_V2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
@@ -834,10 +837,10 @@ namespace Suprema
 
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Face API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int BS2_ScanFace(IntPtr context, UInt32 deviceId, [In, Out] BS2Face[] face, byte erollmentThreshold, OnReadyToScan cbReadyToScan);
+        extern public static int BS2_ScanFace(IntPtr context, UInt32 deviceId, [In, Out] BS2Face[] face, byte enrollmentThreshold, OnReadyToScan cbReadyToScan);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int BS2_ScanFaceEx(IntPtr context, UInt32 deviceId, [In, Out] BS2FaceExWarped[] face, byte erollmentThreshold, OnReadyToScan cbReadyToScan);
+        extern public static int BS2_ScanFaceEx(IntPtr context, UInt32 deviceId, [In, Out] BS2FaceExWarped[] face, byte enrollmentThreshold, OnReadyToScan cbReadyToScan);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_ExtractTemplateFaceEx(IntPtr context, UInt32 deviceId, IntPtr imageData, UInt32 imageDataLen, int isWarped, out BS2TemplateEx templateEx);

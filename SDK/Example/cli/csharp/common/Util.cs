@@ -323,6 +323,17 @@ namespace Suprema
             return defaultValue;
         }
 
+        public static float GetInput(float defaultValue)
+        {
+            string inputStr = Console.ReadLine();
+            if (inputStr.Length > 0)
+            {
+                return float.Parse(inputStr);
+            }
+
+            return defaultValue;
+        }
+
         public static bool GetTimestamp(string formatString, UInt32 defaultValue, out UInt32 timestamp)
         {
             string inputStr = Console.ReadLine();

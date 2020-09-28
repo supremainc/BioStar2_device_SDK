@@ -361,7 +361,7 @@ namespace Suprema
             SQLiteConnection connection = new SQLiteConnection(dbPath);
             connection.Open();
 
-            SQLiteCommand cmd = new SQLiteCommand("CREATE TABLE IF NOT EXISTS User(id CHAR(32) NOT NULL, formatVersion INTEGER, flag INTEGER, version INTEGER, fingerChecksum INTEGER, faceChecksum INTEGER, PRIMARY KEY(id))", connection);
+            SQLiteCommand cmd = new SQLiteCommand("CREATE TABLE IF NOT EXISTS User(id CHAR(32) NOT NULL, formatVersion INTEGER, flag INTEGER, version INTEGER, authGroupID INTEGER, faceChecksum INTEGER, PRIMARY KEY(id))", connection);
             cmd.ExecuteNonQuery();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS BS2UserSetting(userID CHAR(32), startTime INTEGER, endTime INTEGER, fingerAuthMode INTEGER, cardAuthMode INTEGER, idAuthMode INTEGER, securityLevel INTEGER, FOREIGN KEY(userID) REFERENCES User(id) ON DELETE CASCADE)";
             cmd.ExecuteNonQuery();
@@ -383,7 +383,7 @@ namespace Suprema
             cmd.ExecuteNonQuery();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS BS2Job(userID CHAR(32), code INTEGER, label CHAR(48), FOREIGN KEY(userID) REFERENCES User(id) ON DELETE CASCADE)";
             cmd.ExecuteNonQuery();
-            cmd.CommandText = "CREATE VIEW IF NOT EXISTS BS2User AS SELECT User.id AS userID, User.formatVersion, User.flag, User.version, User.fingerChecksum, User.faceChecksum, (SELECT COUNT(BS2CSNCard.userID) FROM BS2CSNCard WHERE BS2CSNCARD.userID = User.id) AS numCards, (SELECT COUNT(BS2Fingerprint.userID) FROM BS2Fingerprint WHERE BS2Fingerprint.userID = User.id) as numFingers, (SELECT COUNT(BS2Face.userID) FROM BS2Face WHERE BS2Face.userID = User.id) AS numFaces FROM User";
+            cmd.CommandText = "CREATE VIEW IF NOT EXISTS BS2User AS SELECT User.id AS userID, User.formatVersion, User.flag, User.version, User.authGroupID, User.faceChecksum, (SELECT COUNT(BS2CSNCard.userID) FROM BS2CSNCard WHERE BS2CSNCARD.userID = User.id) AS numCards, (SELECT COUNT(BS2Fingerprint.userID) FROM BS2Fingerprint WHERE BS2Fingerprint.userID = User.id) as numFingers, (SELECT COUNT(BS2Face.userID) FROM BS2Face WHERE BS2Face.userID = User.id) AS numFaces FROM User";
             cmd.ExecuteNonQuery();
 
             return connection;
@@ -409,7 +409,7 @@ namespace Suprema
 
         public bool GetUserList(ref BS2SimpleDeviceInfo deviceInfo, ref List<BS2User> userList)
         {
-            SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, fingerChecksum, faceChecksum, numCards, numFingers, numFaces FROM BS2User", connection);
+            SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, authGroupID, faceChecksum, numCards, numFingers, numFaces FROM BS2User", connection);
             SQLiteDataReader rdr = cmd.ExecuteReader();
 
             userList.Clear();
@@ -424,7 +424,7 @@ namespace Suprema
                 user.formatVersion = Convert.ToByte(rdr[1]);
                 user.flag = Convert.ToByte(rdr[2]);
                 user.version = Convert.ToUInt16(rdr[3]);
-                user.fingerChecksum = Convert.ToUInt32(rdr[4]);
+                user.authGroupID = Convert.ToUInt32(rdr[4]);
                 user.faceChecksum = Convert.ToUInt32(rdr[5]);
 
                 if (Convert.ToBoolean(deviceInfo.cardSupported))
@@ -489,7 +489,7 @@ namespace Suprema
                 byte[] uid = Encoding.UTF8.GetBytes(userID);
                 Array.Copy(uid, 0, targetUser.userID, 0, uid.Length);
 
-                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, fingerChecksum, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
+                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, authGroupID, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@userIDParam", targetUser.userID);
                 SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -499,7 +499,7 @@ namespace Suprema
                     targetUser.formatVersion = Convert.ToByte(rdr[1]);
                     targetUser.flag = Convert.ToByte(rdr[2]);
                     targetUser.version = Convert.ToUInt16(rdr[3]);
-                    targetUser.fingerChecksum = Convert.ToUInt32(rdr[4]);
+                    targetUser.authGroupID = Convert.ToUInt32(rdr[4]);
                     targetUser.faceChecksum = Convert.ToUInt32(rdr[5]);
 
                     if (Convert.ToBoolean(deviceInfo.cardSupported))
@@ -763,7 +763,7 @@ namespace Suprema
                 byte[] uid = Encoding.UTF8.GetBytes(userID);
                 Array.Copy(uid, 0, targetUser.userID, 0, uid.Length);
 
-                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, fingerChecksum, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
+                SQLiteCommand cmd = new SQLiteCommand("SELECT userID, formatVersion, flag, version, authGroupID, faceChecksum, numCards, numFingers, numFaces FROM BS2User WHERE userID = @userIDParam", connection);
                 cmd.Parameters.Clear();
                 cmd.Parameters.AddWithValue("@userIDParam", targetUser.userID);
                 SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -773,7 +773,7 @@ namespace Suprema
                     targetUser.formatVersion = Convert.ToByte(rdr[1]);
                     targetUser.flag = Convert.ToByte(rdr[2]);
                     targetUser.version = Convert.ToUInt16(rdr[3]);
-                    targetUser.fingerChecksum = Convert.ToUInt32(rdr[4]);
+                    targetUser.authGroupID = Convert.ToUInt32(rdr[4]);
                     targetUser.faceChecksum = Convert.ToUInt32(rdr[5]);
 
                     if (Convert.ToBoolean(deviceInfo.cardSupported))
@@ -1083,12 +1083,12 @@ namespace Suprema
         {
             SQLiteTransaction transaction = connection.BeginTransaction();
 
-            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, fingerChecksum, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @fingerChecksumParam, @faceChecksumParam)", connection);
+            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, authGroupID, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @authGroupIDParam, @faceChecksumParam)", connection);
             cmd.Parameters.AddWithValue("@userIDParam", userBlob.user.userID);
             cmd.Parameters.AddWithValue("@formatVersionParam", userBlob.user.formatVersion);
             cmd.Parameters.AddWithValue("@flagParam", userBlob.user.flag);
             cmd.Parameters.AddWithValue("@versionParam", userBlob.user.version);
-            cmd.Parameters.AddWithValue("@fingerChecksumParam", userBlob.user.fingerChecksum);
+            cmd.Parameters.AddWithValue("@authGroupIDParam", userBlob.user.authGroupID);
             cmd.Parameters.AddWithValue("@faceChecksumParam", userBlob.user.faceChecksum);
 
             if (cmd.ExecuteNonQuery() < 1)
@@ -1280,12 +1280,12 @@ namespace Suprema
         {
             SQLiteTransaction transaction = connection.BeginTransaction();
 
-            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, fingerChecksum, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @fingerChecksumParam, @faceChecksumParam)", connection);
+            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO User (Id, formatVersion, flag, version, authGroupID, faceChecksum) VALUES (@userIDParam, @formatVersionParam, @flagParam, @versionParam, @authGroupIDParam, @faceChecksumParam)", connection);
             cmd.Parameters.AddWithValue("@userIDParam", userBlob.user.userID);
             cmd.Parameters.AddWithValue("@formatVersionParam", userBlob.user.formatVersion);
             cmd.Parameters.AddWithValue("@flagParam", userBlob.user.flag);
             cmd.Parameters.AddWithValue("@versionParam", userBlob.user.version);
-            cmd.Parameters.AddWithValue("@fingerChecksumParam", userBlob.user.fingerChecksum);
+            cmd.Parameters.AddWithValue("@authGroupIDParam", userBlob.user.authGroupID);
             cmd.Parameters.AddWithValue("@faceChecksumParam", userBlob.user.faceChecksum);
 
             if (cmd.ExecuteNonQuery() < 1)
@@ -2184,7 +2184,7 @@ namespace Suprema
             userBlob.user.version = 0;
             userBlob.user.formatVersion = 0;
             userBlob.user.faceChecksum = 0;
-            userBlob.user.fingerChecksum = 0;
+            userBlob.user.authGroupID = 0;
             userBlob.user.numCards = 0;
             userBlob.user.numFingers = 0;
             userBlob.user.numFaces = 0;
@@ -3241,7 +3241,7 @@ namespace Suprema
             userBlob.user.version = 0;
             userBlob.user.formatVersion = 0;
             userBlob.user.faceChecksum = 0;
-            userBlob.user.fingerChecksum = 0;
+            userBlob.user.authGroupID = 0;
             userBlob.user.numCards = 0;
             userBlob.user.numFingers = 0;
             userBlob.user.numFaces = 0;

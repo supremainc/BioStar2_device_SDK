@@ -426,6 +426,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_EXTRACT_TEMPLATE_FACEEX:
 			sdkResult = extractTemplateFaceEx(context, id);
 			break;
+		case MENU_DEV_GET_INPUTCONFIG:
+			sdkResult = getInputConfig(context, id);
+			break;
 		default:
 			break;
 		}
@@ -996,4 +999,11 @@ int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)
 	DeviceControl dc(context);
 	BS2TemplateEx templateEx = {0,};
 	return dc.extractTemplateFaceEx(id, templateEx);
+}
+
+int getInputConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2InputConfig config = { 0, };
+	return cc.getInputConfig(id, config);
 }

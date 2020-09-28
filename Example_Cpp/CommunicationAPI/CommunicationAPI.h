@@ -71,6 +71,8 @@ enum EN_MENU_COMM
 	MENU_ELOG_GET_EVENTSMALLBLOB,
 	MENU_ELOG_GET_EVENTSMALLBLOBEX,
 	MENU_USER_ENROLL_FACE,
+	MENU_CONF_UPD_DEVICE_2_SERVER,
+	MENU_CONF_UPD_SERVER_2_DEVICE,
 };
 
 std::vector<MENU_ITEM> menuInfoCommAPI =
@@ -98,6 +100,8 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 	{MENU_ELOG_GET_EVENTSMALLBLOB,	"BS2_GetEventSmallBlob"},
 	{MENU_ELOG_GET_EVENTSMALLBLOBEX,	"BS2_GetEventSmallBlobEx"},
 	{MENU_USER_ENROLL_FACE,			"BS2_EnrolUser"},
+	{MENU_CONF_UPD_DEVICE_2_SERVER,	"Update device to server connection"},
+	{MENU_CONF_UPD_SERVER_2_DEVICE,	"Update server to device connection"},
 };
 
 
@@ -122,6 +126,8 @@ int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
 int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
 void displayConnectedDevices(const DeviceList& devices, bool includeSlave = false, bool includeWiegand = false);
+int updateConnectModeDevice2Server(void* context, BS2_DEVICE_ID id);
+int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id);
 #if 0
 DWORD WINAPI onWaiting(LPVOID lpParam);
 void waitForConnection();

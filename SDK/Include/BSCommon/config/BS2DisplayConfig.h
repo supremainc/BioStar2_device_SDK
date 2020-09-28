@@ -104,6 +104,7 @@ typedef uint32_t BS2_LANGUAGE;
  */
 typedef struct {
 	BS2_LANGUAGE language;		///< 4 byte
+
 	uint8_t background;			///< 1 byte
 	uint8_t volume;				///< 1 byte (0 ~ 100)
 	uint8_t bgTheme;			///< 1 byte
@@ -111,6 +112,7 @@ typedef struct {
 
 	uint16_t menuTimeout;		///< 2 bytes (0 ~ 255 sec)
 	uint16_t msgTimeout;		///< 2 bytes (500 ~ 5000 ms)
+
 	uint16_t backlightTimeout;	///< 2 bytes (in seconds)
 	BS2_BOOL displayDateTime;	///< 1 byte
 	BS2_BOOL useVoice;			///< 1 byte

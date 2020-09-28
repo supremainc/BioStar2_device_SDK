@@ -3292,27 +3292,67 @@ namespace Suprema
             Array.Clear(userBlob[0].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
 	        if (pinSupported)
 	        {
-		        Console.WriteLine("Enter the PIN code:");
-	            Console.Write(">> ");
-		        string pinString = Console.ReadLine();
-		        if (BS2Environment.BS2_PIN_HASH_SIZE < pinString.Length)
-		        {
-			        Console.WriteLine("PIN code is too long");
-			        return;
-		        }
+                Console.WriteLine("Do you want to encrypt the PIN code with a custom key and apply it? [y/n]");
+                Console.Write(">> ");
+                if (Util.IsNo())
+                {
+                    // Default
+                    Console.WriteLine("Enter the PIN code:");
+                    Console.Write(">> ");
+                    string pinString = Console.ReadLine();
+                    if (BS2Environment.BS2_PIN_HASH_SIZE < pinString.Length)
+                    {
+                        Console.WriteLine("PIN code is too long");
+                        return;
+                    }
 
-                IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pinString);
-                IntPtr pinCode = Marshal.AllocHGlobal(BS2Environment.BS2_PIN_HASH_SIZE);
-		        sdkResult = (BS2ErrorCode)API.BS2_MakePinCode(sdkContext, ptrChar, pinCode);
-		        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
-		        {
-			        Console.WriteLine("BS2_MakePinCode call failed: {0}", sdkResult);
-			        return;
-		        }
+                    IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pinString);
+                    IntPtr pinCode = Marshal.AllocHGlobal(BS2Environment.BS2_PIN_HASH_SIZE);
+                    sdkResult = (BS2ErrorCode)API.BS2_MakePinCode(sdkContext, ptrChar, pinCode);
+                    if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+                    {
+                        Console.WriteLine("BS2_MakePinCode call failed: {0}", sdkResult);
+                        return;
+                    }
 
-                Marshal.Copy(pinCode, userBlob[0].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
-                Marshal.FreeHGlobal(ptrChar);
-                Marshal.FreeHGlobal(pinCode);
+                    Marshal.Copy(pinCode, userBlob[0].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
+                    Marshal.FreeHGlobal(ptrChar);
+                    Marshal.FreeHGlobal(pinCode);
+                }
+                else
+                {
+                    Console.WriteLine("Please enter the PIN encryption key.");
+                    Console.WriteLine("You may have changed the key using the function BS2_SetDataEncryptKey.");
+                    Console.Write(">> ");
+                    string keyString = Console.ReadLine();
+                    byte[] buff = Encoding.UTF8.GetBytes(keyString);
+
+                    BS2EncryptKey keyInfo = Util.AllocateStructure<BS2EncryptKey>();
+                    Array.Clear(keyInfo.key, 0, BS2Environment.BS2_ENC_KEY_SIZE);
+                    Array.Copy(buff, 0, keyInfo.key, 0, keyString.Length);
+
+                    Console.WriteLine("Enter the PIN code:");
+                    Console.Write(">> ");
+                    string pinString = Console.ReadLine();
+                    if (BS2Environment.BS2_PIN_HASH_SIZE < pinString.Length)
+                    {
+                        Console.WriteLine("PIN code is too long");
+                        return;
+                    }
+
+                    IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pinString);
+                    IntPtr pinCode = Marshal.AllocHGlobal(BS2Environment.BS2_PIN_HASH_SIZE);
+                    sdkResult = (BS2ErrorCode)API.BS2_MakePinCodeWithKey(sdkContext, ptrChar, pinCode, ref keyInfo);
+                    if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+                    {
+                        Console.WriteLine("BS2_MakePinCodeWithKey call failed: {0}", sdkResult);
+                        return;
+                    }
+
+                    Marshal.Copy(pinCode, userBlob[0].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
+                    Marshal.FreeHGlobal(ptrChar);
+                    Marshal.FreeHGlobal(pinCode);
+                }
 	        }
 
             Console.WriteLine("Do you want to register private auth mode? [y/n]");
@@ -3917,6 +3957,8 @@ namespace Suprema
             Console.WriteLine("     |  |--cardAuthMode[{0}]", userBlob.setting.cardAuthMode);
             Console.WriteLine("     |  |--idAuthMode[{0}]", userBlob.setting.idAuthMode);
             Console.WriteLine("     |  +--securityLevel[{0}]", userBlob.setting.securityLevel);
+            Console.WriteLine("     +--name[{0}]", Encoding.Default.GetString(userBlob.name));
+            Console.WriteLine("     +--pin[{0}]", BitConverter.ToString(userBlob.pin));
             Console.WriteLine("     +--card");
             printCard(userBlob.cardObjs, userBlob.user.numCards);
             Console.WriteLine("     +--finger");

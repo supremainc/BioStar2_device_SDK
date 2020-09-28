@@ -51,8 +51,11 @@ void onDeviceConnected(BS2_DEVICE_ID id)
 	if (!getDeviceLogs(id, timezone))
 		return;
 
-	//int sdkResult = BS2_StartMonitoringLog(sdkContext, id, onLogReceived);
+#if REALTIME_LOG_TEMPERATURE
 	int sdkResult = BS2_StartMonitoringLogEx(sdkContext, id, onLogReceivedEx);
+#else
+	int sdkResult = BS2_StartMonitoringLog(sdkContext, id, onLogReceived);
+#endif
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_StartMonitoringLogEx call failed: %d", sdkResult);
 
@@ -508,6 +511,14 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = uc.enrollUser(id);
 			break;
+		case MENU_CONF_UPD_DEVICE_2_SERVER:
+			id = selectDeviceID(deviceList, false, false);
+			sdkResult = updateConnectModeDevice2Server(context, id);
+			break;
+		case MENU_CONF_UPD_SERVER_2_DEVICE:
+			id = selectDeviceID(deviceList, false, false);
+			sdkResult = updateConnectModeServer2Device(context, id);
+			break;
 		default:
 			break;
 		}
@@ -693,6 +704,27 @@ int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* 
 	}
 
 	return sdkResult;
+}
+
+int updateConnectModeDevice2Server(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	string msg;
+
+	msg = "Insert server IP";
+	string ip = Utility::getInput<string>(msg);
+
+	msg = "Insert server port";
+	BS2_PORT port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+
+	return cc.updateConnectModeDevice2Server(id, ip, port);
+}
+
+int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+
+	return cc.updateConnectModeServer2Device(id);
 }
 
 #if 0

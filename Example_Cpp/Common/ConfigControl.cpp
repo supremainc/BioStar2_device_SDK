@@ -74,7 +74,7 @@ int ConfigControl::setDisplayConfig(BS2_DEVICE_ID id, const BS2DisplayConfig& co
 	return sdkResult;
 }
 
-int ConfigControl::getIPConfig(BS2_DEVICE_ID id, BS2IpConfig& config)
+int ConfigControl::getIPConfig(BS2_DEVICE_ID id, BS2IpConfig& config) const
 {
 	int sdkResult = BS2_GetIPConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -85,11 +85,31 @@ int ConfigControl::getIPConfig(BS2_DEVICE_ID id, BS2IpConfig& config)
 	return sdkResult;
 }
 
+int ConfigControl::setIPConfig(BS2_DEVICE_ID id, const BS2IpConfig& config)
+{
+	int sdkResult = BS2_SetIPConfig(context_, id, const_cast<BS2IpConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetIPConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::getFactoryConfig(BS2_DEVICE_ID id, BS2FactoryConfig& config)
 {
 	int sdkResult = BS2_GetFactoryConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetFactoryConfig call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::getInputConfig(BS2_DEVICE_ID id, BS2InputConfig& config)
+{
+	int sdkResult = BS2_GetInputConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetInputConfig call failed: %d", sdkResult);
 	else
 		print(config);
 
@@ -235,6 +255,32 @@ int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_M
 	return sdkResult;
 }
 
+int ConfigControl::updateConnectModeDevice2Server(BS2_DEVICE_ID id, string serverIP, BS2_PORT serverPort)
+{
+	BS2IpConfig config = { 0, };
+	int sdkResult = getIPConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.connectionMode = BS2_CONNECTION_MODE_DEVICE_TO_SERVER;
+	config.serverPort = serverPort;
+	strcpy(config.serverAddr, serverIP.c_str());
+
+	return setIPConfig(id, config);
+}
+
+int ConfigControl::updateConnectModeServer2Device(BS2_DEVICE_ID id)
+{
+	BS2IpConfig config = { 0, };
+	int sdkResult = getIPConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.connectionMode = BS2_CONNECTION_MODE_SERVER_TO_DEVICE;
+
+	return setIPConfig(id, config);
+}
+
 int ConfigControl::updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mode)
 {
 	BS2Rs485Config config = { 0, };
@@ -254,7 +300,7 @@ int ConfigControl::updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mod
 	return sdkResult;
 }
 
-void ConfigControl::print(const BS2SystemConfig& config)
+void ConfigControl::print(const BS2SystemConfig& config) const
 {
 	TRACE("==[BS2SystemConfig]==");
 	TRACE("timezone:%d", config.timezone);
@@ -273,7 +319,7 @@ void ConfigControl::print(const BS2SystemConfig& config)
 	TRACE("useCardOperationMask:0x%08x", config.useCardOperationMask);
 }
 
-void ConfigControl::print(const BS2DisplayConfig& config)
+void ConfigControl::print(const BS2DisplayConfig& config) const
 {
 	TRACE("==[BS2DisplayConfig]==");
 	TRACE("language:%u", config.language);
@@ -296,7 +342,7 @@ void ConfigControl::print(const BS2DisplayConfig& config)
 	//uint8_t tnaIcon[BS2_MAX_TNA_KEY];		///< 16 bytes : tnaIcon
 }
 
-void ConfigControl::print(const BS2IpConfig& config)
+void ConfigControl::print(const BS2IpConfig& config) const
 {
 	TRACE("==[BS2IpConfig]==");
 	TRACE("connectionMode:%s", config.connectionMode ? "D2S" : "S2D");
@@ -312,7 +358,7 @@ void ConfigControl::print(const BS2IpConfig& config)
 	TRACE("sslServerPort:%u", config.sslServerPort);
 }
 
-void ConfigControl::print(const BS2FactoryConfig& config)
+void ConfigControl::print(const BS2FactoryConfig& config) const
 {
 	TRACE("==[BS2FactoryConfig]==");
 	TRACE("deviceID:%u", config.deviceID);
@@ -330,7 +376,7 @@ void ConfigControl::print(const BS2FactoryConfig& config)
 		config.firmwareVer.major, config.firmwareVer.minor, config.firmwareVer.ext, config.firmwareRev);
 }
 
-void ConfigControl::print(const BS2FingerprintConfig& config)
+void ConfigControl::print(const BS2FingerprintConfig& config) const
 {
 	TRACE("==[BS2FingerprintConfig]==");
 	TRACE("securityLevel:%u", config.securityLevel);
@@ -346,7 +392,7 @@ void ConfigControl::print(const BS2FingerprintConfig& config)
 	TRACE("checkDuplicate:%u", config.checkDuplicate);
 }
 
-void ConfigControl::print(const BS2FaceConfig& config)
+void ConfigControl::print(const BS2FaceConfig& config) const
 {
 	TRACE("==[BS2FaceConfig]==");
 	TRACE("securityLevel:%u", config.securityLevel);
@@ -360,7 +406,7 @@ void ConfigControl::print(const BS2FaceConfig& config)
 	TRACE("checkDuplicate:%u", config.checkDuplicate);
 }
 
-void ConfigControl::print(const BS2DesFireCardConfigEx& config)
+void ConfigControl::print(const BS2DesFireCardConfigEx& config) const
 {
 	TRACE("==[BS2DesFireCardConfigEx]==");
 	TRACE("appMasterKey:%s", Utility::getHexaString(config.desfireAppKey.appMasterKey, 16).c_str());	// maybe 0
@@ -370,7 +416,7 @@ void ConfigControl::print(const BS2DesFireCardConfigEx& config)
 	TRACE("fileWriteKeyNumber:%u", config.desfireAppKey.fileWriteKeyNumber);
 }
 
-void ConfigControl::print(const BS2AuthConfigExt& config)
+void ConfigControl::print(const BS2AuthConfigExt& config) const
 {
 	TRACE("==[BS2AuthConfigExt]==");
 	TRACE("+--extAuthSchedule");
@@ -425,7 +471,7 @@ void ConfigControl::print(const BS2AuthConfigExt& config)
 	TRACE("+--numOperators : %u", config.numOperators);
 }
 
-void ConfigControl::print(const BS2FaceConfigExt& config)
+void ConfigControl::print(const BS2FaceConfigExt& config) const
 {
 	TRACE("==[BS2FaceConfigExt]==");
 	TRACE("+--thermalCheckMode : %u", config.thermalCheckMode);
@@ -440,7 +486,7 @@ void ConfigControl::print(const BS2FaceConfigExt& config)
 	TRACE("+--faceCheckOrder : %u", config.faceCheckOrder);
 }
 
-void ConfigControl::print(const BS2ThermalCameraConfig& config)
+void ConfigControl::print(const BS2ThermalCameraConfig& config) const
 {
 	TRACE("==[BS2ThermalCameraConfig]==");
 	TRACE("+--distance : %u", config.distance);
@@ -452,4 +498,36 @@ void ConfigControl::print(const BS2ThermalCameraConfig& config)
 	TRACE("   +--height : %u", config.roi.height);
 	TRACE("+--useBodyCompensation : %u", config.useBodyCompensation);
 	TRACE("+--compensationTemperature : %d", config.compensationTemperature);
+}
+
+void ConfigControl::print(const BS2InputConfig& config) const
+{
+	TRACE("==[BS2InputConfig]==");
+	TRACE("+--distance : %u", config.numInputs);
+	TRACE("|--emissionRate : %u", config.numSupervised);
+
+	for (int idx = 0; idx < config.numInputs; idx++)
+	{
+		TRACE("+--Port(%u)", idx);
+		TRACE("   |--portIndex : %u", config.supervised_inputs[idx].portIndex);
+		TRACE("   |--enabled : %u", config.supervised_inputs[idx].enabled);
+		TRACE("   |--supervised_index : %u", config.supervised_inputs[idx].supervised_index);
+		print(config.supervised_inputs[idx].config);
+	}
+}
+
+void ConfigControl::print(const BS2SupervisedInputConfig& config) const
+{
+	TRACE("   +--[BS2SupervisedInputConfig]");
+	print(config.shortInput);
+	print(config.openInput);
+	print(config.onInput);
+	print(config.offInput);
+}
+
+void ConfigControl::print(const BS2SVInputRange& inputRange) const
+{
+	TRACE("      +--[BS2SVInputRange]");
+	TRACE("         |--minValue : %u", inputRange.minValue);
+	TRACE("         +--maxValue : %u", inputRange.maxValue);
 }

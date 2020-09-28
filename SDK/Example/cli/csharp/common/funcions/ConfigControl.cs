@@ -25,16 +25,16 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get VoipConfig", getVoipConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set VoipConfig", setVoipConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FaceConfig", getFaceConfig));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FaceConfig", setFaceConfig));            
-            
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FaceConfig", setFaceConfig));
+
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get auth group", getAuthGroup));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove auth group", removeAuthGroup));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set auth group", setAuthGroup));            
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set auth group", setAuthGroup));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("disable ssl", disbleSSL));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigEx", getRS485ConfigEx));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigEx", setRS485ConfigEx));      
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigEx", setRS485ConfigEx));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfigEx", getCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfigEx", setCardConfigEx));
@@ -65,6 +65,13 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get AuthConfig", getAuthConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set AuthConfig", setAuthConfig));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get AuthConfigEx", getAuthConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set AuthConfigEx", setAuthConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FaceConfigEx", getFaceConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FaceConfigEx", setFaceConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get ThermalCameraConfig", getThermalCameraConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set ThermalCameraConfig", setThermalCameraConfig));
 
             return functionList;
         }
@@ -115,7 +122,7 @@ namespace Suprema
             Console.WriteLine("     |--dnsAddrV6 : {0}", Encoding.UTF8.GetString(config.dnsAddrV6), BitConverter.ToString(config.dnsAddrV6));
             Console.WriteLine("     |--serverIpAddressV6 : {0}", Encoding.UTF8.GetString(config.serverIpAddressV6), BitConverter.ToString(config.serverIpAddressV6));
             Console.WriteLine("     |--serverPortV6 : {0}", config.serverPortV6);
-            Console.WriteLine("     |--sslServerPortV6 : {0}", config.sslServerPortV6 );			
+            Console.WriteLine("     |--sslServerPortV6 : {0}", config.sslServerPortV6);
             Console.WriteLine("     |--portV6 : {0}", config.portV6);
             Console.WriteLine("     |--numOfAllocatedAddressV6 : {0}", config.numOfAllocatedAddressV6);
             Console.WriteLine("     |--numOfAllocatedGatewayV6 : {0}", config.numOfAllocatedGatewayV6);
@@ -186,10 +193,10 @@ namespace Suprema
                 string strInput;
                 byte[] bytesInput = null;
                 if (config.useDhcpV6 == 0)
-                { 
+                {
                     Console.WriteLine("staticIpAddressV6 ? [(Blank:{0})]", Encoding.UTF8.GetString(config.staticIpAddressV6));
                     Console.Write(">>>> ");
-                    strInput = Console.ReadLine();                    
+                    strInput = Console.ReadLine();
                     if (strInput.Length == 0)
                     {
                         Console.WriteLine("   Do you want to keep the value? [Y(keep) / N(clear), (Blank:Y)]");
@@ -203,7 +210,7 @@ namespace Suprema
                     {
                         Array.Clear(config.staticIpAddressV6, 0, config.staticIpAddressV6.Length);
                         bytesInput = Encoding.UTF8.GetBytes(strInput);
-                        Array.Copy(bytesInput, 0, config.staticIpAddressV6, 0, Math.Min(bytesInput.Length, config.staticIpAddressV6.Length));                    
+                        Array.Copy(bytesInput, 0, config.staticIpAddressV6, 0, Math.Min(bytesInput.Length, config.staticIpAddressV6.Length));
                     }
                     if (Encoding.UTF8.GetString(config.staticIpAddressV6).Length > 0)
                     {
@@ -423,7 +430,7 @@ namespace Suprema
         public void setCard1xConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS1CardConfig card1xConfig = Util.AllocateStructure<BS1CardConfig>();
-            
+
             card1xConfig.magicNo = 0;
             card1xConfig.disabled = 0;
             card1xConfig.useCSNOnly = 0;
@@ -444,8 +451,8 @@ namespace Suprema
             {
                 Console.WriteLine("Got error({0}).", result);
             }
-        }          
-        
+        }
+
         void getSystemExtConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2SystemConfigExt config;
@@ -497,14 +504,14 @@ namespace Suprema
 
         public void setVoipConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
-            BS2VoipConfig config = Util.AllocateStructure<BS2VoipConfig>();            
+            BS2VoipConfig config = Util.AllocateStructure<BS2VoipConfig>();
 
             string url = "192.168.0.1";
             byte[] str = Encoding.UTF8.GetBytes(url);
             Array.Clear(config.serverUrl, 0, BS2Environment.BS2_URL_SIZE);
             Array.Copy(str, 0, config.serverUrl, 0, str.Length);
 
-            config.serverPort = 5061; 
+            config.serverPort = 5061;
 
             string userId = "홍길동";
             byte[] str2 = Encoding.UTF8.GetBytes(userId);
@@ -539,8 +546,8 @@ namespace Suprema
             string descript2 = "사임당 나아가신다.";
             byte[] str7 = Encoding.UTF8.GetBytes(descript2);
             Array.Clear(config.phonebook[1].descript, 0, BS2Environment.BS2_MAX_DESCRIPTION_NAME_LEN);
-            Array.Copy(str7, 0, config.phonebook[1].descript, 0, str7.Length);  
-         
+            Array.Copy(str7, 0, config.phonebook[1].descript, 0, str7.Length);
+
 
             Console.WriteLine("Trying to set Voip configuration.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetVoipConfig(sdkContext, deviceID, ref config);
@@ -553,7 +560,7 @@ namespace Suprema
         void getFaceConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2FaceConfig config;
-            Console.WriteLine("Trying to get SystemExtConfig");
+            Console.WriteLine("Trying to get FaceConfig");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFaceConfig(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
@@ -569,13 +576,92 @@ namespace Suprema
         {
             BS2FaceConfig config = Util.AllocateStructure<BS2FaceConfig>();
 
+            const UInt32 faceExMask = (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX;
+
+            Console.WriteLine("Insert securityLevel. (0: Basic, 1: Highly secure, 2: Most highly secure)");
+            Console.Write(">> ");
+            config.securityLevel = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert lightCondition. (0: In door, 1: Out door, 2: Automatic");
+            Console.Write(">> ");
+            config.lightCondition = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert enrollThreshold. (0: Most strict - 9: Least strict, 4: Default)");
+            Console.Write(">> ");
+            config.enrollThreshold = Util.GetInput((byte)4);
+
+            Console.WriteLine("Insert detectSensitivity. (0: Off, 1: Low, 2: Basic, 3: High)");
+            Console.Write(">> ");
+            config.detectSensitivity = Util.GetInput((byte)2);
+
+            if ((deviceInfoEx.supported & faceExMask) == faceExMask)
+            {
+                Console.WriteLine("Insert enrollTimeout. (FSF2 default: 20s)");
+                Console.Write(">> ");
+                config.enrollTimeout = Util.GetInput((UInt16)20);
+
+                Console.WriteLine("Insert lfdLevel. (0: Not use, 1: Strict, 2: More Strict, 3: Most Strict... FSF2 default: 1)");
+                Console.Write(">> ");
+                config.lfdLevel = Util.GetInput((byte)1);
+            }
+            else
+            {
+                Console.WriteLine("Insert enrollTimeout. (FS2,FL default: 60s)");
+                Console.Write(">> ");
+                config.enrollTimeout = Util.GetInput((UInt16)60);
+
+                Console.WriteLine("Insert lfdLevel. (0: Not use, 1: Strict, 2: More Strict, 3: Most Strict... FS2,FL default: 0)");
+                Console.Write(">> ");
+                config.lfdLevel = Util.GetInput((byte)0);
+            }
+
+            Console.WriteLine("Insert quickEnrollment. (0: 3-step enrollment(High quality), 1: 1-step enrollment(Quick)");
+            Console.Write(">> ");
+            config.quickEnrollment = Util.GetInput((byte)1);
+
+            Console.WriteLine("Insert previewOption. (0: Not used, 1: 1/2 stage, 2: All stages)");
+            Console.Write(">> ");
+            config.previewOption = Util.GetInput((byte)1);
+
+            Console.WriteLine("insert checkDuplicate. (0 or 1)");
+            Console.Write(">> ");
+            config.checkDuplicate = Util.GetInput((byte)0);
+
+            if ((deviceInfoEx.supported & faceExMask) == faceExMask)
+            {
+                // Check F2
+                Console.WriteLine("Insert operationMode. (0: Fusion, 1: Visual, 2: Visual (+IR detect)");
+                Console.Write(">> ");
+                config.operationMode = Util.GetInput((byte)0);
+
+                Console.WriteLine("Insert maxRotation. (default: 15)");
+                Console.Write(">> ");
+                config.maxRotation = Util.GetInput((byte)15);
+
+                Console.WriteLine("Insert min value of faceWidth. (default: 66)");
+                Console.Write(">> ");
+                config.faceWidth.min = Util.GetInput((UInt16)66);
+
+                Console.WriteLine("Insert max value of faceWidth. (default: 185)");
+                Console.Write(">> ");
+                config.faceWidth.max = Util.GetInput((UInt16)185);
+
+                Console.WriteLine("Insert x value of searchRange. (default: 144)");
+                Console.Write(">> ");
+                config.searchRange.x = Util.GetInput((UInt16)144);
+
+                Console.WriteLine("Insert width value of searchRange. (default: 432)");
+                Console.Write(">> ");
+                config.searchRange.width = Util.GetInput((UInt16)432);
+            }
+
             Console.WriteLine("Trying to set FaceConfig configuration.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetFaceConfig(sdkContext, deviceID, ref config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("Got error({0}).", result);
             }
-        }        
+        }
 
         #region Auth Group
         public void getAuthGroup(IntPtr sdkContext, uint deviceID, bool isMasterDevice)
@@ -769,7 +855,7 @@ namespace Suprema
             }
 
             Marshal.FreeHGlobal(authGroupListObj);
-        }        
+        }
         #endregion
 
         public void disbleSSL(IntPtr sdkContext, uint deviceID, bool isMasterDevice)
@@ -783,7 +869,7 @@ namespace Suprema
             }
         }
 
-       
+
         void getRS485ConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Rs485ConfigEX config;
@@ -843,7 +929,7 @@ namespace Suprema
                 Console.WriteLine("Got error({0}).", result);
             }
 
-        }        
+        }
 
         void getCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
@@ -1426,6 +1512,316 @@ namespace Suprema
             }
         }
 
+        public void getAuthConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2AuthConfigExt authConfigExt;
+            Console.WriteLine("Trying to get authentication ext configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetAuthConfigExt(sdkContext, deviceID, out authConfigExt);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(authConfigExt);
+        }
+
+        public void setAuthConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2AuthConfigExt authConfigExt = Util.AllocateStructure<BS2AuthConfigExt>();
+            UInt32 mode;
+
+            Console.WriteLine("Register FaceEx authentication mode");
+            do
+            {
+                Console.WriteLine(" 11. Face");
+                Console.WriteLine(" 12. Face + Fingerprint");
+                Console.WriteLine(" 13. Face + PIN");
+                Console.WriteLine(" 14. Face + Fingerprint/PIN");
+                Console.WriteLine(" 15. Face + Fingerprint + PIN");
+                Console.WriteLine("999. No more changes.");
+                Console.Write(">> ");
+
+                mode = (UInt32)Util.GetInput();
+                if ((UInt32)BS2ExtFaceAuthModeEnum.EXT_FACE_ONLY <= mode &&
+                    mode < (UInt32)BS2ExtFaceAuthModeEnum.NUM_OF_EXT_FACE_AUTH_MODE)
+                {
+                    Console.WriteLine("0. Off (No time)");
+                    Console.WriteLine("1. On (Always)");
+                    Console.Write(">> ");
+                    UInt32 onoff = (UInt32)Util.GetInput();
+                    if (0 == onoff || 1 == onoff)
+                    {
+                        authConfigExt.extAuthSchedule[mode] = onoff;
+                    }
+                }
+            } while (mode != 999);
+
+            Console.WriteLine("Register Fingerprint authentication mode");
+            do
+            {
+                Console.WriteLine(" 16. Fingerprint");
+                Console.WriteLine(" 17. Fingerprint + Face");
+                Console.WriteLine(" 18. Fingerprint + PIN");
+                Console.WriteLine(" 19. Fingerprint + Face/PIN");
+                Console.WriteLine(" 20. Fingerprint + Face + PIN");
+                Console.WriteLine("999. No more changes.");
+                Console.Write(">> ");
+
+                mode = (UInt32)Util.GetInput();
+                if ((UInt32)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_ONLY <= mode &&
+                    mode < (UInt32)BS2ExtFingerprintAuthModeEnum.NUM_OF_EXT_FINGERPRINT_AUTH_MODE)
+                {
+                    Console.WriteLine("0. Off (No time)");
+                    Console.WriteLine("1. On (Always)");
+                    Console.Write(">> ");
+                    UInt32 onoff = (UInt32)Util.GetInput();
+                    if (0 == onoff || 1 == onoff)
+                    {
+                        authConfigExt.extAuthSchedule[mode] = onoff;
+                    }
+                }
+            } while (mode != 999);
+
+            Console.WriteLine("Register Card authentication mode");
+            do
+            {
+                Console.WriteLine(" 21. Card");
+                Console.WriteLine(" 22. Card + Face");
+                Console.WriteLine(" 23. Card + Fingerprint");
+                Console.WriteLine(" 24. Card + PIN");
+                Console.WriteLine(" 25. Card + Face/Fingerprint");
+                Console.WriteLine(" 26. Card + Face/PIN");
+                Console.WriteLine(" 27. Card + Fingerprint/PIN");
+                Console.WriteLine(" 28. Card + Face/Fingerprint/PIN");
+                Console.WriteLine(" 29. Card + Face + Fingerprint");
+                Console.WriteLine(" 30. Card + Face + PIN");
+                Console.WriteLine(" 31. Card + Fingerprint + Face");
+                Console.WriteLine(" 32. Card + Fingerprint + PIN");
+                Console.WriteLine(" 33. Card + Face/Fingerprint + PIN");
+                Console.WriteLine(" 34. Card + Face + Fingerprint/PIN");
+                Console.WriteLine(" 35. Card + Fingerprint + Face/PIN");
+                Console.WriteLine("999. No more changes.");
+                Console.Write(">> ");
+
+                mode = (UInt32)Util.GetInput();
+                if ((UInt32)BS2ExtCardAuthModeEnum.EXT_CARD_ONLY <= mode &&
+                    mode < (UInt32)BS2ExtCardAuthModeEnum.NUM_OF_EXT_CARD_AUTH_MODE)
+                {
+                    Console.WriteLine("0. Off (No time)");
+                    Console.WriteLine("1. On (Always)");
+                    Console.Write(">> ");
+                    UInt32 onoff = (UInt32)Util.GetInput();
+                    if (0 == onoff || 1 == onoff)
+                    {
+                        authConfigExt.extAuthSchedule[mode] = onoff;
+                    }
+                }
+            } while (mode != 999);
+
+            Console.WriteLine("Register ID authentication mode");
+            do
+            {
+                Console.WriteLine(" 36. ID + Face");
+                Console.WriteLine(" 37. ID + Fingerprint");
+                Console.WriteLine(" 38. ID + PIN");
+                Console.WriteLine(" 39. ID + Face/Fingerprint");
+                Console.WriteLine(" 40. ID + Face/PIN");
+                Console.WriteLine(" 41. ID + Fingerprint/PIN");
+                Console.WriteLine(" 42. ID + Face/Fingerprint/PIN");
+                Console.WriteLine(" 43. ID + Face + Fingerprint");
+                Console.WriteLine(" 44. ID + Face + PIN");
+                Console.WriteLine(" 45. ID + Fingerprint + Face");
+                Console.WriteLine(" 46. ID + Fingerprint + PIN");
+                Console.WriteLine(" 47. ID + Face/Fingerprint + PIN");
+                Console.WriteLine(" 48. ID + Face + Fingerprint/PIN");
+                Console.WriteLine(" 49. ID + Fingerprint + Face/PIN");
+                Console.WriteLine("999. No more changes.");
+                Console.Write(">> ");
+
+                mode = (UInt32)Util.GetInput();
+                if ((UInt32)BS2ExtIDAuthModeEnum.EXT_ID_FACE <= mode &&
+                    mode < (UInt32)BS2ExtIDAuthModeEnum.NUM_OF_EXT_ID_AUTH_MODE)
+                {
+                    Console.WriteLine("0. Off (No time)");
+                    Console.WriteLine("1. On (Always)");
+                    Console.Write(">> ");
+                    UInt32 onoff = (UInt32)Util.GetInput();
+                    if (0 == onoff || 1 == onoff)
+                    {
+                        authConfigExt.extAuthSchedule[mode] = onoff;
+                    }
+                }
+            } while (mode != 999);
+
+            Console.WriteLine("Insert global APB option. (0: Not use, 1: Use)");
+            Console.Write(">> ");
+            authConfigExt.useGlobalAPB = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert global APB fail action. (0: Not use, 1: Soft APB, 2: Hard APB)");
+            Console.Write(">> ");
+            authConfigExt.globalAPBFailAction = Util.GetInput((byte)0);
+
+            Console.WriteLine("Using group matching. (0: Not use, 1: Use)");
+            Console.Write(">> ");
+            authConfigExt.useGroupMatching = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert private authentication. (0: Not use, 1: Use)");
+            Console.Write(">> ");
+            authConfigExt.usePrivateAuth = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert face detection level. (0: Not use, 1: Normal mode, 2: Strict mode)");
+            Console.Write(">> ");
+            authConfigExt.faceDetectionLevel = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert server matching option. (0: Not use, 1: Use)");
+            Console.Write(">> ");
+            authConfigExt.useServerMatching = Util.GetInput((byte)0);
+
+            Console.WriteLine("Using full access. (0: Not use, 1: Use)");
+            Console.Write(">> ");
+            authConfigExt.useFullAccess = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert matching timeout in seconds");
+            Console.Write(">> ");
+            authConfigExt.matchTimeout = Util.GetInput((byte)5);
+
+            Console.WriteLine("Insert authentication timeout in seconds");
+            Console.Write(">> ");
+            authConfigExt.authTimeout = Util.GetInput((byte)10);
+
+            authConfigExt.numOperators = 0;
+
+            Console.WriteLine("Trying to set authentication ext configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetAuthConfigExt(sdkContext, deviceID, ref authConfigExt);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
+        public void getFaceConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FaceConfigExt faceConfigExt;
+            Console.WriteLine("Trying to get face ext configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFaceConfigExt(sdkContext, deviceID, out faceConfigExt);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(faceConfigExt);
+        }
+
+        public void setFaceConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FaceConfigExt faceConfigExt = Util.AllocateStructure<BS2FaceConfigExt>();
+
+            Console.WriteLine("Insert thermal check mode. (0: Not use, 1: Hard, 2: Soft)");
+            Console.Write(">> ");
+            faceConfigExt.thermalCheckMode = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert mask check mode. (0: Not use, 1: Hard, 2: Soft)");
+            Console.Write(">> ");
+            faceConfigExt.maskCheckMode = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert thermal format. (0: Fahrenheit, 1: Celsius)");
+            Console.Write(">> ");
+            faceConfigExt.thermalFormat = Util.GetInput((byte)1);
+
+            Console.WriteLine("Insert high temperature value in Celsius. (30.0 ~ 45.0℃)");
+            Console.Write(">> ");
+            float threshold = Util.GetInput(38.0F);
+            faceConfigExt.thermalThreshold = (UInt16)(threshold * 100);
+
+            Console.WriteLine("Insert mask detection level. (0: Not use, 1: Normal, 2: High, 3: Very high)");
+            Console.Write(">> ");
+            faceConfigExt.maskDetectionLevel = Util.GetInput((byte)0);
+
+            Console.WriteLine("Do you want to record the temperature in the event log? [y/n]");
+            Console.Write(">> ");
+            faceConfigExt.auditTemperature = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to use reject sound? [y/n]");
+            Console.Write(">> ");
+            faceConfigExt.useRejectSound = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to use overlapped thermal? [y/n]");
+            Console.Write(">> ");
+            faceConfigExt.useOverlapThermal = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Insert face check order.");
+            Console.WriteLine(" 0: Face check after auth [default]");
+            Console.WriteLine(" 1: Face check before auth");
+            Console.WriteLine(" 2: Face check without auth");
+            Console.Write(">> ");
+            faceConfigExt.faceCheckOrder = Util.GetInput((byte)0);
+
+            Console.WriteLine("Trying to set face ext configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetFaceConfigExt(sdkContext, deviceID, ref faceConfigExt);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
+        public void getThermalCameraConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2ThermalCameraConfig config;
+            Console.WriteLine("Trying to get thermal camera configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetThermalCameraConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setThermalCameraConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2ThermalCameraConfig config = Util.AllocateStructure<BS2ThermalCameraConfig>();
+
+            Console.WriteLine("Insert camera distance from user. (cm. default: 70)");
+            Console.Write(">> ");
+            config.distance = Util.GetInput((byte)70);
+
+            Console.WriteLine("Insert emission rate. (95/97/98, default: 98)");
+            Console.Write(">> ");
+            config.emissionRate = Util.GetInput((byte)98);
+
+            Console.WriteLine("Insert ROI(Region of interest).");
+            Console.WriteLine("  x");
+            Console.Write("  >> ");
+            config.roi.x = Util.GetInput((ushort)0);
+            Console.WriteLine("  y");
+            Console.Write("  >> ");
+            config.roi.y = Util.GetInput((ushort)0);
+            Console.WriteLine("  width");
+            Console.Write("  >> ");
+            config.roi.width = Util.GetInput((ushort)0);
+            Console.WriteLine("  height");
+            Console.Write("  >> ");
+            config.roi.height = Util.GetInput((ushort)0);
+
+            Console.WriteLine("Do you want to use body compensation [y/n]");
+            Console.Write(">> ");
+            config.useBodyCompensation = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Insert compensation temperature *10. If you want -4.5℃, it is -45. (-50 ~ 50)");
+            Console.Write(">> ");
+            config.compensationTemperature = (sbyte)Util.GetInput();
+
+            Console.WriteLine("Trying to set thermal camera configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetThermalCameraConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
         void print(IntPtr sdkContext, BS2DstConfig config)
         {
             Console.WriteLine(">>>> Daylight saving time configuration ");
@@ -1527,13 +1923,13 @@ namespace Suprema
         {
             Console.WriteLine(">>>> SystemExt configuration ");
             Console.WriteLine("     |--primarySecureKey : {0}", BitConverter.ToString(config.primarySecureKey));
-            Console.WriteLine("     |--secondarySecureKey : {0}", BitConverter.ToString(config.secondarySecureKey));           
+            Console.WriteLine("     |--secondarySecureKey : {0}", BitConverter.ToString(config.secondarySecureKey));
             Console.WriteLine("<<<< ");
         }
 
         void print(IntPtr sdkContext, BS2VoipConfig config)
         {
-            Console.WriteLine(">>>> Voip configuration ");            
+            Console.WriteLine(">>>> Voip configuration ");
             Console.WriteLine("     |--serverUrl : {0}", Encoding.UTF8.GetString(config.serverUrl).TrimEnd('\0'));
             Console.WriteLine("     |--serverPort : {0}", config.serverPort);
             Console.WriteLine("     |--userID : {0}", Encoding.UTF8.GetString(config.userID).TrimEnd('\0'));
@@ -1542,30 +1938,36 @@ namespace Suprema
             Console.WriteLine("     |--dtmfMode : {0}", config.dtmfMode);
             Console.WriteLine("     |--bUse : {0}", config.bUse);
             Console.WriteLine("     |--reseverd : {0}", config.reseverd[0]);
-            Console.WriteLine("     |--numPhonBook : {0}", config.numPhonBook);            
+            Console.WriteLine("     |--numPhonBook : {0}", config.numPhonBook);
             for (int idx = 0; idx < config.numPhonBook; ++idx)
             {
                 Console.WriteLine("     |++PhoneItem[{0}]", idx);
                 Console.WriteLine("         |--phoneNumber : {0}", Encoding.UTF8.GetString(config.phonebook[idx].phoneNumber).TrimEnd('\0'));
-                Console.WriteLine("         |--descript : {0}", Encoding.UTF8.GetString(config.phonebook[idx].descript).TrimEnd('\0'));                
+                Console.WriteLine("         |--descript : {0}", Encoding.UTF8.GetString(config.phonebook[idx].descript).TrimEnd('\0'));
             }
-           
-            
+
+
             Console.WriteLine("<<<< ");
         }
 
         void print(IntPtr sdkContext, BS2FaceConfig config)
-        {          
-            Console.WriteLine(">>>> Face configuration ");            
-            Console.WriteLine("     |--securityLevel : {0}", config.securityLevel);           
+        {
+            Console.WriteLine(">>>> Face configuration ");
+            Console.WriteLine("     |--securityLevel : {0}", config.securityLevel);
             Console.WriteLine("     |--lightCondition : {0}", config.lightCondition);
-            Console.WriteLine("     |--enrollThreshold : {0}", config.enrollThreshold);            
+            Console.WriteLine("     |--enrollThreshold : {0}", config.enrollThreshold);
             Console.WriteLine("     |--detectSensitivity : {0}", config.detectSensitivity);
             Console.WriteLine("     |--enrollTimeout : {0}", config.enrollTimeout);
             Console.WriteLine("     |--lfdLevel : {0}", config.lfdLevel);
             Console.WriteLine("     |--quickEnrollment : {0}", config.quickEnrollment);
             Console.WriteLine("     |--checkDuplicate : {0}", config.checkDuplicate);
             Console.WriteLine("     |--previewOption : {0}", config.previewOption);
+
+            // FSF2 support
+            Console.WriteLine("     |--operationMode : {0}", config.operationMode);
+            Console.WriteLine("     |--maxRotation : {0}", config.maxRotation);
+            Console.WriteLine("     |--faceWidth.min : {0}, faceWidth.max : {1}", config.faceWidth.min, config.faceWidth.max);
+            Console.WriteLine("     |--searchRange.x : {0}, searchRange.width : {1}", config.searchRange.x, config.searchRange.width);
 
             Console.WriteLine("<<<< ");
         }
@@ -1590,19 +1992,19 @@ namespace Suprema
 
         void print(IntPtr sdkContext, BS2AuthGroup authGroup)
         {
-            Console.WriteLine(">>>> AuthGroup id[{0}] name[{1}]", authGroup.id, Encoding.UTF8.GetString(authGroup.name).TrimEnd('\0'));            
+            Console.WriteLine(">>>> AuthGroup id[{0}] name[{1}]", authGroup.id, Encoding.UTF8.GetString(authGroup.name).TrimEnd('\0'));
         }
 
         void print(IntPtr sdkContext, BS2DisplayConfig config)
         {
             Console.WriteLine(">>>> Display configuration ");
-            Console.WriteLine("     |--useUserPhrase : {0}", config.useUserPhrase);            
+            Console.WriteLine("     |--useUserPhrase : {0}", config.useUserPhrase);
             Console.WriteLine("<<<< ");
         }
 
         void print(IntPtr sdkContext, BS2Rs485ConfigEX config)
         {
-            Console.WriteLine(">>>> Rs485ConfigEX configuration ");            
+            Console.WriteLine(">>>> Rs485ConfigEX configuration ");
             Console.WriteLine("     |--mode : {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}", config.mode[0], config.mode[1], config.mode[2], config.mode[3], config.mode[4], config.mode[5], config.mode[6], config.mode[7]);
             Console.WriteLine("     |--numOfChannels : {0}", config.numOfChannels);
 
@@ -1624,7 +2026,7 @@ namespace Suprema
                     Console.WriteLine("                  |--channelInfo : {0}", config.channels[idx].slaveDevices[idx2].channelInfo);
                 }
             }
-            
+
             Console.WriteLine("<<<< ");
         }
 
@@ -1662,6 +2064,92 @@ namespace Suprema
             Console.WriteLine("     |--authTimeout : {0}", config.authTimeout);
             Console.WriteLine("     +--numOperators : {0}", config.numOperators);
             Console.WriteLine("<<<< ");
+        }
+
+        void print(BS2AuthConfigExt config)
+        {
+            Console.WriteLine(">>>> AuthConfigExt configuration ");
+            Console.WriteLine("     +--extAuthSchedule");
+            Console.WriteLine("        +--Face : {0}", config.extAuthSchedule[(int)BS2ExtFaceAuthModeEnum.EXT_FACE_ONLY]);
+            Console.WriteLine("        |--Face + Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtFaceAuthModeEnum.EXT_FACE_FINGERPRINT]);
+            Console.WriteLine("        |--Face + PIN : {0}", config.extAuthSchedule[(int)BS2ExtFaceAuthModeEnum.EXT_FACE_PIN]);
+            Console.WriteLine("        |--Face + Fingerprint/PIN : {0}", config.extAuthSchedule[(int)BS2ExtFaceAuthModeEnum.EXT_FACE_FINGERPRINT_OR_PIN]);
+            Console.WriteLine("        |--Face + Fingerprint + PIN : {0}", config.extAuthSchedule[(int)BS2ExtFaceAuthModeEnum.EXT_FACE_FINGERPRINT_PIN]);
+            Console.WriteLine("        +--Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_ONLY]);
+            Console.WriteLine("        |--Fingerprint + Face : {0}", config.extAuthSchedule[(int)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_FACE]);
+            Console.WriteLine("        |--Fingerprint + PIN : {0}", config.extAuthSchedule[(int)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_PIN]);
+            Console.WriteLine("        |--Fingerprint + Face/PIN : {0}", config.extAuthSchedule[(int)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_FACE_OR_PIN]);
+            Console.WriteLine("        |--Fingerprint + Face + PIN : {0}", config.extAuthSchedule[(int)BS2ExtFingerprintAuthModeEnum.EXT_FINGERPRINT_FACE_PIN]);
+            Console.WriteLine("        +--Card : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_ONLY]);
+            Console.WriteLine("        |--Card + Face : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE]);
+            Console.WriteLine("        |--Card + Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT]);
+            Console.WriteLine("        |--Card + PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_PIN]);
+            Console.WriteLine("        |--Card + Face/Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_FINGERPRINT]);
+            Console.WriteLine("        |--Card + Face/PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_PIN]);
+            Console.WriteLine("        |--Card + Fingerprint/PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_OR_PIN]);
+            Console.WriteLine("        |--Card + Face/Fingerprint/PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_FINGERPRINT_OR_PIN]);
+            Console.WriteLine("        |--Card + Face + Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_FINGERPRINT]);
+            Console.WriteLine("        |--Card + Face + PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_PIN]);
+            Console.WriteLine("        |--Card + Fingerprint + Face : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_FACE]);
+            Console.WriteLine("        |--Card + Fingerprint + PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_PIN]);
+            Console.WriteLine("        |--Card + Face/Fingerprint + PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_OR_FINGERPRINT_PIN]);
+            Console.WriteLine("        |--Card + Face + Fingerprint/PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FACE_FINGERPRINT_OR_PIN]);
+            Console.WriteLine("        |--Card + Fingerprint + Face/PIN : {0}", config.extAuthSchedule[(int)BS2ExtCardAuthModeEnum.EXT_CARD_FINGERPRINT_FACE_OR_PIN]);
+            Console.WriteLine("        +--ID + Face : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE]);
+            Console.WriteLine("        |--ID + Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT]);
+            Console.WriteLine("        |--ID + PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_PIN]);
+            Console.WriteLine("        |--ID + Face/Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_FINGERPRINT]);
+            Console.WriteLine("        |--ID + Face/PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_PIN]);
+            Console.WriteLine("        |--ID + Fingerprint/PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_OR_PIN]);
+            Console.WriteLine("        |--ID + Face/Fingerprint/PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_FINGERPRINT_OR_PIN]);
+            Console.WriteLine("        |--ID + Face + Fingerprint : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE_FINGERPRINT]);
+            Console.WriteLine("        |--ID + Face + PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE_PIN]);
+            Console.WriteLine("        |--ID + Fingerprint + Face : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_FACE]);
+            Console.WriteLine("        |--ID + Fingerprint + PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_PIN]);
+            Console.WriteLine("        |--ID + Face/Fingerprint + PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE_OR_FINGERPRINT_PIN]);
+            Console.WriteLine("        |--ID + Face + Fingerprint/PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FACE_FINGERPRINT_OR_PIN]);
+            Console.WriteLine("        |--ID + Fingerprint + Face/PIN : {0}", config.extAuthSchedule[(int)BS2ExtIDAuthModeEnum.EXT_ID_FINGERPRINT_FACE_OR_PIN]);
+            Console.WriteLine("     +--useGlobalAPB : {0}", config.useGlobalAPB);
+            Console.WriteLine("     |--globalAPBFailAction : {0}", config.globalAPBFailAction);
+            Console.WriteLine("     |--useGroupMatching : {0}", config.useGroupMatching);
+            Console.WriteLine("     |--usePrivateAuth : {0}", config.usePrivateAuth);
+            Console.WriteLine("     |--faceDetectionLevel : {0}", config.faceDetectionLevel);
+            Console.WriteLine("     |--useServerMatching : {0}", config.useServerMatching);
+            Console.WriteLine("     |--useFullAccess : {0}", config.useFullAccess);
+            Console.WriteLine("     |--matchTimeout : {0}", config.matchTimeout);
+            Console.WriteLine("     |--authTimeout : {0}", config.authTimeout);
+            Console.WriteLine("     +--numOperators : {0}", config.numOperators);
+            Console.WriteLine("<<<< ");
+        }
+
+        void print(BS2FaceConfigExt config)
+        {
+            Console.WriteLine(">>>> FaceConfigExt configuration ");
+            Console.WriteLine("     +--thermalCheckMode : {0}", config.thermalCheckMode);
+            Console.WriteLine("     |--maskCheckMode : {0}", config.maskCheckMode);
+            Console.WriteLine("     |--thermalFormat : {0}", config.thermalFormat);
+            float threshold = (float)config.thermalThreshold / 100.0F;
+            Console.WriteLine("     |--thermalThreshold : {0}", threshold);
+            Console.WriteLine("     |--maskDetectionLevel : {0}", config.maskDetectionLevel);
+            Console.WriteLine("     |--auditTemperature : {0}", config.auditTemperature);
+            Console.WriteLine("     |--useRejectSound : {0}", config.useRejectSound);
+            Console.WriteLine("     |--useOverlapThermal : {0}", config.useOverlapThermal);
+            Console.WriteLine("     +--faceCheckOrder : {0}", config.faceCheckOrder);
+            Console.WriteLine("<<<< ");
+        }
+
+        void print(BS2ThermalCameraConfig config)
+        {
+            Console.WriteLine(">>>> ThermalCamera configuration ");
+            Console.WriteLine("     +--distance : {0}", config.distance);
+            Console.WriteLine("     |--emissionRate : {0}", config.emissionRate);
+            Console.WriteLine("     +--roi");
+            Console.WriteLine("        |--x : {0}", config.roi.x);
+            Console.WriteLine("        |--y : {0}", config.roi.y);
+            Console.WriteLine("        |--width : {0}", config.roi.width);
+            Console.WriteLine("        |--height : {0}", config.roi.height);
+            Console.WriteLine("     +--useBodyCompensation : {0}", config.useBodyCompensation);
+            Console.WriteLine("     +--compensationTemperature : {0}", config.compensationTemperature);
         }
     }
 }

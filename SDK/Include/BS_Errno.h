@@ -70,6 +70,19 @@
 #define BS_SDK_ERROR_FACE_SCAN_TIMEOUT                      -316
 #define BS_SDK_ERROR_FACE_SCAN_CANCELLED                    -317
 #define BS_SDK_ERROR_FACE_SCAN_FAILED                       -318
+#define BS_SDK_ERROR_NO_FACE_DETECTED                       BS_SDK_ERROR_FACE_CAPTURE_FAIL
+#define BS_SDK_ERROR_FAKE_FACE_DETECTED                     -319
+#define BS_SDK_ERROR_CANNOT_ESTIMATE                        -320
+#define BS_SDK_ERROR_NORMALIZE_FACE                         -321
+#define BS_SDK_ERROR_SMALL_DETECTION                        -322
+#define BS_SDK_ERROR_LARGE_DETECTION                        -323
+#define BS_SDK_ERROR_BIASED_DETECTION                       -324
+#define BS_SDK_ERROR_ROTATED_FACE                           -325
+#define BS_SDK_ERROR_OVERLAPPED_FACE                        -326
+#define BS_SDK_ERROR_UNOPENED_EYES                          -327
+#define BS_SDK_ERROR_NOT_LOOKING_FRONT                      -328
+#define BS_SDK_ERROR_OCCLUDED_MOUTH                         -329
+#define BS_SDK_ERROR_MATCH_FAIL                             -330
 
 //File I/O errors
 #define BS_SDK_ERROR_CANNOT_OPEN_DIR                        -400
@@ -165,7 +178,11 @@
 #define BS_SDK_ERROR_CANNOT_FIND_OPERATOR                   -756
 #define BS_SDK_ERROR_DUPLICATE_FINGERPRINT                  -757
 #define BS_SDK_ERROR_DUPLICATE_FACE                         -758
-
+#define BS_SDK_ERROR_NO_FACE_CREDENTIAL                     -759
+#define BS_SDK_ERROR_NO_FINGERPRINT_CREDENTIAL              -760
+#define BS_SDK_ERROR_NO_FACE_PIN_CREDENTIAL                 -761
+#define BS_SDK_ERROR_NO_FINGERPRINT_PIN_CREDENTIAL          -762
+#define BS_SDK_ERROR_USER_IMAGE_EX_FULL                     -763
 
 //Config errors
 #define BS_SDK_ERROR_INVALID_CONFIG                         -800

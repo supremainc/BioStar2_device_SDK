@@ -426,12 +426,6 @@ typedef struct
 	BS2_ACCESS_GROUP_ID accessGroupId[BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER];
 }BS2UserSmallBlobEx;
 
-// using BS2UserBlob = BS2UserBlob;
-using BS2UserSBlob = BS2UserSmallBlob;
-
-using BS2UserJobBlob = BS2UserBlobEx;
-using BS2UserJobSBlob = BS2UserSmallBlobEx;
-
 typedef struct
 {
 	BS2User user;
@@ -791,6 +785,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_UpgradeFirmware(void* context, BS2_D
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_UpdateResource(void* context, BS2_DEVICE_ID deviceId, BS2ResourceElement* resourceElement, uint8_t keepVerifyingSlaveDevice, OnProgressChanged ptrProgressChanged);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetKeepAliveTimeout(void* context, long ms);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCode(void* context, char* plaintext, unsigned char* ciphertext);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCodeWithKey(void* context, char* plaintext, unsigned char* ciphertext, const BS2EncryptKey* key);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ComputeCRC16CCITT(unsigned char* data, uint32_t dataLen, uint16_t* crc);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCardModel(char* modelName, BS2_CARD_MODEL* cardModel);
 
@@ -871,10 +866,10 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveFloorLevel(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllFloorLevel(void* context, BS2_DEVICE_ID deviceId);
 
 //Face
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFace(void* context, BS2_DEVICE_ID deviceId, BS2Face* face, uint8_t erollmentThreshold, OnReadyToScan ptrReadyToScan);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFace(void* context, BS2_DEVICE_ID deviceId, BS2Face* face, uint8_t enrollmentThreshold, OnReadyToScan ptrReadyToScan);
 
  //FaceEx
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2FaceEx* faceEx, uint8_t erollmentThreshold, OnReadyToScan ptrReadyToScan);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2FaceEx* faceEx, uint8_t enrollmentThreshold, OnReadyToScan ptrReadyToScan);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ExtractTemplateFaceEx(void* context, BS2_DEVICE_ID deviceId, const uint8_t* imageData, uint32_t imageDataLen, int isWarped, BS2TemplateEx* templateEx);
 
 //AuthGroup
@@ -972,7 +967,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetGlobalAPBViolationByDoorOpenHandl
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_CheckGlobalAPBViolationByDoorOpen(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, BS2_ZONE_ID zoneID);
 
 // Encryption Key
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDataEncryptKey(void* context, BS2_DEVICE_ID deviceId, BS2EncryptKey* keyInfo);
+DEPRECATED_FUNC BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDataEncryptKey(void* context, BS2_DEVICE_ID deviceId, BS2EncryptKey* keyInfo);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDataEncryptKey(void* context, BS2_DEVICE_ID deviceId, const BS2EncryptKey* keyInfo);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveDataEncryptKey(void* context, BS2_DEVICE_ID deviceId);
 

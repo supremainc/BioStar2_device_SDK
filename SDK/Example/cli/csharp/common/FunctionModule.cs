@@ -13,10 +13,12 @@ namespace Suprema
     public abstract class FunctionModule
     {
         protected BS2SimpleDeviceInfo deviceInfo;
+        protected BS2SimpleDeviceInfoEx deviceInfoEx;
         protected abstract List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice);
 
         public void execute(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice, bool noConnection = false)
         {
+#if OLD_CODE
             if (noConnection == false)
             { 
                 BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetDeviceInfo(sdkContext, deviceID, out deviceInfo);
@@ -26,6 +28,17 @@ namespace Suprema
                     return;
                 }
             }
+#else
+            if (noConnection == false)
+            { 
+                BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetDeviceInfoEx(sdkContext, deviceID, out deviceInfo, out deviceInfoEx);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Can't get device information(errorCode : {0}).", result);
+                    return;
+                }
+            }
+#endif
 
 
             List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> functionList = getFunctionList(sdkContext, deviceID, isMasterDevice);

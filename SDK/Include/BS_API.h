@@ -34,6 +34,7 @@
 #include "BSCommon/config/BS2FaceConfig.h"
 #include "BSCommon/config/BS2DstConfig.h"
 #include "BSCommon/config/BS2ConfigHeader.h"
+#include "BSCommon/config/BS2ConfigHeaderEx.h"
 #include "BSCommon/config/BS2DeviceZoneMasterConfig.h"
 #include "BSCommon/config/BS2DeviceZoneConfig.h"
 #include "BSCommon/data/BS2AccessGroup.h"
@@ -50,6 +51,7 @@
 #include "BSCommon/data/BS2Event.h"
 #include "BSCommon/data/BS2EventExt.h"
 #include "BSCommon/data/BS2Face.h"
+#include "BSCommon/data/BS2FaceEx.h"
 #include "BSCommon/data/BS2Fingerprint.h"
 #include "BSCommon/data/BS2FireAlarmZone.h"
 #include "BSCommon/data/BS2ScheduledLockUnlockZone.h"
@@ -70,6 +72,9 @@
 #include "BSCommon/data/BS2Operator.h" //[Admin 1000] 
 #include "BSCommon/protocol/BS2UdpDiscover.h"
 #include "BSCommon/protocol/BS2SystemInfo.h"
+#include "BSCommon/config/BS2AuthConfigExt.h"
+#include "BSCommon/config/BS2FaceConfigExt.h"
+#include "BSCommon/config/BS2ThermalCameraConfig.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -210,12 +215,17 @@ typedef struct
 {
 	enum
 	{
-		BS2_SUPPORT_RS485EX 	= 0x00000001,
-		BS2_SUPPORT_CARDEX  	= 0x00000002,
-		BS2_SUPPORT_DST     	= 0x00000004,
-		BS2_SUPPORT_DESFIREEX	= 0x00000008,
+		BS2_SUPPORT_RS485EX 		= 0x00000001,
+		BS2_SUPPORT_CARDEX  		= 0x00000002,
+		BS2_SUPPORT_DST     		= 0x00000004,
+		BS2_SUPPORT_DESFIREEX		= 0x00000008,
+		BS2_SUPPORT_FACE_EX			= 0x00000010,
 
-		BS2_SUPPORT_ALL     	= BS2_SUPPORT_RS485EX | BS2_SUPPORT_CARDEX | BS2_SUPPORT_DST | BS2_SUPPORT_DESFIREEX,
+		BS2_SUPPORT_FINGER_SCAN		= 0x00010000,
+		BS2_SUPPORT_FACE_SCAN		= 0x00020000,
+		BS2_SUPPORT_FACE_EX_SCAN	= 0x00040000,
+
+		BS2_SUPPORT_ALL     		= BS2_SUPPORT_RS485EX | BS2_SUPPORT_CARDEX | BS2_SUPPORT_DST | BS2_SUPPORT_DESFIREEX | BS2_SUPPORT_FACE_EX | BS2_SUPPORT_FINGER_SCAN | BS2_SUPPORT_FACE_SCAN | BS2_SUPPORT_FACE_EX_SCAN,
 	};
 
 	uint32_t supported;
@@ -418,6 +428,25 @@ typedef struct
 
 typedef struct
 {
+	BS2User user;
+	BS2UserSetting setting;
+	BS2_USER_NAME user_name;
+	BS2UserPhoto* user_photo_obj;
+	BS2_USER_PIN pin;
+	BS2CSNCard* cardObjs;
+	BS2Fingerprint* fingerObjs;
+	BS2Face* faceObjs;						// FS2, FL
+	BS2Job job;
+	BS2_USER_PHRASE phrase;
+	BS2_ACCESS_GROUP_ID accessGroupId[BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER];
+
+	BS2UserSettingEx settingEx;				// F2
+	BS2FaceEx* faceExObjs;					// F2
+} BS2UserFaceExBlob;
+
+
+typedef struct
+{
 	uint16_t eventMask;
 	BS2_EVENT_ID id;
 	BS2EventExtInfo info;                         // valid if eventMask has BS2_EVENT_MASK_INFO
@@ -436,6 +465,27 @@ typedef struct
 	uint8_t reserved;
 }BS2EventSmallBlob;
 
+typedef struct
+{
+	uint16_t eventMask;
+	BS2_EVENT_ID id;
+	BS2EventExtInfo info;                         // valid if eventMask has BS2_EVENT_MASK_INFO
+	union
+	{
+		BS2_USER_ID userID;                       // valid if eventMask has BS2_EVENT_MASK_USER_ID
+		uint8_t cardID[BS2_CARD_DATA_SIZE];       // valid if eventMask has BS2_EVENT_MASK_CARD_ID
+		BS2_DOOR_ID doorID;                       // valid if eventMask has BS2_EVENT_MASK_DOOR_ID
+		BS2_ZONE_ID zoneID;                       // valid if eventMask has BS2_EVENT_MASK_ZONE_ID
+		BS2EventExtIoDevice ioDevice;             // valid if eventMask has BS2_EVENT_MASK_IODEVICE
+	};
+	BS2_TNA_KEY tnaKey;                           // valid if eventMask has BS2_EVENT_MASK_TNA_KEY
+	BS2_JOB_CODE jobCode;                         // valid if eventMask has BS2_EVENT_MASK_JOB_CODE
+	uint16_t imageSize;                           // valid if eventMask has BS2_EVENT_MASK_IMAGE
+	uint8_t* imageObj;                            // valid if eventMask has BS2_EVENT_MASK_IMAGE
+	uint8_t reserved;
+	uint32_t temperature;                         // valid if eventMask has BS2_EVENT_MASK_TEMPERATURE
+} BS2EventSmallBlobEx;
+
 typedef uint32_t BS2_CONFIG_MASK;
 
 #pragma pack()
@@ -447,6 +497,7 @@ typedef void (*OnDeviceDisconnected)(BS2_DEVICE_ID deviceId);
 typedef void (*OnReadyToScan)(BS2_DEVICE_ID deviceId, uint32_t sequence);
 typedef void (*OnProgressChanged)(BS2_DEVICE_ID deviceId, uint32_t progressPercentage);
 typedef void (*OnLogReceived)(BS2_DEVICE_ID deviceId, const BS2Event* event);
+typedef void (*OnLogReceivedEx)(BS2_DEVICE_ID deviceId, const BS2Event* event, BS2_TEMPERATURE temperature);
 typedef void (*OnAlarmFired)(BS2_DEVICE_ID deviceId, const BS2Event* event);
 typedef void (*OnInputDetected)(BS2_DEVICE_ID deviceId, const BS2Event* event);
 typedef void (*OnConfigChanged)(BS2_DEVICE_ID deviceId, uint32_t configMask);
@@ -652,6 +703,12 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDstConfig(void* context, BS2_DEVI
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDstConfig(void* context, BS2_DEVICE_ID deviceId, BS2DstConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDesFireCardConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2DesFireCardConfigEx* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDesFireCardConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2DesFireCardConfigEx* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAuthConfigExt(void* context, BS2_DEVICE_ID deviceId, BS2AuthConfigExt* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetAuthConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2AuthConfigExt* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFaceConfigExt(void* context, BS2_DEVICE_ID deviceId, BS2FaceConfigExt* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetFaceConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2FaceConfigExt* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, BS2ThermalCameraConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, const BS2ThermalCameraConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
@@ -714,6 +771,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFilteredLogSinceEventId(void* con
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetImageLog(void* context, BS2_DEVICE_ID deviceId, BS2_EVENT_ID eventId, uint8_t** imageObj, uint32_t* imageSize);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ClearLog(void* context, BS2_DEVICE_ID deviceId);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_StartMonitoringLog(void* context, BS2_DEVICE_ID deviceId, OnLogReceived ptrLogReceived);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_StartMonitoringLogEx(void* context, BS2_DEVICE_ID deviceId, OnLogReceivedEx ptrLogReceivedEx);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_StopMonitoringLog(void* context, BS2_DEVICE_ID deviceId);
 
 // Misc api
@@ -727,6 +785,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_UpgradeFirmware(void* context, BS2_D
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_UpdateResource(void* context, BS2_DEVICE_ID deviceId, BS2ResourceElement* resourceElement, uint8_t keepVerifyingSlaveDevice, OnProgressChanged ptrProgressChanged);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetKeepAliveTimeout(void* context, long ms);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCode(void* context, char* plaintext, unsigned char* ciphertext);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCodeWithKey(void* context, char* plaintext, unsigned char* ciphertext, const BS2EncryptKey* key);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ComputeCRC16CCITT(unsigned char* data, uint32_t dataLen, uint16_t* crc);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCardModel(char* modelName, BS2_CARD_MODEL* cardModel);
 
@@ -807,7 +866,11 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveFloorLevel(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllFloorLevel(void* context, BS2_DEVICE_ID deviceId);
 
 //Face
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFace(void* context, BS2_DEVICE_ID deviceId, BS2Face* face, uint8_t erollmentThreshold, OnReadyToScan ptrReadyToScan);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFace(void* context, BS2_DEVICE_ID deviceId, BS2Face* face, uint8_t enrollmentThreshold, OnReadyToScan ptrReadyToScan);
+
+ //FaceEx
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2FaceEx* faceEx, uint8_t enrollmentThreshold, OnReadyToScan ptrReadyToScan);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ExtractTemplateFaceEx(void* context, BS2_DEVICE_ID deviceId, const uint8_t* imageData, uint32_t imageDataLen, int isWarped, BS2TemplateEx* templateEx);
 
 //AuthGroup
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAuthGroup(void* context, BS2_DEVICE_ID deviceId, BS2_AUTH_GROUP_ID* authGroupIds, uint32_t authGroupIdCount, BS2AuthGroup** authGroupObj, uint32_t* numAuthGroup);
@@ -904,7 +967,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetGlobalAPBViolationByDoorOpenHandl
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_CheckGlobalAPBViolationByDoorOpen(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, BS2_ZONE_ID zoneID);
 
 // Encryption Key
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDataEncryptKey(void* context, BS2_DEVICE_ID deviceId, BS2EncryptKey* keyInfo);
+DEPRECATED_FUNC BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDataEncryptKey(void* context, BS2_DEVICE_ID deviceId, BS2EncryptKey* keyInfo);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDataEncryptKey(void* context, BS2_DEVICE_ID deviceId, const BS2EncryptKey* keyInfo);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveDataEncryptKey(void* context, BS2_DEVICE_ID deviceId);
 
@@ -972,6 +1035,16 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllAuthOperatorLevelEx(void* c
 
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlob(void* context, BS2_DEVICE_ID deviceId, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobFromDir(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobEx(void* context, BS2_DEVICE_ID deviceId, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlobEx** logsObj, uint32_t* numLog);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobExFromDir(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlobEx** logsObj, uint32_t* numLog);
+
+// FaceEx
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnrollUserFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2UserFaceExBlob* userBlob, uint32_t userCount, uint8_t overwrite);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceEx(void* context, BS2_DEVICE_ID deviceId, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceEx(void* context, BS2_DEVICE_ID deviceId, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask);
+
 
 
 #ifdef __cplusplus
