@@ -14,6 +14,7 @@
 #define BS_SDK_SECOND_AUTH_SUCCESS                          4
 #define BS_SDK_DUAL_AUTH_SUCCESS                            5
 #define BS_SDK_WIEGAND_BYPASS_SUCCESS                       11
+#define BS_SDK_ANONYMOUS_SUCCESS                            12
 
 // Driver errors
 #define BS_SDK_ERROR_FROM_DEVICE_DRIVER                     -1
@@ -62,6 +63,7 @@
 #define BS_SDK_ERROR_EXTRACTION_LOW_QUALITY                 -308
 #define BS_SDK_ERROR_CAPTURE_LOW_QUALITY                    -309
 #define BS_SDK_ERROR_CANNOT_FIND_FINGERPRINT                -310
+#define BS_SDK_ERROR_NO_FINGER_DETECTED                     BS_SDK_ERROR_FINGERPRINT_CAPTURE_FAIL
 #define BS_SDK_ERROR_FAKE_FINGER_DETECTED                   -311
 #define BS_SDK_ERROR_FAKE_FINGER_TRY_AGAIN                  -312
 #define BS_SDK_ERROR_FAKE_FINGER_SENSOR_ERROR               -313
@@ -71,18 +73,19 @@
 #define BS_SDK_ERROR_FACE_SCAN_CANCELLED                    -317
 #define BS_SDK_ERROR_FACE_SCAN_FAILED                       -318
 #define BS_SDK_ERROR_NO_FACE_DETECTED                       BS_SDK_ERROR_FACE_CAPTURE_FAIL
-#define BS_SDK_ERROR_FAKE_FACE_DETECTED                     -319
-#define BS_SDK_ERROR_CANNOT_ESTIMATE                        -320
-#define BS_SDK_ERROR_NORMALIZE_FACE                         -321
-#define BS_SDK_ERROR_SMALL_DETECTION                        -322
-#define BS_SDK_ERROR_LARGE_DETECTION                        -323
-#define BS_SDK_ERROR_BIASED_DETECTION                       -324
-#define BS_SDK_ERROR_ROTATED_FACE                           -325
-#define BS_SDK_ERROR_OVERLAPPED_FACE                        -326
-#define BS_SDK_ERROR_UNOPENED_EYES                          -327
-#define BS_SDK_ERROR_NOT_LOOKING_FRONT                      -328
-#define BS_SDK_ERROR_OCCLUDED_MOUTH                         -329
-#define BS_SDK_ERROR_MATCH_FAIL                             -330
+#define BS_SDK_ERROR_UNMASKED_FACE_DETECTED                 -319
+#define BS_SDK_ERROR_FAKE_FACE_DETECTED                     -320
+#define BS_SDK_ERROR_CANNOT_ESTIMATE                        -321
+#define BS_SDK_ERROR_NORMALIZE_FACE                         -322
+#define BS_SDK_ERROR_SMALL_DETECTION                        -323
+#define BS_SDK_ERROR_LARGE_DETECTION                        -324
+#define BS_SDK_ERROR_BIASED_DETECTION                       -325
+#define BS_SDK_ERROR_ROTATED_FACE                           -326
+#define BS_SDK_ERROR_OVERLAPPED_FACE                        -327
+#define BS_SDK_ERROR_UNOPENED_EYES                          -328
+#define BS_SDK_ERROR_NOT_LOOKING_FRONT                      -329
+#define BS_SDK_ERROR_OCCLUDED_MOUTH                         -330
+#define BS_SDK_ERROR_MATCH_FAIL                             -331
 
 //File I/O errors
 #define BS_SDK_ERROR_CANNOT_OPEN_DIR                        -400
@@ -149,6 +152,7 @@
 #define BS_SDK_ERROR_DOOR_SCHEDULE_FULL                     -726
 #define BS_SDK_ERROR_DB_SLOT_FULL                           -727
 #define BS_SDK_ERROR_ACCESS_GROUP_FULL                      -728
+#define BS_SDK_ERROR_FLOOR_LEVEL_FULL                       -729
 #define BS_SDK_ERROR_ACCESS_SCHEDULE_FULL                   -730
 #define BS_SDK_ERROR_HOLIDAY_GROUP_FULL                     -731
 #define BS_SDK_ERROR_HOLIDAY_FULL                           -732
@@ -243,6 +247,17 @@
 #define BS_SDK_ERROR_AUTH_GROUP_REQUIRED                    -1124
 #define BS_SDK_ERROR_IDENTIFICATION_REQUIRED                -1125
 #define BS_SDK_ERROR_ANTI_TAILGATE_VIOLATION                -1126
+#define BS_SDK_ERROR_HIGH_TEMPERATURE_VIOLATION             -1127
+#define BS_SDK_ERROR_CANNOT_MEASURE_TEMPERATURE             -1128
+#define BS_SDK_ERROR_UNMASKED_FACE_VIOLATION                -1129
+
+// Required (Fingerprint/Face/PIN/Mask/Thermal ...)
+#define BS_SDK_MASK_CHECK_REQUIRED                          -1130
+#define BS_SDK_THERMAL_CHECK_REQUIRED                       -1131
+#define BS_SDK_FACE_AUTH_REQUIRED                           -1132
+#define BS_SDK_FINGERPRINT_AUTH_REQUIRED                    -1133
+#define BS_SDK_FACE_OR_PIN_AUTH_REQUIRED                    -1134
+#define BS_SDK_FINGERPRINT_OR_PIN_AUTH_REQUIRED             -1135
 
 //Zone errors
 #define BS_SDK_ERROR_CANNOT_FIND_ZONE                       -1200
@@ -255,7 +270,8 @@
 #define BS_SDK_ERROR_SCHEDULED_LOCK_VIOLATION               -1206
 #define BS_SDK_ERROR_SCHEDULED_UNLOCK_VIOLATION             (DEPRECATED_MAC)-1207
 #define BS_SDK_ERROR_INTRUSION_ALARM_VIOLATION              -1207
-#define BS_SDK_ERROR_SET_FIRE_ALARM                         -1208
+#define BS_SDK_ERROR_SET_FIRE_ALARM                         (DEPRECATED_MAC)-1208	// Deprecated 2.7.2
+#define BS_SDK_ERROR_APB_ZONE_FULL                          -1208
 #define BS_SDK_ERROR_TIMED_APB_ZONE_FULL                    -1209
 #define BS_SDK_ERROR_FIRE_ALARM_ZONE_FULL                   -1210
 #define BS_SDK_ERROR_SCHEDULED_LOCK_UNLOCK_ZONE_FULL        -1211
@@ -277,6 +293,8 @@
 #define BS_SDK_ERROR_SOFT_AUTH_LIMIT_VIOLATION              -1227
 #define BS_SDK_ERROR_HARD_AUTH_LIMIT_VIOLATION              -1228
 
+#define BS_SDK_ERROR_LIFT_LOCK_UNLOCK_ZONE_FULL             -1229
+#define BS_SDK_ERROR_LIFT_LOCK_VIOLATION                    -1230
 //Card errors
 #define BS_SDK_ERROR_CARD_IO                                -1300
 #define BS_SDK_ERROR_CARD_INIT_FAIL                         -1301
@@ -311,11 +329,15 @@
 
 //SSL
 #define BS_SDK_ERROR_SSL_INIT                               -3000
-#define BS_SDK_ERROR_SSL_EXIST                              -3001
-#define BS_SDK_ERROR_SSL_IS_NOT_CONNECTED                   -3002
+#define BS_SDK_ERROR_SSL_EXIST                              (DEPRECATED_MAC)-3001	// Deprecated 2.7.2
+#define BS_SDK_ERROR_SSL_NOT_SUPPORTED                      -3001
+#define BS_SDK_ERROR_SSL_IS_NOT_CONNECTED                   (DEPRECATED_MAC)-3002	// Deprecated 2.7.2
+#define BS_SDK_ERROR_SSL_CANNOT_CONNECT                     -3002
 #define BS_SDK_ERROR_SSL_ALREADY_CONNECTED                  -3003
-#define BS_SDK_ERROR_SSL_INVALID_CA                         -3004
-#define BS_SDK_ERROR_SSL_VERIFY_CA                          -3005
+#define BS_SDK_ERROR_SSL_INVALID_CA                         (DEPRECATED_MAC)-3004	// Deprecated 2.7.2
+#define BS_SDK_ERROR_SSL_INVALID_CERT                       -3004
+#define BS_SDK_ERROR_SSL_VERIFY_CA                          (DEPRECATED_MAC)-3005	// Deprecated 2.7.2
+#define BS_SDK_ERROR_SSL_VERIFY_CERT                        -3005
 #define BS_SDK_ERROR_SSL_INVALID_KEY                        -3006
 #define BS_SDK_ERROR_SSL_VERIFY_KEY                         -3007
 
@@ -341,5 +363,7 @@
 #define BS_SDK_ERROR_MOBILE_NOT_LOGIN						-10103
 #define BS_SDK_ERROR_MOBILE_ADD_DEVICE_FAULT                -10104
 #define BS_SDK_ERROR_MOBILE_DEVICE_NOT_FOUND				-10105
+
+#define BS_SDK_ERROR_INITIALIZE_FILELOG                     -10201
 
 #endif /* CORE_JNI_SRC_BS_ERRNO_H_ */

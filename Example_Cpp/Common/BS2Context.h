@@ -9,6 +9,7 @@ public:
 	static BS2Context* getInstance();
 	void releaseInstance();
 
+	static void onDebugMessage(uint32_t level, uint32_t module, const char* msg);
 	void* initSDK(BS2_PORT port = BS2_TCP_SERVER_PORT_DEFAULT);
 	void* getContext() {return context_;}
 	void setDebugFileLog(uint32_t level, uint32_t module, const char* path);

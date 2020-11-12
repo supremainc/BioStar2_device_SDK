@@ -151,7 +151,7 @@ vector<string> Utility::tokenizeString(const string& data, const char delimiter)
 	return result;
 }
 
-string Utility::getEventString(const BS2Event& event, int32_t timezone)
+string Utility::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone)
 {
 	char buffer[1024] = { 0, };
 	switch (event.code & BS2_EVENT_MASK)
@@ -170,25 +170,25 @@ string Utility::getEventString(const BS2Event& event, int32_t timezone)
 	case BS2_EVENT_ACCESS_DENIED:
 	case BS2_EVENT_FAKE_FINGER_DETECTED:
 	case BS2_EVENT_ACCESS_GRANTED:
-	case BS2_EVENT_ABNORMAL_FEVER_DETECTED:
+	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
 	case BS2_EVENT_UNMASKED_FACE_DETECTED:
-		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s)",
-			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server");
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s)",
+			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server");
 		break;
 
 	default:
-		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d)",
-			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID);
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d)",
+			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID);
 		break;
 	}
 
 	return buffer;
 }
 
-string Utility::getEventStringWithThermal(const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature)
+string Utility::getEventStringWithThermal(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature)
 {
 	char buffer[1024] = { 0, };
-	float temper = (float)temperature / 100.0;
+	float temper = (float)temperature / (float)100.0;
 	switch (event.code & BS2_EVENT_MASK)
 	{
 	case BS2_EVENT_USER_ENROLL_SUCCESS:
@@ -205,15 +205,15 @@ string Utility::getEventStringWithThermal(const BS2Event& event, int32_t timezon
 	case BS2_EVENT_ACCESS_DENIED:
 	case BS2_EVENT_FAKE_FINGER_DETECTED:
 	case BS2_EVENT_ACCESS_GRANTED:
-	case BS2_EVENT_ABNORMAL_FEVER_DETECTED:
+	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
 	case BS2_EVENT_UNMASKED_FACE_DETECTED:
-		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s) temperature(%.2f¡É)",
-			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
+			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
 		break;
 
 	default:
-		sprintf(buffer, "mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) temperature(%.2f¡É)",
-			event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, temper);
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) temperature(%.2f)",
+			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, temper);
 		break;
 	}
 

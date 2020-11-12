@@ -134,6 +134,14 @@ namespace Suprema
         public const int BS2_MAX_WARPED_IR_IMAGE_LENGTH = 30 * 1024;
         // F2 support
 
+        public const int BS2_THERMAL_CAMERA_DISTANCE_DEFAULT = 100;
+        public const int BS2_THERMAL_CAMERA_EMISSION_RATE_DEFAULT = 98;
+
+        public const int BS2_THERMAL_CAMERA_ROI_X_DEFAULT = 30;
+        public const int BS2_THERMAL_CAMERA_ROI_Y_DEFAULT = 25;
+        public const int BS2_THERMAL_CAMERA_ROI_WIDTH_DEFAULT = 50;
+        public const int BS2_THERMAL_CAMERA_ROI_HEIGHT_DEFAULT = 55;
+
         public const int BS2_MOBILE_ACCESS_KEY_SIZE = 124;
 
         #region DEVICE_ZONE_SUPPORTED
@@ -300,16 +308,16 @@ namespace Suprema
         public byte[] reserved;
 
         public byte thermalFormat;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public byte[] reserved2;
+        public byte reserved2;
 
-        public UInt16 thermalThreshold;
+        public UInt16 thermalThresholdLow;
+        public UInt16 thermalThresholdHigh;
         public byte maskDetectionLevel;
         public byte auditTemperature;
 
         public byte useRejectSound;
         public byte useOverlapThermal;
-        public byte reserved4;
+        public byte useDynamicROI;
         public byte faceCheckOrder;
     }
 
@@ -695,7 +703,8 @@ namespace Suprema
         public UInt16 wiegandInputMask; //(bitmask , no use 0 postion bit, 1~15 bit)
         public UInt16 wiegandCardMask; //(bitmask , no use 0 postion bit, 1~15 bit)
         public byte wiegandCSNIndex; //(1~15)
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 27)]
+        public byte useWiegandUserID;           // [+ V2.7.2]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 26)]
         public byte[] reserved;
     }
 

@@ -18,18 +18,14 @@ static DeviceList deviceList;
 void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 {
 	int32_t timezone = deviceList.getTimezone(id);
-	stringstream buf;
-	buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(*event, timezone);
-	cout << buf.str() << endl;
+	cout << Utility::getEventString(id, *event, timezone) << endl;
 }
 
 // Thermal supported callback
 void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE temperature)
 {
 	int32_t timezone = deviceList.getTimezone(id);
-	stringstream buf;
-	buf << "Device(" << std::to_string(id) << ") " << Utility::getEventStringWithThermal(*event, timezone, temperature);
-	cout << buf.str() << endl;
+	cout << Utility::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
 }
 
 
@@ -651,9 +647,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			{
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
-				stringstream buf;
-				buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(event, timezone);
-				cout << buf.str() << endl;
+				cout << Utility::getEventString(id, event, timezone) << endl;
 
 				if (event.image & 0x01)
 				{

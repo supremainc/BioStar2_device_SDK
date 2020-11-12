@@ -294,6 +294,9 @@ namespace Suprema
         extern public static int BS2_ResetConfig(IntPtr context, UInt32 deviceId, [MarshalAs(UnmanagedType.I1)] bool includingDB);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_ResetConfigExceptNetInfo(IntPtr context, UInt32 deviceId, [MarshalAs(UnmanagedType.I1)] bool includingDB);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetConfig(IntPtr context, UInt32 deviceId, ref BS2Configs configs);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]

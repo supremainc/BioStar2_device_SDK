@@ -431,5 +431,5 @@ void DeviceControl::print(const BS2TemplateEx& templateEx)
 {
 	TRACE("==[BS2TemplateEx]==");
 	TRACE("isIR : %u", templateEx.isIR);
-	TRACE("data : %x", templateEx.data[0]);
+	TRACE("data[0] : %x, data[551] : %x", templateEx.data[0], templateEx.data[551]);
 }

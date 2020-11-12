@@ -36,6 +36,8 @@ public:
 	int setFaceConfigEx(BS2_DEVICE_ID id, const BS2FaceConfigExt& config);
 	int getThermalCameraConfig(BS2_DEVICE_ID id, BS2ThermalCameraConfig& config);
 	int setThermalCameraConfig(BS2_DEVICE_ID id, const BS2ThermalCameraConfig& config);
+	int getTriggerActionConfig(BS2_DEVICE_ID id, BS2TriggerActionConfig& config);
+	int setTriggerActionConfig(BS2_DEVICE_ID id, const BS2TriggerActionConfig& config);
 
 	int updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode = BS2_CONNECTION_MODE_SERVER_TO_DEVICE);
 	int updateConnectModeDevice2Server(BS2_DEVICE_ID id, std::string serverIP, BS2_PORT serverPort);
@@ -56,6 +58,9 @@ private:
 	void print(const BS2InputConfig& config) const;
 	void print(const BS2SupervisedInputConfig& config) const;
 	void print(const BS2SVInputRange& inputRange) const;
+	void print(const BS2TriggerActionConfig& config) const;
+	void print(const BS2Trigger& trigger) const;
+	void print(const BS2Action& action) const;
 
 
 private:

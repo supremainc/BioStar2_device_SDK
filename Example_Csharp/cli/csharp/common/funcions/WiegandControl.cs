@@ -484,7 +484,18 @@ namespace Suprema
             Console.WriteLine("   Enter the pulse interval(µs) for the wiegand signal.(200(Min) ~ 20000(Max) 10000[Default]");
             Console.Write("     >>>> ");
             wiegandConfig.outPulseInterval = Util.GetInput(10000);
-            
+
+            if (wiegandConfig.mode == (byte)BS2WiegandModeEnum.BS2_WIEGAND_OUT_ONLY || wiegandConfig.mode == (byte)BS2WiegandModeEnum.BS2_WIEGAND_IN_OUT)
+            {
+                Console.WriteLine("   Select the type of output information. [0:Not use(default), 1:Card ID, 2:User ID]");
+                Console.Write("     >>>> ");
+                wiegandConfig.useWiegandUserID = (byte)Util.GetInput((byte)0);
+            }
+            else
+            {
+                wiegandConfig.useWiegandUserID = (byte)0;
+            }
+
             result = (BS2ErrorCode)API.BS2_SetWiegandConfig(sdkContext, deviceID, ref wiegandConfig);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {

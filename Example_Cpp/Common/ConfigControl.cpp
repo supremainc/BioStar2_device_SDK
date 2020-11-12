@@ -30,7 +30,7 @@ int ConfigControl::getSystemConfig(BS2_DEVICE_ID id, BS2SystemConfig& config)
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetSystemConfig call failed: %d", sdkResult);
 
-	print(config);
+	//print(config);
 
 	return sdkResult;
 }
@@ -232,6 +232,26 @@ int ConfigControl::setThermalCameraConfig(BS2_DEVICE_ID id, const BS2ThermalCame
 	int sdkResult = BS2_SetThermalCameraConfig(context_, id, const_cast<BS2ThermalCameraConfig*>(&config));
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_SetThermalCameraConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getTriggerActionConfig(BS2_DEVICE_ID id, BS2TriggerActionConfig& config)
+{
+	int sdkResult = BS2_GetTriggerActionConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetTriggerActionConfig call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setTriggerActionConfig(BS2_DEVICE_ID id, const BS2TriggerActionConfig& config)
+{
+	int sdkResult = BS2_SetTriggerActionConfig(context_, id, const_cast<BS2TriggerActionConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetTriggerActionConfig call failed: %d", sdkResult);
 
 	return sdkResult;
 }
@@ -477,12 +497,15 @@ void ConfigControl::print(const BS2FaceConfigExt& config) const
 	TRACE("+--thermalCheckMode : %u", config.thermalCheckMode);
 	TRACE("|--maskCheckMode : %u", config.maskCheckMode);
 	TRACE("|--thermalFormat : %u", config.thermalFormat);
-	float temper = (float)config.thermalThreshold / 100.0;
-	TRACE("|--thermalThreshold : %.2f¡É", temper);
+	float temperLow = (float)config.thermalThresholdLow / (float)100.0;
+	float temperHigh = (float)config.thermalThresholdHigh / (float)100.0;
+	TRACE("|--thermalThresholdLow : %.2f", temperLow);
+	TRACE("|--thermalThresholdHigh : %.2f", temperHigh);
 	TRACE("|--maskDetectionLevel : %u", config.maskDetectionLevel);
 	TRACE("|--auditTemperature : %u", config.auditTemperature);
 	TRACE("|--useRejectSound : %u", config.useRejectSound);
 	TRACE("|--useOverlapThermal : %u", config.useOverlapThermal);
+	TRACE("|--useDynamicROI : %u", config.useDynamicROI);
 	TRACE("+--faceCheckOrder : %u", config.faceCheckOrder);
 }
 
@@ -530,4 +553,154 @@ void ConfigControl::print(const BS2SVInputRange& inputRange) const
 	TRACE("      +--[BS2SVInputRange]");
 	TRACE("         |--minValue : %u", inputRange.minValue);
 	TRACE("         +--maxValue : %u", inputRange.maxValue);
+}
+
+void ConfigControl::print(const BS2TriggerActionConfig& config) const
+{
+	TRACE("==[BS2TriggerActionConfig]==");
+	for (int idx = 0; idx < config.numItems; idx++)
+	{
+		TRACE("+--BS2TriggerAction : %d", idx);
+		print(config.items[idx].trigger);
+		print(config.items[idx].action);
+	}
+}
+
+void ConfigControl::print(const BS2Trigger& trigger) const
+{
+	TRACE("==[BS2Trigger]==");
+	switch (trigger.type)
+	{
+	case BS2_TRIGGER_EVENT:
+		TRACE("   +--device : %u", trigger.deviceID);
+		TRACE("   |--type : event");
+		TRACE("   +--code : %u", trigger.event.code);
+		break;
+	case BS2_TRIGGER_INPUT:
+		TRACE("   +--device : %u", trigger.deviceID);
+		TRACE("   |--type : input");
+		TRACE("   |--port : %u", trigger.input.port);
+		TRACE("   |--switchType : %u", trigger.input.switchType);
+		TRACE("   |--duration : %u", trigger.input.duration);
+		TRACE("   +--scheduleID : %u", trigger.input.scheduleID);
+		break;
+	case BS2_TRIGGER_SCHEDULE:
+		TRACE("   +--device : %u", trigger.deviceID);
+		TRACE("   |--type : schedule");
+		TRACE("   |--scheduleType : %u", trigger.schedule.type);
+		TRACE("   +--scheduleID : %u", trigger.schedule.scheduleID);
+		break;
+	case BS2_TRIGGER_NONE:
+		TRACE("   +--device : %u", trigger.deviceID);
+		TRACE("   +--type : None");
+		break;
+	default:
+		break;
+	}
+}
+
+void ConfigControl::print(const BS2Action& action) const
+{
+	TRACE("==[BS2Action]==");
+	switch (action.type)
+	{
+	case BS2_ACTION_RELAY:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : relay");
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   |--delay : %u", action.delay);
+		TRACE("   |--relayIndex : %u", action.relay.relayIndex);
+		TRACE("   |--signalID : %u", action.relay.signal.signalID);
+		TRACE("   |--count : %u", action.relay.signal.count);
+		TRACE("   |--onDuration : %u", action.relay.signal.onDuration);
+		TRACE("   |--offDuration : %u", action.relay.signal.offDuration);
+		TRACE("   +--delay : %u", action.relay.signal.delay);
+		break;
+	case BS2_ACTION_TTL:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : output");
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   |--delay : %u", action.delay);
+		TRACE("   |--relayIndex : %u", action.outputPort.portIndex);
+		TRACE("   |--signalID : %u", action.outputPort.signal.signalID);
+		TRACE("   |--count : %u", action.outputPort.signal.count);
+		TRACE("   |--onDuration : %u", action.outputPort.signal.onDuration);
+		TRACE("   |--offDuration : %u", action.outputPort.signal.offDuration);
+		TRACE("   +--delay : %u", action.outputPort.signal.delay);
+		break;
+	case BS2_ACTION_DISPLAY:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : display");
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   |--delay : %u", action.delay);
+		TRACE("   |--duration : %u", action.display.duration);
+		TRACE("   |--displayID : %u", action.display.displayID);
+		TRACE("   +--resourceID : %u", action.display.resourceID);
+		break;
+	case BS2_ACTION_SOUND:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : sound");
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   |--delay : %u", action.delay);
+		TRACE("   |--count : %u", action.sound.count);
+		TRACE("   |--soundIndex : %u", action.sound.soundIndex);
+		TRACE("   +--delay : %u", action.sound.delay);
+		break;
+	case BS2_ACTION_LED:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : led");
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   |--delay : %u", action.delay);
+		TRACE("   |--count : %u", action.led.count);
+		for (int idx = 0; idx < action.led.count; idx++)
+		{
+			TRACE("   +--led : %u", idx);
+			TRACE("      +--color : %u", action.led.signal[idx].color);
+			TRACE("      |--duration : %u", action.led.signal[idx].duration);
+			TRACE("      +--delay : %u", action.led.signal[idx].delay);
+		}
+		break;
+	case BS2_ACTION_BUZZER:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : buzzer");
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   |--delay : %u", action.delay);
+		TRACE("   |--count : %u", action.buzzer.count);
+		for (int idx = 0; idx < action.buzzer.count; idx++)
+		{
+			TRACE("   +--buzzer : %u", idx);
+			TRACE("      +--tone : %u", action.buzzer.signal[idx].tone);
+			TRACE("      |--fadeout : %u", action.buzzer.signal[idx].fadeout);
+			TRACE("      |--duration : %u", action.buzzer.signal[idx].duration);
+			TRACE("      +--delay : %u", action.buzzer.signal[idx].delay);
+		}
+		break;
+	case BS2_ACTION_LIFT:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : lift");
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   |--delay : %u", action.delay);
+		TRACE("   |--liftID : %u", action.lift.liftID);
+		TRACE("   +--type : %u", action.lift.type);
+		break;
+	case BS2_ACTION_UNLOCK_DEVICE:
+	case BS2_ACTION_REBOOT_DEVICE:
+	case BS2_ACTION_LOCK_DEVICE:
+	case BS2_ACTION_RELEASE_ALARM:
+	case BS2_ACTION_GENERAL_INPUT:
+	case BS2_ACTION_FIRE_ALARM_INPUT:
+	case BS2_ACTION_AUTH_SUCCESS:
+	case BS2_ACTION_AUTH_FAIL:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   |--type : %u", action.type);
+		TRACE("   |--stopFlag : %u", action.stopFlag);
+		TRACE("   +--delay : %u", action.delay);
+		break;
+	case BS2_ACTION_NONE:
+		TRACE("   +--device : %u", action.deviceID);
+		TRACE("   +--type : None");
+		break;
+	default:
+		break;
+	}
 }

@@ -34,6 +34,35 @@ void TRACE(const char* fmt, ...)
 }
 
 
+void BS2Context::onDebugMessage(uint32_t level, uint32_t module, const char* msg)
+{
+	string strLevel, strModule;
+	switch (level)
+	{
+	case DEBUG_LOG_FATAL:  strLevel = "[FATAL] ";  break;
+	case DEBUG_LOG_ERROR:  strLevel = "[ERROR] ";  break;
+	case DEBUG_LOG_WARN:   strLevel = "[WARN]  ";  break;
+	case DEBUG_LOG_INFO:   strLevel = "[INFO]  ";  break;
+	case DEBUG_LOG_TRACE:  strLevel = "[TRACE] ";  break;
+	}
+
+	switch (module)
+	{
+	case DEBUG_MODULE_KEEP_ALIVE:       strModule = "[KeepAlive]       "; break;
+	case DEBUG_MODULE_SOCKET_MANAGER:   strModule = "[SocketManager]   "; break;
+	case DEBUG_MODULE_SOCKET_HANDLER:   strModule = "[SocketHandler]   "; break;
+	case DEBUG_MODULE_DEVICE:           strModule = "[Device]          "; break;
+	case DEBUG_MODULE_DEVICE_MANAGER:   strModule = "[DeviceManager]   "; break;
+	case DEBUG_MODULE_EVENT_DISPATCHER: strModule = "[EventDispatcher] "; break;
+	case DEBUG_MODULE_API:              strModule = "[API]             "; break;
+	case DEBUG_MODULE_MISC:             strModule = "[Misc]            "; break;
+	case DEBUG_MODULE_PACKET:           strModule = "[Packet]          "; break;
+	}
+
+	cout << strLevel << strModule << msg << endl;
+}
+
+
 BS2Context::BS2Context() : context_(NULL)
 {
 }
@@ -99,8 +128,11 @@ void* BS2Context::initSDK(BS2_PORT port)
 
 void BS2Context::setDebugFileLog(uint32_t level, uint32_t module, const char* path)
 {
+#if OLD_CODE
+	BS2_SetDebugExCallback(&BS2Context::onDebugMessage, level, module);
+#else
 	BS2_SetDebugFileLog(level, module, path);
-	//BS2_SetDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".");
+#endif
 }
 
 

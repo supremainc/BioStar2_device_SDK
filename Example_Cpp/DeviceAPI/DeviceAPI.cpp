@@ -19,9 +19,7 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		stringstream buf;
-		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(*event, timezone);
-		cout << buf.str() << endl;
+		cout << Utility::getEventString(id, *event, timezone) << endl;
 	}
 }
 
@@ -31,9 +29,7 @@ void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE te
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		stringstream buf;
-		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventStringWithThermal(*event, timezone, temperature);
-		cout << buf.str() << endl;
+		cout << Utility::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
 	}
 }
 
@@ -57,6 +53,9 @@ void onDeviceDisconnected(BS2_DEVICE_ID id)
 
 int main(int argc, char* argv[])
 {
+	// Set debugging SDK log (to current working directory)
+	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".");
+
 	// Create SDK context and initialize
 	sdkContext = BS2Context::getInstance()->initSDK();
 	if (!sdkContext)
@@ -65,8 +64,6 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	// Set debugging SDK log (to current working directory)
-	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
 	BS2Context::getInstance()->setDeviceEventListener(NULL, onDeviceConnected, onDeviceDisconnected);
 
 	connectTestDevice(sdkContext);
@@ -429,6 +426,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_GET_INPUTCONFIG:
 			sdkResult = getInputConfig(context, id);
 			break;
+		case MENU_DEV_GET_TRIGGERACTIONCONFIG:
+			sdkResult = getTriggerActionConfig(context, id);
+			break;
+		case MENU_DEV_SET_TRIGGERACTIONCONFIG:
+			sdkResult = setTriggerActionConfig(context, id);
+			break;
 		default:
 			break;
 		}
@@ -534,9 +537,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			{
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
-				stringstream buf;
-				buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(event, timezone);
-				cout << buf.str() << endl;
+				cout << Utility::getEventString(id, event, timezone) << endl;
 
 				if (event.image & 0x01)
 				{
@@ -931,9 +932,13 @@ int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
 	msg = "Insert thermal format. (0: Fahrenheit, 1: Celsius)";
 	config.thermalFormat = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	msg = "Insert high temperature value in Celsius. (30.0 ~ 45.0กษ)";
-	float threshold = Utility::getInput<float>(msg);
-	config.thermalThreshold = (uint16_t)(threshold * 100);
+	msg = "Insert low value of high temperature range in Celsius. (30.0 ~ 45.0)";
+	float thresholdLow = Utility::getInput<float>(msg);
+	config.thermalThresholdLow = (uint16_t)(thresholdLow * 100);
+
+	msg = "Insert high value of high temperature range in Celsius. (30.0 ~ 45.0)";
+	float thresholdHigh = Utility::getInput<float>(msg);
+	config.thermalThresholdHigh = (uint16_t)(thresholdHigh * 100);
 
 	msg = "Insert mask detection level. (0: Not use, 1: Normal, 2: High, 3: Very high)";
 	config.maskDetectionLevel = (BS2_MASK_DETECTION_LEVEL)Utility::getInput<uint32_t>(msg);
@@ -946,6 +951,10 @@ int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
 
 	msg = "Do you want to use overlapped thermal? [y/n]";
 	config.useOverlapThermal = Utility::isYes(msg);
+
+	msg = "Do you want to use dynamic ROI? [y/n]";
+	config.useDynamicROI = Utility::isYes(msg);
+
 
 	strmsg << "Insert face check order." << endl;
 	strmsg << " 0: Face check after auth [default]" << endl;
@@ -988,7 +997,7 @@ int setThermalCameraConfig(void* context, BS2_DEVICE_ID id)
 	msg = "Do you want to use body compensation [y/n]";
 	config.useBodyCompensation = Utility::isYes(msg);
 
-	msg = "Insert compensation temperature *10. If you want -4.5กษ, it is -45. (-50 ~ 50)";
+	msg = "Insert compensation temperature *10. If you want -4.5, it is -45. (-50 ~ 50)";
 	config.compensationTemperature = (int8_t)Utility::getInput<int32_t>(msg);
 
 	return cc.setThermalCameraConfig(id, config);
@@ -1006,4 +1015,76 @@ int getInputConfig(void* context, BS2_DEVICE_ID id)
 	ConfigControl cc(context);
 	BS2InputConfig config = { 0, };
 	return cc.getInputConfig(id, config);
+}
+
+int getTriggerActionConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2TriggerActionConfig config = { 0, };
+	return cc.getTriggerActionConfig(id, config);
+}
+
+int setTriggerActionConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2TriggerActionConfig config = { 0, };
+	string msg;
+
+	msg = "How many trigger-action do you want to register?";
+	config.numItems = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	for (uint8_t idx = 0; idx < config.numItems; idx++)
+	{
+		BS2Trigger& trigger = config.items[idx].trigger;
+
+		msg = "[Trigger] Please insert device ID.";
+		trigger.deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>(msg);
+
+		trigger.type = BS2_TRIGGER_INPUT;
+		BS2InputTrigger& inputTrigger = trigger.input;
+
+		msg = "[Trigger] Please insert input port No.";
+		inputTrigger.port = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "[Trigger] Please insert switchType (N/O:0, N/C:1).";
+		BS2_SWITCH_TYPE sw = (BS2_SWITCH_TYPE)Utility::getInput<uint32_t>(msg);
+		inputTrigger.switchType = (sw == BS2_SWITCH_TYPE_NORMAL_OPEN) ? BS2_SWITCH_TYPE_NORMAL_OPEN : BS2_SWITCH_TYPE_NORMAL_CLOSED;
+
+		msg = "[Trigger] Please insert duration.";
+		inputTrigger.duration = (uint16_t)Utility::getInput<uint32_t>(msg);
+		inputTrigger.scheduleID = BS2_SCHEDULE_ALWAYS_ID;
+
+
+		BS2Action& action = config.items[idx].action;
+		msg = "[Action] Please insert device ID.";
+		action.deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>(msg);
+
+		action.type = BS2_ACTION_RELAY;
+		action.stopFlag = BS2_STOP_NONE;
+
+		msg = "[Action] Please insert delay of relay.";
+		action.delay = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		BS2RelayAction& relayAction = action.relay;
+		msg = "[Action] Please insert relay index.";
+		relayAction.relayIndex = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		BS2Signal& relaySignal = relayAction.signal;
+		msg = "[Action] Please insert signal ID.";
+		relaySignal.signalID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+		msg = "[Action] Please insert signal count.";
+		relaySignal.count = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "[Action] Please insert signal On-Duration.";
+		relaySignal.onDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "[Action] Please insert signal Off-Duration.";
+		relaySignal.offDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "[Action] Please insert signal delay.";
+		relaySignal.delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	return cc.setTriggerActionConfig(id, config);
 }

@@ -13,7 +13,12 @@ namespace Suprema
         BS_SDK_FIRST_AUTH_SUCCESS                           = 3,
         BS_SDK_SECOND_AUTH_SUCCESS                          = 4,
         BS_SDK_DUAL_AUTH_SUCCESS                            = 5,
-        
+        BS_SDK_WIEGAND_BYPASS_SUCCESS                       = 11,
+        BS_SDK_ANONYMOUS_SUCCESS                            = 12,
+
+		// Driver errors
+        BS_SDK_ERROR_FROM_DEVICE_DRIVER                     = -1,
+
         // Communication errors
         BS_SDK_ERROR_CANNOT_OPEN_SOCKET                     = -101,
         BS_SDK_ERROR_CANNOT_CONNECT_SOCKET                  = -102,
@@ -58,6 +63,7 @@ namespace Suprema
         BS_SDK_ERROR_EXTRACTION_LOW_QUALITY                 = -308,
         BS_SDK_ERROR_CAPTURE_LOW_QUALITY                    = -309,
         BS_SDK_ERROR_CANNOT_FIND_FINGERPRINT                = -310,
+        BS_SDK_ERROR_NO_FINGER_DETECTED                     = BS_SDK_ERROR_FINGERPRINT_CAPTURE_FAIL,
         BS_SDK_ERROR_FAKE_FINGER_DETECTED                   = -311,
         BS_SDK_ERROR_FAKE_FINGER_TRY_AGAIN                  = -312,
         BS_SDK_ERROR_FAKE_FINGER_SENSOR_ERROR               = -313,
@@ -66,7 +72,21 @@ namespace Suprema
         BS_SDK_ERROR_FACE_SCAN_TIMEOUT                      = -316,
         BS_SDK_ERROR_FACE_SCAN_CANCELLED                    = -317,
         BS_SDK_ERROR_FACE_SCAN_FAILED                       = -318,
-        
+        BS_SDK_ERROR_NO_FACE_DETECTED                       = BS_SDK_ERROR_FACE_CAPTURE_FAIL,
+        BS_SDK_ERROR_UNMASKED_FACE_DETECTED                 = -319,
+        BS_SDK_ERROR_FAKE_FACE_DETECTED                     = -320,
+        BS_SDK_ERROR_CANNOT_ESTIMATE                        = -321,
+        BS_SDK_ERROR_NORMALIZE_FACE                         = -322,
+        BS_SDK_ERROR_SMALL_DETECTION                        = -323,
+        BS_SDK_ERROR_LARGE_DETECTION                        = -324,
+        BS_SDK_ERROR_BIASED_DETECTION                       = -325,
+        BS_SDK_ERROR_ROTATED_FACE                           = -326,
+        BS_SDK_ERROR_OVERLAPPED_FACE                        = -327,
+        BS_SDK_ERROR_UNOPENED_EYES                          = -328,
+        BS_SDK_ERROR_NOT_LOOKING_FRONT                      = -329,
+        BS_SDK_ERROR_OCCLUDED_MOUTH                         = -330,
+        BS_SDK_ERROR_MATCH_FAIL                             = -331,
+
         //File I/O errors
         BS_SDK_ERROR_CANNOT_OPEN_DIR                        = -400,
         BS_SDK_ERROR_CANNOT_OPEN_FILE                       = -401,
@@ -76,7 +96,8 @@ namespace Suprema
         BS_SDK_ERROR_CANNOT_GET_STAT                        = -405,
         BS_SDK_ERROR_CANNOT_GET_SYSINFO                     = -406,
         BS_SDK_ERROR_DATA_MISMATCH                          = -407,
-        
+        BS_SDK_ERROR_ALREADY_OPEN_DIR                       = -408,
+
         // I/O errors
         BS_SDK_ERROR_INVALID_RELAY                          = -500,
         BS_SDK_ERROR_CANNOT_WRITE_IO_PACKET                 = -501,
@@ -96,11 +117,12 @@ namespace Suprema
         BS_SDK_ERROR_MISC_INPUT_QUEUE_FULL                  = -522,
         BS_SDK_ERROR_WIEGAND_DATA_QUEUE_FULL                = -523,
         BS_SDK_ERROR_WIEGAND_DATA_QUEUE_EMPTY               = -524,
-        
+
         //Util errors
         BS_SDK_ERROR_NOT_SUPPORTED                          = -600,
         BS_SDK_ERROR_TIMEOUT                                = -601,
-        
+        BS_SDK_ERROR_CANNOT_SET_TIME                        = -602,
+
         //Database errors
         BS_SDK_ERROR_INVALID_DATA_FILE                      = -700,
         BS_SDK_ERROR_TOO_LARGE_DATA_FOR_SLOT                = -701,
@@ -130,6 +152,7 @@ namespace Suprema
         BS_SDK_ERROR_DOOR_SCHEDULE_FULL                     = -726,
         BS_SDK_ERROR_DB_SLOT_FULL                           = -727,
         BS_SDK_ERROR_ACCESS_GROUP_FULL                      = -728,
+        BS_SDK_ERROR_FLOOR_LEVEL_FULL                       = -729,
         BS_SDK_ERROR_ACCESS_SCHEDULE_FULL                   = -730,
         BS_SDK_ERROR_HOLIDAY_GROUP_FULL                     = -731,
         BS_SDK_ERROR_HOLIDAY_FULL                           = -732,
@@ -159,7 +182,12 @@ namespace Suprema
         BS_SDK_ERROR_CANNOT_FIND_OPERATOR                   = -756,
         BS_SDK_ERROR_DUPLICATE_FINGERPRINT                  = -757,
         BS_SDK_ERROR_DUPLICATE_FACE                         = -758,
-        
+        BS_SDK_ERROR_NO_FACE_CREDENTIAL                     = -759,
+        BS_SDK_ERROR_NO_FINGERPRINT_CREDENTIAL              = -760,
+        BS_SDK_ERROR_NO_FACE_PIN_CREDENTIAL                 = -761,
+        BS_SDK_ERROR_NO_FINGERPRINT_PIN_CREDENTIAL          = -762,
+        BS_SDK_ERROR_USER_IMAGE_EX_FULL                     = -763,
+
         //Config errors
         BS_SDK_ERROR_INVALID_CONFIG                         = -800,
         BS_SDK_ERROR_CANNOT_OPEN_CONFIG_FILE                = -801,
@@ -168,7 +196,7 @@ namespace Suprema
         BS_SDK_ERROR_INVALID_CONFIG_DATA                    = -804,
         BS_SDK_ERROR_CANNOT_WRITE_CONFIG_FILE               = -805,
         BS_SDK_ERROR_INVALID_CONFIG_INDEX                   = -806,
-        
+
         //Device errors
         BS_SDK_ERROR_CANNOT_SCAN_FINGER                     = -900,
         BS_SDK_ERROR_CANNOT_SCAN_CARD                       = -901,
@@ -178,14 +206,19 @@ namespace Suprema
         BS_SDK_ERROR_CANNOT_SET_LED                         = -905,
         BS_SDK_ERROR_CANNOT_OPEN_DEVICE_DRIVER              = -906,
         BS_SDK_ERROR_CANNOT_FIND_DEVICE                     = -907,
-        
+        BS_SDK_ERROR_CANNOT_SCAN_FACE                       = -908,
+        BS_SDK_ERROR_SLAVE_FULL                             = -910,
+        BS_SDK_ERROR_CANNOT_ADD_DEVICE                      = -911,
+
         //Door errors
         BS_SDK_ERROR_CANNOT_FIND_DOOR                       = -1000,
         BS_SDK_ERROR_DOOR_FULL                              = -1001,
         BS_SDK_ERROR_CANNOT_LOCK_DOOR                       = -1002,
         BS_SDK_ERROR_CANNOT_UNLOCK_DOOR                     = -1003,
         BS_SDK_ERROR_CANNOT_RELEASE_DOOR                    = -1004,
-        
+        BS_SDK_ERROR_CANNOT_FIND_LIFT                       = -1005,
+        BS_SDK_ERROR_LIFT_FULL                              = -1006,
+
         //Access control errors
         BS_SDK_ERROR_ACCESS_RULE_VIOLATION                  = -1100,
         BS_SDK_ERROR_DISABLED                               = -1101,
@@ -214,17 +247,31 @@ namespace Suprema
         BS_SDK_ERROR_AUTH_GROUP_REQUIRED                    = -1124,
         BS_SDK_ERROR_IDENTIFICATION_REQUIRED                = -1125,
         BS_SDK_ERROR_ANTI_TAILGATE_VIOLATION                = -1126,
-        
+        BS_SDK_ERROR_HIGH_TEMPERATURE_VIOLATION             = -1127,
+        BS_SDK_ERROR_CANNOT_MEASURE_TEMPERATURE             = -1128,
+        BS_SDK_ERROR_UNMASKED_FACE_VIOLATION                = -1129,
+
+        // Required (Fingerprint/Face/PIN/Mask/Thermal ...)
+        BS_SDK_MASK_CHECK_REQUIRED                          = -1130,
+        BS_SDK_THERMAL_CHECK_REQUIRED                       = -1131,
+        BS_SDK_FACE_AUTH_REQUIRED                           = -1132,
+        BS_SDK_FINGERPRINT_AUTH_REQUIRED                    = -1133,
+        BS_SDK_FACE_OR_PIN_AUTH_REQUIRED                    = -1134,
+        BS_SDK_FINGERPRINT_OR_PIN_AUTH_REQUIRED             = -1135,
+
         //Zone errors
         BS_SDK_ERROR_CANNOT_FIND_ZONE                       = -1200,
-        BS_SDK_ERROR_ZONE_FULL                              = -1201,
+        [Obsolete] BS_SDK_ERROR_ZONE_FULL                   = -1201,
+        BS_SDK_ERROR_SET_ZONE                               = -1201,
         BS_SDK_ERROR_HARD_APB_VIOLATION                     = -1202,
         BS_SDK_ERROR_SOFT_APB_VIOLATION                     = -1203,
         BS_SDK_ERROR_HARD_TIMED_APB_VIOLATION               = -1204,
         BS_SDK_ERROR_SOFT_TIMED_APB_VIOLATION               = -1205,
         BS_SDK_ERROR_SCHEDULED_LOCK_VIOLATION               = -1206,
-        BS_SDK_ERROR_SCHEDULED_UNLOCK_VIOLATION             = -1207,
-        BS_SDK_ERROR_SET_FIRE_ALARM                         = -1208,
+        [Obsolete] BS_SDK_ERROR_SCHEDULED_UNLOCK_VIOLATION  = -1207,
+        BS_SDK_ERROR_INTRUSION_ALARM_VIOLATION              = -1207,
+        [Obsolete] BS_SDK_ERROR_SET_FIRE_ALARM              = -1208,
+        BS_SDK_ERROR_APB_ZONE_FULL                          = -1208,
         BS_SDK_ERROR_TIMED_APB_ZONE_FULL                    = -1209,
         BS_SDK_ERROR_FIRE_ALARM_ZONE_FULL                   = -1210,
         BS_SDK_ERROR_SCHEDULED_LOCK_UNLOCK_ZONE_FULL        = -1211,
@@ -245,7 +292,9 @@ namespace Suprema
         BS_SDK_ERROR_AUTH_LIMIT_USER_VIOLATION              = -1226,
         BS_SDK_ERROR_SOFT_AUTH_LIMIT_VIOLATION              = -1227,
         BS_SDK_ERROR_HARD_AUTH_LIMIT_VIOLATION              = -1228,
-        
+
+        BS_SDK_ERROR_LIFT_LOCK_UNLOCK_ZONE_FULL             = -1229,
+        BS_SDK_ERROR_LIFT_LOCK_VIOLATION                    = -1230,
         //Card errors
         BS_SDK_ERROR_CARD_IO                                = -1300,
         BS_SDK_ERROR_CARD_INIT_FAIL                         = -1301,
@@ -286,6 +335,9 @@ namespace Suprema
         BS_SDK_ERROR_SSL_VERIFY_CERT                         = -3005,
         BS_SDK_ERROR_SSL_INVALID_KEY                         = -3006,
         BS_SDK_ERROR_SSL_VERIFY_KEY                          = -3007,
+
+        // Mobile access
+        BS_SDK_ERROR_MOBILE_PORTAL                           = -3100,
 
         BS_SDK_ERROR_NULL_POINTER                            = -10000,
         BS_SDK_ERROR_UNINITIALIZED                           = -10001,

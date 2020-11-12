@@ -108,7 +108,9 @@ typedef struct {
 	uint16_t	wiegandInputMask;	///< 2 Bytes (bitmask , no use 0 postion bit, 1~15 bit)
 	uint16_t	wiegandCardMask;	///< 2 Bytes (bitmask , no use 0 postion bit, 1~15 bit)
 	uint8_t		wiegandCSNIndex;	///< 1 Bytes (1~15)
-	uint8_t reserved[27];			///< 27 bytes (reserved)
+
+	uint8_t useWiegandUserID;     	///< 1 byte (0 - Not use, 1 - CardID, 2 - UserID)
+	uint8_t reserved[26];			///< 26 bytes (reserved)
 } BS2WiegandConfig;
 
 #endif	// __BS2_WIEGAND_CONFIG_H__

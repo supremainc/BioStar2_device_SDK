@@ -3355,6 +3355,10 @@ namespace Suprema
                 }
 	        }
 
+            userBlob[0].setting.fingerAuthMode = (byte)BS2FingerAuthModeEnum.NONE;
+            userBlob[0].setting.cardAuthMode = (byte)BS2CardAuthModeEnum.NONE;
+            userBlob[0].setting.idAuthMode = (byte)BS2IDAuthModeEnum.NONE;
+
             Console.WriteLine("Do you want to register private auth mode? [y/n]");
             Console.Write(">> ");
             if (Util.IsYes())
@@ -3444,6 +3448,11 @@ namespace Suprema
 			        }
 		        }
 	        }
+
+            userBlob[0].settingEx.faceAuthMode = (byte)BS2ExtFaceAuthModeEnum.NONE;
+            userBlob[0].settingEx.fingerprintAuthMode = (byte)BS2ExtFingerprintAuthModeEnum.NONE;
+            userBlob[0].settingEx.cardAuthMode = (byte)BS2ExtCardAuthModeEnum.NONE;
+            userBlob[0].settingEx.idAuthMode = (byte)BS2ExtIDAuthModeEnum.NONE;
 
             Console.WriteLine("Do you want to register private auth-ex mode? [y/n]");
             Console.Write(">> ");
@@ -3923,7 +3932,7 @@ namespace Suprema
 
 	        sdkResult = (BS2ErrorCode)API.BS2_EnrollUserFaceEx(sdkContext, deviceID, userBlob, 1, 1);
 	        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
-		        Console.WriteLine("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
+		        Console.WriteLine("BS2_EnrollUserFaceEx call failed {0}", sdkResult);
 
 	        if (userBlob[0].cardObjs != IntPtr.Zero)
 		        Marshal.FreeHGlobal(userBlob[0].cardObjs);
@@ -3936,7 +3945,7 @@ namespace Suprema
 
 	        if (userBlob[0].faceExObjs != IntPtr.Zero)
 	        {
-                if (unwarpedMemory)
+                //if (unwarpedMemory)
                     Marshal.FreeHGlobal(userBlob[0].faceExObjs);
 	        }
         }

@@ -19,9 +19,7 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		stringstream buf;
-		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(*event, timezone);
-		cout << buf.str() << endl;
+		cout << Utility::getEventString(id, *event, timezone) << endl;
 	}
 }
 
@@ -32,9 +30,7 @@ void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE te
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		stringstream buf;
-		buf << "Device(" << std::to_string(id) << ") " << Utility::getEventStringWithThermal(*event, timezone, temperature);
-		cout << buf.str() << endl;
+		cout << Utility::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
 	}
 }
 
@@ -65,6 +61,9 @@ int main(int argc, char* argv[])
 	//::testing::InitGoogleTest();
 	//return RUN_ALL_TESTS();
 
+	// Set debugging SDK log (to current working directory)
+	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+
 	// Create SDK context and initialize
 	sdkContext = BS2Context::getInstance()->initSDK();
 	if (!sdkContext)
@@ -73,8 +72,6 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	// Set debugging SDK log (to current working directory)
-	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
 	BS2Context::getInstance()->setDeviceEventListener(NULL, onDeviceConnected, onDeviceDisconnected);
 
 	connectTestDevice(sdkContext);
@@ -351,6 +348,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_ENR_USR:
 			sdkResult = uc.enrollUser(id);
 			break;
+		case MENU_USR_ENR_USR_SMALL:
+			sdkResult = uc.enrollUserSmall(id);
+			break;
 		case MENU_USR_ENR_USR_FACEEX:
 			sdkResult = uc.enrollUserFaceEx(id);
 			break;
@@ -477,9 +477,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			{
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
-				stringstream buf;
-				buf << "Device(" << std::to_string(id) << ") " << Utility::getEventString(event, timezone);
-				cout << buf.str() << endl;
+				cout << Utility::getEventString(id, event, timezone) << endl;
 
 				if (event.image & 0x01)
 				{

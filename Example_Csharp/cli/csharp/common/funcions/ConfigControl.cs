@@ -1730,10 +1730,17 @@ namespace Suprema
             Console.Write(">> ");
             faceConfigExt.thermalFormat = Util.GetInput((byte)1);
 
-            Console.WriteLine("Insert high temperature value in Celsius. (30.0 ~ 45.0℃)");
+            const float THERMAL_THRESHOLD_DEFAULT_LOW = 32.0F;
+            const float THERMAL_THRESHOLD_DEFAULT_HIGH = 38.0F;
+            Console.WriteLine("Insert low value of high temperature range in Celsius. (30.0 ~ 45.0℃)");
             Console.Write(">> ");
-            float threshold = Util.GetInput(38.0F);
-            faceConfigExt.thermalThreshold = (UInt16)(threshold * 100);
+            float thresholdLow = Util.GetInput(THERMAL_THRESHOLD_DEFAULT_LOW);
+            faceConfigExt.thermalThresholdLow = (UInt16)(thresholdLow * 100);
+
+            Console.WriteLine("Insert high value of high temperature range in Celsius. (30.0 ~ 45.0℃)");
+            Console.Write(">> ");
+            float thresholdHigh = Util.GetInput(THERMAL_THRESHOLD_DEFAULT_HIGH);
+            faceConfigExt.thermalThresholdHigh = (UInt16)(thresholdHigh * 100);
 
             Console.WriteLine("Insert mask detection level. (0: Not use, 1: Normal, 2: High, 3: Very high)");
             Console.Write(">> ");
@@ -1750,6 +1757,10 @@ namespace Suprema
             Console.WriteLine("Do you want to use overlapped thermal? [y/n]");
             Console.Write(">> ");
             faceConfigExt.useOverlapThermal = Util.IsYes() ? (byte)1 : (byte)0;
+
+            Console.WriteLine("Do you want to use dynamic ROI? [y/n]");
+            Console.Write(">> ");
+            faceConfigExt.useDynamicROI = Util.IsYes() ? (byte)1 : (byte)0;
 
             Console.WriteLine("Insert face check order.");
             Console.WriteLine(" 0: Face check after auth [default]");
@@ -1784,27 +1795,27 @@ namespace Suprema
         {
             BS2ThermalCameraConfig config = Util.AllocateStructure<BS2ThermalCameraConfig>();
 
-            Console.WriteLine("Insert camera distance from user. (cm. default: 70)");
+            Console.WriteLine("Insert camera distance from user. (cm. default: 100)");
             Console.Write(">> ");
-            config.distance = Util.GetInput((byte)70);
+            config.distance = Util.GetInput((byte)BS2Environment.BS2_THERMAL_CAMERA_DISTANCE_DEFAULT);
 
             Console.WriteLine("Insert emission rate. (95/97/98, default: 98)");
             Console.Write(">> ");
-            config.emissionRate = Util.GetInput((byte)98);
+            config.emissionRate = Util.GetInput((byte)BS2Environment.BS2_THERMAL_CAMERA_EMISSION_RATE_DEFAULT);
 
             Console.WriteLine("Insert ROI(Region of interest).");
             Console.WriteLine("  x");
             Console.Write("  >> ");
-            config.roi.x = Util.GetInput((ushort)0);
+            config.roi.x = Util.GetInput((ushort)BS2Environment.BS2_THERMAL_CAMERA_ROI_X_DEFAULT);
             Console.WriteLine("  y");
             Console.Write("  >> ");
-            config.roi.y = Util.GetInput((ushort)0);
+            config.roi.y = Util.GetInput((ushort)BS2Environment.BS2_THERMAL_CAMERA_ROI_Y_DEFAULT);
             Console.WriteLine("  width");
             Console.Write("  >> ");
-            config.roi.width = Util.GetInput((ushort)0);
+            config.roi.width = Util.GetInput((ushort)BS2Environment.BS2_THERMAL_CAMERA_ROI_WIDTH_DEFAULT);
             Console.WriteLine("  height");
             Console.Write("  >> ");
-            config.roi.height = Util.GetInput((ushort)0);
+            config.roi.height = Util.GetInput((ushort)BS2Environment.BS2_THERMAL_CAMERA_ROI_HEIGHT_DEFAULT);
 
             Console.WriteLine("Do you want to use body compensation [y/n]");
             Console.Write(">> ");
@@ -2128,12 +2139,15 @@ namespace Suprema
             Console.WriteLine("     +--thermalCheckMode : {0}", config.thermalCheckMode);
             Console.WriteLine("     |--maskCheckMode : {0}", config.maskCheckMode);
             Console.WriteLine("     |--thermalFormat : {0}", config.thermalFormat);
-            float threshold = (float)config.thermalThreshold / 100.0F;
-            Console.WriteLine("     |--thermalThreshold : {0}", threshold);
+            float thresholdLow = (float)config.thermalThresholdLow / 100.0F;
+            Console.WriteLine("     |--thermalThresholdLow : {0}", thresholdLow);
+            float thresholdHigh = (float)config.thermalThresholdHigh / 100.0F;
+            Console.WriteLine("     |--thermalThresholdHigh : {0}", thresholdHigh);
             Console.WriteLine("     |--maskDetectionLevel : {0}", config.maskDetectionLevel);
             Console.WriteLine("     |--auditTemperature : {0}", config.auditTemperature);
             Console.WriteLine("     |--useRejectSound : {0}", config.useRejectSound);
             Console.WriteLine("     |--useOverlapThermal : {0}", config.useOverlapThermal);
+            Console.WriteLine("     |--useDynamicROI : {0}", config.useDynamicROI);
             Console.WriteLine("     +--faceCheckOrder : {0}", config.faceCheckOrder);
             Console.WriteLine("<<<< ");
         }

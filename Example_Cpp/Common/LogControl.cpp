@@ -108,8 +108,8 @@ void LogControl::print(const BS2EventSmallBlobEx* logs, uint32_t numLog)
 			TRACE("imageSize : %u", logs[index].imageSize);
 			TRACE("imageObj : %p", logs[index].imageObj);
 		}
-		float temper = (float)logs[index].temperature / 100.0;
-		TRACE("temperature : %.2f¡É", temper);
+		float temper = (float)logs[index].temperature / (float)100.0;
+		TRACE("temperature : %.2f", temper);
 		TRACE("============================>>");
 	}
 }

@@ -43,8 +43,12 @@ enum {
 	BS2_THERMAL_THRESHOLD_MIN = 3000,
 	BS2_THERMAL_THRESHOLD_MAX = 4500,
 
-	BS2_THERMAL_THRESHOLD_DEFAULT = 3800,
+	BS2_THERMAL_THRESHOLD_LOW_DEFAULT = 3200,
+	BS2_THERMAL_THRESHOLD_HIGH_DEFAULT = 3800,
+	BS2_THERMAL_THRESHOLD_DEFAULT = 3800,	// Deprecated V2.7.2
 };
+
+#define BS2_THERMAL_THRESHOLD_DEFAULT		(DEPRECATED_ENUM)BS2_THERMAL_THRESHOLD_DEFAULT
 
 typedef struct {
 	BS2_FACE_CHECK_MODE thermalCheckMode;			///< 1 byte
@@ -52,15 +56,16 @@ typedef struct {
 	uint8_t reserved[2];				///< 2 bytes (packing)
 
 	uint8_t thermalFormat;						///< 1 byte
-	uint8_t reserved2[3];							///< 3 bytes (packing)
+	uint8_t reserved2;							///< 1 byte (packing)
+	uint16_t thermalThresholdLow;		///< 2 bytes : Celsius * 100
 
-	uint16_t thermalThreshold;				///< 2 bytes : Celsius * 100
+	uint16_t thermalThresholdHigh;				///< 2 bytes : Celsius * 100
 	BS2_MASK_DETECTION_LEVEL maskDetectionLevel;		///< 1 byte
 	BS2_BOOL auditTemperature;					///< 1 byte
 
 	BS2_BOOL useRejectSound;				///< 1 byte
 	BS2_BOOL useOverlapThermal;					///< 1 byte
-	uint8_t reserved4;										///< 1 byte (packing)
+	BS2_BOOL useDynamicROI;										///< 1 byte
 	BS2_FACE_CHECK_ORDER faceCheckOrder;				///< 1 byte
 } BS2FaceConfigExt;
 

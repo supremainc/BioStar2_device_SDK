@@ -33,6 +33,33 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 
+### V2.7.2.4 released 11/11/2020:
+
+**New Features**
+
+**1.** You can select either Card ID or User ID for Wiegand output setting.
+* Refer to structure BS2WiegandConfig
+* Refer to API BS2_GetWiegandConfig
+* Refer to API BS2_SetWiegandConfig
+
+
+**Modified Features**
+
+**1.** File log output structure of internal SDK has been changed.
+Before, it used to write a file from each event processing thread, but now there's a separate file writing thread.
+It leads to improve the speed of event processing.
+* Refer to API BS2_SetDebugFileLog
+
+**2.** When enrolling multiple face users to FaceStation F2,
+Fixed an issue that could cause the BS_SDK_ERROR_NO_FACE_CREDENTIAL(-759) error.
+* Refer to API BS2_EnrollUserFaceEx
+
+**3.** Fixed an issue where the callback may not work intermittenly when the device is disconnected.
+* Refer to API BS2_SetDeviceEventListener
+
+**4.** There were fixes for stabilizing the code inside the SDK.
+
+
 ### V2.7.1.1 released 09/22/2020:
 
 **New Features**
@@ -43,7 +70,7 @@ The SDK currently being distributed comes with C # examples. This github provide
 * Structure BS2FaceEx has been added
 * Structure BS2UserFaceExBlob has been added
 * API BS2_ScanFaceEx has been added
-* API BS2_ExtraceTemplateFaceEx has been added
+* API BS2_ExtractTemplateFaceEx has been added
 * API BS2_EnrollUserFaceEx has been added
 * API BS2_GetUserInfosFaceEx has been added
 * API BS2_GetUserDatasFaceEx has been added

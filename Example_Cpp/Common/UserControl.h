@@ -55,6 +55,7 @@ public:
 	int getAllUser(BS2_DEVICE_ID id);
 	int getAllUserFaceEx(BS2_DEVICE_ID id);
 	int enrollUser(BS2_DEVICE_ID id);
+	int enrollUserSmall(BS2_DEVICE_ID id);
 	int getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, uint32_t* width, uint32_t* height);
 	int removeUser(BS2_DEVICE_ID id);
 	int removeAllUser(BS2_DEVICE_ID id);
