@@ -32,3 +32,5 @@
 **/.vs
 **/.vs/Example_Cpp
 **/.vs/Example_Cpp/v14
+**/bin
+**/obj
