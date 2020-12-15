@@ -309,6 +309,7 @@ int runAPIs(void* context, const DeviceInfo& device)
 	int sdkResult = BS_SDK_SUCCESS;
 	int selectedTop(0);
 	DeviceControl dc(context);
+	ConfigControl cc(context);
 
 	cout << endl << endl << "== DeviceAPI Test ==" << endl;
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
@@ -431,6 +432,15 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 		case MENU_DEV_SET_TRIGGERACTIONCONFIG:
 			sdkResult = setTriggerActionConfig(context, id);
+			break;
+		case MENU_DEV_REM_TRIGGERACTIONCONFIG:
+			sdkResult = removeTriggerActionConfig(context, id);
+			break;
+		case MENU_DEV_UPD_DEVICE_VOLUME:
+			sdkResult = updateDeviceVolume(context, id);
+			break;
+		case MENU_DEV_RST_CONFIG_EXCEPT_NETINFO:
+			sdkResult = cc.resetConfigExceptNetInfo(id);
 			break;
 		default:
 			break;
@@ -932,11 +942,11 @@ int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
 	msg = "Insert thermal format. (0: Fahrenheit, 1: Celsius)";
 	config.thermalFormat = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	msg = "Insert low value of high temperature range in Celsius. (30.0 ~ 45.0)";
+	msg = "Insert low value of high temperature range in Celsius. (1.0 ~ 45.0)";
 	float thresholdLow = Utility::getInput<float>(msg);
 	config.thermalThresholdLow = (uint16_t)(thresholdLow * 100);
 
-	msg = "Insert high value of high temperature range in Celsius. (30.0 ~ 45.0)";
+	msg = "Insert high value of high temperature range in Celsius. (1.0 ~ 45.0)";
 	float thresholdHigh = Utility::getInput<float>(msg);
 	config.thermalThresholdHigh = (uint16_t)(thresholdHigh * 100);
 
@@ -1087,4 +1097,26 @@ int setTriggerActionConfig(void* context, BS2_DEVICE_ID id)
 	}
 
 	return cc.setTriggerActionConfig(id, config);
+}
+
+int removeTriggerActionConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2TriggerActionConfig config = { 0, };
+
+	return cc.setTriggerActionConfig(id, config);
+}
+
+int updateDeviceVolume(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2DisplayConfig config = { 0, };
+
+	int sdkResult = cc.getDisplayConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.volume = 10;
+
+	return cc.setDisplayConfig(id, config);
 }

@@ -1732,12 +1732,12 @@ namespace Suprema
 
             const float THERMAL_THRESHOLD_DEFAULT_LOW = 32.0F;
             const float THERMAL_THRESHOLD_DEFAULT_HIGH = 38.0F;
-            Console.WriteLine("Insert low value of high temperature range in Celsius. (30.0 ~ 45.0℃)");
+            Console.WriteLine("Insert low value of high temperature range in Celsius. (1.0 ~ 45.0℃)");
             Console.Write(">> ");
             float thresholdLow = Util.GetInput(THERMAL_THRESHOLD_DEFAULT_LOW);
             faceConfigExt.thermalThresholdLow = (UInt16)(thresholdLow * 100);
 
-            Console.WriteLine("Insert high value of high temperature range in Celsius. (30.0 ~ 45.0℃)");
+            Console.WriteLine("Insert high value of high temperature range in Celsius. (1.0 ~ 45.0℃)");
             Console.Write(">> ");
             float thresholdHigh = Util.GetInput(THERMAL_THRESHOLD_DEFAULT_HIGH);
             faceConfigExt.thermalThresholdHigh = (UInt16)(thresholdHigh * 100);

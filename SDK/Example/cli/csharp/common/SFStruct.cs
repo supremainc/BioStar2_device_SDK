@@ -395,6 +395,7 @@ namespace Suprema
         public byte[] shortcutHome;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_TNA_KEY)]
         public byte[] tnaIcon;
+        public byte useScreenSaver;         // FS2, F2
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public byte[] reserved2;
     }

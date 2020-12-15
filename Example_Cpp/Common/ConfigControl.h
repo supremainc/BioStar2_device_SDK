@@ -44,6 +44,8 @@ public:
 	int updateConnectModeServer2Device(BS2_DEVICE_ID id);
 	int updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mode = BS2_RS485_MODE_DEFAULT);
 
+	int resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB = true);
+
 private:
 	void print(const BS2SystemConfig& config) const;
 	void print(const BS2DisplayConfig& config) const;

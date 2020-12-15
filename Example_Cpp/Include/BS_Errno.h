@@ -365,5 +365,6 @@
 #define BS_SDK_ERROR_MOBILE_DEVICE_NOT_FOUND				-10105
 
 #define BS_SDK_ERROR_INITIALIZE_FILELOG                     -10201
+#define BS_SDK_ERROR_INITIALIZE_NOTIFYMGR                   -10202
 
 #endif /* CORE_JNI_SRC_BS_ERRNO_H_ */

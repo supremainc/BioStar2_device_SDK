@@ -354,6 +354,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_ENR_USR_FACEEX:
 			sdkResult = uc.enrollUserFaceEx(id);
 			break;
+		case MENU_USR_ENR_USR_SCAN_N_LOAD:
+			sdkResult = uc.enrollUserFaceExScanAndLoad(id);
+			break;
 		case MENU_USR_GET_LASTFPIMAGE:
 			sdkResult = getLastFingerprintImage(uc, id);
 			break;

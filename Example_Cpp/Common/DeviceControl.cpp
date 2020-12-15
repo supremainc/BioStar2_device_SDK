@@ -297,6 +297,15 @@ int DeviceControl::getAuthOperatorLevelEx(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int DeviceControl::removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id)
+{
+	int sdkResult = BS2_RemoveAllAuthOperatorLevelEx(context_, id);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_RemoveAllAuthOperatorLevelEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int DeviceControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx)
 {
 	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };

@@ -541,6 +541,7 @@ typedef void (*CBDebugPrint)(char* msg);
 #define DEBUG_MODULE_MISC				(0x1 << 7)
 #define DEBUG_MODULE_PACKET				(0x1 << 8)
 #define DEBUG_MOBILEACCESS				(0x1 << 9)
+#define DEBUG_MODULE_NOTIFY_MANAGER		(0x1 << 10)
 #define DEBUG_MODULE_ALL				(DEBUG_ALL)
 #define DEBUG_LOG_FATAL					(0x1 << 0)
 #define DEBUG_LOG_ERROR					(0x1 << 1)
@@ -1045,6 +1046,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceEx(void* context, BS
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask);
 
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_VerifyUserFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, BS2UserFaceExBlob* userBlob);
 
 
 #ifdef __cplusplus

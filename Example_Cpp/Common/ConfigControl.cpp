@@ -320,6 +320,16 @@ int ConfigControl::updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mod
 	return sdkResult;
 }
 
+int ConfigControl::resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB)
+{
+	uint8_t includeDBInfo = includeDB ? 1 : 0;
+	int sdkResult = BS2_ResetConfigExceptNetInfo(context_, id, includeDBInfo);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_ResetConfigExceptNetInfo call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 void ConfigControl::print(const BS2SystemConfig& config) const
 {
 	TRACE("==[BS2SystemConfig]==");
@@ -358,8 +368,11 @@ void ConfigControl::print(const BS2DisplayConfig& config) const
 	TRACE("homeFormation:%u", config.homeFormation);
 	TRACE("useUserPhrase:%u", config.useUserPhrase);
 
-	//uint8_t shortcutHome[BS2_MAX_SHORTCUT_HOME];	///< 8 bytes
-	//uint8_t tnaIcon[BS2_MAX_TNA_KEY];		///< 16 bytes : tnaIcon
+	for (int idx = 0; idx < BS2_MAX_SHORTCUT_HOME; idx++)
+		TRACE("shortcutHome[%d]:%d", idx, config.shortcutHome[idx]);
+	for (int idx = 0; idx < BS2_MAX_TNA_KEY; idx++)
+		TRACE("tnaIcon[%d]:%d", idx, config.tnaIcon[idx]);
+	TRACE("useScreenSaver:%u", config.useScreenSaver);
 }
 
 void ConfigControl::print(const BS2IpConfig& config) const
@@ -497,15 +510,22 @@ void ConfigControl::print(const BS2FaceConfigExt& config) const
 	TRACE("+--thermalCheckMode : %u", config.thermalCheckMode);
 	TRACE("|--maskCheckMode : %u", config.maskCheckMode);
 	TRACE("|--thermalFormat : %u", config.thermalFormat);
+#ifndef LESS_THAN_272
 	float temperLow = (float)config.thermalThresholdLow / (float)100.0;
 	float temperHigh = (float)config.thermalThresholdHigh / (float)100.0;
 	TRACE("|--thermalThresholdLow : %.2f", temperLow);
 	TRACE("|--thermalThresholdHigh : %.2f", temperHigh);
+#else
+	float temper = (float)config.thermalThreshold / (float)100.0;
+	TRACE("|--thermalThreshold : %.2f", temper);
+#endif
 	TRACE("|--maskDetectionLevel : %u", config.maskDetectionLevel);
 	TRACE("|--auditTemperature : %u", config.auditTemperature);
 	TRACE("|--useRejectSound : %u", config.useRejectSound);
 	TRACE("|--useOverlapThermal : %u", config.useOverlapThermal);
+#ifndef LESS_THAN_272
 	TRACE("|--useDynamicROI : %u", config.useDynamicROI);
+#endif
 	TRACE("+--faceCheckOrder : %u", config.faceCheckOrder);
 }
 

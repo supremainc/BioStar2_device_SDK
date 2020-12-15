@@ -1237,6 +1237,9 @@ namespace Suprema
         extern public static int BS2_VerifyUserSmallEx(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, ref BS2UserSmallBlobEx userBlob);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_VerifyUserFaceEx(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, ref BS2UserFaceExBlob userBlob);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_IdentifyUserSmallEx(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, ref BS2UserSmallBlobEx userBlob);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]

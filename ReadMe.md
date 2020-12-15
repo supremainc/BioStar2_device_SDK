@@ -33,6 +33,38 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 
+### Version V2.7.2.12 released 12/11/2020:
+
+**New Features**
+
+* Supports screensaver activation (FaceStation 2, FaceStation F2)
+
+**1.** You can turn the screensaver on and off. FaceStation 2, FaceStation F2 only.
+* Refer to structure BS2DisplayConfig
+* Refer to API BS2_GetDisplayConfig
+* Refer to API BS2_SetDisplayConfig
+
+**2.** FaceStation F2 server matching support. (Card only)
+* Refer to API BS2_SetServerMatchingHandler
+* Refer to API BS2_VerifyUserFaceEx
+
+
+**Modified Features**
+
+**1.** Fixed an issue where devices could not connect normally when in Device to Server connection mode.
+
+**2.** In the process of unloading SDK through BS2_ReleaseContext, a problem that may not be normally unloaded due to a specific thread has been fixed.
+
+**3.** Body temperature measurement range has been modified. (30º ~ 45º => 1º ~ 45º)
+* Refer to structure BS2FaceConfigExt (thermalThresholdLow, thermalThresholdHigh)
+
+**4.** Fixed a problem where BS_SDK_ERROR_NOT_SUPPORTED or BS_SDK_ERROR_TIMEOUT error was returned  when enrolling a user with multiple image to FaceStation F2.
+* Refer to API BS2_EnrollUserFaceEx
+
+
+**5.** Fixed a problem in which a specific function was called from some devices except BioStation 2, but the BS_SDK_ERROR_TIMEOUT error was returned as a result value.
+* Refer to API BS2_ResetConfigExceptNetInfo
+
 ### V2.7.2.4 released 11/11/2020:
 
 **New Features**

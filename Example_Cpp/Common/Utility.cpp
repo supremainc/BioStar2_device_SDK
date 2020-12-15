@@ -170,7 +170,9 @@ string Utility::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t 
 	case BS2_EVENT_ACCESS_DENIED:
 	case BS2_EVENT_FAKE_FINGER_DETECTED:
 	case BS2_EVENT_ACCESS_GRANTED:
+#ifndef LESS_THAN_272
 	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
+#endif
 	case BS2_EVENT_UNMASKED_FACE_DETECTED:
 		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s)",
 			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server");
@@ -205,7 +207,9 @@ string Utility::getEventStringWithThermal(BS2_DEVICE_ID id, const BS2Event& even
 	case BS2_EVENT_ACCESS_DENIED:
 	case BS2_EVENT_FAKE_FINGER_DETECTED:
 	case BS2_EVENT_ACCESS_GRANTED:
+#ifndef LESS_THAN_272
 	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
+#endif
 	case BS2_EVENT_UNMASKED_FACE_DETECTED:
 		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
 			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server", temper);

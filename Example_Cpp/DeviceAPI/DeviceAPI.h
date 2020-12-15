@@ -61,6 +61,9 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_INPUTCONFIG,
 	MENU_DEV_GET_TRIGGERACTIONCONFIG,
 	MENU_DEV_SET_TRIGGERACTIONCONFIG,
+	MENU_DEV_REM_TRIGGERACTIONCONFIG,
+	MENU_DEV_UPD_DEVICE_VOLUME,
+	MENU_DEV_RST_CONFIG_EXCEPT_NETINFO,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -102,6 +105,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_INPUTCONFIG,		"BS2_GetInputConfig"},
 	{MENU_DEV_GET_TRIGGERACTIONCONFIG,	"BS2_GetTriggerActionConfig"},
 	{MENU_DEV_SET_TRIGGERACTIONCONFIG,	"BS2_SetTriggerActionConfig"},
+	{MENU_DEV_REM_TRIGGERACTIONCONFIG,	"Remove trigger action config"},
+	{MENU_DEV_UPD_DEVICE_VOLUME,		"Update device volume"},
+	{MENU_DEV_RST_CONFIG_EXCEPT_NETINFO,"BS2_ResetConfigExceptNetInfo"},
 };
 
 
@@ -141,3 +147,5 @@ int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id);
 int getInputConfig(void* context, BS2_DEVICE_ID id);
 int getTriggerActionConfig(void* context, BS2_DEVICE_ID id);
 int setTriggerActionConfig(void* context, BS2_DEVICE_ID id);
+int removeTriggerActionConfig(void* context, BS2_DEVICE_ID id);
+int updateDeviceVolume(void* context, BS2_DEVICE_ID id);
