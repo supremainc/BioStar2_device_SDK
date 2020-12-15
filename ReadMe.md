@@ -38,6 +38,7 @@ The SDK currently being distributed comes with C # examples. This github provide
 **New Features**
 
 * Supports screensaver activation (FaceStation 2, FaceStation F2)
+* FaceStation F2 server matching support (Card only)
 
 **1.** You can turn the screensaver on and off. FaceStation 2, FaceStation F2 only.
 * Refer to structure BS2DisplayConfig
