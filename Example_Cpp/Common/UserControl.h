@@ -67,7 +67,7 @@ public:
 	int getUserFaceEx(BS2_DEVICE_ID id);
 	int makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob);
 	int makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& templateEx, BS2UserFaceExBlob* userBlob);
-	int enrollUserFaceEx(BS2_DEVICE_ID id);
+	int enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card = NULL, BS2Fingerprint* finger = NULL, BS2Face* face = NULL, BS2FaceEx* faceEx = NULL);
 	int enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id);
 
 	int updateCardTypeCRC(BS2SmartCardData& card);
@@ -81,7 +81,6 @@ public:
 
 	void print(const BS2Card& card);
 
-private:
 	int getUserBlobUserID(BS2User& user);
 	int getUserBlobUserName(BS2UserBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo);
 	int getUserBlobUserName(BS2UserBlobEx& userBlob, const BS2SimpleDeviceInfo& deviceInfo);
@@ -133,6 +132,7 @@ private:
 	int scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOfFace);
 	int scanAndLoadFaceEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, uint32_t numOfScan, uint32_t numOfImage);
 
+private:
 	void dumpHexa(const uint8_t* data, uint32_t size);
 	void print(const BS2UserBlob& userBlob);
 	void print(const BS2UserFaceExBlob& userBlob);

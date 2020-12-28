@@ -908,7 +908,7 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 	return sdkResult;
 }
 
-int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id)
+int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerprint* finger, BS2Face* face, BS2FaceEx* faceEx)
 {
 	BS2SimpleDeviceInfo deviceInfo = { 0, };
 	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
@@ -974,14 +974,47 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo)))
-		return sdkResult;
+	if (card)
+	{
+		userBlob.cardObjs = new BS2CSNCard;
+		memcpy(userBlob.cardObjs, card, sizeof(BS2CSNCard));
+		user.numCards++;
+	}
+	else
+	{
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo)))
+			return sdkResult;
+	}
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(userBlob, id, deviceInfoEx)))
-		return sdkResult;
+	if (finger)
+	{
+		userBlob.fingerObjs = new BS2Fingerprint;
+		memcpy(userBlob.fingerObjs, finger, sizeof(BS2Fingerprint));
+		user.numFingers++;
+	}
+	else
+	{
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(userBlob, id, deviceInfoEx)))
+			return sdkResult;
+	}
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(userBlob, id, deviceInfoEx)))
-		return sdkResult;
+	if (face)
+	{
+		userBlob.faceObjs = new BS2Face;
+		memcpy(userBlob.faceObjs, face, sizeof(BS2Face));
+		user.numFaces++;
+	}
+	else if (faceEx)
+	{
+		userBlob.faceExObjs = new BS2FaceEx;
+		memcpy(userBlob.faceExObjs, faceEx, sizeof(BS2FaceEx));
+		user.numFaces++;
+	}
+	else
+	{
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(userBlob, id, deviceInfoEx)))
+			return sdkResult;
+	}
 
 	sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
 	if (BS_SDK_SUCCESS != sdkResult)

@@ -507,6 +507,9 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = uc.enrollUser(id);
 			break;
+		case MENU_USER_ENROLL_FACEEX:
+			sdkResult = enrollUserFaceEx_2_CS40(context, deviceList);
+			break;
 		case MENU_CONF_UPD_DEVICE_2_SERVER:
 			id = selectDeviceID(deviceList, false, false);
 			sdkResult = updateConnectModeDevice2Server(context, id);
@@ -697,6 +700,62 @@ int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* 
 			BS2_ReleaseObject(imageObj);
 	}
 
+	return sdkResult;
+}
+
+int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList)
+{
+	const string fnFaceTemplate = "C:\\Temp\\user01.dat";
+	BS2Face face = { 0, }, faceTemp = { 0, };
+	uint8_t numOfScanFace(0);
+	UserControl uc(context);
+	int sdkResult = BS_SDK_SUCCESS;
+	FILE* fp = NULL;
+
+	bool isWrite = Utility::isYes("Do you want to write face template to file? [y/n]");
+	if (isWrite)
+	{
+		displayConnectedDevices(deviceList, true);
+		BS2_DEVICE_ID scanDeviceID = Utility::getInput<BS2_DEVICE_ID>("Please enter the DEVICE ID for the scan face:");
+		sdkResult = uc.scanFace(scanDeviceID, &faceTemp, numOfScanFace);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("Face scan failed from device: %u, error: %d", scanDeviceID, sdkResult);
+			return sdkResult;
+		}
+
+		fp = fopen(fnFaceTemplate.c_str(), "wb");
+		if (fp)
+		{
+			size_t written = fwrite(&faceTemp, sizeof(BS2Face), 1, fp);
+			TRACE("Template: %u, Written: %u", sizeof(BS2Face), written);
+		}
+
+		fclose(fp);
+	}
+
+	fp = fopen(fnFaceTemplate.c_str(), "rb");
+	if (fp)
+	{
+		size_t readData = fread(&face, sizeof(BS2Face), 1, fp);
+		TRACE("Template: %u, Read: %u", sizeof(BS2Face), readData);
+	}
+
+	fclose(fp);
+
+	if (isWrite && (memcmp(&face, &faceTemp, sizeof(BS2Face)) != 0))
+	{
+		TRACE("Different template read and written");
+		return BS_SDK_ERROR_INTERNAL;
+	}
+
+	displayConnectedDevices(deviceList, true);
+	BS2_DEVICE_ID enrollDeviceID = Utility::getInput<BS2_DEVICE_ID>("Please enter the DEVICE ID for the enroll:");
+
+	sdkResult = uc.enrollUserFaceEx(enrollDeviceID, NULL, NULL, &face, NULL);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("Face enroll failed to device: %u, error: %d", enrollDeviceID, sdkResult);
+	
 	return sdkResult;
 }
 

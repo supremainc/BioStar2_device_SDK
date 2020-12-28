@@ -33,7 +33,21 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 
-### Version V2.7.2.12 released 12/11/2020:
+### V2.7.2.13 Beta released 12/24/2020:
+
+**Modified Features**
+
+**1.** `Master: CoreStation 40`, `Slave: FaceStation 2 / FaceLite` <br>
+ When registering a user with a face template for FaceStation 2 and FaceLite to CoreStation, a problem that could fail with a BS_SDK_ERROR_TIMEOUT error has been fixed.
+* Refer to API BS2_EnrolUser
+* Refer to API BS2_EnrollUser
+* Refer to API BS2_EnrolUserEx
+* Refer to API BS2_EnrollUserEx
+* Refer to API BS2_EnrollUserSmall
+* Refer to API BS2_EnrollUserSmallEx
+* Refer to API BS2_EnrollUserFaceEx
+
+### V2.7.2.12 released 12/11/2020:
 
 **New Features**
 
