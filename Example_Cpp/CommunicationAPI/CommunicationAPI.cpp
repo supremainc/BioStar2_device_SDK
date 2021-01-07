@@ -518,6 +518,9 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			id = selectDeviceID(deviceList, false, false);
 			sdkResult = updateConnectModeServer2Device(context, id);
 			break;
+		case MENU_USER_ENROLL_MULTIPLE:
+			sdkResult = enrollMultipleUsers(context, deviceList);
+			break;
 		default:
 			break;
 		}
@@ -811,3 +814,90 @@ void waitForConnection()
 }
 
 #endif
+
+int enrollMultipleUsers(void* context, const DeviceList& devices)
+{
+	uint32_t numOfUser = Utility::getInput<uint32_t>("How many users would you like to create:");
+
+	uint32_t uid = 1;
+	string name = "test";
+	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC("2010-01-01 00:00:00");
+	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC("2030-01-01 00:00:00");
+	string pinString = "1234";
+	BS2_USER_PIN pin = { 0, };
+	int sdkResult = BS2_MakePinCode(context, const_cast<char*>(pinString.c_str()), pin);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_MakePinCode call failed: %d", sdkResult);
+		return sdkResult;
+	}
+	const string fnFaceTemplate = "C:\\Temp\\user01.dat";
+	BS2Face face = { 0, };
+	FILE* fp = fopen(fnFaceTemplate.c_str(), "rb");
+	if (fp)
+	{
+		size_t readData = fread(&face, sizeof(BS2Face), 1, fp);
+		TRACE("Template: %u, Read: %u", sizeof(BS2Face), readData);
+	}
+	else
+	{
+		TRACE("Not found template");
+		return BS_SDK_SUCCESS;
+	}
+
+	BS2UserBlob* userBlob = new BS2UserBlob[numOfUser];
+	memset(userBlob, 0x0, sizeof(BS2UserBlob) * numOfUser);
+	for (uint32_t idx = 0; idx < numOfUser; idx++)
+	{
+		BS2User& user = userBlob[idx].user;
+		BS2UserSetting& setting = userBlob[idx].setting;
+		BS2UserPhoto& photo = userBlob[idx].user_photo;
+
+		stringstream msg;
+
+		uint32_t userID = uid + idx;
+		sprintf(user.userID, "%u", userID);
+		sprintf(reinterpret_cast<char*>(userBlob[idx].user_name), "%s%u", name.c_str(), userID);
+		setting.startTime = startTime;
+		setting.endTime = endTime;
+		memcpy(userBlob[idx].pin, pin, sizeof(BS2_USER_PIN));
+		setting.fingerAuthMode = BS2_AUTH_MODE_BIOMETRIC_ONLY;
+		setting.cardAuthMode = BS2_AUTH_MODE_CARD_ONLY;
+		setting.idAuthMode = BS2_AUTH_MODE_ID_BIOMETRIC;
+		setting.securityLevel = BS2_USER_SECURITY_LEVEL_DEFAULT;
+		user.flag = BS2_USER_FLAG_CREATED;
+
+		user.numFingers = 0;
+		user.numCards = 0;
+		user.numFaces = 1;
+		userBlob[idx].faceObjs = new BS2Face;
+		memcpy(userBlob[idx].faceObjs, &face, sizeof(BS2Face));
+	}
+
+	unsigned long tm1 = GetTickCount();
+	TRACE("Tick 1: %u", tm1);
+	auto allDevices = devices.getAllDevices();
+	for (auto id : allDevices)
+	{
+		sdkResult = BS2_EnrolUser(context, id.first, userBlob, numOfUser, 1);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_EnrolUser call failed: %d", sdkResult);
+	}
+	unsigned long tm2 = GetTickCount();
+	TRACE("Tick 2: %u", tm2);
+	TRACE("Run time: %u.%u", (tm2 - tm1) / 1000, (tm2 - tm1) % 1000);
+
+	for (uint32_t idx = 0; idx < numOfUser; idx++)
+	{
+		if (userBlob[idx].cardObjs)
+			delete[] userBlob[idx].cardObjs;
+
+		if (userBlob[idx].fingerObjs)
+			delete[] userBlob[idx].fingerObjs;
+
+		if (userBlob[idx].faceObjs)
+			delete[] userBlob[idx].faceObjs;
+	}
+
+	return sdkResult;
+}

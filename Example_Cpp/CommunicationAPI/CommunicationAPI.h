@@ -74,6 +74,7 @@ enum EN_MENU_COMM
 	MENU_USER_ENROLL_FACEEX,
 	MENU_CONF_UPD_DEVICE_2_SERVER,
 	MENU_CONF_UPD_SERVER_2_DEVICE,
+	MENU_USER_ENROLL_MULTIPLE,
 };
 
 std::vector<MENU_ITEM> menuInfoCommAPI =
@@ -104,6 +105,7 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 	{MENU_USER_ENROLL_FACEEX,		"BS2_EnrollUserFaceEx to CS40"},
 	{MENU_CONF_UPD_DEVICE_2_SERVER,	"Update device to server connection"},
 	{MENU_CONF_UPD_SERVER_2_DEVICE,	"Update server to device connection"},
+	{MENU_USER_ENROLL_MULTIPLE,		"Enroll multiple users"},
 };
 
 
@@ -135,3 +137,4 @@ int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id);
 DWORD WINAPI onWaiting(LPVOID lpParam);
 void waitForConnection();
 #endif
+int enrollMultipleUsers(void* context, const DeviceList& devices);
