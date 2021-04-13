@@ -90,9 +90,9 @@ typedef struct {
 typedef struct {
 	BS2_DEVICE_ID	deviceID;		///< 4 bytes
 	uint8_t			port;			///< 1 byte : 1 ~ 16
-	BS2_SWITCH_TYPE			switchType;		///< 0 = N/O, 1 = N/C	
+	BS2_SWITCH_TYPE			switchType;		///< 1 byte : 0 = N/O, 1 = N/C
 	uint8_t					apbUseDoorSensor;	
-	uint8_t			reserved[1];	///< 2 bytes (packing)
+	uint8_t			reserved[1];	///< 1 byte (packing)
 } BS2DoorSensor;
 
 /**
@@ -136,6 +136,7 @@ enum {
 	BS2_DOOR_FLAG_SCHEDULE = 0x01,
 	BS2_DOOR_FLAG_OPERATOR = 0x04,
 	BS2_DOOR_FLAG_EMERGENCY = 0x02,
+	BS2_DOOR_FLAG_ALL = 0xFF,
 };
 
 typedef uint8_t BS2_DOOR_FLAG;
@@ -172,7 +173,7 @@ typedef struct {
  */
 typedef struct {
 	BS2_DOOR_ID		doorID;				///< 4 bytes
-	char			name[BS2_MAX_DOOR_NAME_LEN];
+	char			name[BS2_MAX_DOOR_NAME_LEN];		///< 144 bytes
 
 	BS2_DEVICE_ID	entryDeviceID;		///< 4 bytes
 	BS2_DEVICE_ID	exitDeviceID;		///< 4 bytes
@@ -193,18 +194,19 @@ typedef struct {
 	BS2_BOOL	unconditionalLock;				///< 1 byte -  The door will be locked after autoLock timeout, even though it is open.
 #endif
 
-	BS2Action		forcedOpenAlarm[BS2_MAX_FORCED_OPEN_ALARM_ACTION];
-	BS2Action		heldOpenAlarm[BS2_MAX_HELD_OPEN_ALARM_ACTION];
+	BS2Action		forcedOpenAlarm[BS2_MAX_FORCED_OPEN_ALARM_ACTION];		///< 32 * 5 bytes
+	BS2Action		heldOpenAlarm[BS2_MAX_HELD_OPEN_ALARM_ACTION];		///< 32 * 5 bytes
 
 	BS2_SCHEDULE_ID			dualAuthScheduleID;			///< 4 bytes
 	BS2_DUAL_AUTH_DEVICE	dualAuthDevice;				///< 1 byte
 	BS2_DUAL_AUTH_APPROVAL	dualAuthApprovalType;		///< 1 byte
+	uint8_t					reserved[2];				///< 2 bytes (packing)
 	uint32_t				dualAuthTimeout;			///< 4 bytes
 	uint8_t					numDualAuthApprovalGroups;	///< 1 byte
-	uint8_t					reserved2[1];				///< 1 byte (packing)
-	BS2_ACCESS_GROUP_ID		dualAuthApprovalGroupID[BS2_MAX_DUAL_AUTH_APPROVAL_GROUP];
+	uint8_t					reserved2[3];				///< 3 bytes (packing)
+	BS2_ACCESS_GROUP_ID		dualAuthApprovalGroupID[BS2_MAX_DUAL_AUTH_APPROVAL_GROUP];		///< 4 * 16 bytes
 
-	BS2AntiPassbackZone		apbZone;
+	BS2AntiPassbackZone		apbZone;		///< 1408 bytes
 } BS2Door;
 
 #endif	// __BS2_DOOR_H__

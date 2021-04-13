@@ -84,8 +84,8 @@ typedef enum {
  */
 typedef struct {
 	uint32_t	length;											///< 4 bytes
-	uint8_t		idFields[BS2_WIEGAND_MAX_FIELDS][BS2_WIEGAND_FIELD_SIZE];		///< 00000............................0000 : 32 bytes
-	uint8_t		parityFields[BS2_WIEGAND_MAX_PARITIES][BS2_WIEGAND_FIELD_SIZE];	///< 00000.....001111111111111000000000000 : 32 bytes
+	uint8_t		idFields[BS2_WIEGAND_MAX_FIELDS][BS2_WIEGAND_FIELD_SIZE];		///< 4 * 32 bytes: 00000............................0000
+	uint8_t		parityFields[BS2_WIEGAND_MAX_PARITIES][BS2_WIEGAND_FIELD_SIZE];	///< 4 * 32 bytes: 00000.....001111111111111000000000000
 	BS2_WIEGAND_PARITY	parityType[BS2_WIEGAND_MAX_PARITIES];	///< 4 bytes: 0 = none, 1 = odd, 2 = even
 	uint8_t		parityPos[BS2_WIEGAND_MAX_PARITIES];			///< 4 bytes: position of parity bit (0 ~ 255)
 } BS2WiegandFormat;
@@ -103,10 +103,11 @@ typedef struct {
 	uint16_t outPulseInterval;		///< 2 bytes (200 ~ 20000 us, default = 10000)
 
 	BS2_UID formatID;				///< 4 bytes (wiegand format ID)
-	BS2WiegandFormat format;
+	BS2WiegandFormat format;		///< 268 bytes
 
-	uint16_t	wiegandInputMask;	///< 2 Bytes (bitmask , no use 0 postion bit, 1~15 bit)
-	uint16_t	wiegandCardMask;	///< 2 Bytes (bitmask , no use 0 postion bit, 1~15 bit)
+	uint16_t	wiegandInputMask;	///< 2 bytes (bitmask , no use 0 postion bit, 1~15 bit)
+	uint16_t	wiegandCardMask;	///< 2 bytes (bitmask , no use 0 postion bit, 1~15 bit)
+
 	uint8_t		wiegandCSNIndex;	///< 1 Bytes (1~15)
 
 	uint8_t useWiegandUserID;     	///< 1 byte (0 - Not use, 1 - CardID, 2 - UserID)

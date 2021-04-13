@@ -236,6 +236,26 @@ int ConfigControl::setThermalCameraConfig(BS2_DEVICE_ID id, const BS2ThermalCame
 	return sdkResult;
 }
 
+int ConfigControl::getEventConfig(BS2_DEVICE_ID id, BS2EventConfig& config)
+{
+	int sdkResult = BS2_GetEventConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetEventConfig call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setEventConfig(BS2_DEVICE_ID id, const BS2EventConfig& config)
+{
+	int sdkResult = BS2_SetEventConfig(context_, id, const_cast<BS2EventConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetEventConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::getTriggerActionConfig(BS2_DEVICE_ID id, BS2TriggerActionConfig& config)
 {
 	int sdkResult = BS2_GetTriggerActionConfig(context_, id, &config);
@@ -510,7 +530,7 @@ void ConfigControl::print(const BS2FaceConfigExt& config) const
 	TRACE("+--thermalCheckMode : %u", config.thermalCheckMode);
 	TRACE("|--maskCheckMode : %u", config.maskCheckMode);
 	TRACE("|--thermalFormat : %u", config.thermalFormat);
-#ifndef LESS_THAN_272
+#if VER_272_OR_HIGHER
 	float temperLow = (float)config.thermalThresholdLow / (float)100.0;
 	float temperHigh = (float)config.thermalThresholdHigh / (float)100.0;
 	TRACE("|--thermalThresholdLow : %.2f", temperLow);
@@ -523,7 +543,7 @@ void ConfigControl::print(const BS2FaceConfigExt& config) const
 	TRACE("|--auditTemperature : %u", config.auditTemperature);
 	TRACE("|--useRejectSound : %u", config.useRejectSound);
 	TRACE("|--useOverlapThermal : %u", config.useOverlapThermal);
-#ifndef LESS_THAN_272
+#if VER_272_OR_HIGHER
 	TRACE("|--useDynamicROI : %u", config.useDynamicROI);
 #endif
 	TRACE("+--faceCheckOrder : %u", config.faceCheckOrder);
@@ -541,6 +561,18 @@ void ConfigControl::print(const BS2ThermalCameraConfig& config) const
 	TRACE("   +--height : %u", config.roi.height);
 	TRACE("+--useBodyCompensation : %u", config.useBodyCompensation);
 	TRACE("+--compensationTemperature : %d", config.compensationTemperature);
+}
+
+void ConfigControl::print(const BS2EventConfig& config) const
+{
+	TRACE("==[BS2EventConfig]==");
+	TRACE("+--numImageEventFilter : %u", config.numImageEventFilter);
+	for (int idx = 0; idx < config.numImageEventFilter; idx++)
+	{
+		TRACE("+--imageEventFilter");
+		TRACE("   |--mainEventCode : %u", config.imageEventFilter[idx].mainEventCode);
+		TRACE("   +--scheduleID : %u", config.imageEventFilter[idx].scheduleID);
+	}
 }
 
 void ConfigControl::print(const BS2InputConfig& config) const

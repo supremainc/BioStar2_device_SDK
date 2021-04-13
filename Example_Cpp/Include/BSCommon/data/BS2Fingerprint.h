@@ -64,6 +64,11 @@ typedef struct {
 	BS2RawImage rawImage;
 } BS2ScanFingerprint;
 
+typedef struct {
+	BS2_USER_ID userID;
+	uint8_t fingerTemplate[BS2_FINGER_TEMPLATE_SIZE];
+} BS2VerifyFingerprint;
+
 /**
  *	BS2Fingerprint
  */
@@ -71,6 +76,6 @@ typedef struct {
 	uint8_t index;			///< 1 bytes
 	uint8_t flag;			///< 1 bytes
 	uint8_t reserved[2];	///< 2 bytes
-	uint8_t data[BS2_TEMPLATE_PER_FINGER][BS2_FINGER_TEMPLATE_SIZE];
+	uint8_t data[BS2_TEMPLATE_PER_FINGER][BS2_FINGER_TEMPLATE_SIZE];		///< 2 * 384 bytes
 } BS2Fingerprint;
 #endif	// __BS2_FINGERPRINT_H__

@@ -18,6 +18,12 @@ BS2Context* BS2Context::sdk_ = NULL;
 
 using namespace std;
 
+const string ssl_server_root_crt = "../resource/server/ssl_server_root.crt";
+const string ssl_server_crt = "../resource/server/ssl_server.crt";
+const string ssl_server_pem = "../resource/server/ssl_server.pem";
+const string ssl_server_passwd = "supremaserver";
+
+
 void TRACE(const char* fmt, ...)
 {
 	char buffer[0x160] = { 0, };
@@ -33,6 +39,41 @@ void TRACE(const char* fmt, ...)
 #endif
 }
 
+
+uint32_t BS2Context::OnPreferMethod(BS2_DEVICE_ID deviceID)
+{
+	return BS2_SSL_METHOD_MASK_TLS1 | BS2_SSL_METHOD_MASK_TLS1_1 | BS2_SSL_METHOD_MASK_TLS1_2;
+}
+
+const char* BS2Context::OnGetRootCaFilePath(BS2_DEVICE_ID deviceID)
+{
+	return ssl_server_root_crt.c_str();
+}
+
+const char* BS2Context::OnGetServerCaFilePath(BS2_DEVICE_ID deviceID)
+{
+	return ssl_server_crt.c_str();
+}
+
+const char* BS2Context::OnGetServerPrivateKeyFilePath(BS2_DEVICE_ID deviceID)
+{
+	return ssl_server_pem.c_str();
+}
+
+const char* BS2Context::OnGetPassword(BS2_DEVICE_ID deviceID)
+{
+	return ssl_server_passwd.c_str();
+}
+
+void BS2Context::onErrorOccured(BS2_DEVICE_ID deviceID, int errCode)
+{
+	TRACE("Error occured on SSL - Device:%u, Error:%d", deviceID, errCode);
+}
+
+void BS2Context::OnSendRootCA(BS2_DEVICE_ID deviceID, int result)
+{
+	TRACE("RootCA send result - Device:%u, Result:%d", deviceID, result);
+}
 
 void BS2Context::onDebugMessage(uint32_t level, uint32_t module, const char* msg)
 {
@@ -78,7 +119,16 @@ BS2Context::~BS2Context()
 BS2Context* BS2Context::getInstance()
 {
 	if (!sdk_)
+	{
 		sdk_ = new BS2Context;
+
+		sdk_->context_ = BS2_AllocateContext();
+		if (!sdk_->context_)
+		{
+			TRACE("BS2_AllocateContext call failed");
+			return NULL;
+		}
+	}
 
 	return sdk_;
 }
@@ -94,35 +144,26 @@ void BS2Context::releaseInstance()
 }
 
 
-void* BS2Context::initSDK(BS2_PORT port)
+int BS2Context::initSDK(BS2_PORT port)
 {
-	TRACE("Version:%s", BS2_Version());
-
-	context_ = BS2_AllocateContext();
-	if (!context_)
-	{
-		TRACE("BS2_AllocateContext call failed");
-		return NULL;
-	}
-
 	int sdkResult = setServerPort(port);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		BS2_ReleaseContext(context_);
 		context_ = NULL;
-		return NULL;
 	}
-
-	sdkResult = BS2_Initialize(context_);
-	if (BS_SDK_SUCCESS != sdkResult)
+	else
 	{
-		TRACE("BS2_Initialize call failed: %d", sdkResult);
-		BS2_ReleaseContext(context_);
-		context_ = NULL;
-		return NULL;
+		sdkResult = BS2_Initialize(context_);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_Initialize call failed: %d", sdkResult);
+			BS2_ReleaseContext(context_);
+			context_ = NULL;
+		}
 	}
 
-	return context_;
+	return sdkResult;
 }
 
 
@@ -153,6 +194,24 @@ int BS2Context::setServerPort(BS2_PORT port)
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_SetServerPort call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int BS2Context::setSSLHandler()
+{
+	int sdkResult = BS2_SetSSLHandler(context_, BS2Context::OnPreferMethod, BS2Context::OnGetRootCaFilePath, BS2Context::OnGetServerCaFilePath, BS2Context::OnGetServerPrivateKeyFilePath, BS2Context::OnGetPassword, BS2Context::onErrorOccured);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetSSLHandler call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	sdkResult = BS2_SetDeviceSSLEventListener(context_, BS2Context::OnSendRootCA);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetDeviceSSLEventListener call failed: %d", sdkResult);
 	}
 
 	return sdkResult;

@@ -80,9 +80,9 @@ typedef struct {
 	uint8_t				reserved[3];	///< 3 bytes (packing)
 
 	union {
-		BS2EventTrigger event;
-		BS2InputTrigger	input;
-		BS2ScheduleTrigger schedule;
+		BS2EventTrigger event;		///< 4 bytes
+		BS2InputTrigger	input;		///< 8 bytes
+		BS2ScheduleTrigger schedule;		///< 8 bytes
 	};
 } BS2Trigger;
 

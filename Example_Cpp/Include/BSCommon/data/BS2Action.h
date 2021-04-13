@@ -134,7 +134,7 @@ typedef struct {
 typedef struct {
 	uint16_t		count;			///< 2 bytes (0 = infinite)
 	uint8_t			reserved[2];	///< 2 bytes (packing)
-	BS2LedSignal	signal[BS2_LED_SIGNAL_NUM];		///< 18 bytes
+	BS2LedSignal	signal[BS2_LED_SIGNAL_NUM];		///< 6 * 3 bytes
 } BS2LedAction;
 
 /**
@@ -165,7 +165,7 @@ typedef struct {
 typedef struct {
 	uint16_t		count;			///< 2 bytes (0 = infinite)
 	uint8_t			reserved[2];	///< 2 bytes (packing)
-	BS2BuzzerSignal	signal[BS2_BUZZER_SIGNAL_NUM];		///< 18 bytes
+	BS2BuzzerSignal	signal[BS2_BUZZER_SIGNAL_NUM];		///< 6 * 3 bytes
 } BS2BuzzerAction;
 
 /**
@@ -204,8 +204,9 @@ typedef uint8_t BS2_LIFT_ACTION_TYPE;
  * BS2LiftAction
  */
 typedef struct {
-	BS2_LIFT_ID liftID;
-	BS2_LIFT_ACTION_TYPE type;
+	BS2_LIFT_ID liftID;				///< 4 bytes
+	BS2_LIFT_ACTION_TYPE type;		///< 1 byte
+	uint8_t		reserved[3];		///< 3 bytes (packing)
 } BS2LiftAction;
 
 /**
@@ -232,13 +233,13 @@ typedef struct {
 	BS2_STOP_FLAG stopFlag;			///< 1 byte
 	uint16_t				delay;	///< 2 bytes
 	union {
-		BS2RelayAction		relay;		///< type = BS2_ACTION_RELAY
-		BS2OutputPortAction	outputPort;	///< type = BS2_ACTION_TTL
-		BS2DisplayAction	display;	///< type = BS2_ACTION_DISPLAY
-		BS2SoundAction		sound;		///< type = BS2_ACTION_SOUND
-		BS2LedAction		led;		///< type = BS2_ACTION_LED
-		BS2BuzzerAction		buzzer;		///< type = BS2_ACTION_BUZZER
-		BS2LiftAction lift;			///< type = BS2_ACTION_LIFT
+		BS2RelayAction		relay;		///< 16 bytes, type = BS2_ACTION_RELAY
+		BS2OutputPortAction	outputPort;	///< 16 bytes, type = BS2_ACTION_TTL
+		BS2DisplayAction	display;	///< 12 bytes, type = BS2_ACTION_DISPLAY
+		BS2SoundAction		sound;		///< 22 bytes, type = BS2_ACTION_SOUND
+		BS2LedAction		led;		///< 22 bytes, type = BS2_ACTION_LED
+		BS2BuzzerAction		buzzer;		///< 22 bytes, type = BS2_ACTION_BUZZER
+		BS2LiftAction 		lift;		///< 8 bytes, type = BS2_ACTION_LIFT
 	};
 } BS2Action;
 

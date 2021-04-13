@@ -2480,3 +2480,304 @@ void UserControl::print(const BS2FaceEx* face, uint8_t numFace)
 		}
 	}
 }
+
+#if TEST_CODE
+int UserControl::enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx)
+{
+	uint32_t uid = 1;
+	string name = "test";
+	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC("2010-01-01 00:00:00");
+	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC("2030-01-01 00:00:00");
+	string pinString = "1234";
+
+	BS2UserFaceExBlob userBlob = { 0, };
+	BS2User& user = userBlob.user;
+	BS2UserSetting& setting = userBlob.setting;
+	BS2UserSettingEx& settingEx = userBlob.settingEx;
+	userBlob.user_photo_obj = NULL;
+
+	uint32_t userID = uid + idx;
+	sprintf(user.userID, "%u", userID);
+	sprintf(reinterpret_cast<char*>(userBlob.user_name), "%s%u", name.c_str(), userID);
+	setting.startTime = startTime;
+	setting.endTime = endTime;
+	setting.fingerAuthMode = BS2_AUTH_MODE_BIOMETRIC_ONLY;
+	setting.cardAuthMode = BS2_AUTH_MODE_CARD_ONLY;
+	setting.idAuthMode = BS2_AUTH_MODE_ID_BIOMETRIC;
+	setting.securityLevel = BS2_USER_SECURITY_LEVEL_DEFAULT;
+	settingEx.faceAuthMode = BS2_EXT_AUTH_MODE_FACE_ONLY;
+	settingEx.fingerprintAuthMode = BS2_EXT_AUTH_MODE_FINGERPRINT_ONLY;
+	settingEx.cardAuthMode = BS2_EXT_AUTH_MODE_CARD_ONLY;
+	settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+	user.flag = BS2_USER_FLAG_CREATED;
+
+	user.numFingers = 0;
+	user.numCards = 0;
+	user.numFaces = 0;
+
+	int sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
+
+	if (userBlob.cardObjs)
+		delete[] userBlob.cardObjs;
+
+	if (userBlob.fingerObjs)
+		delete[] userBlob.fingerObjs;
+
+	if (userBlob.faceObjs)
+		delete[] userBlob.faceObjs;
+
+	if (userBlob.faceExObjs)
+		delete[] userBlob.faceExObjs;
+
+	return sdkResult;
+}
+
+int UserControl::enrollUserFaceEx_WithImage_1User(BS2_DEVICE_ID id)
+{
+#ifdef _DEBUG
+	uint32_t numOfUser = 500;
+#else
+	uint32_t numOfUser = Utility::getInput<uint32_t>("How many users would you like to create:");
+#endif
+
+	uint32_t uid = 1;
+	string name = "test";
+	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC("2010-01-01 00:00:00");
+	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC("2030-01-01 00:00:00");
+	string pinString = "1234";
+	BS2_USER_PIN pin = { 0, };
+	int sdkResult = BS2_MakePinCode(context_, const_cast<char*>(pinString.c_str()), pin);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_MakePinCode call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	for (uint32_t idx = 0; idx < numOfUser; idx++)
+	{
+		BS2UserFaceExBlob userBlob = { 0, };
+		BS2User& user = userBlob.user;
+		BS2UserSetting& setting = userBlob.setting;
+		BS2UserSettingEx& settingEx = userBlob.settingEx;
+		userBlob.user_photo_obj = NULL;
+
+		uint32_t userID = uid + idx;
+		sprintf(user.userID, "%u", userID);
+		sprintf(reinterpret_cast<char*>(userBlob.user_name), "%s%u", name.c_str(), userID);
+		setting.startTime = startTime;
+		setting.endTime = endTime;
+		memcpy(userBlob.pin, pin, sizeof(BS2_USER_PIN));
+		setting.fingerAuthMode = BS2_AUTH_MODE_BIOMETRIC_ONLY;
+		setting.cardAuthMode = BS2_AUTH_MODE_CARD_ONLY;
+		setting.idAuthMode = BS2_AUTH_MODE_ID_BIOMETRIC;
+		setting.securityLevel = BS2_USER_SECURITY_LEVEL_DEFAULT;
+		settingEx.faceAuthMode = BS2_EXT_AUTH_MODE_FACE_ONLY;
+		settingEx.fingerprintAuthMode = BS2_EXT_AUTH_MODE_FINGERPRINT_ONLY;
+		settingEx.cardAuthMode = BS2_EXT_AUTH_MODE_CARD_ONLY;
+		settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+		user.flag = BS2_USER_FLAG_CREATED;
+
+		user.numFingers = 0;
+		user.numCards = 0;
+		user.numFaces = 0;
+
+		uint32_t sizeTotal(0);
+		vector<UserImageInfo> listImage;
+		const size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
+
+		{
+			string filePath = "d:\\Pic\\f2test\\mypic2.jpg";
+			uint32_t size = Utility::getResourceSize(filePath);
+			if (0 < size)
+			{
+				sizeTotal += (dataOffset + size);
+				UserImageInfo info;
+				info.fileName = filePath;
+				info.size = size;
+				listImage.push_back(info);
+			}
+
+			//filePath = "d:\\Pic\\f2test\\mypic3.jpg";
+			//size = Utility::getResourceSize(filePath);
+			//if (0 < size)
+			//{
+			//	sizeTotal += (dataOffset + size);
+			//	UserImageInfo info;
+			//	info.fileName = filePath;
+			//	info.size = size;
+			//	listImage.push_back(info);
+			//}
+		}
+
+		uint8_t* ptrBuff = new uint8_t[sizeTotal];
+		memset(ptrBuff, 0x0, sizeTotal);
+		userBlob.faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrBuff);
+		BS2FaceEx* ptrFace = userBlob.faceExObjs;
+
+		for (auto imageInfo : listImage)
+		{
+			shared_ptr<uint8_t> buffer(new uint8_t[imageInfo.size], ArrayDeleter<uint8_t>());
+			uint32_t sizeFaceEx = dataOffset + imageInfo.size;
+			if (Utility::getResourceFromFile(imageInfo.fileName, buffer, imageInfo.size))
+			{
+				ptrFace->flag = BS2_FACE_EX_FLAG_NONE;
+				ptrFace->imageLen = imageInfo.size;
+				memcpy(&ptrFace->rawImageData, buffer.get(), imageInfo.size);
+				user.numFaces++;
+
+				ptrBuff = reinterpret_cast<uint8_t*>(ptrFace);
+				ptrBuff += sizeFaceEx;
+				ptrFace = reinterpret_cast<BS2FaceEx*>(ptrBuff);
+			}
+		}
+
+		sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
+
+		if (userBlob.cardObjs)
+			delete[] userBlob.cardObjs;
+
+		if (userBlob.fingerObjs)
+			delete[] userBlob.fingerObjs;
+
+		if (userBlob.faceObjs)
+			delete[] userBlob.faceObjs;
+
+		if (userBlob.faceExObjs)
+			delete[] userBlob.faceExObjs;
+
+		TRACE("Call finished %d times", idx + 1);
+	}
+
+	return sdkResult;
+}
+
+int UserControl::enrollUserFaceEx_WithImage_Multi(BS2_DEVICE_ID id)
+{
+#ifdef _DEBUG
+	uint32_t numOfUser = 100;
+	uint32_t numOfRetry = 500;
+#else
+	uint32_t numOfUser = Utility::getInput<uint32_t>("How many users would you like to create:");
+#endif
+
+	int sdkResult = BS_SDK_SUCCESS;
+
+	for (uint32_t row = 0; row < numOfRetry; row++)
+	{
+		uint32_t uid = 1;
+		string name = "test";
+		BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC("2010-01-01 00:00:00");
+		BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC("2030-01-01 00:00:00");
+
+		BS2UserFaceExBlob* userBlob = new BS2UserFaceExBlob[numOfUser];
+		memset(userBlob, 0x0, sizeof(BS2UserFaceExBlob) * numOfUser);
+
+		for (uint32_t idx = 0; idx < numOfUser; idx++)
+		{
+			BS2User& user = userBlob[idx].user;
+			BS2UserSetting& setting = userBlob[idx].setting;
+			BS2UserSettingEx& settingEx = userBlob[idx].settingEx;
+			userBlob[idx].user_photo_obj = NULL;
+
+			uint32_t userID = uid + idx;
+			sprintf(user.userID, "%u", userID);
+			sprintf(reinterpret_cast<char*>(userBlob[idx].user_name), "%s%u", name.c_str(), userID);
+			setting.startTime = startTime;
+			setting.endTime = endTime;
+			setting.fingerAuthMode = BS2_AUTH_MODE_BIOMETRIC_ONLY;
+			setting.cardAuthMode = BS2_AUTH_MODE_CARD_ONLY;
+			setting.idAuthMode = BS2_AUTH_MODE_ID_BIOMETRIC;
+			setting.securityLevel = BS2_USER_SECURITY_LEVEL_DEFAULT;
+			settingEx.faceAuthMode = BS2_EXT_AUTH_MODE_FACE_ONLY;
+			settingEx.fingerprintAuthMode = BS2_EXT_AUTH_MODE_FINGERPRINT_ONLY;
+			settingEx.cardAuthMode = BS2_EXT_AUTH_MODE_CARD_ONLY;
+			settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+			user.flag = BS2_USER_FLAG_CREATED;
+
+			user.numFingers = 0;
+			user.numCards = 0;
+			user.numFaces = 0;
+
+			uint32_t sizeTotal(0);
+			vector<UserImageInfo> listImage;
+			const size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
+
+			{
+				string filePath = "d:\\Pic\\f2test\\mypic2.jpg";
+				uint32_t size = Utility::getResourceSize(filePath);
+				if (0 < size)
+				{
+					sizeTotal += (dataOffset + size);
+					UserImageInfo info;
+					info.fileName = filePath;
+					info.size = size;
+					listImage.push_back(info);
+				}
+
+				//filePath = "d:\\Pic\\f2test\\mypic3.jpg";
+				//size = Utility::getResourceSize(filePath);
+				//if (0 < size)
+				//{
+				//	sizeTotal += (dataOffset + size);
+				//	UserImageInfo info;
+				//	info.fileName = filePath;
+				//	info.size = size;
+				//	listImage.push_back(info);
+				//}
+			}
+
+			uint8_t* ptrBuff = new uint8_t[sizeTotal];
+			memset(ptrBuff, 0x0, sizeTotal);
+			userBlob[idx].faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrBuff);
+			BS2FaceEx* ptrFace = userBlob[idx].faceExObjs;
+
+			for (auto imageInfo : listImage)
+			{
+				shared_ptr<uint8_t> buffer(new uint8_t[imageInfo.size], ArrayDeleter<uint8_t>());
+				uint32_t sizeFaceEx = dataOffset + imageInfo.size;
+				if (Utility::getResourceFromFile(imageInfo.fileName, buffer, imageInfo.size))
+				{
+					ptrFace->flag = BS2_FACE_EX_FLAG_NONE;
+					ptrFace->imageLen = imageInfo.size;
+					memcpy(&ptrFace->rawImageData, buffer.get(), imageInfo.size);
+					user.numFaces++;
+
+					ptrBuff = reinterpret_cast<uint8_t*>(ptrFace);
+					ptrBuff += sizeFaceEx;
+					ptrFace = reinterpret_cast<BS2FaceEx*>(ptrBuff);
+				}
+			}
+		}
+
+		sdkResult = BS2_EnrollUserFaceEx(context_, id, userBlob, numOfUser, 1);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
+
+		for (uint32_t idx = 0; idx < numOfUser; idx++)
+		{
+			if (userBlob[idx].cardObjs)
+				delete[] userBlob[idx].cardObjs;
+
+			if (userBlob[idx].fingerObjs)
+				delete[] userBlob[idx].fingerObjs;
+
+			if (userBlob[idx].faceObjs)
+				delete[] userBlob[idx].faceObjs;
+
+			if (userBlob[idx].faceExObjs)
+				delete[] userBlob[idx].faceExObjs;
+		}
+
+		if (userBlob)
+			delete[] userBlob;
+
+		TRACE("Call finished %d times", row + 1);
+	}
+
+	return sdkResult;
+}
+#endif

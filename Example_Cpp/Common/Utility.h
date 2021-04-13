@@ -7,6 +7,10 @@
 #include "BS_API.h"
 
 
+#define VER_272_OR_HIGHER			1
+#define VER_271_OR_HIGHER			1
+
+
 #define BITMAP_SIGNATURE			0x4D42
 #define BITMAP_SIGNATURE_SIZE		14
 

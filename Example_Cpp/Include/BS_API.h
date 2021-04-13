@@ -75,6 +75,7 @@
 #include "BSCommon/config/BS2AuthConfigExt.h"
 #include "BSCommon/config/BS2FaceConfigExt.h"
 #include "BSCommon/config/BS2ThermalCameraConfig.h"
+#include "BSCommon/config/BS2BarcodeConfig.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -220,12 +221,23 @@ typedef struct
 		BS2_SUPPORT_DST     		= 0x00000004,
 		BS2_SUPPORT_DESFIREEX		= 0x00000008,
 		BS2_SUPPORT_FACE_EX			= 0x00000010,
+		BS2_SUPPORT_QR				= 0x00000020,
 
 		BS2_SUPPORT_FINGER_SCAN		= 0x00010000,
 		BS2_SUPPORT_FACE_SCAN		= 0x00020000,
 		BS2_SUPPORT_FACE_EX_SCAN	= 0x00040000,
+		BS2_SUPPORT_QR_SCAN			= 0x00080000,
 
-		BS2_SUPPORT_ALL     		= BS2_SUPPORT_RS485EX | BS2_SUPPORT_CARDEX | BS2_SUPPORT_DST | BS2_SUPPORT_DESFIREEX | BS2_SUPPORT_FACE_EX | BS2_SUPPORT_FINGER_SCAN | BS2_SUPPORT_FACE_SCAN | BS2_SUPPORT_FACE_EX_SCAN,
+		BS2_SUPPORT_ALL     		= BS2_SUPPORT_RS485EX |
+									  BS2_SUPPORT_CARDEX |
+									  BS2_SUPPORT_DST |
+									  BS2_SUPPORT_DESFIREEX |
+									  BS2_SUPPORT_FACE_EX |
+									  BS2_SUPPORT_QR |
+									  BS2_SUPPORT_FINGER_SCAN |
+									  BS2_SUPPORT_FACE_SCAN |
+									  BS2_SUPPORT_FACE_EX_SCAN |
+									  BS2_SUPPORT_QR_SCAN,
 	};
 
 	uint32_t supported;
@@ -710,6 +722,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFaceConfigExt(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetFaceConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2FaceConfigExt* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, BS2ThermalCameraConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, const BS2ThermalCameraConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, BS2BarcodeConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, const BS2BarcodeConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);

@@ -55,7 +55,7 @@ typedef struct {
 
 typedef struct {
 	BS2_ZONE_ID		zoneID;			///< 4 bytes
-	char			name[BS2_MAX_ZONE_NAME_LEN];		///< 48 * 3 bytes
+	char			name[BS2_MAX_ZONE_NAME_LEN];		///< 144 bytes
 
 	uint8_t			numSensors;		///< 1 byte
 	union {

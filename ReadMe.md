@@ -33,18 +33,25 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 
-### V2.7.2.14 Beta released 01/06/2021:
+### V2.7.2.17 Beta released 04/12/2021:
 
 **Modified Features**
 
-**1.** Improved the problem that the transmission speed was slightly slower in the previous version when sending many users.
-* Refer to API BS2_EnrolUser
-* Refer to API BS2_EnrollUser
-* Refer to API BS2_EnrolUserEx
-* Refer to API BS2_EnrollUserEx
-* Refer to API BS2_EnrollUserSmall
-* Refer to API BS2_EnrollUserSmallEx
-* Refer to API BS2_EnrollUserFaceEx
+**1.** Fixed BS2_GetEventConfig call result returned from BS_SDK_ERROR_NOT_SUPPORTED to BS_SDK_SUCCESS on FaceLite device.
+* Refer to API BS2_GetEventConfig
+
+**2.** Fixed a problem where the device connection could not be made by repeatedly calling BS2_AllocateContext, BS2_ReleaseContext, BS2_ConnectDeviceViaIP, BS2_DisconnectDevice in the SSL connection mode.
+* Refer to API BS2_AllocateContext
+* Refer to API BS2_ReleaseContext
+* Refer to API BS2_ConnectDeviceViaIP
+* Refer to API BS2_DisconnectDevice
+
+**3.** BS2_GetCardModel function is modified to support the following device models.
+* BEW2-ODPB
+* BEW2-OAPB
+* BEW2-OHPB
+
+**4.** Added SSL connection example.
 
 ### V2.7.2.12 released 12/11/2020:
 
@@ -308,6 +315,19 @@ Refer to API BS2_FactoryReset
 
 
 ### Release Notes (Beta)
+
+### V2.7.2.14 Beta released 01/06/2021:
+
+**Modified Features**
+
+**1.** Improved the problem that the transmission speed was slightly slower in the previous version when sending many users.
+* Refer to API BS2_EnrolUser
+* Refer to API BS2_EnrollUser
+* Refer to API BS2_EnrolUserEx
+* Refer to API BS2_EnrollUserEx
+* Refer to API BS2_EnrollUserSmall
+* Refer to API BS2_EnrollUserSmallEx
+* Refer to API BS2_EnrollUserFaceEx
 
 ### V2.7.2.13 Beta released 12/24/2020:
 

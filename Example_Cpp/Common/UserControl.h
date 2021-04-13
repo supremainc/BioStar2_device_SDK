@@ -132,6 +132,12 @@ public:
 	int scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOfFace);
 	int scanAndLoadFaceEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, uint32_t numOfScan, uint32_t numOfImage);
 
+#if TEST_CODE	
+	int enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx);
+	int enrollUserFaceEx_WithImage_1User(BS2_DEVICE_ID id);
+	int enrollUserFaceEx_WithImage_Multi(BS2_DEVICE_ID id);
+#endif
+
 private:
 	void dumpHexa(const uint8_t* data, uint32_t size);
 	void print(const BS2UserBlob& userBlob);

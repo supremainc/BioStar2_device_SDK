@@ -54,11 +54,14 @@ void onDeviceDisconnected(BS2_DEVICE_ID id)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".");
+	BS2Context::setDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".");
+
+	TRACE("Version: %s", BS2_Version());
+
+	sdkContext = BS2Context::getInstance()->getContext();
 
 	// Create SDK context and initialize
-	sdkContext = BS2Context::getInstance()->initSDK();
-	if (!sdkContext)
+	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
 	{
 		BS2Context::getInstance()->releaseInstance();
 		return -1;
@@ -420,6 +423,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 		case MENU_DEV_SET_THERMALCAMERACONFIG:
 			sdkResult = setThermalCameraConfig(context, id);
+			break;
+		case MENU_DEV_GET_EVENTCONFIG:
+			sdkResult = getEventConfig(context, id);
+			break;
+		case MENU_DEV_SET_EVENTCONFIG:
+			sdkResult = setEventConfig(context, id);
 			break;
 		case MENU_DEV_EXTRACT_TEMPLATE_FACEEX:
 			sdkResult = extractTemplateFaceEx(context, id);
@@ -1011,6 +1020,44 @@ int setThermalCameraConfig(void* context, BS2_DEVICE_ID id)
 	config.compensationTemperature = (int8_t)Utility::getInput<int32_t>(msg);
 
 	return cc.setThermalCameraConfig(id, config);
+}
+
+int getEventConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2EventConfig config = { 0, };
+	return cc.getEventConfig(id, config);
+}
+
+int setEventConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2EventConfig config = { 0, };
+	string msg;
+
+	//msg = "Insert camera distance from user. (cm. Recommend: 70)";
+	//config.distance = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	//msg = "Insert emission rate. (95/97/98, Recommend: 98)";
+	//config.emissionRate = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	//cout << "Insert ROI(Region of interest)." << endl;
+	//msg = "x:";
+	//config.roi.x = (uint16_t)Utility::getInput<uint32_t>(msg);
+	//msg = "y:";
+	//config.roi.y = (uint16_t)Utility::getInput<uint32_t>(msg);
+	//msg = "width:";
+	//config.roi.width = (uint16_t)Utility::getInput<uint32_t>(msg);
+	//msg = "height:";
+	//config.roi.height = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	//msg = "Do you want to use body compensation [y/n]";
+	//config.useBodyCompensation = Utility::isYes(msg);
+
+	//msg = "Insert compensation temperature *10. If you want -4.5, it is -45. (-50 ~ 50)";
+	//config.compensationTemperature = (int8_t)Utility::getInput<int32_t>(msg);
+
+	return cc.setEventConfig(id, config);
 }
 
 int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)

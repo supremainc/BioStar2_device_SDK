@@ -41,14 +41,14 @@ enum {
  *	WeeklySchedule
  */
 typedef struct {
-	BS2DaySchedule	schedule[BS2_NUM_WEEKDAYS];
+	BS2DaySchedule	schedule[BS2_NUM_WEEKDAYS];		///< 24 * 7 bytes
 } BS2WeeklySchedule;
 
 typedef struct {
 	BS2_TIMESTAMP	startDate;		///< 4 bytes
 	uint8_t			numDays;		///< 1 byte
 	uint8_t			reserved[3];	///< 3 bytes (packing)
-	BS2DaySchedule	schedule[BS2_MAX_DAYS_PER_DAILY_SCHEDULE];
+	BS2DaySchedule	schedule[BS2_MAX_DAYS_PER_DAILY_SCHEDULE];		///< 24 * 90 bytes
 } BS2DailySchedule;
 
 /**
@@ -56,7 +56,7 @@ typedef struct {
  */
 typedef struct {
 	BS2_HOLIDAY_GROUP_ID	id;		///< 4 bytes
-	BS2DaySchedule			schedules;
+	BS2DaySchedule			schedules;		///< 24 bytes
 } BS2HolidaySchedule;
 
 /**

@@ -32,8 +32,8 @@ enum {
  *  BS2BlackList
  */
  typedef struct {
-	uint8_t		cardID[BS2_CARD_DATA_SIZE];
-	uint16_t	issueCount;
+	uint8_t		cardID[BS2_CARD_DATA_SIZE];		///< 32 bytes
+	uint16_t	issueCount;				///< 2 bytes
 } BS2BlackList;
 
 #endif	// __BS2_BLACK_LIST_H__

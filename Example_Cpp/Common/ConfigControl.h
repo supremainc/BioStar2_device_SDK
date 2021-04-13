@@ -4,6 +4,7 @@
 #include <string>
 #include "BS_API.h"
 
+#include "Utility.h"
 
 class ConfigControl
 {
@@ -36,6 +37,8 @@ public:
 	int setFaceConfigEx(BS2_DEVICE_ID id, const BS2FaceConfigExt& config);
 	int getThermalCameraConfig(BS2_DEVICE_ID id, BS2ThermalCameraConfig& config);
 	int setThermalCameraConfig(BS2_DEVICE_ID id, const BS2ThermalCameraConfig& config);
+	int getEventConfig(BS2_DEVICE_ID id, BS2EventConfig& config);
+	int setEventConfig(BS2_DEVICE_ID id, const BS2EventConfig& config);
 	int getTriggerActionConfig(BS2_DEVICE_ID id, BS2TriggerActionConfig& config);
 	int setTriggerActionConfig(BS2_DEVICE_ID id, const BS2TriggerActionConfig& config);
 
@@ -57,6 +60,7 @@ private:
 	void print(const BS2AuthConfigExt& config) const;
 	void print(const BS2FaceConfigExt& config) const;
 	void print(const BS2ThermalCameraConfig& config) const;
+	void print(const BS2EventConfig& config) const;
 	void print(const BS2InputConfig& config) const;
 	void print(const BS2SupervisedInputConfig& config) const;
 	void print(const BS2SVInputRange& inputRange) const;

@@ -62,11 +62,14 @@ int main(int argc, char* argv[])
 	//return RUN_ALL_TESTS();
 
 	// Set debugging SDK log (to current working directory)
-	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+
+	TRACE("Version: %s", BS2_Version());
+
+	sdkContext = BS2Context::getInstance()->getContext();
 
 	// Create SDK context and initialize
-	sdkContext = BS2Context::getInstance()->initSDK();
-	if (!sdkContext)
+	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
 	{
 		BS2Context::getInstance()->releaseInstance();
 		return -1;

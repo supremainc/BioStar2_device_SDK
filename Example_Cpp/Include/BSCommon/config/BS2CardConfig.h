@@ -183,6 +183,7 @@ enum {
 	HF_NFC,
 	HF_SEOS,
 	HF_SEOS_CONFIG,
+	HF_BLE,
 };
 
 #endif	// __BS2_CARD_CONFIG_H__

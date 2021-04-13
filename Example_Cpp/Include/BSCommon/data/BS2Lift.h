@@ -92,8 +92,8 @@ typedef struct {
 } BS2LiftSensor;
 
 typedef struct {
-	BS2LiftSensor sensor;
-	BS2Action action;
+	BS2LiftSensor sensor;		///< 12 bytes
+	BS2Action action;		///< 32 bytes
 } BS2LiftAlarm;
 
 /**
@@ -124,11 +124,11 @@ typedef struct {
  */
 typedef struct {
 	BS2_LIFT_ID		liftID;				///< 4 bytes
-	char			name[BS2_MAX_LIFT_NAME_LEN];
+	char			name[BS2_MAX_LIFT_NAME_LEN];		///< 144 bytes
 
 	BS2_DEVICE_ID	deviceID[BS2_MAX_DEVICES_ON_LIFT];		///< 4 * 4 bytes
 
-	uint32_t		activateTimeout;	///< 4 bytes (in seconds)
+	uint32_t		activateTimeout;		///< 4 bytes (in seconds)
 	uint32_t		dualAuthTimeout;			///< 4 bytes
 
 	uint8_t	numFloors;		///< 1 byte
@@ -136,14 +136,14 @@ typedef struct {
 	BS2_DUAL_AUTH_APPROVAL	dualAuthApprovalType;		///< 1 byte
 	BS2_BOOL	tamperOn;		///< 1 byte
 
-	BS2_BOOL dualAuthRequired[BS2_MAX_DEVICES_ON_LIFT];			///< 4 * 1 byte
+	BS2_BOOL dualAuthRequired[BS2_MAX_DEVICES_ON_LIFT];			///< 1 * 4 byte
 	BS2_SCHEDULE_ID			dualAuthScheduleID;			///< 4 bytes
 
 	BS2LiftFloor		floor[BS2_MAX_FLOORS_ON_LIFT];				///< 8 * 255 bytes
 	BS2_ACCESS_GROUP_ID		dualAuthApprovalGroupID[BS2_MAX_DUAL_AUTH_APPROVAL_GROUP_ON_LIFT];		///< 4 * 16 bytes
 
-	BS2LiftAlarm alarm[BS2_MAX_ALARMS_ON_LIFT];
-	BS2LiftAlarm tamper;
+	BS2LiftAlarm alarm[BS2_MAX_ALARMS_ON_LIFT];		///< 44 * 2 bytes
+	BS2LiftAlarm tamper;			///< 44 bytes
 
 	BS2_LIFT_ALARM_FLAG	alarmFlags;		///< 1 byte
 	uint8_t reserved[3];			///< 3 bytes (packing)

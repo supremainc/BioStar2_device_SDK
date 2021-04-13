@@ -57,6 +57,8 @@ enum EN_MENU_DEV
 	MENU_DEV_SET_FACECONFIGEX,
 	MENU_DEV_GET_THERMALCAMERACONFIG,
 	MENU_DEV_SET_THERMALCAMERACONFIG,
+	MENU_DEV_GET_EVENTCONFIG,
+	MENU_DEV_SET_EVENTCONFIG,
 	MENU_DEV_EXTRACT_TEMPLATE_FACEEX,
 	MENU_DEV_GET_INPUTCONFIG,
 	MENU_DEV_GET_TRIGGERACTIONCONFIG,
@@ -101,6 +103,8 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_FACECONFIGEX,		"BS2_SetFaceConfigEx"},
 	{MENU_DEV_GET_THERMALCAMERACONFIG,	"BS2_GetThermalCameraConfig"},
 	{MENU_DEV_SET_THERMALCAMERACONFIG,	"BS2_SetThermalCameraConfig"},
+	{MENU_DEV_GET_EVENTCONFIG,		"BS2_GetEventConfig"},
+	{MENU_DEV_SET_EVENTCONFIG,		"BS2_SetEventConfig"},
 	{MENU_DEV_EXTRACT_TEMPLATE_FACEEX,	"BS2_ExtractTemplateFaceEx"},
 	{MENU_DEV_GET_INPUTCONFIG,		"BS2_GetInputConfig"},
 	{MENU_DEV_GET_TRIGGERACTIONCONFIG,	"BS2_GetTriggerActionConfig"},
@@ -143,6 +147,8 @@ int getFaceConfigEx(void* context, BS2_DEVICE_ID id);
 int setFaceConfigEx(void* context, BS2_DEVICE_ID id);
 int getThermalCameraConfig(void* context, BS2_DEVICE_ID id);
 int setThermalCameraConfig(void* context, BS2_DEVICE_ID id);
+int getEventConfig(void* context, BS2_DEVICE_ID id);
+int setEventConfig(void* context, BS2_DEVICE_ID id);
 int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id);
 int getInputConfig(void* context, BS2_DEVICE_ID id);
 int getTriggerActionConfig(void* context, BS2_DEVICE_ID id);

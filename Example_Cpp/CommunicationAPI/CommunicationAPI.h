@@ -109,6 +109,7 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 };
 
 
+int setSSLHandler();
 bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone);
 void connectTestDevice(void* context, DeviceList& deviceList);
 uint32_t showMenu(std::vector<MENU_ITEM>& info);
@@ -138,3 +139,8 @@ DWORD WINAPI onWaiting(LPVOID lpParam);
 void waitForConnection();
 #endif
 int enrollMultipleUsers(void* context, const DeviceList& devices);
+int getAllAccessSchedule(void* context, BS2_DEVICE_ID id);
+#if TEST_CODE
+int connectTestDevice2(void* context);
+int connectTestDevice3(void* context);
+#endif

@@ -150,6 +150,7 @@ copy /y $(SolutionDir)Lib\Window\lib\x86\*.dll $(OutDir)</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Common\AccessControl.h" />
     <ClInclude Include="..\Common\BS2Context.h" />
     <ClInclude Include="..\Common\CommControl.h" />
     <ClInclude Include="..\Common\ConfigControl.h" />
@@ -164,6 +165,7 @@ copy /y $(SolutionDir)Lib\Window\lib\x86\*.dll $(OutDir)</Command>
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\AccessControl.cpp" />
     <ClCompile Include="..\Common\BS2Context.cpp" />
     <ClCompile Include="..\Common\CommControl.cpp" />
     <ClCompile Include="..\Common\ConfigControl.cpp" />

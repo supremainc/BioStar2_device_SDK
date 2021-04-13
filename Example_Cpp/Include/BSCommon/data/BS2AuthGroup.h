@@ -31,9 +31,9 @@ enum {
  *	BS2AuthGroup
  */
 typedef struct {
-	BS2_AUTH_GROUP_ID		id;
-	char					name[BS2_MAX_AUTH_GROUP_NAME_LEN];
-	uint8_t					reserved[32];
+	BS2_AUTH_GROUP_ID		id;		///< 4 bytes
+	char					name[BS2_MAX_AUTH_GROUP_NAME_LEN];		///< 144 bytes
+	uint8_t					reserved[32];			///< 32 bytes (packing)
 } BS2AuthGroup;
 
 /**

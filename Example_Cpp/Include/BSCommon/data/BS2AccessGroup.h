@@ -46,7 +46,7 @@ typedef struct {
 typedef struct {
 	uint8_t				numAccessGroups;	///< 1 byte
 	uint8_t				reserved[3];		///< 3 bytes (packing)
-	BS2_ACCESS_GROUP_ID	accessGroupID[BS2_MAX_ACCESS_GROUP_PER_USER];	///< 64 bytes
+	BS2_ACCESS_GROUP_ID	accessGroupID[BS2_MAX_ACCESS_GROUP_PER_USER];	///< 4 * 16 bytes
 } BS2UserAccessGroups;
 
 /**

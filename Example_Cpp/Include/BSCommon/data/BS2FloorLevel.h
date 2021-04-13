@@ -31,21 +31,21 @@ enum {
  *	BS2FloorSchedule
  */
 typedef struct {
-	BS2_LIFT_ID		liftID;
-	uint16_t					floorIndex;
-	uint8_t					reserved[2];
-	BS2_SCHEDULE_ID	scheduleID;
+	BS2_LIFT_ID		liftID;		///< 4 bytes
+	uint16_t					floorIndex;		///< 2 bytes
+	uint8_t					reserved[2];		///< 2 bytes (packing)
+	BS2_SCHEDULE_ID	scheduleID;		///< 4 bytes
 } BS2FloorSchedule;
 
 /**
  *	BS2FloorLevel
  */
 typedef struct {
-	BS2_FLOOR_LEVEL_ID		id;		// id >= 32768 (BS2_ACCESS_LEVEL_ID < 32768)
-	char					name[BS2_MAX_FLOOR_LEVEL_NAME_LEN];
-	uint8_t					numFloorSchedules;
-	uint8_t					reserved[3];
-	BS2FloorSchedule			floorSchedules[BS2_MAX_FLOOR_LEVEL_ITEMS];
+	BS2_FLOOR_LEVEL_ID		id;		///< 4 bytes, id >= 32768 (BS2_ACCESS_LEVEL_ID < 32768)
+	char					name[BS2_MAX_FLOOR_LEVEL_NAME_LEN];		///< 144 bytes
+	uint8_t					numFloorSchedules;			///< 1 byte
+	uint8_t					reserved[3];			///< 3 bytes (packing)
+	BS2FloorSchedule			floorSchedules[BS2_MAX_FLOOR_LEVEL_ITEMS];		///< 12 * 128 bytes
 } BS2FloorLevel;
 
 #endif	// __BS2_FLOOR_LEVEL_H__

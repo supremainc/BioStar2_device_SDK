@@ -5,7 +5,10 @@
 #include "../Common/CommControl.h"
 #include "../Common/LogControl.h"
 #include "../Common/UserControl.h"
+#include "../Common/AccessControl.h"
+#include <memory>
 
+std::shared_ptr<int> ptr;
 
 extern void TRACE(const char* fmt, ...);
 using namespace std;
@@ -44,11 +47,17 @@ void onDeviceConnected(BS2_DEVICE_ID id)
 	int32_t timezone = 0;
 	DeviceControl dc(sdkContext);
 
+#if RETRIVE_BULK_LOGS
 	if (!getDeviceLogs(id, timezone))
 		return;
+#endif
 
-#if REALTIME_LOG_TEMPERATURE
+#if VER_271_OR_HIGHER
+  #if REALTIME_LOG_TEMPERATURE
 	int sdkResult = BS2_StartMonitoringLogEx(sdkContext, id, onLogReceivedEx);
+  #else
+	int sdkResult = BS2_StartMonitoringLog(sdkContext, id, onLogReceived);
+  #endif
 #else
 	int sdkResult = BS2_StartMonitoringLog(sdkContext, id, onLogReceived);
 #endif
@@ -101,11 +110,22 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::getInstance()->setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+
+	TRACE("Version: %s", BS2_Version());
+
+	sdkContext = BS2Context::getInstance()->getContext();
+
+#ifdef RUN_SSL
+	if (BS_SDK_SUCCESS != setSSLHandler())
+	{
+		BS2Context::getInstance()->releaseInstance();
+		return -1;
+	}
+#endif // RUN_SSL
 
 	// Create SDK context and initialize
-	sdkContext = BS2Context::getInstance()->initSDK();
-	if (!sdkContext)
+	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
 	{
 		BS2Context::getInstance()->releaseInstance();
 		return -1;
@@ -117,6 +137,62 @@ int main(int argc, char* argv[])
 
 	BS2Context::getInstance()->releaseInstance();
 	return 0;
+}
+
+#if TEST_CODE
+#define RUN_SSL
+int main(int argc, char* argv[])
+{
+	// Set debugging SDK log (to current working directory)
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+
+	TRACE("Version: %s", BS2_Version());
+
+	const int RETRY_TIMES = 1000;
+	for (int idx = 0; idx < RETRY_TIMES; idx++)
+	{
+		sdkContext = BS2Context::getInstance()->getContext();
+
+#ifdef RUN_SSL
+		if (BS_SDK_SUCCESS != setSSLHandler())
+		{
+			BS2Context::getInstance()->releaseInstance();
+			return -1;
+		}
+#endif // RUN_SSL
+
+		// Create SDK context and initialize
+		if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
+		{
+			BS2Context::getInstance()->releaseInstance();
+			return -1;
+		}
+
+		BS2Context::getInstance()->setDeviceEventListener(onDeviceAccepted, NULL, onDeviceDisconnected);
+
+		connectTestDevice2(sdkContext);
+		//connectTestDevice3(sdkContext);
+
+		BS2Context::getInstance()->releaseInstance();
+
+		//Sleep(30 * 1000);
+		TRACE("Call finished %d times", idx + 1);
+	}
+	return 0;
+}
+#endif // #if TEST_CODE
+
+
+int setSSLHandler()
+{
+#ifndef _DEBUG
+	if (Utility::isYes("Do you want to listen by SSL connection? [y/n]"))
+#endif
+	{
+		return BS2Context::getInstance()->setSSLHandler();
+	}
+
+	return BS_SDK_SUCCESS;
 }
 
 void connectTestDevice(void* context, DeviceList& deviceList)
@@ -503,6 +579,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 		case MENU_ELOG_GET_EVENTSMALLBLOBEX:
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = lc.getLogSmallBlobEx(id);
+			break;
 		case MENU_USER_ENROLL_FACE:
 			id = selectDeviceID(deviceList, true, false);
 			sdkResult = uc.enrollUser(id);
@@ -901,3 +978,91 @@ int enrollMultipleUsers(void* context, const DeviceList& devices)
 
 	return sdkResult;
 }
+
+
+int getAllAccessSchedule(void* context, BS2_DEVICE_ID id)
+{
+	AccessControl ac(context);
+	vector<BS2Schedule> schedules;
+	int sdkResult = ac.getAllAccessSchedule(id, schedules);
+	return sdkResult;
+}
+
+
+#if TEST_CODE
+int connectTestDevice2(void* context)
+{
+	CommControl cm(context);
+
+	string ip = "192.168.13.123";
+	BS2_PORT port = 51211;
+	BS2_DEVICE_ID id = 0;
+
+	TRACE("Now connect to device (IP:%s, Port:%u)", ip.c_str(), port);
+
+	int sdkResult = cm.connectDevice(id, ip, port);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string inputTime = "2021-03-01 00:00:00";
+	BS2_TIMESTAMP currTime = Utility::convertTimeString2UTC(inputTime);
+
+	sdkResult = BS2_SetDeviceTime(context, id, currTime);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetDeviceTime call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	sdkResult = cm.disconnectDevice(id);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("Device disconnect failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int connectTestDevice3(void* context)
+{
+	CommControl cm(context);
+
+	string ip = "192.168.13.123";
+	BS2_PORT port = 51211;
+	BS2_DEVICE_ID id = 0;
+
+	TRACE("Now connect to device (IP:%s, Port:%u)", ip.c_str(), port);
+
+	int sdkResult = cm.connectDevice(id, ip, port);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	UserControl uc(context);
+	sdkResult = uc.removeAllUser(id);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	const uint32_t numOfRetry = 1000;
+	uint32_t idx = 0;
+	//for (uint32_t idx = 0; idx < numOfRetry; idx++)
+	while (true)
+	{
+		sdkResult = uc.enrollUserFaceEx_1User(id, idx);
+		//sdkResult = uc.enrollUserFaceEx_WithImage_1User(id);
+		//sdkResult = uc.enrollUserFaceEx_WithImage_Multi(id);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		sdkResult = getAllAccessSchedule(context, id);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		TRACE("Call finished %d times", idx + 1);
+		idx++;
+	}
+
+	sdkResult = cm.disconnectDevice(id);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("Device disconnect failed: %d", sdkResult);
+
+	return sdkResult;
+}
+#endif
