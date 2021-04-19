@@ -107,37 +107,37 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 	return true;
 }
 
-//int main(int argc, char* argv[])
-//{
-//	// Set debugging SDK log (to current working directory)
-//	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
-//
-//	TRACE("Version: %s", BS2_Version());
-//
-//	sdkContext = BS2Context::getInstance()->getContext();
-//
-//#ifdef RUN_SSL
-//	if (BS_SDK_SUCCESS != setSSLHandler())
-//	{
-//		BS2Context::getInstance()->releaseInstance();
-//		return -1;
-//	}
-//#endif // RUN_SSL
-//
-//	// Create SDK context and initialize
-//	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
-//	{
-//		BS2Context::getInstance()->releaseInstance();
-//		return -1;
-//	}
-//
-//	BS2Context::getInstance()->setDeviceEventListener(onDeviceAccepted, onDeviceConnected, onDeviceDisconnected);
-//
-//	connectTestDevice(sdkContext, deviceList);
-//
-//	BS2Context::getInstance()->releaseInstance();
-//	return 0;
-//}
+int main(int argc, char* argv[])
+{
+	// Set debugging SDK log (to current working directory)
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+
+	TRACE("Version: %s", BS2_Version());
+
+	sdkContext = BS2Context::getInstance()->getContext();
+
+#ifdef RUN_SSL
+	if (BS_SDK_SUCCESS != setSSLHandler())
+	{
+		BS2Context::getInstance()->releaseInstance();
+		return -1;
+	}
+#endif // RUN_SSL
+
+	// Create SDK context and initialize
+	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
+	{
+		BS2Context::getInstance()->releaseInstance();
+		return -1;
+	}
+
+	BS2Context::getInstance()->setDeviceEventListener(onDeviceAccepted, onDeviceConnected, onDeviceDisconnected);
+
+	connectTestDevice(sdkContext, deviceList);
+
+	BS2Context::getInstance()->releaseInstance();
+	return 0;
+}
 
 #define RUN_SSL
 int main(int argc, char* argv[])
@@ -986,7 +986,7 @@ int getAllAccessSchedule(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-
+#if TEST_CODE
 int connectTestDevice2(void* context)
 {
 	CommControl cm(context);
@@ -1018,7 +1018,6 @@ int connectTestDevice2(void* context)
 	return sdkResult;
 }
 
-#if 0
 int connectTestDevice3(void* context)
 {
 	CommControl cm(context);

@@ -140,5 +140,7 @@ void waitForConnection();
 #endif
 int enrollMultipleUsers(void* context, const DeviceList& devices);
 int getAllAccessSchedule(void* context, BS2_DEVICE_ID id);
+#if TEST_CODE
 int connectTestDevice2(void* context);
 int connectTestDevice3(void* context);
+#endif
