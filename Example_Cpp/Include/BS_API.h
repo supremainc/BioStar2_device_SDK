@@ -722,8 +722,6 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFaceConfigExt(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetFaceConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2FaceConfigExt* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, BS2ThermalCameraConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, const BS2ThermalCameraConfig* config);
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, BS2BarcodeConfig* config);
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, const BS2BarcodeConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
