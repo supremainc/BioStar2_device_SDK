@@ -139,6 +139,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+#if TEST_CODE
 #define RUN_SSL
 int main(int argc, char* argv[])
 {
@@ -179,7 +180,7 @@ int main(int argc, char* argv[])
 	}
 	return 0;
 }
-
+#endif
 
 int setSSLHandler()
 {

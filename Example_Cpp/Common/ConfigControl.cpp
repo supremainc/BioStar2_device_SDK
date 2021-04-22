@@ -567,7 +567,7 @@ void ConfigControl::print(const BS2EventConfig& config) const
 {
 	TRACE("==[BS2EventConfig]==");
 	TRACE("+--numImageEventFilter : %u", config.numImageEventFilter);
-	for (int idx = 0; idx < config.numImageEventFilter; idx++)
+	for (uint32_t idx = 0; idx < config.numImageEventFilter; idx++)
 	{
 		TRACE("+--imageEventFilter");
 		TRACE("   |--mainEventCode : %u", config.imageEventFilter[idx].mainEventCode);
@@ -581,7 +581,7 @@ void ConfigControl::print(const BS2InputConfig& config) const
 	TRACE("+--distance : %u", config.numInputs);
 	TRACE("|--emissionRate : %u", config.numSupervised);
 
-	for (int idx = 0; idx < config.numInputs; idx++)
+	for (uint8_t idx = 0; idx < config.numInputs; idx++)
 	{
 		TRACE("+--Port(%u)", idx);
 		TRACE("   |--portIndex : %u", config.supervised_inputs[idx].portIndex);
