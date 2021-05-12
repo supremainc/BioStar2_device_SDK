@@ -108,11 +108,11 @@ public:
 	int getUserBlobAccessGroupID(BS2UserFaceExBlob& userBlob);
 	int getUserBlobFaceAuthGroupID(BS2User& user);
 	int getUserBlobUserUpdate(BS2User& user);
-	int getUserBlobCardInfo(BS2UserBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo);
-	int getUserBlobCardInfo(BS2UserBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo);
-	int getUserBlobCardInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo);
-	int getUserBlobCardInfo(BS2UserSmallBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo);
-	int getUserBlobCardInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo);
+	int getUserBlobCardInfo(BS2UserBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx);
+	int getUserBlobCardInfo(BS2UserBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx);
+	int getUserBlobCardInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx);
+	int getUserBlobCardInfo(BS2UserSmallBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx);
+	int getUserBlobCardInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int getUserBlobFingerprintInfo(BS2UserBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int getUserBlobFingerprintInfo(BS2UserBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int getUserBlobFingerprintInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
@@ -126,11 +126,13 @@ public:
 	int makePinCode(BS2_USER_PIN chiperText, const BS2SimpleDeviceInfo& deviceInfo);
 	int getProfileImage(BS2UserPhoto** photo, const BS2SimpleDeviceInfo& deviceInfo);
 	int getAccessGroupID(BS2_ACCESS_GROUP_ID* accessGroupId);
-	int getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo);
+	int getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int getFingerprintInfo(BS2Fingerprint** fingerObjs, uint8_t& numOfFingers, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int scanFace(BS2_DEVICE_ID id, BS2Face* ptrFace, uint8_t& numOfFace);
 	int scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOfFace);
 	int scanAndLoadFaceEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, uint32_t numOfScan, uint32_t numOfImage);
+	int extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx);
+	int getNormalizedImageFaceEx(BS2_DEVICE_ID id);
 
 #if TEST_CODE	
 	int enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx);
@@ -152,6 +154,7 @@ private:
 	void print(const BS2Fingerprint* finger, uint8_t numFinger);
 	void print(const BS2Face* face, uint8_t numFace);
 	void print(const BS2FaceEx* face, uint8_t numFace);
+	void print(const BS2TemplateEx& templateEx);
 
 	void printCardSmartHeader(const BS2SmartCardHeader& header);
 	void printCardSmartCredential(const BS2SmartCardCredentials& cred);

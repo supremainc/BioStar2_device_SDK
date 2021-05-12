@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <stdexcept>
 #include "../Common/Utility.h"
 
 #define STR2INT(x)			isdigit(x.c_str()[0]) ? atoi(x.c_str()) : 0;
@@ -121,23 +122,21 @@ bool Utility::setResourceToFile(string file, shared_ptr<uint8_t> buffer, uint32_
 	return true;
 }
 
-string Utility::replaceSlashToPeriod(const string& source)
+string Utility::replaceValue(std::string data, std::string token, std::string replase)
 {
-	const string findStr = "/";
-	const string replaceStr = ".";
-	string resultStr(source);
+	std::stringstream result;
+	size_t posFrom, posTo;
+	posFrom = posTo = 0;
 
-	string::size_type offset = 0;
-	while (true)
+	while (std::string::npos != (posTo = data.find(token, posFrom)))
 	{
-		offset = resultStr.find(findStr, offset);
-		if (string::npos == offset)
-			break;
-
-		resultStr.replace(offset, findStr.length(), replaceStr);
+		result << data.substr(posFrom, posTo - posFrom);
+		result << replase;
+		posFrom = posTo + token.size();
 	}
 
-	return resultStr;
+	result << data.substr(posFrom);
+	return result.str();
 }
 
 vector<string> Utility::tokenizeString(const string& data, const char delimiter)
@@ -312,4 +311,141 @@ BS2_BOOL Utility::isNo(string msg)
 {
 	char selected = Utility::getInput<char>(msg);
 	return (selected == 'n' || selected == 'N');
+}
+
+string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
+{
+	switch (type)
+	{
+	case BS2_DEVICE_TYPE_BIOENTRY_PLUS:
+		return "BEPL";
+	case BS2_DEVICE_TYPE_BIOENTRY_W:
+		return "BEW";
+	case BS2_DEVICE_TYPE_BIOLITE_NET:
+		return "BLN";
+	case BS2_DEVICE_TYPE_XPASS:
+		return "Xps";
+	case BS2_DEVICE_TYPE_XPASS_S2:
+		return "XpsS2";
+	case BS2_DEVICE_TYPE_SECURE_IO_2:
+		return "SIO2";
+	case BS2_DEVICE_TYPE_DOOR_MODULE_20:
+		return "DM-20";
+	case BS2_DEVICE_TYPE_BIOSTATION_2:
+		return "BS2";
+	case BS2_DEVICE_TYPE_BIOSTATION_A2:
+		return "BSA2";
+	case BS2_DEVICE_TYPE_FACESTATION_2:
+		return "FS2";
+	//case BS2_DEVICE_TYPE_IO_DEVICE:
+	//	return "IO";
+	case BS2_DEVICE_TYPE_BIOSTATION_L2:
+		return "BSL2";
+	case BS2_DEVICE_TYPE_BIOENTRY_W2:
+		return "BEW2";
+	case BS2_DEVICE_TYPE_CORESTATION_40:
+		return "CS-40";
+	case BS2_DEVICE_TYPE_OUTPUT_MODULE:
+		return "OM";
+	//case BS2_DEVICE_TYPE_INPUT_MODULE:
+	//	return "IM";
+	case BS2_DEVICE_TYPE_BIOENTRY_P2:
+		return "BEP2";
+	case BS2_DEVICE_TYPE_BIOLITE_N2:
+		return "BLN2";
+	case BS2_DEVICE_TYPE_XPASS2:
+		return "Xps2";
+	case BS2_DEVICE_TYPE_XPASS_S3:
+		return "XpsS3";
+	case BS2_DEVICE_TYPE_BIOENTRY_R2:
+		return "BER2";
+	case BS2_DEVICE_TYPE_XPASS_D2:
+		return "XPD2";
+	//case BS2_DEVICE_TYPE_DOOR_MODULE_21:
+	//	return "DM21";
+	case BS2_DEVICE_TYPE_XPASS_D2_KEYPAD:
+		return "XPD2-K";
+	case BS2_DEVICE_TYPE_FACELITE:
+		return "FL";
+	case BS2_DEVICE_TYPE_XPASS2_KEYPAD:
+		return "XP2-K";
+	case BS2_DEVICE_TYPE_XPASS_D2_REV:
+		return "XPD2 Rev";
+	case BS2_DEVICE_TYPE_XPASS_D2_KEYPAD_REV:
+		return "XPD2-K Rev";
+	case BS2_DEVICE_TYPE_FACESTATION_F2_FP:
+		return "FSF2-Fp";
+	case BS2_DEVICE_TYPE_FACESTATION_F2:
+		return "FSF2";
+	case BS2_DEVICE_TYPE_XSTATION_2_QR:
+		return "XS2-QR";
+	case BS2_DEVICE_TYPE_XSTATION_2:
+		return "XS2";
+	case BS2_DEVICE_TYPE_IM_120:
+		return "IM-120";
+	case BS2_DEVICE_TYPE_UNKNOWN:
+	default:
+		break;
+	}
+	return "Unknown";
+}
+
+string Utility::getStringOfConnectMode(BS2_CONNECTION_MODE mode)
+{
+	switch (mode)
+	{
+	case BS2_CONNECTION_MODE_SERVER_TO_DEVICE:
+		return "S2D";
+	case BS2_CONNECTION_MODE_DEVICE_TO_SERVER:
+		return "D2S";
+	default:
+		break;
+	}
+	return "N/S";
+}
+
+string Utility::convertHexByte2String(const string& input)
+{
+	static const char hex_digits[] = "0123456789ABCDEF";
+
+	std::string output;
+	output.reserve(input.length() * 2);
+	for (unsigned char c : input)
+	{
+		output.push_back(hex_digits[c >> 4]);
+		output.push_back(hex_digits[c & 15]);
+	}
+	return output;
+}
+
+int Utility::hex_value(char hex_digit)
+{
+	switch (hex_digit) {
+	case '0': case '1': case '2': case '3': case '4':
+	case '5': case '6': case '7': case '8': case '9':
+		return hex_digit - '0';
+
+	case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+		return hex_digit - 'A' + 10;
+
+	case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+		return hex_digit - 'a' + 10;
+	}
+	throw std::invalid_argument("invalid hex digit");
+}
+
+string Utility::convertString2HexByte(const string& input)
+{
+	const auto len = input.length();
+	if (len & 1) throw std::invalid_argument("odd length");
+
+	string output;
+	output.reserve(len / 2);
+	for (auto it = input.begin(); it != input.end(); )
+	{
+		int hi = hex_value(*it++);
+		int lo = hex_value(*it++);
+		output.push_back(hi << 4 | lo);
+	}
+	return output;
 }

@@ -247,6 +247,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
 	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
+	bool qrSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR;
 
 	BS2UserBlob userBlob = { 0, };
 	BS2User& user = userBlob.user;
@@ -486,11 +487,10 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 						if (card.isSmartCard)
 						{
 							TRACE("CSN card only supported.");
+							continue;
 						}
-						else
-						{
-							memcpy(&ptrCard[index], &card.card, sizeof(BS2CSNCard));
-						}
+
+						memcpy(&ptrCard[index], &card.card, sizeof(BS2CSNCard));
 						user.numCards++;
 						index++;
 					}
@@ -498,6 +498,43 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 			}
 		}
 	}
+
+	// +V2.8 XS2 QR support
+	if (qrSupported)
+	{
+		if (Utility::isYes("Would you like to register the QR code string to be used for authentication? [y/n]"))
+		{
+			msg.str("");
+			msg << "Enter the ASCII QR code." << endl;
+			msg << "  [ASCII code consisting of values between 32 and 126].";
+			string qrCode = Utility::getInput<string>(msg.str());
+
+			BS2CSNCard qrCard = { 0, };
+			sdkResult = BS2_WriteQRCode(qrCode.c_str(), &qrCard);
+			if (BS_SDK_SUCCESS != sdkResult)
+			{
+				TRACE("BS2_WriteQRCode call failed: %d", sdkResult);
+			}
+			else
+			{
+				size_t numOfRealloc = user.numCards + 1;
+				BS2CSNCard* ptrNewCard = new BS2CSNCard[numOfRealloc];
+				memset(ptrNewCard, 0x0, sizeof(BS2CSNCard) * numOfRealloc);
+
+				if (0 < user.numCards && userBlob.cardObjs)
+				{
+					memcpy(ptrNewCard, userBlob.cardObjs, sizeof(BS2CSNCard) * user.numCards);
+					delete[] userBlob.cardObjs;
+					userBlob.cardObjs = NULL;
+				}
+
+				memcpy(ptrNewCard + user.numCards, &qrCard, sizeof(BS2CSNCard));
+				userBlob.cardObjs = ptrNewCard;
+				user.numCards++;
+			}
+		}
+	}
+	// +V2.8 XS2 QR support
 
 	if (fingerScanSupported)
 	{
@@ -623,7 +660,7 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(userBlob, id, deviceInfoEx)))
@@ -813,7 +850,7 @@ int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(*userBlob, id, deviceInfo)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(*userBlob, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(*userBlob, id, deviceInfoEx)))
@@ -889,7 +926,7 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 	user.numFingers = 0;
 	user.numCards = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(*userBlob, id, deviceInfo)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(*userBlob, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(*userBlob, id, deviceInfoEx)))
@@ -982,7 +1019,7 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 	}
 	else
 	{
-		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo)))
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo, deviceInfoEx)))
 			return sdkResult;
 	}
 
@@ -1107,7 +1144,7 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(userBlob, id, deviceInfoEx)))
@@ -1868,34 +1905,35 @@ int UserControl::getUserBlobUserUpdate(BS2User& user)
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getUserBlobCardInfo(BS2UserBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo);
+	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getUserBlobCardInfo(BS2UserBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo);
+	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getUserBlobCardInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo);
+	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserSmallBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getUserBlobCardInfo(BS2UserSmallBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo);
+	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getUserBlobCardInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo);
+	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
 }
 
-int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
 	int sdkResult = BS_SDK_SUCCESS;
+	bool qrSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR;
 
 	if (deviceInfo.cardSupported)
 	{
@@ -1918,11 +1956,10 @@ int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEV
 						if (card.isSmartCard)
 						{
 							TRACE("CSN card only supported.");
+							continue;
 						}
-						else
-						{
-							memcpy(&ptrCard[index], &card.card, sizeof(BS2CSNCard));
-						}
+
+						memcpy(&ptrCard[index], &card.card, sizeof(BS2CSNCard));
 						numOfCards++;
 						index++;
 					}
@@ -1930,6 +1967,43 @@ int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEV
 			}
 		}
 	}
+
+	// +V2.8 XS2 QR support
+	if (qrSupported)
+	{
+		if (Utility::isYes("Would you like to register the QR code string to be used for authentication? [y/n]"))
+		{
+			stringstream msg;
+			msg << "Enter the ASCII QR code." << endl;
+			msg << "  [ASCII code consisting of values between 32 and 126].";
+			string qrCode = Utility::getInput<string>(msg.str());
+
+			BS2CSNCard qrCard = { 0, };
+			sdkResult = BS2_WriteQRCode(qrCode.c_str(), &qrCard);
+			if (BS_SDK_SUCCESS != sdkResult)
+			{
+				TRACE("BS2_WriteQRCode call failed: %d", sdkResult);
+			}
+			else
+			{
+				size_t numOfRealloc = numOfCards + 1;
+				BS2CSNCard* ptrNewCard = new BS2CSNCard[numOfRealloc];
+				memset(ptrNewCard, 0x0, sizeof(BS2CSNCard) * numOfRealloc);
+
+				if (0 < numOfCards && *cardObjs)
+				{
+					memcpy(ptrNewCard, *cardObjs, sizeof(BS2CSNCard) * numOfCards);
+					delete[] *cardObjs;
+					*cardObjs = NULL;
+				}
+
+				memcpy(ptrNewCard + numOfCards, &qrCard, sizeof(BS2CSNCard));
+				*cardObjs = ptrNewCard;
+				numOfCards++;
+			}
+		}
+	}
+	// +V2.8 XS2 QR support
 
 	return BS_SDK_SUCCESS;
 }
@@ -2229,6 +2303,89 @@ int UserControl::scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOf
 	return sdkResult;
 }
 
+int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx)
+{
+	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+
+	int sdkResult = BS2_GetDeviceInfoEx(context_, id, NULL, &deviceInfoEx);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
+	if (faceExScanSupported)
+	{
+		char flag = Utility::getInput<char>("Do you want to extract faceEx template from image? [y/n]");
+		if ('y' == flag || 'Y' == flag)
+		{
+			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
+			uint32_t size = Utility::getResourceSize(imagePath);
+			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
+
+			size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
+			size_t faceSize = dataOffset + size;
+			if (Utility::getResourceFromFile(imagePath, buffer, size))
+			{
+				sdkResult = BS2_ExtractTemplateFaceEx(context_, id, buffer.get(), size, 0, &templateEx);
+				if (BS_SDK_SUCCESS != sdkResult)
+				{
+					TRACE("BS2_ExtractTemplateFaceEx call failed: %d", sdkResult);
+					return sdkResult;
+				}
+
+				print(templateEx);
+			}
+		}
+	}
+
+	return sdkResult;
+}
+
+int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id)
+{
+	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+
+	int sdkResult = BS2_GetDeviceInfoEx(context_, id, NULL, &deviceInfoEx);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
+	if (!faceExScanSupported)
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+
+	string unwarpedPath = Utility::getInput<string>("Enter the path and name of unwarped face image file:");
+	uint32_t unwarpedSize = Utility::getResourceSize(unwarpedPath);
+	shared_ptr<uint8_t> unwarpedBuffer(new uint8_t[unwarpedSize], ArrayDeleter<uint8_t>());
+	shared_ptr<uint8_t> warpedBuffer(new uint8_t[BS2_MAX_WARPED_IMAGE_LENGTH], ArrayDeleter<uint8_t>());
+	uint32_t warpedSize(0);
+
+	if (Utility::getResourceFromFile(unwarpedPath, unwarpedBuffer, unwarpedSize))
+	{
+		sdkResult = BS2_GetNormalizedImageFaceEx(context_, id, unwarpedBuffer.get(), unwarpedSize, warpedBuffer.get(), &warpedSize);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetNormalizedImageFaceEx call failed: %d", sdkResult);
+			return sdkResult;
+		}
+
+		string warpedPath = Utility::getInput<string>("Enter the path and name of warped image file:");
+		if (0 < warpedPath.size())
+		{
+			if (Utility::setResourceToFile(warpedPath, warpedBuffer, warpedSize))
+				TRACE("File write success: %s", warpedPath.c_str());
+			else
+				TRACE("File write failed: %s", warpedPath.c_str());
+		}
+	}
+
+	return sdkResult;
+}
+
 void UserControl::dumpHexa(const uint8_t* data, uint32_t size)
 {
 	if (NULL == data || size == 0)
@@ -2479,6 +2636,13 @@ void UserControl::print(const BS2FaceEx* face, uint8_t numFace)
 			}
 		}
 	}
+}
+
+void UserControl::print(const BS2TemplateEx& templateEx)
+{
+	TRACE("==[BS2TemplateEx]==");
+	TRACE("isIR : %u", templateEx.isIR);
+	TRACE("data[0] : %x, data[551] : %x", templateEx.data[0], templateEx.data[551]);
 }
 
 #if TEST_CODE

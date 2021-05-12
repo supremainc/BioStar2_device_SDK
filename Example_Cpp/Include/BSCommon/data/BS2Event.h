@@ -63,6 +63,7 @@ enum {
 
 	// Device
 	BS2_EVENT_DEVICE_SYSTEM_RESET			= 0x3000,	// Alert
+	BS2_EVENT_DEVICE_SYSTEM_ERROR_OPENGL	= 0x3050,
 	BS2_EVENT_DEVICE_SYSTEM_STARTED			= 0x3100,
 	BS2_EVENT_DEVICE_TIME_SET				= 0x3200,
 	BS2_EVENT_DEVICE_TIMEZONE_SET			= 0x3201,
@@ -405,14 +406,14 @@ typedef struct {
 		};
 	};
 	uint8_t			param;				///< 1 byte : tnaKey, floorIndex, alarmFlags
-#ifdef LESS_THAN_SDK_2_6_0
-	BS2_BOOL image;						///< 1 byte : Deprecated in V2.6.0
-#else
+#ifdef VER_260_OR_HIGHER
 	uint8_t image: 1;					///< Image and DST support devided by bit
 	uint8_t isDST: 1;
 	uint8_t half: 1;
 	uint8_t hour: 4;
 	uint8_t negative: 1;
+#else
+	BS2_BOOL image;						///< 1 byte : Deprecated in V2.6.0
 #endif
 } BS2Event;
 

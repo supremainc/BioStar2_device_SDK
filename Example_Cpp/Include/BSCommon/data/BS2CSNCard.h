@@ -30,6 +30,14 @@ enum {
 };
 
 /**
+  *  QR code character range
+  */
+enum {
+	BS2_QRCODE_ASCII_MIN		= 0x20,		// ' '		[32~126 in ASCII code]
+	BS2_QRCODE_ASCII_MAX		= 0x7E,		// '~'		[32~126 in ASCII code]
+};
+
+/**
  *  BS2_CARD_TYPE
  */
 enum {

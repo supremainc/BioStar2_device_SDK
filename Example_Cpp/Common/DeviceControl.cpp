@@ -306,46 +306,6 @@ int DeviceControl::removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int DeviceControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx)
-{
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
-
-	int sdkResult = BS2_GetDeviceInfoEx(context_, id, NULL, &deviceInfoEx);
-	if (BS_SDK_SUCCESS != sdkResult)
-	{
-		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
-		return sdkResult;
-	}
-
-	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
-	if (faceExScanSupported)
-	{
-		char flag = Utility::getInput<char>("Do you want to extract faceEx template from image? [y/n]");
-		if ('y' == flag || 'Y' == flag)
-		{
-			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
-			uint32_t size = Utility::getResourceSize(imagePath);
-			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
-
-			size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
-			size_t faceSize = dataOffset + size;
-			if (Utility::getResourceFromFile(imagePath, buffer, size))
-			{
-				sdkResult = BS2_ExtractTemplateFaceEx(context_, id, buffer.get(), size, 0, &templateEx);
-				if (BS_SDK_SUCCESS != sdkResult)
-				{
-					TRACE("BS2_ExtractTemplateFaceEx call failed: %d", sdkResult);
-					return sdkResult;
-				}
-
-				print(templateEx);
-			}
-		}
-	}
-
-	return sdkResult;
-}
-
 void DeviceControl::print(const BS2SimpleDeviceInfo& info)
 {
 	TRACE("==[BS2SimpleDeviceInfo]==");
@@ -435,10 +395,3 @@ void DeviceControl::print(const BS2AuthOperatorLevel& opr)
 	TRACE(" : %u", opr.);
 }
 #endif
-
-void DeviceControl::print(const BS2TemplateEx& templateEx)
-{
-	TRACE("==[BS2TemplateEx]==");
-	TRACE("isIR : %u", templateEx.isIR);
-	TRACE("data[0] : %x, data[551] : %x", templateEx.data[0], templateEx.data[551]);
-}

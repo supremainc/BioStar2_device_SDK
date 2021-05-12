@@ -41,6 +41,10 @@ public:
 	int setEventConfig(BS2_DEVICE_ID id, const BS2EventConfig& config);
 	int getTriggerActionConfig(BS2_DEVICE_ID id, BS2TriggerActionConfig& config);
 	int setTriggerActionConfig(BS2_DEVICE_ID id, const BS2TriggerActionConfig& config);
+	int getBarcodeConfig(BS2_DEVICE_ID id, BS2BarcodeConfig& config);
+	int setBarcodeConfig(BS2_DEVICE_ID id, const BS2BarcodeConfig& config);
+	int getRS485Config(BS2_DEVICE_ID id, BS2Rs485Config& config);
+	int setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config);
 
 	int updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode = BS2_CONNECTION_MODE_SERVER_TO_DEVICE);
 	int updateConnectModeDevice2Server(BS2_DEVICE_ID id, std::string serverIP, BS2_PORT serverPort);
@@ -67,6 +71,10 @@ private:
 	void print(const BS2TriggerActionConfig& config) const;
 	void print(const BS2Trigger& trigger) const;
 	void print(const BS2Action& action) const;
+	void print(const BS2BarcodeConfig& config) const;
+	void print(const BS2Rs485Config& config) const;
+	void print(const BS2Rs485Channel& channel) const;
+	void print(const BS2Rs485SlaveDevice& device) const;
 
 
 private:

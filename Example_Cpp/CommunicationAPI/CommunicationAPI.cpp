@@ -619,8 +619,8 @@ void displayDeviceList(const vector<BS2SimpleDeviceInfo>& devices)
 			Utility::getIPAddress(info.ipv4Address).c_str(),
 			info.port,
 			(info.connectedIP == 0xFFFFFFFF) ? "" : Utility::getIPAddress(info.connectedIP).c_str(),
-			CONNECT_MODE[info.connectionMode],
-			DEVICE_NAME[info.type],
+			Utility::getStringOfConnectMode(info.connectionMode).c_str(),
+			Utility::getStringOfDeviceType(info.type).c_str(),
 			info.dualIDSupported);
 	}
 }
@@ -635,7 +635,7 @@ void displaySlaveList(const vector<BS2Rs485SlaveDevice>& devices)
 		printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d\n",
 			++index,
 			info.deviceID,
-			DEVICE_NAME[info.deviceType],
+			Utility::getStringOfDeviceType(info.deviceType).c_str(),
 			info.enableOSDP,
 			info.connected);
 	}
@@ -651,7 +651,7 @@ void displayCSTSlaveList(const vector<BS2Rs485SlaveDeviceEX>& devices)
 		printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d, Channel:%u\n",
 			++index,
 			info.deviceID,
-			DEVICE_NAME[info.deviceType],
+			Utility::getStringOfDeviceType(info.deviceType).c_str(),
 			info.enableOSDP,
 			info.connected,
 			info.channelInfo);
@@ -678,7 +678,7 @@ void displayConnectedDevices(const DeviceList& devices, bool includeSlave, bool 
 			it->second->id_,
 			Utility::getIPAddress(it->second->ip_).c_str(),
 			it->second->port_,
-			DEVICE_NAME[it->second->type_]);
+			Utility::getStringOfDeviceType(it->second->type_).c_str());
 
 		if (includeSlave)
 			for (auto id : it->second->slaveDevices_)

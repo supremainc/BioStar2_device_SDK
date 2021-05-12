@@ -360,6 +360,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_ENR_USR_SCAN_N_LOAD:
 			sdkResult = uc.enrollUserFaceExScanAndLoad(id);
 			break;
+		case MENU_USR_EXTRACT_TEMPLATE_FACEEX:
+			sdkResult = extractTemplateFaceEx(context, id);
+			break;
+		case MENU_USR_GET_NORMALIZE_IMAGE_FACEEX:
+			sdkResult = getNormalizedImageFaceEx(context, id);
+			break;
 		case MENU_USR_GET_LASTFPIMAGE:
 			sdkResult = getLastFingerprintImage(uc, id);
 			break;
@@ -696,4 +702,17 @@ int eraseCard(UserControl& uc, BS2_DEVICE_ID id)
 {
 	cout << "Now erase your card" << endl;
 	return uc.eraseCard(id);
+}
+
+int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)
+{
+	UserControl uc(context);
+	BS2TemplateEx templateEx = { 0, };
+	return uc.extractTemplateFaceEx(id, templateEx);
+}
+
+int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id)
+{
+	UserControl uc(context);
+	return uc.getNormalizedImageFaceEx(id);
 }

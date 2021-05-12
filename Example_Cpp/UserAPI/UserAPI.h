@@ -38,6 +38,8 @@ enum EN_MENU_DEV
 	MENU_USR_ENR_USR_SMALL,
 	MENU_USR_ENR_USR_FACEEX,
 	MENU_USR_ENR_USR_SCAN_N_LOAD,
+	MENU_USR_EXTRACT_TEMPLATE_FACEEX,
+	MENU_USR_GET_NORMALIZE_IMAGE_FACEEX,
 	MENU_USR_GET_LASTFPIMAGE,
 	MENU_USR_REM_USR,
 	MENU_USR_REM_ALLUSR,
@@ -57,6 +59,8 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_ENR_USR_SMALL,		"Enroll user to device (BS2UserSmallBlob)" },
 	{MENU_USR_ENR_USR_FACEEX,		"Enroll user to FaceEx device"},
 	{MENU_USR_ENR_USR_SCAN_N_LOAD,	"Enroll user with scanned and loaded image for faceEx"},
+	{MENU_USR_EXTRACT_TEMPLATE_FACEEX,		"Extract faceEx template from FSF2"},
+	{MENU_USR_GET_NORMALIZE_IMAGE_FACEEX,	"Get normalize image from FSF2"},
 	{MENU_USR_GET_LASTFPIMAGE,		"Get last fingerprint image from device"},
 	{MENU_USR_REM_USR,				"Remove a user " },
 	{MENU_USR_REM_ALLUSR,			"Remove all users" },
@@ -88,3 +92,5 @@ int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id);
 int scanCard(UserControl& uc, BS2_DEVICE_ID id);
 int writeCard(UserControl& uc, BS2_DEVICE_ID id);
 int eraseCard(UserControl& uc, BS2_DEVICE_ID id);
+int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id);
+int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id);

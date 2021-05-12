@@ -276,6 +276,46 @@ int ConfigControl::setTriggerActionConfig(BS2_DEVICE_ID id, const BS2TriggerActi
 	return sdkResult;
 }
 
+int ConfigControl::getBarcodeConfig(BS2_DEVICE_ID id, BS2BarcodeConfig& config)
+{
+	int sdkResult = BS2_GetBarcodeConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetBarcodeConfig call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setBarcodeConfig(BS2_DEVICE_ID id, const BS2BarcodeConfig& config)
+{
+	int sdkResult = BS2_SetBarcodeConfig(context_, id, const_cast<BS2BarcodeConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetBarcodeConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getRS485Config(BS2_DEVICE_ID id, BS2Rs485Config& config)
+{
+	int sdkResult = BS2_GetRS485Config(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetRS485Config call failed: %d", sdkResult);
+	else
+		print(config);
+
+	return sdkResult;
+}
+
+int ConfigControl::setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config)
+{
+	int sdkResult = BS2_SetRS485Config(context_, id, const_cast<BS2Rs485Config*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -324,20 +364,13 @@ int ConfigControl::updateConnectModeServer2Device(BS2_DEVICE_ID id)
 int ConfigControl::updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mode)
 {
 	BS2Rs485Config config = { 0, };
-	int sdkResult = BS2_GetRS485Config(context_, id, &config);
+	int sdkResult = getRS485Config(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
-	{
-		TRACE("BS2_GetRS485Config call failed: %d", sdkResult);
 		return sdkResult;
-	}
 
 	config.mode = mode;
 
-	sdkResult = BS2_SetRS485Config(context_, id, &config);
-	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
-
-	return sdkResult;
+	return setRS485Config(id, config);
 }
 
 int ConfigControl::resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB)
@@ -755,4 +788,53 @@ void ConfigControl::print(const BS2Action& action) const
 	default:
 		break;
 	}
+}
+
+void ConfigControl::print(const BS2BarcodeConfig& config) const
+{
+	TRACE("==[BS2BarcodeConfig]==");
+	TRACE("+--useBarcode : %u", config.useBarcode);
+	TRACE("+--scanTimeout : %u", config.scanTimeout);
+}
+
+
+void ConfigControl::print(const BS2Rs485Config& config) const
+{
+	TRACE("==[BS2Rs485Config]==");
+	TRACE("+--mode : %u", config.mode);
+	TRACE("|--numOfChannels : %u", config.numOfChannels);
+	for (int index = 0; index < config.numOfChannels; index++)
+	{
+		TRACE("+--channels[%u]", index);
+		print(config.channels[index]);
+	}
+	TRACE("+--intelligentInfo");
+	TRACE("|  |--supportConfig : %u", config.intelligentInfo.supportConfig);
+	TRACE("|  |--useExceptionCode : %u", config.intelligentInfo.useExceptionCode);
+
+	string temp((char*)config.intelligentInfo.exceptionCode, sizeof(config.intelligentInfo.exceptionCode));
+	TRACE("|  |--exceptionCode : 0x%s", Utility::convertHexByte2String(temp).c_str());
+	TRACE("|  |--outputFormat : %u", config.intelligentInfo.outputFormat);
+	TRACE("+  +--osdpID : %u", config.intelligentInfo.osdpID);
+}
+
+void ConfigControl::print(const BS2Rs485Channel& channel) const
+{
+	TRACE("|  |--baudRate : %u", channel.baudRate);
+	TRACE("|  |--channelIndex : %u", channel.channelIndex);
+	TRACE("|  |--useRegistance : %u", channel.useRegistance);
+	TRACE("|  |--numOfDevices : %u", channel.numOfDevices);
+	for (int index = 0; index < channel.numOfDevices; index++)
+	{
+		TRACE("|  +--slaveDevices[%u]", index);
+		print(channel.slaveDevices[index]);
+	}
+}
+
+void ConfigControl::print(const BS2Rs485SlaveDevice& device) const
+{
+	TRACE("|  |  |--deviceID : %u", device.deviceID);
+	TRACE("|  |  |--deviceType : %u", device.deviceType);
+	TRACE("|  |  |--enableOSDP : %u", device.enableOSDP);
+	TRACE("|  |  |--connected : %u", device.connected);
 }

@@ -59,13 +59,16 @@ enum EN_MENU_DEV
 	MENU_DEV_SET_THERMALCAMERACONFIG,
 	MENU_DEV_GET_EVENTCONFIG,
 	MENU_DEV_SET_EVENTCONFIG,
-	MENU_DEV_EXTRACT_TEMPLATE_FACEEX,
 	MENU_DEV_GET_INPUTCONFIG,
 	MENU_DEV_GET_TRIGGERACTIONCONFIG,
 	MENU_DEV_SET_TRIGGERACTIONCONFIG,
 	MENU_DEV_REM_TRIGGERACTIONCONFIG,
 	MENU_DEV_UPD_DEVICE_VOLUME,
 	MENU_DEV_RST_CONFIG_EXCEPT_NETINFO,
+	MENU_DEV_GET_BARCODECONFIG,
+	MENU_DEV_SET_BARCODECONFIG,
+	MENU_DEV_GET_RS485CONFIG,
+	MENU_DEV_SET_RS485CONFIG,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -105,13 +108,16 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_THERMALCAMERACONFIG,	"BS2_SetThermalCameraConfig"},
 	{MENU_DEV_GET_EVENTCONFIG,		"BS2_GetEventConfig"},
 	{MENU_DEV_SET_EVENTCONFIG,		"BS2_SetEventConfig"},
-	{MENU_DEV_EXTRACT_TEMPLATE_FACEEX,	"BS2_ExtractTemplateFaceEx"},
 	{MENU_DEV_GET_INPUTCONFIG,		"BS2_GetInputConfig"},
 	{MENU_DEV_GET_TRIGGERACTIONCONFIG,	"BS2_GetTriggerActionConfig"},
 	{MENU_DEV_SET_TRIGGERACTIONCONFIG,	"BS2_SetTriggerActionConfig"},
 	{MENU_DEV_REM_TRIGGERACTIONCONFIG,	"Remove trigger action config"},
 	{MENU_DEV_UPD_DEVICE_VOLUME,		"Update device volume"},
 	{MENU_DEV_RST_CONFIG_EXCEPT_NETINFO,"BS2_ResetConfigExceptNetInfo"},
+	{MENU_DEV_GET_BARCODECONFIG,	"BS2_GetBarcodeConfig"},
+	{MENU_DEV_SET_BARCODECONFIG,	"BS2_SetBarcodeConfig"},
+	{MENU_DEV_GET_RS485CONFIG,		"BS2_GetRS485Config"},
+	{MENU_DEV_SET_RS485CONFIG,		"BS2_SetRS485Config"},
 };
 
 
@@ -149,9 +155,12 @@ int getThermalCameraConfig(void* context, BS2_DEVICE_ID id);
 int setThermalCameraConfig(void* context, BS2_DEVICE_ID id);
 int getEventConfig(void* context, BS2_DEVICE_ID id);
 int setEventConfig(void* context, BS2_DEVICE_ID id);
-int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id);
 int getInputConfig(void* context, BS2_DEVICE_ID id);
 int getTriggerActionConfig(void* context, BS2_DEVICE_ID id);
 int setTriggerActionConfig(void* context, BS2_DEVICE_ID id);
 int removeTriggerActionConfig(void* context, BS2_DEVICE_ID id);
 int updateDeviceVolume(void* context, BS2_DEVICE_ID id);
+int getBarcodeConfig(void* context, BS2_DEVICE_ID id);
+int setBarcodeConfig(void* context, BS2_DEVICE_ID id);
+int getRS485Config(void* context, BS2_DEVICE_ID id);
+int setRS485Config(void* context, BS2_DEVICE_ID id);

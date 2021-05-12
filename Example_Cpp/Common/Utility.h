@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <sstream>
+#include <stdarg.h>
 #include "BS_API.h"
 
 
@@ -13,6 +14,7 @@
 
 #define BITMAP_SIGNATURE			0x4D42
 #define BITMAP_SIGNATURE_SIZE		14
+#define MAX_BUFFER_SIZE				1024
 
 
 typedef struct __BITMAPINFOHEADER
@@ -56,7 +58,7 @@ class Utility
 {
 public:
 	template <typename T>
-	static T getInput(std::string msg);
+	static T getInput(std::string msgFormat, ...);
 	static std::string getLine(std::string msg);
 
 	static std::string getIPAddress(uint32_t ip);
@@ -66,7 +68,7 @@ public:
 	static bool getResourceFromFile(std::string file, std::shared_ptr<uint8_t> buffer, uint32_t size = 0);
 	static bool setResourceToFile(std::string file, std::shared_ptr<uint8_t> buffer, uint32_t size);
 
-	static std::string replaceSlashToPeriod(const std::string& source);
+	static std::string replaceValue(std::string data, std::string token, std::string replase);
 
 	static std::vector<std::string> tokenizeString(const std::string& data, const char delimiter = ' ');
 	template <typename T>
@@ -83,14 +85,27 @@ public:
 	static BS2_BOOL isYes(std::string msg);
 	static BS2_BOOL isNo(std::string msg);
 
+	static std::string getStringOfDeviceType(BS2_DEVICE_TYPE type);
+	static std::string getStringOfConnectMode(BS2_CONNECTION_MODE mode);
+
+	static std::string convertHexByte2String(const std::string& input);
+	static int hex_value(char hex_digit);
+	static std::string convertString2HexByte(const std::string& input);
+
 private:
 	static void writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits);
 };
 
 template <typename T>
-inline T Utility::getInput(std::string msg)
+inline T Utility::getInput(std::string msgFormat, ...)
 {
-	std::cout << "==> " << msg << " ";
+	va_list ap;
+	va_start(ap, msgFormat);
+	char buf[MAX_BUFFER_SIZE] = { 0, };
+	vsprintf(buf, msgFormat.c_str(), ap);
+	va_end(ap);
+
+	std::cout << "==> " << buf << " ";
 	T value;
 	std::cin >> value;
 

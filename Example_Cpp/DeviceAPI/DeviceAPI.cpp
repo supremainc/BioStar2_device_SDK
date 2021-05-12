@@ -430,9 +430,6 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_EVENTCONFIG:
 			sdkResult = setEventConfig(context, id);
 			break;
-		case MENU_DEV_EXTRACT_TEMPLATE_FACEEX:
-			sdkResult = extractTemplateFaceEx(context, id);
-			break;
 		case MENU_DEV_GET_INPUTCONFIG:
 			sdkResult = getInputConfig(context, id);
 			break;
@@ -450,6 +447,18 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 		case MENU_DEV_RST_CONFIG_EXCEPT_NETINFO:
 			sdkResult = cc.resetConfigExceptNetInfo(id);
+			break;
+		case MENU_DEV_GET_BARCODECONFIG:
+			sdkResult = getBarcodeConfig(context, id);
+			break;
+		case MENU_DEV_SET_BARCODECONFIG:
+			sdkResult = setBarcodeConfig(context, id);
+			break;
+		case MENU_DEV_GET_RS485CONFIG:
+			sdkResult = getRS485Config(context, id);
+			break;
+		case MENU_DEV_SET_RS485CONFIG:
+			sdkResult = setRS485Config(context, id);
 			break;
 		default:
 			break;
@@ -1060,13 +1069,6 @@ int setEventConfig(void* context, BS2_DEVICE_ID id)
 	return cc.setEventConfig(id, config);
 }
 
-int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)
-{
-	DeviceControl dc(context);
-	BS2TemplateEx templateEx = {0,};
-	return dc.extractTemplateFaceEx(id, templateEx);
-}
-
 int getInputConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
@@ -1166,4 +1168,116 @@ int updateDeviceVolume(void* context, BS2_DEVICE_ID id)
 	config.volume = 10;
 
 	return cc.setDisplayConfig(id, config);
+}
+
+int getBarcodeConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2BarcodeConfig config = { 0, };
+	return cc.getBarcodeConfig(id, config);
+}
+
+int setBarcodeConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2BarcodeConfig config = { 0, };
+	string msg;
+
+	config.useBarcode = Utility::isYes("Would you like to use barcode function? [y/n]");
+
+	if (config.useBarcode)
+	{
+		msg = "Set the barcode scan timeout in seconds.";
+		config.scanTimeout = (uint8_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	return cc.setBarcodeConfig(id, config);
+}
+
+int getRS485Config(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2Rs485Config config = { 0, };
+	return cc.getRS485Config(id, config);
+}
+
+int setRS485Config(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2Rs485Config config = { 0, };
+	string msg;
+
+	BS2SimpleDeviceInfo info = {0,};
+	int sdkResult = dc.getDeviceInfo(id, info);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	msg = "Please set the mode. Disable(%u), Master(%u), Slave(%u), Standalone(%u)";
+	config.mode = (BS2_RS485_MODE)Utility::getInput<uint32_t>(msg, BS2_RS485_MODE_DISABLED, BS2_RS485_MODE_MASTER, BS2_RS485_MODE_SLAVE, BS2_RS485_MODE_STANDALONE);
+
+	uint32_t numOfChannels =
+		(BS2_DEVICE_TYPE_CORESTATION_40 == info.type) ? BS2_RS485_MAX_CHANNELS : 1;
+
+	msg = "How many RS485 channels do you want to set up? (0 ~ %u)";
+	config.numOfChannels = (uint8_t)Utility::getInput<uint32_t>(msg, numOfChannels);
+
+	for (uint8_t idx = 0; idx < config.numOfChannels; idx++)
+	{
+		msg = "Please insert baud rate. (Default: 115200)";
+		config.channels[idx].baudRate = Utility::getInput<uint32_t>(msg);
+
+		msg = "Please insert channel index.";
+		config.channels[idx].channelIndex = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Please insert useRegistance.";
+		config.channels[idx].useRegistance = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Please insert number of devices.";
+		config.channels[idx].numOfDevices = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		for (uint8_t slaveIdx = 0; slaveIdx < config.channels[idx].numOfDevices; slaveIdx++)
+		{
+			BS2Rs485SlaveDevice& slaveDevice = config.channels[idx].slaveDevices[slaveIdx];
+
+			msg = "Please insert #%u deviceID.";
+			slaveDevice.deviceID = Utility::getInput<BS2_DEVICE_ID>(msg, slaveIdx);
+
+			msg = "Please insert #%u deviceType.";
+			slaveDevice.deviceType = (uint16_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+
+			msg = "Please insert #%u enableOSDP.";
+			slaveDevice.enableOSDP = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+
+			msg = "Please insert #%u connected.";
+			slaveDevice.connected = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+		}
+	}
+
+	msg = "Would you like to use IntelligentPD-related settings? [y/n]";
+	config.intelligentInfo.supportConfig = Utility::isYes(msg);
+
+	if (config.intelligentInfo.supportConfig)
+	{
+		msg = "Would you like to use an exception code? [y/n]";
+		config.intelligentInfo.useExceptionCode = Utility::isYes(msg);
+		if (config.intelligentInfo.useExceptionCode)
+		{
+			stringstream streamMsg;
+			streamMsg << "Please enter the exception code in 8 bytes hexa." << endl;
+			streamMsg << ">> 0x";
+			string enteredCode = Utility::getInput<string>(streamMsg.str());
+			string exceptionCode = Utility::convertString2HexByte(enteredCode);
+			memcpy(config.intelligentInfo.exceptionCode, exceptionCode.c_str(),
+				min(BS2_RS485_MAX_EXCEPTION_CODE_LEN, exceptionCode.size()));
+		}
+
+		msg = "Please enter the output format. CardID(%u), UserID(%u)";
+		config.intelligentInfo.outputFormat = (uint8_t)Utility::getInput<uint32_t>(msg, BS2_IPD_OUTPUT_CARDID, BS2_IPD_OUTPUT_USERID);
+
+		msg = "Please enter the OSDP ID.";
+		config.intelligentInfo.osdpID = (uint8_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	return cc.setRS485Config(id, config);
 }
