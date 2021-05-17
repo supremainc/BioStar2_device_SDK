@@ -504,7 +504,6 @@ int runAPIs(void* context, const DeviceList& deviceList)
 
 	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
-	BS2FactoryConfig facConfig = { 0, };
 
 	while (BS_SDK_SUCCESS == sdkResult && MENU_COMM_BREAK != (selectedTop = showMenu(menuInfoCommAPI)))
 	{
@@ -569,7 +568,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			break;
 		case MENU_CONF_GET_FACCONFIG:
 			id = selectDeviceID(deviceList, true, false);
-			sdkResult = cc.getFactoryConfig(id, facConfig);
+			sdkResult = getFactoryConfig(context, id);
 			break;
 		case MENU_ELOG_GET_EVENTSMALLBLOB:
 			id = selectDeviceID(deviceList, true, false);
@@ -857,6 +856,18 @@ int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id)
 	ConfigControl cc(context);
 
 	return cc.updateConnectModeServer2Device(id);
+}
+
+int getFactoryConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2FactoryConfig config = { 0, };
+
+	int sdkResult = cc.getFactoryConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 #if 0

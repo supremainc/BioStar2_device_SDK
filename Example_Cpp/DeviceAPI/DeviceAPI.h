@@ -69,6 +69,7 @@ enum EN_MENU_DEV
 	MENU_DEV_SET_BARCODECONFIG,
 	MENU_DEV_GET_RS485CONFIG,
 	MENU_DEV_SET_RS485CONFIG,
+	MENU_DEV_GET_DEVICECAPABILITIES,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -118,6 +119,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_BARCODECONFIG,	"BS2_SetBarcodeConfig"},
 	{MENU_DEV_GET_RS485CONFIG,		"BS2_GetRS485Config"},
 	{MENU_DEV_SET_RS485CONFIG,		"BS2_SetRS485Config"},
+	{MENU_DEV_GET_DEVICECAPABILITIES,	"BS2_GetDeviceCapabilities"},
 };
 
 
@@ -164,3 +166,4 @@ int getBarcodeConfig(void* context, BS2_DEVICE_ID id);
 int setBarcodeConfig(void* context, BS2_DEVICE_ID id);
 int getRS485Config(void* context, BS2_DEVICE_ID id);
 int setRS485Config(void* context, BS2_DEVICE_ID id);
+int getDeviceCapabilities(void* context, BS2_DEVICE_ID id);

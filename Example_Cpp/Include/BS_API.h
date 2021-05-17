@@ -76,6 +76,7 @@
 #include "BSCommon/config/BS2FaceConfigExt.h"
 #include "BSCommon/config/BS2ThermalCameraConfig.h"
 #include "BSCommon/config/BS2BarcodeConfig.h"
+#include "BSCommon/protocol/BS2DeviceInfo.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -805,6 +806,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCode(void* context, char* pla
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCodeWithKey(void* context, char* plaintext, unsigned char* ciphertext, const BS2EncryptKey* key);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ComputeCRC16CCITT(unsigned char* data, uint32_t dataLen, uint16_t* crc);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCardModel(char* modelName, BS2_CARD_MODEL* cardModel);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceCapabilities(void* context, BS2_DEVICE_ID deviceId, BS2DeviceCapabilities* capabilities);
 
 // Slave Control api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice** slaveDeviceObj, uint32_t* slaveDeviceCount);

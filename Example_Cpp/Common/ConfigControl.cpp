@@ -30,8 +30,6 @@ int ConfigControl::getSystemConfig(BS2_DEVICE_ID id, BS2SystemConfig& config)
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetSystemConfig call failed: %d", sdkResult);
 
-	//print(config);
-
 	return sdkResult;
 }
 
@@ -59,8 +57,6 @@ int ConfigControl::getDisplayConfig(BS2_DEVICE_ID id, BS2DisplayConfig& config)
 	int sdkResult = BS2_GetDisplayConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetDisplayConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -79,8 +75,6 @@ int ConfigControl::getIPConfig(BS2_DEVICE_ID id, BS2IpConfig& config) const
 	int sdkResult = BS2_GetIPConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetIPConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -99,8 +93,6 @@ int ConfigControl::getFactoryConfig(BS2_DEVICE_ID id, BS2FactoryConfig& config)
 	int sdkResult = BS2_GetFactoryConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetFactoryConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -110,8 +102,6 @@ int ConfigControl::getInputConfig(BS2_DEVICE_ID id, BS2InputConfig& config)
 	int sdkResult = BS2_GetInputConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetInputConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -121,8 +111,6 @@ int ConfigControl::getFingerprintConfig(BS2_DEVICE_ID id, BS2FingerprintConfig& 
 	int sdkResult = BS2_GetFingerprintConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetFingerprintConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -141,8 +129,6 @@ int ConfigControl::getFaceConfig(BS2_DEVICE_ID id, BS2FaceConfig& config)
 	int sdkResult = BS2_GetFaceConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetFaceConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -161,8 +147,6 @@ int ConfigControl::getDesFireCardConfigEx(BS2_DEVICE_ID id, BS2DesFireCardConfig
 	int sdkResult = BS2_GetDesFireCardConfigEx(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetDesFireCardConfigEx call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -181,8 +165,6 @@ int ConfigControl::getAuthConfigEx(BS2_DEVICE_ID id, BS2AuthConfigExt& config)
 	int sdkResult = BS2_GetAuthConfigExt(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetAuthConfigExt call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -201,8 +183,6 @@ int ConfigControl::getFaceConfigEx(BS2_DEVICE_ID id, BS2FaceConfigExt& config)
 	int sdkResult = BS2_GetFaceConfigExt(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetFaceConfigExt call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -221,8 +201,6 @@ int ConfigControl::getThermalCameraConfig(BS2_DEVICE_ID id, BS2ThermalCameraConf
 	int sdkResult = BS2_GetThermalCameraConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetThermalCameraConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -241,8 +219,6 @@ int ConfigControl::getEventConfig(BS2_DEVICE_ID id, BS2EventConfig& config)
 	int sdkResult = BS2_GetEventConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetEventConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -261,8 +237,6 @@ int ConfigControl::getTriggerActionConfig(BS2_DEVICE_ID id, BS2TriggerActionConf
 	int sdkResult = BS2_GetTriggerActionConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetTriggerActionConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -281,8 +255,6 @@ int ConfigControl::getBarcodeConfig(BS2_DEVICE_ID id, BS2BarcodeConfig& config)
 	int sdkResult = BS2_GetBarcodeConfig(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetBarcodeConfig call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }
@@ -301,8 +273,6 @@ int ConfigControl::getRS485Config(BS2_DEVICE_ID id, BS2Rs485Config& config)
 	int sdkResult = BS2_GetRS485Config(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetRS485Config call failed: %d", sdkResult);
-	else
-		print(config);
 
 	return sdkResult;
 }

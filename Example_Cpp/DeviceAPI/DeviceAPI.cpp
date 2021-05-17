@@ -460,6 +460,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_RS485CONFIG:
 			sdkResult = setRS485Config(context, id);
 			break;
+		case MENU_DEV_GET_DEVICECAPABILITIES:
+			sdkResult = getDeviceCapabilities(context, id);
+			break;
 		default:
 			break;
 		}
@@ -632,7 +635,11 @@ int getFingerprintConfig(void* context, BS2_DEVICE_ID id)
 	ConfigControl cc(context);
 	BS2FingerprintConfig config = { 0, };
 
-	return cc.getFingerprintConfig(id, config);
+	int sdkResult = cc.getFingerprintConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setFingerprintConfig(void* context, BS2_DEVICE_ID id)
@@ -655,7 +662,12 @@ int getFaceConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2FaceConfig config = { 0, };
-	return cc.getFaceConfig(id, config);
+
+	int sdkResult = cc.getFaceConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setFaceConfig(void* context, BS2_DEVICE_ID id)
@@ -677,7 +689,12 @@ int getSystemConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2SystemConfig config = { 0, };
-	return cc.getSystemConfig(id, config);
+
+	int sdkResult = cc.getSystemConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setSystemConfig(void* context, BS2_DEVICE_ID id)
@@ -715,7 +732,12 @@ int getDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2DesFireCardConfigEx config = { 0, };
-	return cc.getDesFireCardConfigEx(id, config);
+
+	int sdkResult = cc.getDesFireCardConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
@@ -744,7 +766,12 @@ int getAuthConfigEx(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2AuthConfigExt config = { 0, };
-	return cc.getAuthConfigEx(id, config);
+
+	int sdkResult = cc.getAuthConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setAuthConfigEx(void* context, BS2_DEVICE_ID id)
@@ -941,7 +968,12 @@ int getFaceConfigEx(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2FaceConfigExt config = { 0, };
-	return cc.getFaceConfigEx(id, config);
+
+	int sdkResult = cc.getFaceConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
@@ -997,7 +1029,12 @@ int getThermalCameraConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2ThermalCameraConfig config = { 0, };
-	return cc.getThermalCameraConfig(id, config);
+
+	int sdkResult = cc.getThermalCameraConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setThermalCameraConfig(void* context, BS2_DEVICE_ID id)
@@ -1035,7 +1072,12 @@ int getEventConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2EventConfig config = { 0, };
-	return cc.getEventConfig(id, config);
+
+	int sdkResult = cc.getEventConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setEventConfig(void* context, BS2_DEVICE_ID id)
@@ -1073,14 +1115,24 @@ int getInputConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2InputConfig config = { 0, };
-	return cc.getInputConfig(id, config);
+
+	int sdkResult = cc.getInputConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int getTriggerActionConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2TriggerActionConfig config = { 0, };
-	return cc.getTriggerActionConfig(id, config);
+
+	int sdkResult = cc.getTriggerActionConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setTriggerActionConfig(void* context, BS2_DEVICE_ID id)
@@ -1165,6 +1217,8 @@ int updateDeviceVolume(void* context, BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
+	cc.print(config);
+
 	config.volume = 10;
 
 	return cc.setDisplayConfig(id, config);
@@ -1174,7 +1228,12 @@ int getBarcodeConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2BarcodeConfig config = { 0, };
-	return cc.getBarcodeConfig(id, config);
+
+	int sdkResult = cc.getBarcodeConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setBarcodeConfig(void* context, BS2_DEVICE_ID id)
@@ -1198,7 +1257,12 @@ int getRS485Config(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
 	BS2Rs485Config config = { 0, };
-	return cc.getRS485Config(id, config);
+
+	int sdkResult = cc.getRS485Config(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
 }
 
 int setRS485Config(void* context, BS2_DEVICE_ID id)
@@ -1280,4 +1344,16 @@ int setRS485Config(void* context, BS2_DEVICE_ID id)
 	}
 
 	return cc.setRS485Config(id, config);
+}
+
+int getDeviceCapabilities(void* context, BS2_DEVICE_ID id)
+{
+	DeviceControl dc(context);
+	BS2DeviceCapabilities cap = { 0, };
+
+	int sdkResult = dc.getDeviceCapabilities(id, cap);
+	if (BS_SDK_SUCCESS == sdkResult)
+		dc.print(cap);
+
+	return sdkResult;
 }

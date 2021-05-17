@@ -53,7 +53,7 @@ public:
 
 	int resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB = true);
 
-private:
+public:
 	void print(const BS2SystemConfig& config) const;
 	void print(const BS2DisplayConfig& config) const;
 	void print(const BS2IpConfig& config) const;

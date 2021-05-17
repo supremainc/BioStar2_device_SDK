@@ -26,6 +26,7 @@ public:
 	int unlockDevice(BS2_DEVICE_ID id);
 	int upgradeFirmware(BS2_DEVICE_ID id);
 	int updateResource(BS2_DEVICE_ID id);
+	int getDeviceCapabilities(BS2_DEVICE_ID id, BS2DeviceCapabilities& cap);
 
 	int getAuthOperatorLevelEx(BS2_DEVICE_ID id);
 	int setAuthOperatorLevelEx(BS2_DEVICE_ID id);
@@ -33,12 +34,13 @@ public:
 	int getAllAuthOperatorLevelEx(BS2_DEVICE_ID id);
 	int removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id);
 
-
-private:
 	void print(const BS2SimpleDeviceInfo& info);
 	void print(const BS2SimpleDeviceInfoEx& info);
 	void print(const BS2IPv6DeviceInfo& info);
 	void print(const BS2AuthOperatorLevel& opr);
+	void print(const BS2DeviceCapabilities& info);
+
+private:
 	static void onUpgrade(BS2_DEVICE_ID id, uint32_t percent);
 
 

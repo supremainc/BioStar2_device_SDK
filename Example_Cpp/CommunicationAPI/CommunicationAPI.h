@@ -134,6 +134,7 @@ void displayConnectedDevices(const DeviceList& devices, bool includeSlave = fals
 int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList);
 int updateConnectModeDevice2Server(void* context, BS2_DEVICE_ID id);
 int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id);
+int getFactoryConfig(void* context, BS2_DEVICE_ID id);
 #if 0
 DWORD WINAPI onWaiting(LPVOID lpParam);
 void waitForConnection();

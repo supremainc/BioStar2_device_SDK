@@ -263,6 +263,18 @@ int DeviceControl::updateResource(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int DeviceControl::getDeviceCapabilities(BS2_DEVICE_ID id, BS2DeviceCapabilities& cap)
+{
+	int sdkResult = BS2_GetDeviceCapabilities(context_, id, &cap);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDeviceCapabilities call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	return sdkResult;
+}
+
 int DeviceControl::getAuthOperatorLevelEx(BS2_DEVICE_ID id)
 {
 	stringstream msg;
@@ -386,6 +398,69 @@ void DeviceControl::print(const BS2AuthOperatorLevel& opr)
 		break;
 	}
 	TRACE("level : %s", strLevel.c_str());
+}
+
+void DeviceControl::print(const BS2DeviceCapabilities& info)
+{
+	TRACE("==[BS2DeviceCapabilities]==");
+	TRACE("maxUsers : %u", info.maxUsers);
+	TRACE("maxEventLogs : %u", info.maxEventLogs);
+	TRACE("maxImageLogs : %u", info.maxImageLogs);
+	TRACE("maxBlacklists : %u", info.maxBlacklists);
+	TRACE("maxOperators : %u", info.maxOperators);
+	TRACE("maxCards : %u", info.maxCards);
+	TRACE("maxFaces : %u", info.maxFaces);
+	TRACE("maxFingerprints : %u", info.maxFingerprints);
+	TRACE("maxUserNames : %u", info.maxUserNames);
+	TRACE("maxUserImages : %u", info.maxUserImages);
+	TRACE("maxUserJobs : %u", info.maxUserJobs);
+	TRACE("maxUserPhrases : %u", info.maxUserPhrases);
+	TRACE("maxCardsPerUser : %u", info.maxCardsPerUser);
+	TRACE("maxFacesPerUser : %u", info.maxFacesPerUser);
+	TRACE("maxFingerprintsPerUser : %u", info.maxFingerprintsPerUser);
+	TRACE("maxInputPorts : %u", info.maxInputPorts);
+	TRACE("maxOutputPorts : %u", info.maxOutputPorts);
+	TRACE("maxRelays : %u", info.maxRelays);
+	TRACE("maxRS485Channels : %u", info.maxRS485Channels);
+
+	TRACE("cameraSupported : %u", info.cameraSupported);
+	TRACE("tamperSupported : %u", info.tamperSupported);
+	TRACE("wlanSupported : %u", info.wlanSupported);
+	TRACE("displaySupported : %u", info.displaySupported);
+	TRACE("thermalSupported : %u", info.thermalSupported);
+	TRACE("maskSupported : %u", info.maskSupported);
+	TRACE("faceExSupported : %u", info.faceExSupported);
+
+	TRACE("[Card Supported]");
+	TRACE("mask : 0x%04x", info.cardSupported.mask);
+	TRACE("MifareFelica : %u", info.cardSupported.HIDProx);
+	TRACE("BLE : %u", info.cardSupported.BLE);
+
+	TRACE("[ExtendedMode] : %u", info.authSupported.extendedMode);
+	TRACE("(Credentials)");
+	TRACE("mask : 0x%01x", info.authSupported.credentials.mask);
+	TRACE("card : %u", info.authSupported.credentials.card);
+	TRACE("face : %u", info.authSupported.credentials.face);
+
+	if (!info.authSupported.extendedMode)
+	{
+		TRACE("(Legacy)");
+		TRACE("biometricAuth.mask : 0x%01x", info.authSupported.legacy.biometricAuth.mask);
+		TRACE("cardAuth.mask : 0x%01x", info.authSupported.legacy.cardAuth.mask);
+		TRACE("idAuth.mask : 0x%01x", info.authSupported.legacy.idAuth.mask);
+		TRACE("biometricAuth.mask : 0x%01x", info.authSupported.legacy.biometricAuth.mask);
+	}
+	else
+	{
+		TRACE("(Extended)");
+		TRACE("faceAuth.mask : 0x%04x", info.authSupported.extended.faceAuth.mask);
+		TRACE("fingerprintAuth.mask : 0x%04x", info.authSupported.extended.fingerprintAuth.mask);
+		TRACE("cardAuth.mask : 0x%04x", info.authSupported.extended.cardAuth.mask);
+		TRACE("idAuth.mask : 0x%04x", info.authSupported.extended.idAuth.mask);
+		TRACE("faceAuth : 0x%04x", info.authSupported.extended.faceAuth.mask);
+	}
+
+	TRACE("intelligentPDSupported : %u", info.intelligentPDSupported);
 }
 
 #if 0
