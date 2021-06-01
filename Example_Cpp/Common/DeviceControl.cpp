@@ -448,7 +448,6 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 		TRACE("biometricAuth.mask : 0x%01x", info.authSupported.legacy.biometricAuth.mask);
 		TRACE("cardAuth.mask : 0x%01x", info.authSupported.legacy.cardAuth.mask);
 		TRACE("idAuth.mask : 0x%01x", info.authSupported.legacy.idAuth.mask);
-		TRACE("biometricAuth.mask : 0x%01x", info.authSupported.legacy.biometricAuth.mask);
 	}
 	else
 	{

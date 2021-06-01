@@ -1246,7 +1246,11 @@ int setBarcodeConfig(void* context, BS2_DEVICE_ID id)
 
 	if (config.useBarcode)
 	{
-		msg = "Set the barcode scan timeout in seconds.";
+		char buf[128] = { 0, };
+		sprintf(buf, "Set the barcode scan timeout in seconds. (%d~%d)",
+			BS2_BARCODE_TIMEOUT_MIN,
+			BS2_BARCODE_TIMEOUT_MAX);
+		msg = buf;
 		config.scanTimeout = (uint8_t)Utility::getInput<uint32_t>(msg);
 	}
 
