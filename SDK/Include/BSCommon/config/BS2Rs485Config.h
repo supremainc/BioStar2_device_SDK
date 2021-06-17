@@ -41,6 +41,22 @@ enum {
 	BS2_RS485_MODE_DEFAULT		= BS2_RS485_MODE_STANDALONE,
 };
 
+enum {
+	BS2_RS485_MAX_EXCEPTION_CODE_LEN = 8,
+
+	BS2_IPD_OUTPUT_CARDID		= 0,
+	BS2_IPD_OUTPUT_USERID		= 1,
+};
+
+typedef struct {
+	BS2_BOOL supportConfig;								///< 1 byte
+	BS2_BOOL useExceptionCode;							///< 1 byte
+	uint8_t exceptionCode[BS2_RS485_MAX_EXCEPTION_CODE_LEN];	///< 8 byte
+	uint8_t outputFormat;     							///< 1 byte (0 - CardID, 1 - UserID)
+	uint8_t osdpID;										///< 1 byte 0 ~ 127
+	uint8_t reserved[4];								///< 4 bytes (packing)
+} BS2IntelligentPDInfo;
+
 typedef uint8_t BS2_RS485_MODE;
 
 /**
@@ -50,8 +66,8 @@ typedef struct {
 	BS2_RS485_MODE mode;		///< 1 byte
 	uint8_t numOfChannels;		///< 1 byte
 	uint8_t reserved[2];		///< 2 bytes (packing)
-
-	uint8_t reserved1[32];		///< 32 bytes (reserved)
+	BS2IntelligentPDInfo intelligentInfo;			///< 1 byte
+	uint8_t reserved1[16];		///< 16 bytes (reserved)
 
 	BS2Rs485Channel channels[BS2_RS485_MAX_CHANNELS]; 	///< 72 bytes
 } BS2Rs485Config;

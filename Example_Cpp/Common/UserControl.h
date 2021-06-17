@@ -55,7 +55,9 @@ public:
 
 public:
 	static int isAcceptableUID(const char* uid);
-	static void onReadyToScan(BS2_DEVICE_ID id, uint32_t sequence);
+	static void onReadyToScanCard(BS2_DEVICE_ID id, uint32_t sequence);
+	static void onReadyToScanFinger(BS2_DEVICE_ID id, uint32_t sequence);
+	static void onReadyToScanFace(BS2_DEVICE_ID id, uint32_t sequence);
 	int getUser(BS2_DEVICE_ID id);
 	int getAllUser(BS2_DEVICE_ID id);
 	int getAllUserFaceEx(BS2_DEVICE_ID id);

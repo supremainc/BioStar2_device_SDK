@@ -28,17 +28,72 @@ Learn how to create a context for device management and connect devices. [Watch 
 
 The SDK currently being distributed comes with C # examples. This github provides additional C ++ examples. 
 [C++Example](https://github.com/supremainc/BioStar2_device_SDK/tree/master/Example_Cpp)(Write in Visual C++ 2015)
+<br>
+<br>
 
 ### Release Notes
+<br>
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
+<br>
 
-### V2.7.2.18 Beta released 04/19/2021:
+### V2.8.0.6 released 06/07/2021:
+
+**New Features**
+
+* Supports X-Station 2
+* Supports Intelligent Slave Feature (FW upgrade is required)
+* Supports getting Face Image Warping (FaceStation F2 only)
+* Supports the function of Device Capabilities to know the connected device capability
+* Adds the relevant log events of Mobile Card Verification
+
+**1.** X-Station 2 Configurations are available to use.
+* Structure BS2BarcodeConfig has been added
+* API BS2_GetBarcodeConfig has been added
+* API BS2_SetBarcodeConfig has been added
+* API BS2_WriteQRCode has been added
+
+**2.** The relevant function of Intelligent Slave is available to use. Intelligent Slave is a function that enables many users' 1:1 or 1:N matching by transmitting the authentication result to OSDP card data when authentication using biometrics is performed in an environment in which the Suprema biometric device and a third-party controller are connected. Intelligent Slave Support.
+* Refer to structure BS2Rs485Config
+* Refer to API BS2_GetRS485Config
+* Refer to API BS2_SetRS485Config
+
+**3.** Getting Image Warping from the raw image file of user face is available to use.
+* Refer to API BS2_GetNormalizedImageFaceEx
+
+**4.** Getting Device Capacity Information has been added.
+Refer to structure BS2DeviceCapabilities
+Refer to API BS2_GetDeviceCapabilities
+
+**5.** New log event 'Mobile Card Verification' has been added to distinguish the user credential.
+Refer to structure BS2Event and refer to the subcode
 
 **Modified Features**
 
-**1.** Fixed a problem that could crash when calling BS2_ReleaseConext.
-* Refer to API BS2_ReleaseContext
+**1.** Fixed the return value from BS_SDK_SUCCESS to BS_SDK_ERROR_NOT_SUPPORTED when requesting Config from FaceLite that does not support Event config.
+Refer to API BS2_GetEventConfig
+
+**2.** Fixed the issue that the SDK allocation and release were repeated, making device connection impossible if a certain number of times were exceeded.
+Refer to API BS2_AllocateContext
+Refer to API BS2_ReleaseContext
+
+**3.** Fixed the issue that calling BS2_ReleaseContext cannot release the resource intermittently and the port 51212/port 51213 occupied.
+
+**4.** Fixed the issue that a deadlock could occur during event processing due to repeated connecting device/disconnecting device calls.
+
+**5.** Fixed the issue that the device could be reset if the fields of timeout were not assigned a multiple of 10 when updating the display settings.
+Refer to structure BS2DisplayConfig menuTimeout, msgTimeout, backlightTimeout
+Refer to API BS2_SetDisplayConfig
+
+**6.** Fixed the issue that CPU Usages goes up to 99% when BS2_SearchDevices is called repeatedly in a 4-core environment.
+
+**7.** FaceStation F2 Only The meaning and setting values of lightCondition in the BS2FaceConfig have been changed as follows.
+| |Supported Ver.|Meaning|0|1|2|3|
+|---|---|---|---|---|---|---|
+|As-Is|1.0.0 ~ 1.0.5|Ambient Brightness|Indoor|Outdoor|Auto|-|
+|To-Be|1.1.0 or higher|Light Brightness|Normal|High|- `(Deprecated)`|Not used|
+
+<br>
 
 ### V2.7.2.12 released 12/11/2020:
 
@@ -72,6 +127,8 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **5.** Fixed a problem in which a specific function was called from some devices except BioStation 2, but the BS_SDK_ERROR_TIMEOUT error was returned as a result value.
 * Refer to API BS2_ResetConfigExceptNetInfo
+<br>
+<br>
 
 ### V2.7.2.4 released 11/11/2020:
 
@@ -98,7 +155,8 @@ Fixed an issue that could cause the BS_SDK_ERROR_NO_FACE_CREDENTIAL(-759) error.
 * Refer to API BS2_SetDeviceEventListener
 
 **4.** There were fixes for stabilizing the code inside the SDK.
-
+<br>
+<br>
 
 ### V2.7.1.1 released 09/22/2020:
 
@@ -141,7 +199,7 @@ Fixed an issue that could cause the BS_SDK_ERROR_NO_FACE_CREDENTIAL(-759) error.
 * API BS2_GetLogSmallBlobEx has been added
 * API BS2_GetLogSmallBlobExFromDir has been added
 
-**7.**​ User-defined PIN encryption key can be changed, and the PIN can be extracted with APIs.
+**7.** User-defined PIN encryption key can be changed, and the PIN can be extracted with APIs.
 * API BS2_SetDataEncryptKey has been added
 * API BS2_MakePinCodeWithKey has been added
 
@@ -172,6 +230,8 @@ With this, FaceStation2 returns fingerScanSupported = false.
 * Structure BS2SimpleDeviceInfoEx has been added
 
 **4.** For security reasons, support for the function BS2_GetDataEncryptKey has been deprecated.
+<br>
+<br>
 
 ### V2.7.0.0 released 07/21/2020:
 
@@ -222,6 +282,8 @@ You can figure out the user who actually doesn't go in even after successful aut
   * API BS2_GetLogBlobFromDir has been added
   * API BS2_GetLogSmallBlobFromDir has been added
   * API BS2_GetImageLog has been added
+<br>
+<br>
 
 ### V2.6.4.1 released 02/25/2020:
 
@@ -271,6 +333,8 @@ You can figure out the user who actually doesn't go in even after successful aut
 **5.** Fixed the issue that SDK doesn't recognize device disconnection when the device is constantly disconnected.
 
 **6.** Fixed the issue of Linux SDK crash.
+<br>
+<br>
 
 ### V2.6.3.16 released 11/04/2019:
 
@@ -299,9 +363,21 @@ You can figure out the user who actually doesn't go in even after successful aut
 Refer to API BS2_FactoryReset
 
 **4.** Fixed a problem where the connection would be terminated normally if the device was disconnected and the packet was exchanged in the SDK without closing the connection yet.
+<br>
+<br>
 
 
 ### Release Notes (Beta)
+<br>
+
+### V2.7.2.18 Beta released 04/19/2021:
+
+**Modified Features**
+
+**1.** Fixed a problem that could crash when calling BS2_ReleaseConext.
+* Refer to API BS2_ReleaseContext
+<br>
+<br>
 
 ### V2.7.2.17 Beta released 04/12/2021:
 
@@ -322,6 +398,8 @@ Refer to API BS2_FactoryReset
 * BEW2-OHPB
 
 **4.** Added SSL connection example.
+<br>
+<br>
 
 ### V2.7.2.14 Beta released 01/06/2021:
 
@@ -335,6 +413,8 @@ Refer to API BS2_FactoryReset
 * Refer to API BS2_EnrollUserSmall
 * Refer to API BS2_EnrollUserSmallEx
 * Refer to API BS2_EnrollUserFaceEx
+<br>
+<br>
 
 ### V2.7.2.13 Beta released 12/24/2020:
 
@@ -349,15 +429,23 @@ Refer to API BS2_FactoryReset
 * Refer to API BS2_EnrollUserSmall
 * Refer to API BS2_EnrollUserSmallEx
 * Refer to API BS2_EnrollUserFaceEx
+<br>
+<br>
 
 ### V2.6.3.23 released 02/06/2020:
 **1.** Fixed a problem where SDK may crash on Linux.
+<br>
+<br>
 
 ### V2.6.3.22 released 02/01/2020:
 **1.** Fixes a problem where SDK will not detect disconnection when device disconnection is repeated.
+<br>
+<br>
 
 ### V2.6.3.21 released 01/15/2020:
 **1.** Fixed BS_SDK_ERROR_NOT_SUPPORTED error when calling BS2_GetCardModel in BLN2-PAB model.
+<br>
+<br>
 
 ### V2.6.3.20 released 01/14/2020:
 **1.** Fixes a problem where BS_SDK_INVALID_CODE_SIGN error occurs when upgrading SIO2 firmware.

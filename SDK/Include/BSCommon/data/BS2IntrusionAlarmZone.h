@@ -59,12 +59,12 @@ typedef struct {
 typedef struct {
 	BS2_EVENT_CODE event;  ///< 2 byte - BS2_EVENT_ZONE_INTRUSION_ALARM_[VIOLATION|(DIS)ARM(ED|_FAIL)|ALARM(_[INPUT|CLEAR])]
 	uint8_t reserved[2];     /// 2 bytes (packing)
-	BS2Action action;
+	BS2Action action;		///< 32 bytes
 } BS2AlarmZoneOutput;
 
 typedef struct {
 	BS2_ZONE_ID zoneID;   ///< 4 bytes
-	char name[BS2_MAX_ZONE_NAME_LEN];  ///< 48 * 3 bytes
+	char name[BS2_MAX_ZONE_NAME_LEN];  ///< 144 bytes
 
 	uint8_t armDelay;  ///< 1 byte
 	uint8_t alarmDelay;  ///< 1 byte
@@ -75,9 +75,9 @@ typedef struct {
 	uint8_t numInputs;  ///< 1 byte
 	uint8_t numOutputs;  ///< 1 byte
 	uint8_t numCards;  ///< 1 byte
+
 	uint8_t numDoors;  ///< 1 byte
 	uint8_t numGroups;  ///< 1 byte
-
 	uint8_t reserved2[10];  ///< 10 bytes (packing)
 
 #if 0

@@ -33,6 +33,9 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("disable ssl", disbleSSL));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485Config", getRS485Config));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485Config", setRS485Config));
+
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigEx", getRS485ConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigEx", setRS485ConfigEx));
 
@@ -72,6 +75,9 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FaceConfigEx", setFaceConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get ThermalCameraConfig", getThermalCameraConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set ThermalCameraConfig", setThermalCameraConfig));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get BarcodeConfig", getBarcodeConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set BarcodeConfig", setBarcodeConfig));
 
             return functionList;
         }
@@ -582,7 +588,7 @@ namespace Suprema
             Console.Write(">> ");
             config.securityLevel = Util.GetInput((byte)0);
 
-            Console.WriteLine("Insert lightCondition. (0: In door, 1: Out door, 2: Automatic");
+            Console.WriteLine("Insert lightCondition. (0: Normal, 1: High, 3: Not used");
             Console.Write(">> ");
             config.lightCondition = Util.GetInput((byte)0);
 
@@ -869,6 +875,119 @@ namespace Suprema
             }
         }
 
+        void getRS485Config(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2Rs485Config config;
+            Console.WriteLine("Trying to get RS485Config");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485Config(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(config);
+            }
+        }
+
+        public void setRS485Config(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2Rs485Config config = Util.AllocateStructure<BS2Rs485Config>();
+            
+            BS2DeviceTypeEnum type = (BS2DeviceTypeEnum)deviceInfo.type;
+            byte numOfChannels = (byte)(BS2DeviceTypeEnum.CORESTATION_40 == type ? BS2Environment.BS2_RS485_MAX_CHANNELS : 1);
+
+            Console.WriteLine("Please set the mode. ({0}(0), {1}(1), {2}(2), {3}(3))",
+                BS2RS485ModeEnum.DISABLED,
+	            BS2RS485ModeEnum.MASTER,
+                BS2RS485ModeEnum.SLAVE,
+                BS2RS485ModeEnum.STANDALONE);
+            Console.Write(">> ");
+            config.mode = Util.GetInput((byte)BS2RS485ModeEnum.STANDALONE);
+
+            Console.WriteLine("How many RS485 channels do you want to set up? (0 ~ {0})", numOfChannels);
+            Console.Write(">> ");
+            config.numOfChannels = Util.GetInput(numOfChannels);
+
+            for (int idx = 0; idx < config.numOfChannels; idx++)
+            {
+                Console.WriteLine("Please insert baud rate. (Default: 115200)");
+                Console.Write(">> ");
+                config.channels[idx].baudRate = Util.GetInput((UInt32)115200);
+
+                Console.WriteLine("Please insert channel index.");
+                Console.Write(">> ");
+                config.channels[idx].channelIndex = Util.GetInput((byte)0);
+
+                Console.WriteLine("Please insert useRegistance.");
+                Console.Write(">> ");
+                config.channels[idx].useRegistance = Util.GetInput((byte)0);
+
+                Console.WriteLine("Please insert number of devices.");
+                Console.Write(">> ");
+                config.channels[idx].numOfDevices = Util.GetInput((byte)1);
+
+                for (int slaveIdx = 0; slaveIdx < config.channels[idx].numOfDevices; slaveIdx++)
+                {
+                    Console.WriteLine("Please insert #{0} deviceID.", slaveIdx);
+                    Console.Write(">> ");
+                    config.channels[idx].slaveDevices[slaveIdx].deviceID = Util.GetInput((UInt32)0);
+
+                    Console.WriteLine("Please insert #{0} deviceType.", slaveIdx);
+                    Console.Write(">> ");
+                    config.channels[idx].slaveDevices[slaveIdx].deviceType = Util.GetInput((UInt16)BS2DeviceTypeEnum.BIOENTRY_W2);
+
+                    Console.WriteLine("Please insert #{0} enableOSDP.", slaveIdx);
+                    Console.Write(">> ");
+                    config.channels[idx].slaveDevices[slaveIdx].enableOSDP = Util.GetInput((byte)0);
+
+                    Console.WriteLine("Please insert #{0} connected.", slaveIdx);
+                    Console.Write(">> ");
+                    config.channels[idx].slaveDevices[slaveIdx].connected = Util.GetInput((byte)0);;
+                }
+            }
+
+            Console.WriteLine("Would you like to use IntelligentPD-related settings? [y/N]");
+            Console.Write(">> ");
+            bool supportConfig = Util.IsNo() != true;
+            config.intelligentInfo.supportConfig = Convert.ToByte(supportConfig);
+
+            if (supportConfig)
+            {
+                Console.WriteLine("Would you like to use an exception code? [Y/n]");
+                Console.Write(">> ");
+                bool useExceptionCode = Util.IsYes();
+                config.intelligentInfo.useExceptionCode = Convert.ToByte(useExceptionCode);
+
+                if (useExceptionCode)
+                {
+                    Console.WriteLine("Please enter the exception code in 8 bytes hexa.");
+                    Console.Write(">> 0x");
+                    string exceptionCode = Console.ReadLine();
+
+                    byte[] byteCode = Util.ConvertString2HexByte(exceptionCode);
+
+                    Array.Clear(config.intelligentInfo.exceptionCode, 0, BS2Environment.BS2_RS485_MAX_EXCEPTION_CODE_LEN);
+                    Array.Copy(byteCode, config.intelligentInfo.exceptionCode, BS2Environment.BS2_RS485_MAX_EXCEPTION_CODE_LEN);
+                }
+
+                Console.WriteLine("Please enter the output format. CardID({0}), UserID({1})",
+                    BS2Environment.BS2_IPD_OUTPUT_CARDID, BS2Environment.BS2_IPD_OUTPUT_USERID);
+                Console.Write(">> ");
+                config.intelligentInfo.outputFormat = Util.GetInput((byte)BS2Environment.BS2_IPD_OUTPUT_CARDID);
+
+                Console.WriteLine("Please enter the OSDP ID.");
+                Console.Write(">> ");
+                config.intelligentInfo.osdpID = Util.GetInput((byte)0);
+            }
+
+            Console.WriteLine("Trying to set RS485Config configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetRS485Config(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
 
         void getRS485ConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
@@ -1833,6 +1952,52 @@ namespace Suprema
             }
         }
 
+        public void getBarcodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2BarcodeConfig config;
+            Console.WriteLine("Trying to get barcode configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetBarcodeConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setBarcodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2BarcodeConfig config = Util.AllocateStructure<BS2BarcodeConfig>();
+
+            Console.WriteLine("Trying to get barcode configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetBarcodeConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Would you like to use barcode function? [Y/n]");
+            Console.Write(">> ");
+            bool useBarcode = Util.IsYes();
+            
+            config.useBarcode = Convert.ToByte(useBarcode);
+            if (useBarcode)
+            {
+                Console.WriteLine("Set the barcode scan timeout in seconds. ({0}~{1})", BS2Environment.BS2_BARCODE_TIMEOUT_MIN, BS2Environment.BS2_BARCODE_TIMEOUT_MAX);
+                Console.Write(">> ");
+                config.scanTimeout = Util.GetInput((byte)BS2Environment.BS2_BARCODE_TIMEOUT_DEFAULT);
+            }
+
+            Console.WriteLine("Trying to set barcode configuration.");
+            result = (BS2ErrorCode)API.BS2_SetBarcodeConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
         void print(IntPtr sdkContext, BS2DstConfig config)
         {
             Console.WriteLine(">>>> Daylight saving time configuration ");
@@ -2164,6 +2329,57 @@ namespace Suprema
             Console.WriteLine("        |--height : {0}", config.roi.height);
             Console.WriteLine("     +--useBodyCompensation : {0}", config.useBodyCompensation);
             Console.WriteLine("     +--compensationTemperature : {0}", config.compensationTemperature);
+        }
+
+        void print(BS2BarcodeConfig config)
+        {
+            Console.WriteLine(">>>> Barcode configuration ");
+            Console.WriteLine("     +--useBarcode : {0}", config.useBarcode);
+            Console.WriteLine("     +--scanTimeout : {0}", config.scanTimeout);
+        }
+
+        void print(BS2Rs485Config config)
+        {
+            Console.WriteLine(">>>> RS485 configuration ");
+            Console.WriteLine("     +--mode : {0}", config.mode);
+            Console.WriteLine("     |--numOfChannels : {0}", config.numOfChannels);
+            for (int index = 0; index < config.numOfChannels; index++)
+                print(config.channels[index], index);
+
+            print(config.intelligentInfo);
+        }
+
+        void print(BS2Rs485Channel channel, int index)
+        {
+            Console.WriteLine("     +--channels[{0}]", index);
+            Console.WriteLine("     |  |--baudRate : {0}", channel.baudRate);
+            Console.WriteLine("     |  |--channelIndex : {0}", channel.channelIndex);
+            Console.WriteLine("     |  |--useRegistance : {0}", channel.useRegistance);
+            Console.WriteLine("     |  |--numOfDevices : {0}", channel.numOfDevices);
+            for (int idx = 0; idx < channel.numOfDevices; idx++)
+            {
+                print(channel.slaveDevices[idx], idx);
+            }
+        }
+
+        void print(BS2Rs485SlaveDevice device, int index)
+        {
+            Console.WriteLine("     |  +--slaveDevices[{0}]", index);
+            Console.WriteLine("     |  |  |--deviceID : {0}", device.deviceID);
+            Console.WriteLine("     |  |  |--deviceType : {0}", device.deviceType);
+            Console.WriteLine("     |  |  |--enableOSDP : {0}", device.enableOSDP);
+            Console.WriteLine("     |  |  |--connected : {0}", device.connected);
+        }
+
+        void print(BS2IntelligentPDInfo info)
+        {
+            Console.WriteLine("     +--intelligentInfo");
+            Console.WriteLine("     |  |--supportConfig : {0}", info.supportConfig);
+            Console.WriteLine("     |  |--useExceptionCode : {0}", info.useExceptionCode);
+            //Console.WriteLine("     |  |--exceptionCode : {0}", BitConverter.ToString(info.exceptionCode));
+            Console.WriteLine("     |  |--exceptionCode : {0}", Util.ConvertHexByte2String(info.exceptionCode));
+            Console.WriteLine("     |  |--outputFormat : {0}", info.outputFormat);
+            Console.WriteLine("     +--+--osdpID : {0}", info.osdpID);
         }
     }
 }

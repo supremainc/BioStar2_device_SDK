@@ -16,30 +16,30 @@ enum {
 
 typedef struct {
 // #ifdef DST_YEAR_SUPPORT
-	BS2_YEAR year;			// year, 0 means every year.
+	BS2_YEAR year;				///< 2 bytes, year, 0 means every year.
 // #else
 // 	uint8_t reserved[2];
 // #endif
-	BS2_MONTH month;		// [0, 11] : months since January
-	BS2_ORDINAL ordinal;	// [0, -1] : first, second, ..., last
-	BS2_WEEKDAY weekDay;	// [0, 6] : days since Sunday
-	uint8_t hour;			// [0, 23]
-	uint8_t minute;			// [0, 59]
-	uint8_t second;			// [0, 59]
+	BS2_MONTH month;			///< 1 byte, [0, 11] : months since January
+	BS2_ORDINAL ordinal;		///< 1 byte, [0, -1] : first, second, ..., last
+	BS2_WEEKDAY weekDay;		///< 1 byte, [0, 6] : days since Sunday
+	uint8_t hour;				///< 1 byte, [0, 23]
+	uint8_t minute;				///< 1 byte, [0, 59]
+	uint8_t second;				///< 1 byte, [0, 59]
 } BS2WeekTime;
 
 typedef struct {
-	BS2WeekTime startTime;	// When the standard local time hits this value, the clock should be put forward as much as the offset.
-	BS2WeekTime endTime;	// When the standard local time hits this value, the clock should be put backward as much as the offset.
-	int32_t timeOffset;		// in seconds
-	uint8_t reserved[4];
+	BS2WeekTime startTime;		///< 8 bytes, When the clock time hits this value, the clock should be put forward as much as the offset.
+	BS2WeekTime endTime;		///< 8 bytes, When the clock time hits this value, the clock should be put backward as much as the offset.
+	int32_t timeOffset;			///< 4 bytes, in seconds
+	uint8_t reserved[4];		///< 4 bytes (packing)
 } BS2DstSchedule;
 
 typedef struct {
-	uint8_t numSchedules;
-	uint8_t reserved[31];
+	uint8_t numSchedules;		///< 1 byte
+	uint8_t reserved[31];		///< 31 bytes (packing)
 
-	BS2DstSchedule schedules[BS2_MAX_DST_SCHEDULE];
+	BS2DstSchedule schedules[BS2_MAX_DST_SCHEDULE];		///< 24 * 2 bytes
 } BS2DstConfig;
 
 #endif /* BS2DSTCONFIG_H_ */

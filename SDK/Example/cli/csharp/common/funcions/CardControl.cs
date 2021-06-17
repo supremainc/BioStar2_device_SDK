@@ -220,6 +220,8 @@ namespace Suprema
                 return;
             }
 
+            bool fingerScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN;
+
             Console.WriteLine("choose the format for the card: [2: SecureCredential(default), 3: AccessOn]");
             Console.Write(">>>> ");
             smartCard.header.cardType = Util.GetInput((byte)BS2CardTypeEnum.SECURE);
@@ -251,7 +253,8 @@ namespace Suprema
                 }
             }
 
-            if (Convert.ToBoolean(deviceInfo.fingerSupported))
+            //if (Convert.ToBoolean(deviceInfo.fingerSupported))
+            if (fingerScanSupported)
             {
                 Console.WriteLine("How many fingerprint templates do you want to set? [0(default)-{0}]", BS2Environment.BS2_SMART_CARD_MAX_TEMPLATE_COUNT);
                 Console.Write(">>>> ");

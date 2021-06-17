@@ -39,9 +39,19 @@ int UserControl::isAcceptableUID(const char* uid)
 	return 1;
 }
 
-void UserControl::onReadyToScan(BS2_DEVICE_ID id, uint32_t sequence)
+void UserControl::onReadyToScanCard(BS2_DEVICE_ID id, uint32_t sequence)
 {
-	cout << "Place your card(/finger/face) on the device. [" << id << ", " << "Seq:" << sequence << "]" << endl;
+	cout << "Place your card on the device. [" << id << ", " << "Seq:" << sequence << "]" << endl;
+}
+
+void UserControl::onReadyToScanFinger(BS2_DEVICE_ID id, uint32_t sequence)
+{
+	cout << "Place your finger on the device. [" << id << ", " << "Seq:" << sequence << "]" << endl;
+}
+
+void UserControl::onReadyToScanFace(BS2_DEVICE_ID id, uint32_t sequence)
+{
+	cout << "Place your face on the device. [" << id << ", " << "Seq:" << sequence << "]" << endl;
 }
 
 int UserControl::getUser(BS2_DEVICE_ID id)
@@ -479,7 +489,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 				for (uint32_t index = 0; index < numCard;)
 				{
 					BS2Card card = { 0, };
-					sdkResult = BS2_ScanCard(context_, id, &card, onReadyToScan);
+					sdkResult = BS2_ScanCard(context_, id, &card, onReadyToScanCard);
 					if (BS_SDK_SUCCESS != sdkResult)
 						TRACE("BS2_ScanCard call failed: %d", sdkResult);
 					else
@@ -550,7 +560,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 				{
 					for (uint32_t templateIndex = 0; templateIndex < BS2_TEMPLATE_PER_FINGER;)
 					{
-						sdkResult = BS2_ScanFingerprint(context_, id, &ptrFinger[index], templateIndex, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScan);
+						sdkResult = BS2_ScanFingerprint(context_, id, &ptrFinger[index], templateIndex, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScanFinger);
 						if (BS_SDK_SUCCESS != sdkResult)
 							TRACE("BS2_ScanFingerprint call failed: %d", sdkResult);
 						else
@@ -574,7 +584,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 				userBlob.faceObjs = ptrFace;
 				for (uint32_t index = 0; index < numFace;)
 				{
-					sdkResult = BS2_ScanFace(context_, id, &ptrFace[index], BS2_FACE_ENROLL_THRESHOLD_DEFAULT, onReadyToScan);
+					sdkResult = BS2_ScanFace(context_, id, &ptrFace[index], BS2_FACE_ENROLL_THRESHOLD_DEFAULT, onReadyToScanFace);
 					if (BS_SDK_SUCCESS != sdkResult)
 						TRACE("BS2_ScanFace call failed: %d", sdkResult);
 					else
@@ -1254,7 +1264,7 @@ int UserControl::scanTemplate(BS2_DEVICE_ID id, uint8_t* fpTemplate)
 
 	BS2Fingerprint finger = { 0, };
 RESCAN:
-	int sdkResult = BS2_ScanFingerprint(context_, id, &finger, 0, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScan);
+	int sdkResult = BS2_ScanFingerprint(context_, id, &finger, 0, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScanFinger);
 	if (BS_SDK_ERROR_EXTRACTION_LOW_QUALITY == sdkResult)
 	{
 		TRACE("Low quality fingerprints were scanned.");
@@ -1275,7 +1285,7 @@ int UserControl::scanCard(BS2_DEVICE_ID id, uint8_t* card)
 		return BS_SDK_ERROR_INVALID_PARAM;
 
 	BS2Card tempCard = { 0, };
-	int sdkResult = BS2_ScanCard(context_, id, &tempCard, onReadyToScan);
+	int sdkResult = BS2_ScanCard(context_, id, &tempCard, onReadyToScanCard);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_ScanCard call failed: %d", sdkResult);
 	else
@@ -1291,7 +1301,7 @@ int UserControl::scanCard(BS2_DEVICE_ID id, uint8_t* card)
 
 int UserControl::scanCard(BS2_DEVICE_ID id, BS2Card* card)
 {
-	int sdkResult = BS2_ScanCard(context_, id, card, onReadyToScan);
+	int sdkResult = BS2_ScanCard(context_, id, card, onReadyToScanCard);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_ScanCard call failed: %d", sdkResult);
 
@@ -1948,7 +1958,7 @@ int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEV
 				for (uint32_t index = 0; index < numCard;)
 				{
 					BS2Card card = { 0, };
-					sdkResult = BS2_ScanCard(context_, id, &card, onReadyToScan);
+					sdkResult = BS2_ScanCard(context_, id, &card, onReadyToScanCard);
 					if (BS_SDK_SUCCESS != sdkResult)
 						TRACE("BS2_ScanCard call failed: %d", sdkResult);
 					else
@@ -2052,7 +2062,7 @@ int UserControl::getFingerprintInfo(BS2Fingerprint** fingerObjs, uint8_t& numOfF
 				{
 					for (uint32_t templateIndex = 0; templateIndex < BS2_TEMPLATE_PER_FINGER;)
 					{
-						sdkResult = BS2_ScanFingerprint(context_, id, &ptrFinger[index], templateIndex, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScan);
+						sdkResult = BS2_ScanFingerprint(context_, id, &ptrFinger[index], templateIndex, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScanFinger);
 						if (BS_SDK_SUCCESS != sdkResult)
 							TRACE("BS2_ScanFingerprint call failed: %d", sdkResult);
 						else
@@ -2260,7 +2270,7 @@ int UserControl::scanFace(BS2_DEVICE_ID id, BS2Face* ptrFace, uint8_t& numOfFace
 
 	while (retryCount < MAX_RETRY)
 	{
-		sdkResult = BS2_ScanFace(context_, id, ptrFace, BS2_FACE_ENROLL_THRESHOLD_DEFAULT, onReadyToScan);
+		sdkResult = BS2_ScanFace(context_, id, ptrFace, BS2_FACE_ENROLL_THRESHOLD_DEFAULT, onReadyToScanFace);
 		if (BS_SDK_SUCCESS != sdkResult)
 		{
 			TRACE("BS2_ScanFace call failed: %d", sdkResult);
@@ -2287,7 +2297,7 @@ int UserControl::scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOf
 
 	while (retryCount < MAX_RETRY)
 	{
-		sdkResult = BS2_ScanFaceEx(context_, id, ptrFace, BS2_FACE_ENROLL_THRESHOLD_DEFAULT, onReadyToScan);
+		sdkResult = BS2_ScanFaceEx(context_, id, ptrFace, BS2_FACE_ENROLL_THRESHOLD_DEFAULT, onReadyToScanFace);
 		if (BS_SDK_SUCCESS != sdkResult)
 		{
 			TRACE("BS2_ScanFaceEx call failed: %d", sdkResult);

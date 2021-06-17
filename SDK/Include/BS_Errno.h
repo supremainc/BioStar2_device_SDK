@@ -326,6 +326,7 @@
 #define BS_SDK_ERROR_DEVICE_LOCKED                          -2004
 #define BS_SDK_ERROR_CANNOT_SEND_TO_SERVER                  -2005
 #define BS_SDK_ERROR_CANNOT_UPGRADE_MEMOEY                  -2006
+#define BS_SDK_ERROR_UPGRADE_NOT_SUPPORTED                  -2007
 
 //SSL
 #define BS_SDK_ERROR_SSL_INIT                               -3000

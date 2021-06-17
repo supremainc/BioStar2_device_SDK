@@ -28,6 +28,7 @@ enum {
 	BS2_TEMPLATE_PER_FACE	= 30,
 
 	BS2_FACE_IMAGE_SIZE = 16 * 1024,
+	BS2_CAPTURE_IMAGE_MAXSIZE = 1280*720*3,
 };
 
 /**
@@ -42,8 +43,8 @@ typedef struct {
 	uint16_t imageLen;		///< 2 bytes
 	uint8_t reserved2[2];			///< 2 bytes
 
-	uint8_t imageData[BS2_FACE_IMAGE_SIZE];
-	uint8_t templateData[BS2_TEMPLATE_PER_FACE][BS2_FACE_TEMPLATE_LENGTH];
+	uint8_t imageData[BS2_FACE_IMAGE_SIZE];		///< 16384 bytes
+	uint8_t templateData[BS2_TEMPLATE_PER_FACE][BS2_FACE_TEMPLATE_LENGTH];		///< 30 * 3008 bytes
 } BS2Face;
 
 #endif	// __BS2_FACE_H__

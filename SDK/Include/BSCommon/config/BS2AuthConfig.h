@@ -29,7 +29,7 @@ enum {
 
 	BS2_AUTH_TIMEOUT_MIN 		= 3,
 	BS2_AUTH_TIMEOUT_MAX 		= 20,
-#if defined(FACESTATION2) || defined(FACELITE)
+#if defined(FACESTATION2) || defined(FACELITE) || defined(FACESTATION_F2)
 	BS2_AUTH_TIMEOUT_DEFAULT	= 5,
 #else
 	BS2_AUTH_TIMEOUT_DEFAULT	= 10,
@@ -130,8 +130,8 @@ typedef struct {
 
 	BS2_BOOL useGlobalAPB;                                             ///< 1 byte
 	BS2_GLOBAL_APB_FAIL_ACTION_TYPE globalAPBFailAction;               ///< 1 byte
-	BS2_BOOL useGroupMatching;																							///< 1 byte
-	uint8_t reserved;                                              ///< 1 bytes (packing)
+	BS2_BOOL useGroupMatching;                                         ///< 1 byte
+	uint8_t reserved;                                                  ///< 1 byte (packing)
 
 	uint8_t reserved2[28];                                              ///< 28 bytes (reserved)
 

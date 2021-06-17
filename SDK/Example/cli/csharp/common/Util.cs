@@ -36,6 +36,12 @@ namespace Suprema
             return instance;
         }
 
+        public void CopyMemory<T>(ref IntPtr source, ref IntPtr target)
+        {
+            Type structType = typeof(T);
+            int structSize = Marshal.SizeOf(structType);
+            CopyMemory(target, source, (uint)structSize);
+        }
 
         public static byte[] StructToBytes<T>(ref T source)
         {
@@ -332,6 +338,23 @@ namespace Suprema
             }
 
             return defaultValue;
+        }
+
+        public static string ConvertHexByte2String(byte[] convertArr)
+        {
+            string converted = string.Empty;
+            converted = string.Concat(Array.ConvertAll(convertArr, byt => byt.ToString("X2")));
+            return converted;
+        }
+
+        public static byte[] ConvertString2HexByte(string convertStr)
+        {
+            byte[] converted = new byte[convertStr.Length / 2];
+            for (int i = 0; i < converted.Length; i++)
+            {
+                converted[i] = Convert.ToByte(convertStr.Substring(i * 2, 2), 16);
+            }
+            return converted;
         }
 
         public static bool GetTimestamp(string formatString, UInt32 defaultValue, out UInt32 timestamp)
@@ -739,5 +762,8 @@ namespace Suprema
                                 (BS2EventCodeEnum)eventLog.code,
                                 Convert.ToBoolean(eventLog.image & (byte)BS2EventImageBitPos.BS2_IMAGEFIELD_POS_IMAGE));
         }
+
+        [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
+        public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
     }
 }

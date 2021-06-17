@@ -942,7 +942,7 @@ namespace Suprema
             IntPtr deviceObjList = IntPtr.Zero;
             API.BS2_GetDevices(sdkContext, out deviceObjList, out numDevice);
 
-            Console.WriteLine("����� ��ġ ����: " + numDevice);
+            Console.WriteLine("Number of connected devices: " + numDevice);
             if (numDevice > 0)
             {
                 BS2SimpleDeviceInfo deviceInfo;
@@ -956,7 +956,7 @@ namespace Suprema
                             deviceID);
                 }
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
-                Console.WriteLine("����� ��ġ ����: " + numDevice);
+                Console.WriteLine("Number of connected devices: " + numDevice);
             }
 
             API.BS2_ReleaseObject(deviceObjList);
@@ -997,6 +997,10 @@ namespace Suprema
             bool fingerSupported = Convert.ToBoolean(deviceInfo.fingerSupported);
             bool pinSupported = Convert.ToBoolean(deviceInfo.pinSupported);
 
+            bool fingerScanSupported = Convert.ToBoolean(deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN);
+            bool faceScanSupported = Convert.ToBoolean(deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_SCAN);
+            bool faceExScanSupported = Convert.ToBoolean(deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN);
+
             privateIDAuthMode.Add(BS2IDAuthModeEnum.PROHIBITED);
 
             if (cardSupported)
@@ -1010,7 +1014,7 @@ namespace Suprema
 
                     privateIDAuthMode.Add(BS2IDAuthModeEnum.ID_PIN);
 
-                    if (fingerSupported)
+                    if (fingerScanSupported)
                     {
                         privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_BIOMETRIC_OR_PIN);
                         privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_BIOMETRIC_PIN);
@@ -1022,7 +1026,7 @@ namespace Suprema
                     }
                 }
 
-                if (fingerSupported)
+                if (fingerScanSupported)
                 {
                     privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_BIOMETRIC);
 
@@ -1031,7 +1035,7 @@ namespace Suprema
                     privateIDAuthMode.Add(BS2IDAuthModeEnum.ID_BIOMETRIC);
                 }
             }
-            else if (fingerSupported)
+            else if (fingerScanSupported)
             {
                 if (pinSupported)
                 {
@@ -1131,7 +1135,7 @@ namespace Suprema
                 }
             }
 
-            if (fingerSupported)
+            if (fingerScanSupported)
             {
                 Console.WriteLine("Enter the security level for this user: [{0}: {1}, {2}: {3}, {4}: {5}(default), {6}: {7}, {8}: {9}]",
                                 (byte)BS2UserSecurityLevelEnum.LOWER,
@@ -1303,7 +1307,7 @@ namespace Suprema
                 }
             }
 
-            if (fingerSupported)
+            if (fingerScanSupported)
             {
                 Console.WriteLine("How many fingerprints do you want to register? [1(default) - {0}]", BS2Environment.BS2_MAX_NUM_OF_FINGER_PER_USER);
                 Console.Write(">>>> ");

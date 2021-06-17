@@ -63,6 +63,7 @@ enum {
 
 	// Device
 	BS2_EVENT_DEVICE_SYSTEM_RESET			= 0x3000,	// Alert
+	BS2_EVENT_DEVICE_SYSTEM_ERROR_OPENGL	= 0x3050,
 	BS2_EVENT_DEVICE_SYSTEM_STARTED			= 0x3100,
 	BS2_EVENT_DEVICE_TIME_SET				= 0x3200,
 	BS2_EVENT_DEVICE_TIMEZONE_SET			= 0x3201,
@@ -229,6 +230,15 @@ enum {
 	BS2_SUB_EVENT_VERIFY_ID_FACE_FINGER			= 0x12,
 	BS2_SUB_EVENT_VERIFY_ID_FINGER_FACE			= 0x13,
 
+	BS2_SUB_EVENT_VERIFY_MOBLIE_CARD				= 0x16,
+	BS2_SUB_EVENT_VERIFY_MOBILE_CARD_PIN			= 0x17,
+	BS2_SUB_EVENT_VERIFY_MOBILE_CARD_FINGER			= 0x18,
+	BS2_SUB_EVENT_VERIFY_MOBILE_CARD_FINGER_PIN		= 0x19,
+	BS2_SUB_EVENT_VERIFY_MOBILE_CARD_FACE			= 0x1A,
+	BS2_SUB_EVENT_VERIFY_MOBILE_CARD_FACE_PIN		= 0x1B,
+	BS2_SUB_EVENT_VERIFY_MOBILE_CARD_FACE_FINGER	= 0x20,
+	BS2_SUB_EVENT_VERIFY_MOBILE_CARD_FINGER_FACE	= 0x21,
+
 	// Identified authentication mode
 	BS2_SUB_EVENT_IDENTIFY_FINGER				= 0x01,
 	BS2_SUB_EVENT_IDENTIFY_FINGER_PIN			= 0x02,
@@ -238,6 +248,10 @@ enum {
 	BS2_SUB_EVENT_IDENTIFY_FACE_FINGER_PIN	= 0x06,
 	BS2_SUB_EVENT_IDENTIFY_FINGER_FACE			= 0x07,
 	BS2_SUB_EVENT_IDENTIFY_FINGER_FACE_PIN	= 0x08,
+
+	// Reason to be failed
+	BS2_SUB_EVENT_ENROLL_FAIL_INVALID_FACE = 0x01,
+	BS2_SUB_EVENT_UPDATE_FAIL_INVALID_FACE = 0x01,
 
 	// Reason to be failed
 	BS2_SUB_EVENT_DUAL_AUTH_FAIL_TIMEOUT		= 0x01,
@@ -262,6 +276,7 @@ enum {
 	BS2_SUB_EVENT_CREDENTIAL_FACE				= 0x05,
 	BS2_SUB_EVENT_CREDENTIAL_AOC_PIN			= 0x06,
 	BS2_SUB_EVENT_CREDENTIAL_AOC_FINGER			= 0x07,
+	BS2_SUB_EVENT_CREDENTIAL_MOBILE_CARD		= 0x08,
 
 	// Reason to be failed
 	BS2_SUB_EVENT_AUTH_FAIL_INVALID_AUTH_MODE	= 0x01,
@@ -370,7 +385,6 @@ typedef struct {
 			BS2_PORT_VALUE value;
 			uint8_t reserved[25];
 		};
-		//Remark for SWIG
 		struct {
 			BS2_ZONE_ID zoneID;
 			BS2_DOOR_ID doorID;
@@ -392,14 +406,14 @@ typedef struct {
 		};
 	};
 	uint8_t			param;				///< 1 byte : tnaKey, floorIndex, alarmFlags
-#ifdef LESS_THAN_SDK_2_6_0
-	BS2_BOOL image;						///< 1 byte : Deprecated in V2.6.0
-#else
+#ifdef VER_260_OR_HIGHER
 	uint8_t image: 1;					///< Image and DST support devided by bit
 	uint8_t isDST: 1;
 	uint8_t half: 1;
 	uint8_t hour: 4;
 	uint8_t negative: 1;
+#else
+	BS2_BOOL image;						///< 1 byte : Deprecated in V2.6.0
 #endif
 } BS2Event;
 

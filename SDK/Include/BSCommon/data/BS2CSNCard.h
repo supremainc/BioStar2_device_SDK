@@ -20,9 +20,6 @@
 
 #include "../BS2Types.h"
 
-#if defined(BIOSTATION_L2) || defined(BIOENTRY_W2)
-#include "cardconfig.h"
-#else
 
 /**
  *	constants for BS2CSNCard
@@ -33,17 +30,28 @@ enum {
 };
 
 /**
+  *  QR code character range
+  */
+enum {
+	BS2_QRCODE_ASCII_MIN		= 0x20,		// ' '		[32~126 in ASCII code]
+	BS2_QRCODE_ASCII_MAX		= 0x7E,		// '~'		[32~126 in ASCII code]
+};
+
+/**
  *  BS2_CARD_TYPE
  */
 enum {
-	BS2_CARD_TYPE_UNKNOWN		= 0x00,
-	BS2_CARD_TYPE_CSN			= 0x01,
-	BS2_CARD_TYPE_SECURE		= 0x02,
-	BS2_CARD_TYPE_ACCESS		= 0x03,
-	BS2_CARD_TYPE_WIEGAND		= 0x0A,		// from Wiegand reader or iClass/HID Card reader
-	BS2_CARD_TYPE_CONFIG_CARD	= 0x0B,	
+	BS2_CARD_TYPE_UNKNOWN		 = 0x00,
+	BS2_CARD_TYPE_CSN			 = 0x01,
+	BS2_CARD_TYPE_SECURE		 = 0x02,
+	BS2_CARD_TYPE_ACCESS		 = 0x03,
+	BS2_CARD_TYPE_CSN_MOBILE	 = 0x04,
+	BS2_CARD_TYPE_WIEGAND_MOBILE = 0x05,
+	BS2_CARD_TYPE_QR		 	 = 0x06,
+	BS2_CARD_TYPE_SECURE_QR	 	 = 0x07,
+	BS2_CARD_TYPE_WIEGAND		 = 0x0A,		// from Wiegand reader or iClass/HID Card reader
+	BS2_CARD_TYPE_CONFIG_CARD	 = 0x0B,	
 };
-#endif	//BIOSTATION_L2
 
 typedef uint8_t	BS2_CARD_TYPE;
 

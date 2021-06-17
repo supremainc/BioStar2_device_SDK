@@ -43,7 +43,7 @@ namespace Suprema
         public const int BS2_USER_PHOTO_SIZE = 16 * 1024;
         public const int BS2_PIN_HASH_SIZE = 32;
         public const int BS2_MAX_OPERATORS = 10;
-        public const int BS2_DEVICE_STATUS_NUM = 15;
+        public const int BS2_DEVICE_STATUS_NUM = (int)BS2DeviceStatus.NUM_OF_STATUS;
         public const int BS2_MAX_SHORTCUT_HOME = 8;
         public const int BS2_MAX_TNA_KEY = 16;
         public const int BS2_MAX_TNA_LABEL_LEN = 16 * 3;
@@ -104,7 +104,8 @@ namespace Suprema
         public const int BS2_MAX_UNLOCK_GROUPS_IN_SCHEDULED_LOCK_UNLOCK_ZONE = 16;
         public const int BS2_VOIP_MAX_PHONEBOOK = 32;
         public const int BS2_MAX_DESCRIPTION_NAME_LEN = 144;
-        public const int BS2_FACE_IMAGE_SIZE = 16384;
+        public const int BS2_FACE_IMAGE_SIZE = 16 * 1024;
+        public const int BS2_CAPTURE_IMAGE_MAXSIZE = 1280 * 720 * 3;
 		public const int BS2_MAX_AUTH_GROUP_NAME_LEN = 144;
         public const int BS2_MAX_JOB_SIZE = 16;
         public const int BS2_MAX_JOBLABEL_LEN = 48;
@@ -135,12 +136,20 @@ namespace Suprema
         // F2 support
 
         public const int BS2_THERMAL_CAMERA_DISTANCE_DEFAULT = 100;
-        public const int BS2_THERMAL_CAMERA_EMISSION_RATE_DEFAULT = 98;
+        [Obsolete] public const int BS2_THERMAL_CAMERA_EMISSION_RATE_DEFAULT = 98;
+        public const int BS2_THERMAL_CAMERA_EMISSIVITY_DEFAULT = 98;
 
+        // Default (F2)
         public const int BS2_THERMAL_CAMERA_ROI_X_DEFAULT = 30;
         public const int BS2_THERMAL_CAMERA_ROI_Y_DEFAULT = 25;
         public const int BS2_THERMAL_CAMERA_ROI_WIDTH_DEFAULT = 50;
         public const int BS2_THERMAL_CAMERA_ROI_HEIGHT_DEFAULT = 55;
+
+        // Default (FS2)
+	    public const int BS2_THERMAL_CAMERA_ROI_X_DEFAULT_FS2 = 47;
+	    public const int BS2_THERMAL_CAMERA_ROI_Y_DEFAULT_FS2 = 45;
+	    public const int BS2_THERMAL_CAMERA_ROI_WIDTH_DEFAULT_FS2 = 15;
+        public const int BS2_THERMAL_CAMERA_ROI_HEIGHT_DEFAULT_FS2 = 10;
 
         public const int BS2_MOBILE_ACCESS_KEY_SIZE = 124;
 
@@ -184,6 +193,18 @@ namespace Suprema
 	    public const int BS2_MAX_LIFTS_IN_LIFT_LOCK_UNLOCK_ZONE = 32;
 	    public const int BS2_MAX_BYPASS_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE = 16;
 	    public const int BS2_MAX_UNLOCK_GROUPS_IN_LIFT_LOCK_UNLOCK_ZONE = 16;
+
+	    public const int BS2_DEVICE_ID_MIN = 0x01000000;
+        public const int BS2_DEVICE_ID_MAX = 0x3FFFFFFF;
+
+        public const int BS2_BARCODE_TIMEOUT_DEFAULT = 4;
+        public const int BS2_BARCODE_TIMEOUT_MIN = BS2_BARCODE_TIMEOUT_DEFAULT;
+        public const int BS2_BARCODE_TIMEOUT_MAX = 10;
+
+        // Intelligent PD
+        public const int BS2_RS485_MAX_EXCEPTION_CODE_LEN = 8;
+        public const int BS2_IPD_OUTPUT_CARDID = 0;
+	    public const int BS2_IPD_OUTPUT_USERID = 1;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -334,7 +355,7 @@ namespace Suprema
     public struct BS2ThermalCameraConfig
     {
         public byte distance;
-        public byte emissionRate;
+        public byte emissionRate;       // (emissivity)
         public BS2ThermalCameraROI roi;
         public byte useBodyCompensation;
         public sbyte compensationTemperature;
@@ -625,6 +646,15 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2VerifyFingerprint
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] userID;
+	    [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_FINGER_TEMPLATE_SIZE)]
+	    public byte[] fingerTemplate;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2FingerprintConfig
     {
         public byte securityLevel;
@@ -652,6 +682,20 @@ namespace Suprema
         public byte connected;
     }
 
+    // [+2.8]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2IntelligentPDInfo
+    {
+        public byte supportConfig;
+        public byte useExceptionCode;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_EXCEPTION_CODE_LEN)]
+        public byte[] exceptionCode;
+        public byte outputFormat;
+        public byte osdpID;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved;
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2Rs485Channel
     {
@@ -670,7 +714,8 @@ namespace Suprema
         public byte mode;
         public byte numOfChannels;
         public UInt16 reserved;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public BS2IntelligentPDInfo intelligentInfo;            // [+2.8]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]   // [*2.8]  32->16
         public byte[] reserved1;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_CHANNELS)]
         public BS2Rs485Channel[] channels;
@@ -945,7 +990,9 @@ namespace Suprema
     public struct BS2LiftAction
     {
         public UInt32 liftID;
-        public byte type;        
+        public byte type;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved;     // [+ V2.8]
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -982,8 +1029,10 @@ namespace Suprema
     public struct BS2ImageEventFilter
     {
         public byte mainEventCode;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public byte[] reserved;
+        public byte subEventCode;               // [+ V2.8]
+        public byte subCodeIncluded;            // [+ V2.8]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+        public byte[] reserved2;
         public UInt32 scheduleID;
     }
 
@@ -994,7 +1043,7 @@ namespace Suprema
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_EVENT_MAX_IMAGE_CODE_COUNT)]
         public BS2ImageEventFilter[] imageEventFilter;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public byte[] reserved;
+        public byte[] unused;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1451,9 +1500,11 @@ namespace Suprema
         public UInt32 dualAuthScheduleID;
         public byte dualAuthDevice;
         public byte dualAuthApprovalType;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved;         // [+ V2.8]
         public UInt32 dualAuthTimeout;
         public byte numDualAuthApprovalGroups;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         public byte[] reserved2;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_DUAL_AUTH_APPROVAL_GROUP)]
         public UInt32[] dualAuthApprovalGroupID;
@@ -2583,5 +2634,161 @@ namespace Suprema
 
         public BS2UserSettingEx settingEx;
         public IntPtr faceExObjs;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2BarcodeConfig          // [+ V2.8]
+    {
+	    public byte useBarcode;
+        public byte scanTimeout;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 14)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2LagacyAuth          // [+ V2.8]
+	{
+		public byte biometricAuthMask;
+        //biomerticOnly: 1;
+        //biometricPIN: 1;
+        //unused: 6;
+		public byte cardAuthMask;
+        //rdOnly: 1;
+        //rdBiometric: 1;
+        //rdPIN: 1;
+        //rdBiometricOrPIN: 1;
+        //rdBiometricPIN: 1;
+        //used: 3;
+		public byte idAuthMask;
+		//Biometric: 1;
+		//PIN: 1;
+		//BiometricOrPIN: 1;
+		//BiometricPIN: 1;
+		//used: 4;
+	}
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2ExtendedAuth          // [+ V2.8]
+    {
+		public UInt32 faceAuthMask;
+        //faceOnly: 1;
+        //faceFingerprint: 1;
+        //facePIN: 1;
+        //faceFingerprintOrPIN: 1;
+        //faceFingerprintPIN: 1;
+        //unused: 27;
+		public UInt32 fingerprintAuthMask;
+		//fingerprintOnly: 1;
+		//fingerprintFace: 1;
+		//fingerprintPIN: 1;
+		//fingerprintFaceOrPIN: 1;
+		//fingerprintFacePIN: 1;
+		//unused: 27;
+		public UInt32 cardAuthMask;
+		//cardOnly: 1;
+		//cardFace: 1;
+		//cardFingerprint: 1;
+		//cardPIN: 1;
+		//cardFaceOrFingerprint: 1;
+		//cardFaceOrPIN: 1;
+		//cardFingerprintOrPIN: 1;
+		//cardFaceOrFingerprintOrPIN: 1;
+		//cardFaceFingerprint: 1;
+		//cardFacePIN: 1;
+		//cardFingerprintFace: 1;
+		//cardFingerprintPIN: 1;
+		//cardFaceOrFingerprintPIN: 1;
+		//cardFaceFingerprintOrPIN: 1;
+		//cardFingerprintFaceOrPIN: 1;
+		//unused: 17;
+		public UInt32 idAuthMask;
+        //idFace: 1;
+        //idFingerprint: 1;
+        //idPIN: 1;
+        //idFaceOrFingerprint: 1;
+        //idFaceOrPIN: 1;
+        //idFingerprintOrPIN: 1;
+        //idFaceOrFingerprintOrPIN: 1;
+        //idFaceFingerprint: 1;
+        //idFacePIN: 1;
+        //idFingerprintFace: 1;
+        //idFingerprintPIN: 1;
+        //idFaceOrFingerprintPIN: 1;
+        //idFaceFingerprintOrPIN: 1;
+        //idFingerprintFaceOrPIN: 1;
+        //unused: 18;
+	}
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2AuthSupported
+    {
+		public byte extendedMode;
+		public byte credentialsMask;
+        //card: 1;
+        //fingerprint: 1;
+        //face: 1;
+        //id: 1;
+        //pin: 1;
+        //reserved: 3;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+		public byte[] reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] auth;
+        //public BS2LagacyAuth lagacy;
+        //public BS2ExtendedAuth extended;
+	}
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2DeviceCapabilities
+    {
+	    public UInt32 maxUsers;
+	    public UInt32 maxEventLogs;
+	    public UInt32 maxImageLogs;
+	    public UInt32 maxBlacklists;
+	    public UInt32 maxOperators;
+	    public UInt32 maxCards;		///< 4 bytes
+	    public UInt32 maxFaces;		///< 4 bytes
+	    public UInt32 maxFingerprints;		///< 4 bytes
+	    public UInt32 maxUserNames;		///< 4 bytes
+	    public UInt32 maxUserImages;		///< 4 bytes
+	    public UInt32 maxUserJobs;		///< 4 bytes
+	    public UInt32 maxUserPhrases;		///< 4 bytes
+	    public byte maxCardsPerUser;		///< 1 byte
+	    public byte maxFacesPerUser;		///< 1 byte
+	    public byte maxFingerprintsPerUser;		///< 1 byte
+	    public byte maxInputPorts;		///< 1 byte
+	    public byte maxOutputPorts;		///< 1 byte
+	    public byte maxRelays;			///< 1 byte
+	    public byte maxRS485Channels;		///< 1 byte
+
+	    public byte systemSupported;
+        //cameraSupported: 1;
+        //tamperSupported: 1;
+        //wlanSupported: 1;
+        //displaySupported: 1;
+        //thermalSupported: 1;
+        //maskSupported: 1;
+        //faceExSupported: 1;
+        //unused: 1;
+	    public UInt32 cardSupportedMask;
+        //EM: 1;
+        //HIDProx: 1;
+        //MifareFelica: 1;
+        //iClass: 1;
+        //ClassicPlus: 1;
+        //DesFireEV1: 1;
+        //SRSE: 1;
+        //SEOS: 1;
+        //NFC: 1;
+        //BLE: 1;
+        //reserved: 21;
+        //useCardOperation: 1;
+	    public BS2AuthSupported authSupported;
+	    public byte functionSupported;
+        //intelligentPDSupported: 1;
+        //unused2: 7;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 431)]
+	    public byte[] reserved;
     }
 }

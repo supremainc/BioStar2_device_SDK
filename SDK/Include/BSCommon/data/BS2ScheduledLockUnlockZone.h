@@ -21,7 +21,7 @@ enum {
 
 typedef struct {
 	BS2_ZONE_ID zoneID;		///< 4 bytes
-	char name[BS2_MAX_ZONE_NAME_LEN];		///< 48 * 3 bytes
+	char name[BS2_MAX_ZONE_NAME_LEN];		///< 144 bytes
 
 	BS2_SCHEDULE_ID lockScheduleID;		///< 4 bytes
 	BS2_SCHEDULE_ID unlockScheduleID;		///< 4 bytes

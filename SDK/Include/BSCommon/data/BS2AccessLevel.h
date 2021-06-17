@@ -31,19 +31,19 @@ enum {
  *	BS2DoorSchedule
  */
 typedef struct {
-	BS2_DOOR_ID		doorID;
-	BS2_SCHEDULE_ID	scheduleID;
+	BS2_DOOR_ID		doorID;		///< 4 bytes
+	BS2_SCHEDULE_ID	scheduleID;		///< 4 bytes
 } BS2DoorSchedule;
 
 /**
  *	BS2AccessLevel
  */
 typedef struct {
-	BS2_ACCESS_LEVEL_ID		id;		// id < 32768 (BS2_FLOOR_LEVEL_ID >= 32768)
-	char					name[BS2_MAX_ACCESS_LEVEL_NAME_LEN];
-	uint8_t					numDoorSchedules;
-	uint8_t					reserved[3];
-	BS2DoorSchedule			doorSchedules[BS2_MAX_ACCESS_LEVEL_ITEMS];
+	BS2_ACCESS_LEVEL_ID		id;		///< 4 bytes, id < 32768 (BS2_FLOOR_LEVEL_ID >= 32768)
+	char					name[BS2_MAX_ACCESS_LEVEL_NAME_LEN];		///< 144 bytes
+	uint8_t					numDoorSchedules;		///< 1 byte
+	uint8_t					reserved[3];			///< 3 bytes (packing)
+	BS2DoorSchedule			doorSchedules[BS2_MAX_ACCESS_LEVEL_ITEMS];		///< 8 * 128 bytes
 } BS2AccessLevel;
 
 #endif	// __BS2_ACCESS_LEVEL_H__

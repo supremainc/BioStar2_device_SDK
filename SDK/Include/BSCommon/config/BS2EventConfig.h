@@ -21,12 +21,14 @@ typedef struct {
 	uint32_t numImageEventFilter;                        ///< 4 bytes
 
 	struct {
-	  uint8_t mainEventCode;                             ///< 1 bytes
-	  uint8_t reserved[3];                               ///< 3 bytes(padding)
-	  BS2_SCHEDULE_ID scheduleID;                        ///< 4 bytes
+		uint8_t mainEventCode;                           ///< 1 byte
+		uint8_t subEventCode;                            ///< 1 byte
+		BS2_BOOL subCodeIncluded;                        ///< 1 byte - SHOULD be "true" for backward compatibility.
+		uint8_t reserved2[1];                            ///< 1 byte (padding)
+		BS2_SCHEDULE_ID scheduleID;                      ///< 4 bytes
 	} imageEventFilter[BS2_EVENT_MAX_IMAGE_CODE_COUNT];  ///< 256 bytes
 
-	uint8_t reserved[32];                                ///< 32 bytes
+	uint8_t unused[32];						             ///< 32 bytes (reserved)
 } BS2EventConfig;
 
 

@@ -35,7 +35,7 @@ typedef struct {
 
 typedef struct {
 	BS2_ZONE_ID zoneID;		///< 4 bytes
-	char name[BS2_MAX_ZONE_NAME_LEN];		///< 48 * 3 bytes
+	char name[BS2_MAX_ZONE_NAME_LEN];		///< 144 bytes
 
 	BS2_TIMED_APB_ZONE_TYPE type;		///< 1 byte
 	uint8_t numReaders;		///< 1 byte

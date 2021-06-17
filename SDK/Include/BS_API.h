@@ -75,6 +75,8 @@
 #include "BSCommon/config/BS2AuthConfigExt.h"
 #include "BSCommon/config/BS2FaceConfigExt.h"
 #include "BSCommon/config/BS2ThermalCameraConfig.h"
+#include "BSCommon/config/BS2BarcodeConfig.h"
+#include "BSCommon/protocol/BS2DeviceInfo.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -219,13 +221,25 @@ typedef struct
 		BS2_SUPPORT_CARDEX  		= 0x00000002,
 		BS2_SUPPORT_DST     		= 0x00000004,
 		BS2_SUPPORT_DESFIREEX		= 0x00000008,
+		
 		BS2_SUPPORT_FACE_EX			= 0x00000010,
+		BS2_SUPPORT_QR				= 0x00000020,
 
 		BS2_SUPPORT_FINGER_SCAN		= 0x00010000,
 		BS2_SUPPORT_FACE_SCAN		= 0x00020000,
 		BS2_SUPPORT_FACE_EX_SCAN	= 0x00040000,
+		BS2_SUPPORT_QR_SCAN			= 0x00080000,
 
-		BS2_SUPPORT_ALL     		= BS2_SUPPORT_RS485EX | BS2_SUPPORT_CARDEX | BS2_SUPPORT_DST | BS2_SUPPORT_DESFIREEX | BS2_SUPPORT_FACE_EX | BS2_SUPPORT_FINGER_SCAN | BS2_SUPPORT_FACE_SCAN | BS2_SUPPORT_FACE_EX_SCAN,
+		BS2_SUPPORT_ALL     		= BS2_SUPPORT_RS485EX |
+									  BS2_SUPPORT_CARDEX |
+									  BS2_SUPPORT_DST |
+									  BS2_SUPPORT_DESFIREEX |
+									  BS2_SUPPORT_FACE_EX |
+									  BS2_SUPPORT_QR |
+									  BS2_SUPPORT_FINGER_SCAN |
+									  BS2_SUPPORT_FACE_SCAN |
+									  BS2_SUPPORT_FACE_EX_SCAN |
+									  BS2_SUPPORT_QR_SCAN,
 	};
 
 	uint32_t supported;
@@ -643,6 +657,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllBlackList(void* context, BS
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanCard(void* context, BS2_DEVICE_ID deviceId, BS2Card* card, OnReadyToScan ptrReadyToScan);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_WriteCard(void* context, BS2_DEVICE_ID deviceId, BS2SmartCardData* smartCard);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EraseCard(void* context, BS2_DEVICE_ID deviceId);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_WriteQRCode(const char* qrText, BS2CSNCard* card);
 
 // Config api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ClearDatabase(void* context, BS2_DEVICE_ID deviceId);
@@ -710,6 +725,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFaceConfigExt(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetFaceConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2FaceConfigExt* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, BS2ThermalCameraConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, const BS2ThermalCameraConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, BS2BarcodeConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, const BS2BarcodeConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
@@ -789,6 +806,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCode(void* context, char* pla
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCodeWithKey(void* context, char* plaintext, unsigned char* ciphertext, const BS2EncryptKey* key);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ComputeCRC16CCITT(unsigned char* data, uint32_t dataLen, uint16_t* crc);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCardModel(char* modelName, BS2_CARD_MODEL* cardModel);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceCapabilities(void* context, BS2_DEVICE_ID deviceId, BS2DeviceCapabilities* capabilities);
 
 // Slave Control api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice** slaveDeviceObj, uint32_t* slaveDeviceCount);
@@ -872,6 +890,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFace(void* context, BS2_DEVICE_I
  //FaceEx
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2FaceEx* faceEx, uint8_t enrollmentThreshold, OnReadyToScan ptrReadyToScan);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ExtractTemplateFaceEx(void* context, BS2_DEVICE_ID deviceId, const uint8_t* imageData, uint32_t imageDataLen, int isWarped, BS2TemplateEx* templateEx);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetNormalizedImageFaceEx(void* context, BS2_DEVICE_ID deviceId, const uint8_t* unwarpedImage, uint32_t unwarpedImageLen, uint8_t* warpedImage, uint32_t* warpedImageLen);
 
 //AuthGroup
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAuthGroup(void* context, BS2_DEVICE_ID deviceId, BS2_AUTH_GROUP_ID* authGroupIds, uint32_t authGroupIdCount, BS2AuthGroup** authGroupObj, uint32_t* numAuthGroup);

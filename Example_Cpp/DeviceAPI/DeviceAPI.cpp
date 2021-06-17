@@ -1242,6 +1242,10 @@ int setBarcodeConfig(void* context, BS2_DEVICE_ID id)
 	BS2BarcodeConfig config = { 0, };
 	string msg;
 
+	int sdkResult = cc.getBarcodeConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
 	config.useBarcode = Utility::isYes("Would you like to use barcode function? [y/n]");
 
 	if (config.useBarcode)
