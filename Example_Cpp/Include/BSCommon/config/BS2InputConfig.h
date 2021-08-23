@@ -23,6 +23,7 @@
 
 enum{
 	BS2_MAX_INPUT_NUM =	8,
+	BS2_MAX_INPUT_NUM_EX = 16,
 };
 
 enum{
@@ -52,6 +53,7 @@ enum{
 	SUPERVISED_REG_4_7K,
 	SUPERVISED_REG_10K,
 
+	SUPERVISED_REG_UNUSED = 254,
 	SUPERVISED_REG_CUSTOM = 255,
 };
 
@@ -73,5 +75,28 @@ typedef struct{
 		BS2SupervisedInputConfig	config; ///< 16 byte
 	} supervised_inputs[BS2_MAX_INPUT_NUM]; ///<
 } BS2InputConfig;
+
+/**
+ *	BS2InputConfigEx
+ */
+typedef struct{
+	uint8_t		numInputs;		///< 1 byte
+	uint8_t		numSupervised;	///< 1 byte
+	uint8_t		reserved[18];	///< 18 bytes
+	
+	struct {
+		uint8_t						portIndex;				///< 1 byte
+		BS2_SWITCH_TYPE				switchType;				///< 1 byte
+		uint16_t					duration;				///< 2 bytes
+		
+		uint8_t						reserved;				///< 1 byte
+		uint8_t						supervisedResistor;		///< 1 byte
+		uint8_t						reserved1[16];			///< 16 bytes
+		
+		uint8_t						reserved2[26];			///< 26 bytes
+	} inputs[BS2_MAX_INPUT_NUM_EX]; 						///< 768 bytes
+
+	uint8_t		reserved2[200];								///< 200 bytes
+} BS2InputConfigEx;											///< 988 bytes
 
 #endif	/* __BS2_INPUT_CONFIG_H__ */

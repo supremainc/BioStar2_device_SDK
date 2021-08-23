@@ -74,7 +74,7 @@ public:
 	template <typename T>
 	static std::vector<T> tokenizeInteger(const std::string& data, const char delimiter = ' ');
 	template <typename T>
-	static T str2int(const std::string& data);
+	static T convAString2Int(const std::string& data);
 
 	static std::string getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone);
 	static std::string getEventStringWithThermal(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature);
@@ -128,7 +128,7 @@ inline std::vector<T> Utility::tokenizeInteger(const std::string& data, const ch
 }
 
 template <typename T>
-inline T Utility::str2int(const std::string& data)
+inline T Utility::convAString2Int(const std::string& data)
 {
 	if (data.size() == 0)
 		return (T)0;

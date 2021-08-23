@@ -36,6 +36,40 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 <br>
+<br>
+
+### V2.8.1.0 released 08/05/2021:
+
+**New Features**
+
+* Supports X-Station 2 Finger (Product Name: XS2-OAPB, XS2-ODPB)
+* Supports Input Module Feature (Product Name: IM-120)
+* Supports the function of commanding certain actions to devices
+
+**1.** X-Station 2 Finger Configurations are available to use.
+
+**2.** Input Module(Product Name: IM-120) Configurations are available to use.
+* Refer to Structure BS2InputConfigEx
+* Refer to Structure BS2RelayActionConfig
+* Refer to Structure BS2Event relayAction
+* Refer to API BS2_GetInputConfigEx
+* Refer to API BS2_SetInputConfigEx
+* Refer to API BS2_GetRelayActionConfig
+* Refer to API BS2_SetRelayActionConfig
+
+**3.** You can now command certain actions to devices.
+You can now turn on LED, alarm a buzzer, or control relay and perform more actions at the desired time with the COMMANDS below.
+* Refer to Structure BS2Action
+* Refer to API BS2_RunAction
+
+**Modified Features**
+
+**1.** Fixed the error in which Linux returns BS_SDK_ERROR_TIMEOUT and is not able to have device connections.
+
+**2.** C# examples provided to guide through server-matching function implementation will not be supported anymore.
+* Refer to the Server API Document Server API
+
+<br>
 
 ### V2.8.0.6 released 06/07/2021:
 

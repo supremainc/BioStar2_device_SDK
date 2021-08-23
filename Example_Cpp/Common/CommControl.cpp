@@ -441,8 +441,7 @@ int CommControl::isAutoConnection()
 
 int CommControl::setAutoConnection()
 {
-	char input = Utility::getInput<char>("Do you want to enable auto connection? [y/n]");
-	int enable = (input == 'y' || input == 'Y') ? 1 : 0;
+	int enable = Utility::isYes("Do you want to enable auto connection?");
 
 	int sdkResult = BS2_SetAutoConnection(context_, enable);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -466,8 +465,7 @@ int CommControl::getEnableIPV4()
 
 int CommControl::setEnableIPV4()
 {
-	char input = Utility::getInput<char>("Do you want to enable IPV4 connection mode? [y/n]");
-	int enable = (input == 'y' || input == 'Y') ? 1 : 0;
+	int enable = Utility::isYes("Do you want to enable IPV4 connection mode?");
 
 	int sdkResult = BS2_SetEnableIPV4(context_, enable);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -491,8 +489,7 @@ int CommControl::getEnableIPV6()
 
 int CommControl::setEnableIPV6()
 {
-	char input = Utility::getInput<char>("Do you want to enable IPV6 connection mode? [y/n]");
-	int enable = (input == 'y' || input == 'Y') ? 1 : 0;
+	int enable = Utility::isYes("Do you want to enable IPV6 connection mode?");
 
 	int sdkResult = BS2_SetEnableIPV6(context_, enable);
 	if (BS_SDK_SUCCESS != sdkResult)

@@ -177,6 +177,13 @@ string Utility::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t 
 			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server");
 		break;
 
+	case BS2_EVENT_RELAY_ACTION_ON:
+	case BS2_EVENT_RELAY_ACTION_OFF:
+	case BS2_EVENT_RELAY_ACTION_KEEP:
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) relayPort(%u) inputPort(%u)",
+			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.relayAction.relayPort, event.relayAction.inputPort);
+		break;
+
 	default:
 		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d)",
 			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID);
@@ -303,12 +310,14 @@ int Utility::saveBMP(FILE* fp, unsigned char* data, int width, int height)
 
 BS2_BOOL Utility::isYes(string msg)
 {
+	msg += " [y/n]";
 	char selected = Utility::getInput<char>(msg);
 	return (selected == 'y' || selected == 'Y');
 }
 
 BS2_BOOL Utility::isNo(string msg)
 {
+	msg += " [y/n]";
 	char selected = Utility::getInput<char>(msg);
 	return (selected == 'n' || selected == 'N');
 }
@@ -383,6 +392,8 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 		return "XS2";
 	case BS2_DEVICE_TYPE_IM_120:
 		return "IM-120";
+	case BS2_DEVICE_TYPE_XSTATION_2_FP:
+		return "XS2-Fp";
 	case BS2_DEVICE_TYPE_UNKNOWN:
 	default:
 		break;

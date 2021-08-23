@@ -45,6 +45,10 @@ public:
 	int setBarcodeConfig(BS2_DEVICE_ID id, const BS2BarcodeConfig& config);
 	int getRS485Config(BS2_DEVICE_ID id, BS2Rs485Config& config);
 	int setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config);
+	int getInputConfigEx(BS2_DEVICE_ID id, BS2InputConfigEx& config);
+	int setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config);
+	int getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config);
+	int setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionConfig& config);
 
 	int updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode = BS2_CONNECTION_MODE_SERVER_TO_DEVICE);
 	int updateConnectModeDevice2Server(BS2_DEVICE_ID id, std::string serverIP, BS2_PORT serverPort);
@@ -75,6 +79,8 @@ public:
 	void print(const BS2Rs485Config& config) const;
 	void print(const BS2Rs485Channel& channel) const;
 	void print(const BS2Rs485SlaveDevice& device) const;
+	void print(const BS2InputConfigEx& config) const;
+	void print(const BS2RelayActionConfig& config) const;
 
 
 private:

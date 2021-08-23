@@ -414,8 +414,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (deviceInfo.userPhotoSupported)
 	{
-		char profileImage = Utility::getInput<char>("Do you want to register a profile image? [y/n]");
-		if ('y' == profileImage || 'Y' == profileImage)
+		if (Utility::isYes("Do you want to register a profile image?"))
 		{
 			string imagePath = Utility::getInput<string>("Enter the profile image path and name:");
 			uint32_t size = Utility::getResourceSize(imagePath);
@@ -438,8 +437,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		}
 	}
 
-	char flag = Utility::getInput<char>("Do you want to register access group ID? [y/n]");
-	if ('y' == flag || 'Y' == flag)
+	if (Utility::isYes("Do you want to register access group ID?"))
 	{
 		msg.str("");
 		msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
@@ -467,10 +465,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		user.authGroupID = authGroupID;
 	}
 
-	{
-		flag = Utility::getInput<char>("Do you want to overwrite the user if it exist? [y/n]");
-		user.flag = (flag == 'y' || flag == 'Y') ? BS2_USER_FLAG_CREATED | BS2_USER_FLAG_UPDATED : BS2_USER_FLAG_CREATED;
-	}
+	user.flag = Utility::isYes("Do you want to overwrite the user if it exist?") ? BS2_USER_FLAG_CREATED | BS2_USER_FLAG_UPDATED : BS2_USER_FLAG_CREATED;
 
 	user.numFingers = 0;
 	user.numCards = 0;
@@ -478,8 +473,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (deviceInfo.cardSupported)
 	{
-		flag = Utility::getInput<char>("Do you want to scan card? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan card?"))
 		{
 			uint32_t numCard = Utility::getInput<uint32_t>("How many cards would you like to register?");
 			BS2CSNCard* ptrCard = new BS2CSNCard[numCard];
@@ -512,7 +506,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	// +V2.8 XS2 QR support
 	if (qrSupported)
 	{
-		if (Utility::isYes("Would you like to register the QR code string to be used for authentication? [y/n]"))
+		if (Utility::isYes("Would you like to register the QR code string to be used for authentication?"))
 		{
 			msg.str("");
 			msg << "Enter the ASCII QR code." << endl;
@@ -548,8 +542,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (fingerScanSupported)
 	{
-		flag = Utility::getInput<char>("Do you want to scan fingerprint? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan fingerprint?"))
 		{
 			uint32_t numFinger = Utility::getInput<uint32_t>("How many fingers would you like to register?");
 			BS2Fingerprint* ptrFinger = new BS2Fingerprint[numFinger];
@@ -574,8 +567,7 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 	if (faceScanSupported)
 	{
-		flag = Utility::getInput<char>("Do you want to scan face? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan face?"))
 		{
 			uint32_t numFace = Utility::getInput<uint32_t>("How many face would you like to register?");
 			BS2Face* ptrFace = new BS2Face[numFace];
@@ -1449,8 +1441,7 @@ int UserControl::getUserBlobPrivateAuthMode(BS2UserSetting& setting, const BS2Si
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 
 	stringstream msg;
-	char select = Utility::getInput<char>("Do you want to register private auth mode? [y/n]");
-	if (select == 'y' || select == 'Y')
+	if (Utility::isYes("Do you want to register private auth mode?"))
 	{
 		if (fingerScanSupported || faceScanSupported)
 		{
@@ -1551,8 +1542,7 @@ int UserControl::getUserBlobPrivateAuthModeEx(BS2UserSettingEx& settingEx, const
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 
 	stringstream msg;
-	char select = Utility::getInput<char>("Do you want to register private auth-ex mode? [y/n]");
-	if (select == 'y' || select == 'Y')
+	if (Utility::isYes("Do you want to register private auth-ex mode?"))
 	{
 		if (faceExScanSupported)
 		{
@@ -1817,8 +1807,7 @@ int UserControl::getProfileImage(BS2UserPhoto** photo, const BS2SimpleDeviceInfo
 
 	if (deviceInfo.userPhotoSupported)
 	{
-		char profileImage = Utility::getInput<char>("Do you want to register a profile image? [y/n]");
-		if ('y' == profileImage || 'Y' == profileImage)
+		if (Utility::isYes("Do you want to register a profile image?"))
 		{
 			string imagePath = Utility::getInput<string>("Enter the profile image path and name:");
 			uint32_t size = Utility::getResourceSize(imagePath);
@@ -1872,8 +1861,7 @@ int UserControl::getUserBlobAccessGroupID(BS2UserFaceExBlob& userBlob)
 
 int UserControl::getAccessGroupID(BS2_ACCESS_GROUP_ID* accessGroupId)
 {
-	char flag = Utility::getInput<char>("Do you want to register access group ID? [y/n]");
-	if ('y' == flag || 'Y' == flag)
+	if (Utility::isYes("Do you want to register access group ID?"))
 	{
 		stringstream msg;
 		msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
@@ -1909,8 +1897,8 @@ int UserControl::getUserBlobFaceAuthGroupID(BS2User& user)
 
 int UserControl::getUserBlobUserUpdate(BS2User& user)
 {
-	char flag = Utility::getInput<char>("Do you want to overwrite the user if it exist? [y/n]");
-	user.flag = (flag == 'y' || flag == 'Y') ? BS2_USER_FLAG_CREATED | BS2_USER_FLAG_UPDATED : BS2_USER_FLAG_CREATED;
+	bool flag = Utility::isYes("Do you want to overwrite the user if it exist?");
+	user.flag = flag ? BS2_USER_FLAG_CREATED | BS2_USER_FLAG_UPDATED : BS2_USER_FLAG_CREATED;
 
 	return BS_SDK_SUCCESS;
 }
@@ -1947,8 +1935,7 @@ int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEV
 
 	if (deviceInfo.cardSupported)
 	{
-		char flag = Utility::getInput<char>("Do you want to scan card? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan card?"))
 		{
 			uint32_t numCard = Utility::getInput<uint32_t>("How many cards would you like to register?");
 			BS2CSNCard* ptrCard = new BS2CSNCard[numCard];
@@ -1981,7 +1968,7 @@ int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEV
 	// +V2.8 XS2 QR support
 	if (qrSupported)
 	{
-		if (Utility::isYes("Would you like to register the QR code string to be used for authentication? [y/n]"))
+		if (Utility::isYes("Would you like to register the QR code string to be used for authentication?"))
 		{
 			stringstream msg;
 			msg << "Enter the ASCII QR code." << endl;
@@ -2050,8 +2037,7 @@ int UserControl::getFingerprintInfo(BS2Fingerprint** fingerObjs, uint8_t& numOfF
 
 	if (fingerScanSupported)
 	{
-		char flag = Utility::getInput<char>("Do you want to scan fingerprint? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan fingerprint?"))
 		{
 			uint32_t numFinger = Utility::getInput<uint32_t>("How many fingers would you like to register?");
 			BS2Fingerprint* ptrFinger = new BS2Fingerprint[numFinger];
@@ -2086,8 +2072,7 @@ int UserControl::getUserBlobFaceInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID i
 
 	if (faceScanSupported)
 	{
-		char flag = Utility::getInput<char>("Do you want to scan face from device? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan face from device?"))
 		{
 			uint32_t numFace = Utility::getInput<uint32_t>("How many face would you like to register?");
 			BS2Face* ptrFace = new BS2Face[numFace];
@@ -2116,8 +2101,7 @@ int UserControl::getUserBlobFaceInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID 
 
 	if (faceScanSupported)
 	{
-		char flag = Utility::getInput<char>("Do you want to scan face from device? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan face from device?"))
 		{
 			uint32_t numFace = Utility::getInput<uint32_t>("How many face would you like to register?");
 			BS2Face* ptrFace = new BS2Face[numFace];
@@ -2135,8 +2119,7 @@ int UserControl::getUserBlobFaceInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID 
 	}
 	else if (faceExScanSupported)
 	{
-		char flag = Utility::getInput<char>("Do you want to scan faceEx from device? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan faceEx from device?"))
 		{
 			uint32_t numFace = Utility::getInput<uint32_t>("How many faceEx would you like to register?");
 			BS2FaceEx* ptrFace = new BS2FaceEx[numFace];
@@ -2153,8 +2136,7 @@ int UserControl::getUserBlobFaceInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID 
 		}
 		else
 		{
-			flag = Utility::getInput<char>("Do you want to register from file image? [y/n]");
-			if ('y' == flag || 'Y' == flag)
+			if (Utility::isYes("Do you want to register from file image?"))
 			{
 				string imagePath = Utility::getInput<string>("Enter the face image path and name:");
 				uint32_t size = Utility::getResourceSize(imagePath);
@@ -2189,12 +2171,10 @@ int UserControl::getUserBlobFaceInfoEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_I
 
 	if (faceExScanSupported)
 	{
-		char flag = Utility::getInput<char>("Do you want to scan faceEx from device? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to scan faceEx from device?"))
 			numOfScan = Utility::getInput<uint32_t>("How many faceEx would you like to register?");
 
-		flag = Utility::getInput<char>("Do you want to register from file image? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to register from file image?"))
 			numOfImage = Utility::getInput<uint32_t>("How many image files would you like to register?");
 
 		if (0 < numOfScan || 0 < numOfImage)
@@ -2327,8 +2307,7 @@ int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& template
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 	if (faceExScanSupported)
 	{
-		char flag = Utility::getInput<char>("Do you want to extract faceEx template from image? [y/n]");
-		if ('y' == flag || 'Y' == flag)
+		if (Utility::isYes("Do you want to extract faceEx template from image?"))
 		{
 			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
 			uint32_t size = Utility::getResourceSize(imagePath);

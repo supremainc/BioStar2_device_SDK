@@ -158,8 +158,7 @@ int connectViaIP(void* context, DeviceInfo& device)
 int connectSlave(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utility::getInput<char>("Do you want to find slave devices? [y/n]");
-	if ('y' == selected || 'Y' == selected)
+	if (Utility::isYes("Do you want to find slave devices?"))
 	{
 		BS2_DEVICE_ID slaveID = 0;
 		ConfigControl cc(context);
@@ -187,8 +186,7 @@ int connectSlave(void* context, DeviceInfo& device)
 int connectWiegand(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utility::getInput<char>("Do you want to find wiegand devices? [y/n]");
-	if ('y' == selected || 'Y' == selected)
+	if (Utility::isYes("Do you want to find wiegand devices?"))
 	{
 		BS2_DEVICE_ID wiegandID = 0;
 		int sdkResult = searchWiegand(context, device.id_, wiegandID);
@@ -201,7 +199,7 @@ int connectWiegand(void* context, DeviceInfo& device)
 
 uint32_t getSelectedIndex()
 {
-	return Utility::getInput<uint32_t>("Select ID:");
+	return Utility::getInput<uint32_t>("Select number:");
 }
 
 int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
@@ -315,7 +313,6 @@ int runAPIs(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 
 	cout << endl << endl << "== DeviceAPI Test ==" << endl;
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 
 	while (BS_SDK_SUCCESS == sdkResult && MENU_DEV_BREAK != (selectedTop = showMenu(menuInfoDeviceAPI)))
 	{
@@ -331,47 +328,47 @@ int runAPIs(void* context, const DeviceInfo& device)
 			return BS_SDK_SUCCESS;
 
 		case MENU_DEV_GET_DEVINF:
-			sdkResult = dc.getDeviceInfo(id);
+			sdkResult = dc.getDeviceInfo(getSelectedDeviceID(device));
 			if (BS_SDK_SUCCESS == sdkResult)
 			break;
 		case MENU_DEV_GET_DEVINFEX:
-			sdkResult = dc.getDeviceInfoEx(id);
+			sdkResult = dc.getDeviceInfoEx(getSelectedDeviceID(device));
 			if (BS_SDK_SUCCESS == sdkResult)
 			break;
 		case MENU_DEV_GET_DEVTIME:
-			sdkResult = dc.getDeviceTime(id);
+			sdkResult = dc.getDeviceTime(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_SET_DEVTIME:
-			sdkResult = dc.setDeviceTime(id);
+			sdkResult = dc.setDeviceTime(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_CLR_DATABASE:
-			sdkResult = dc.clearDatabase(id);
+			sdkResult = dc.clearDatabase(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_FACTORY_RESET:
-			sdkResult = dc.factoryReset(id);
+			sdkResult = dc.factoryReset(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_REBOOT_DEV:
-			sdkResult = dc.rebootDevice(id);
+			sdkResult = dc.rebootDevice(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_LOCK_DEV:
-			sdkResult = dc.lockDevice(id);
+			sdkResult = dc.lockDevice(getSelectedDeviceID(device));
 			// try a fingerprint verification test.
 			break;
 		case MENU_DEV_UNLOCK_DEV:
-			sdkResult = dc.unlockDevice(id);
+			sdkResult = dc.unlockDevice(getSelectedDeviceID(device));
 			// try a fingerprint verification test.
 			break;
 		case MENU_DEV_UPG_FIRMWARE:
-			sdkResult = dc.upgradeFirmware(id);
+			sdkResult = dc.upgradeFirmware(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_UPD_RESOURCE:
-			sdkResult = dc.updateResource(id);
+			sdkResult = dc.updateResource(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_GET_SPCDEVINFO:
-			sdkResult = dc.getSpecifiedDeviceInfo(id);
+			sdkResult = dc.getSpecifiedDeviceInfo(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_GET_AUTH_OPRLEVELEX:
-			sdkResult = dc.getAuthOperatorLevelEx(id);
+			sdkResult = dc.getAuthOperatorLevelEx(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_GET_ALLAUTH_OPRLEVELEX:
 			break;
@@ -383,85 +380,97 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 
 		case MENU_DEV_GET_FINGERPRINTCONFIG:
-			sdkResult = getFingerprintConfig(context, id);
+			sdkResult = getFingerprintConfig(context, device);
 			break;
 		case MENU_DEV_SET_FINGERPRINTCONFIG: 
-			sdkResult = setFingerprintConfig(context, id);
+			sdkResult = setFingerprintConfig(context, device);
 			break;
 		case MENU_DEV_GET_FACECONFIG:
-			sdkResult = getFaceConfig(context, id);
+			sdkResult = getFaceConfig(context, device);
 			break;
 		case MENU_DEV_SET_FACECONFIG:
-			sdkResult = setFaceConfig(context, id);
+			sdkResult = setFaceConfig(context, device);
 			break;
 		case MENU_DEV_GET_SYSTEMCONFIG:
-			sdkResult = getSystemConfig(context, id);
+			sdkResult = getSystemConfig(context, device);
 			break;
 		case MENU_DEV_SET_SYSTEMCONFIG:
-			sdkResult = setSystemConfig(context, id);
+			sdkResult = setSystemConfig(context, device);
 			break;
 		case MENU_DEV_GET_DESFIRECONFIGEX:
-			sdkResult = getDesFireCardConfigEx(context, id);
+			sdkResult = getDesFireCardConfigEx(context, device);
 			break;
 		case MENU_DEV_SET_DESFIRECONFIGEX:
-			sdkResult = setDesFireCardConfigEx(context, id);
+			sdkResult = setDesFireCardConfigEx(context, device);
 			break;
 		case MENU_DEV_GET_AUTHCONFIGEX:
-			sdkResult = getAuthConfigEx(context, id);
+			sdkResult = getAuthConfigEx(context, device);
 			break;
 		case MENU_DEV_SET_AUTHCONFIGEX:
-			sdkResult = setAuthConfigEx(context, id);
+			sdkResult = setAuthConfigEx(context, device);
 			break;
 		case MENU_DEV_GET_FACECONFIGEX:
-			sdkResult = getFaceConfigEx(context, id);
+			sdkResult = getFaceConfigEx(context, device);
 			break;
 		case MENU_DEV_SET_FACECONFIGEX:
-			sdkResult = setFaceConfigEx(context, id);
+			sdkResult = setFaceConfigEx(context, device);
 			break;
 		case MENU_DEV_GET_THERMALCAMERACONFIG:
-			sdkResult = getThermalCameraConfig(context, id);
+			sdkResult = getThermalCameraConfig(context, device);
 			break;
 		case MENU_DEV_SET_THERMALCAMERACONFIG:
-			sdkResult = setThermalCameraConfig(context, id);
+			sdkResult = setThermalCameraConfig(context, device);
 			break;
 		case MENU_DEV_GET_EVENTCONFIG:
-			sdkResult = getEventConfig(context, id);
+			sdkResult = getEventConfig(context, device);
 			break;
 		case MENU_DEV_SET_EVENTCONFIG:
-			sdkResult = setEventConfig(context, id);
+			sdkResult = setEventConfig(context, device);
 			break;
 		case MENU_DEV_GET_INPUTCONFIG:
-			sdkResult = getInputConfig(context, id);
+			sdkResult = getInputConfig(context, device);
 			break;
 		case MENU_DEV_GET_TRIGGERACTIONCONFIG:
-			sdkResult = getTriggerActionConfig(context, id);
+			sdkResult = getTriggerActionConfig(context, device);
 			break;
 		case MENU_DEV_SET_TRIGGERACTIONCONFIG:
-			sdkResult = setTriggerActionConfig(context, id);
+			sdkResult = setTriggerActionConfig(context, device);
 			break;
 		case MENU_DEV_REM_TRIGGERACTIONCONFIG:
-			sdkResult = removeTriggerActionConfig(context, id);
+			sdkResult = removeTriggerActionConfig(context, device);
 			break;
 		case MENU_DEV_UPD_DEVICE_VOLUME:
-			sdkResult = updateDeviceVolume(context, id);
+			sdkResult = updateDeviceVolume(context, device);
 			break;
 		case MENU_DEV_RST_CONFIG_EXCEPT_NETINFO:
-			sdkResult = cc.resetConfigExceptNetInfo(id);
+			sdkResult = cc.resetConfigExceptNetInfo(getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_GET_BARCODECONFIG:
-			sdkResult = getBarcodeConfig(context, id);
+			sdkResult = getBarcodeConfig(context, device);
 			break;
 		case MENU_DEV_SET_BARCODECONFIG:
-			sdkResult = setBarcodeConfig(context, id);
+			sdkResult = setBarcodeConfig(context, device);
 			break;
 		case MENU_DEV_GET_RS485CONFIG:
-			sdkResult = getRS485Config(context, id);
+			sdkResult = getRS485Config(context, device);
 			break;
 		case MENU_DEV_SET_RS485CONFIG:
-			sdkResult = setRS485Config(context, id);
+			sdkResult = setRS485Config(context, device);
 			break;
 		case MENU_DEV_GET_DEVICECAPABILITIES:
-			sdkResult = getDeviceCapabilities(context, id);
+			sdkResult = getDeviceCapabilities(context, device);
+			break;
+		case MENU_DEV_GET_INPUTCONFIGEX:
+			sdkResult = getInputConfigEx(context, device);
+			break;
+		case MENU_DEV_SET_INPUTCONFIGEX:
+			sdkResult = setInputConfigEx(context, device);
+			break;
+		case MENU_DEV_GET_RELAYACTIONCONFIG:
+			sdkResult = getRelayActionConfig(context, device);
+			break;
+		case MENU_DEV_SET_RELAYACTIONCONFIG:
+			sdkResult = setRelayActionConfig(context, device);
 			break;
 		default:
 			break;
@@ -627,14 +636,15 @@ BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info)
 	for (uint32_t index = 0; index < info.slaveDevices_.size(); index++)
 		printf("%u - (S)\n", info.slaveDevices_[index]);
 
-	return Utility::getInput<BS2_DEVICE_ID>("Select ID:");
+	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 }
 
-int getFingerprintConfig(void* context, BS2_DEVICE_ID id)
+int getFingerprintConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2FingerprintConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFingerprintConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -642,27 +652,29 @@ int getFingerprintConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setFingerprintConfig(void* context, BS2_DEVICE_ID id)
+int setFingerprintConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2FingerprintConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFingerprintConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
-		char checkDuplicate = Utility::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
-		config.checkDuplicate = ('y' == checkDuplicate || 'Y' == checkDuplicate);
+		string msg = "Do you want to turn on the checkDuplicate option?";
+		config.checkDuplicate = Utility::isYes(msg);
 		sdkResult = cc.setFingerprintConfig(id, config);
 	}
 
 	return sdkResult;
 }
 
-int getFaceConfig(void* context, BS2_DEVICE_ID id)
+int getFaceConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2FaceConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFaceConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -670,26 +682,29 @@ int getFaceConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setFaceConfig(void* context, BS2_DEVICE_ID id)
+int setFaceConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2FaceConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFaceConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
-		char checkDuplicate = Utility::getInput<char>("Do you want to turn on the checkDuplicate option? [y/n]");
-		config.checkDuplicate = ('y' == checkDuplicate || 'Y' == checkDuplicate);
+		string msg = "Do you want to turn on the checkDuplicate option?";
+		config.checkDuplicate = Utility::isYes(msg);
 		sdkResult = cc.setFaceConfig(id, config);
 	}
 
 	return sdkResult;
 }
 
-int getSystemConfig(void* context, BS2_DEVICE_ID id)
+int getSystemConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2SystemConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getSystemConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -697,10 +712,12 @@ int getSystemConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setSystemConfig(void* context, BS2_DEVICE_ID id)
+int setSystemConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2SystemConfig config = {0,};
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getSystemConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
@@ -728,11 +745,12 @@ int setSystemConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int getDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
+int getDesFireCardConfigEx(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2DesFireCardConfigEx config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getDesFireCardConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -740,10 +758,12 @@ int getDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
+int setDesFireCardConfigEx(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2DesFireCardConfigEx config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getDesFireCardConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
@@ -762,10 +782,12 @@ int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int getAuthConfigEx(void* context, BS2_DEVICE_ID id)
+int getAuthConfigEx(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2AuthConfigExt config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 
 	int sdkResult = cc.getAuthConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
@@ -774,12 +796,14 @@ int getAuthConfigEx(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setAuthConfigEx(void* context, BS2_DEVICE_ID id)
+int setAuthConfigEx(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2AuthConfigExt config = { 0, };
 	const int EXIT_MENU = 999;
 	uint32_t mode(0);
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 
 	int sdkResult = cc.getAuthConfigEx(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -964,11 +988,12 @@ int setAuthConfigEx(void* context, BS2_DEVICE_ID id)
 	return cc.setAuthConfigEx(id, config);
 }
 
-int getFaceConfigEx(void* context, BS2_DEVICE_ID id)
+int getFaceConfigEx(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2FaceConfigExt config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFaceConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -976,12 +1001,14 @@ int getFaceConfigEx(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
+int setFaceConfigEx(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2FaceConfigExt config = { 0, };
 	string msg;
 	stringstream strmsg;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 
 	msg = "Insert thermal check mode. (0: Not use, 1: Hard, 2: Soft)";
 	config.thermalCheckMode = (BS2_FACE_CHECK_MODE)Utility::getInput<uint32_t>(msg);
@@ -1003,16 +1030,16 @@ int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
 	msg = "Insert mask detection level. (0: Not use, 1: Normal, 2: High, 3: Very high)";
 	config.maskDetectionLevel = (BS2_MASK_DETECTION_LEVEL)Utility::getInput<uint32_t>(msg);
 
-	msg = "Do you want to record the temperature in the event log? [y/n]";
+	msg = "Do you want to record the temperature in the event log?";
 	config.auditTemperature = Utility::isYes(msg);
 
-	msg = "Do you want to use reject sound? [y/n]";
+	msg = "Do you want to use reject sound?";
 	config.useRejectSound = Utility::isYes(msg);
 
-	msg = "Do you want to use overlapped thermal? [y/n]";
+	msg = "Do you want to use overlapped thermal?";
 	config.useOverlapThermal = Utility::isYes(msg);
 
-	msg = "Do you want to use dynamic ROI? [y/n]";
+	msg = "Do you want to use dynamic ROI?";
 	config.useDynamicROI = Utility::isYes(msg);
 
 
@@ -1025,11 +1052,12 @@ int setFaceConfigEx(void* context, BS2_DEVICE_ID id)
 	return cc.setFaceConfigEx(id, config);
 }
 
-int getThermalCameraConfig(void* context, BS2_DEVICE_ID id)
+int getThermalCameraConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2ThermalCameraConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getThermalCameraConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -1037,11 +1065,13 @@ int getThermalCameraConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setThermalCameraConfig(void* context, BS2_DEVICE_ID id)
+int setThermalCameraConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2ThermalCameraConfig config = { 0, };
 	string msg;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 
 	msg = "Insert camera distance from user. (cm. Recommend: 70)";
 	config.distance = (uint8_t)Utility::getInput<uint32_t>(msg);
@@ -1059,7 +1089,7 @@ int setThermalCameraConfig(void* context, BS2_DEVICE_ID id)
 	msg = "height:";
 	config.roi.height = (uint16_t)Utility::getInput<uint32_t>(msg);
 
-	msg = "Do you want to use body compensation [y/n]";
+	msg = "Do you want to use body compensation";
 	config.useBodyCompensation = Utility::isYes(msg);
 
 	msg = "Insert compensation temperature *10. If you want -4.5, it is -45. (-50 ~ 50)";
@@ -1068,11 +1098,12 @@ int setThermalCameraConfig(void* context, BS2_DEVICE_ID id)
 	return cc.setThermalCameraConfig(id, config);
 }
 
-int getEventConfig(void* context, BS2_DEVICE_ID id)
+int getEventConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2EventConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getEventConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -1080,12 +1111,13 @@ int getEventConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setEventConfig(void* context, BS2_DEVICE_ID id)
+int setEventConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2EventConfig config = { 0, };
 	string msg;
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	//msg = "Insert camera distance from user. (cm. Recommend: 70)";
 	//config.distance = (uint8_t)Utility::getInput<uint32_t>(msg);
 
@@ -1102,7 +1134,7 @@ int setEventConfig(void* context, BS2_DEVICE_ID id)
 	//msg = "height:";
 	//config.roi.height = (uint16_t)Utility::getInput<uint32_t>(msg);
 
-	//msg = "Do you want to use body compensation [y/n]";
+	//msg = "Do you want to use body compensation";
 	//config.useBodyCompensation = Utility::isYes(msg);
 
 	//msg = "Insert compensation temperature *10. If you want -4.5, it is -45. (-50 ~ 50)";
@@ -1111,23 +1143,41 @@ int setEventConfig(void* context, BS2_DEVICE_ID id)
 	return cc.setEventConfig(id, config);
 }
 
-int getInputConfig(void* context, BS2_DEVICE_ID id)
+int getInputConfig(void* context, const DeviceInfo& device)
 {
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+
+	DeviceControl dc(context);
+	BS2SimpleDeviceInfo info = { 0, };
+	int sdkResult = dc.getDeviceInfo(id, info);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	switch (info.type)
+	{
+	case BS2_DEVICE_TYPE_CORESTATION_40:
+	case BS2_DEVICE_TYPE_IM_120:
+		break;
+	default:
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
 	ConfigControl cc(context);
 	BS2InputConfig config = { 0, };
 
-	int sdkResult = cc.getInputConfig(id, config);
+	sdkResult = cc.getInputConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
 
 	return sdkResult;
 }
 
-int getTriggerActionConfig(void* context, BS2_DEVICE_ID id)
+int getTriggerActionConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2TriggerActionConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getTriggerActionConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -1135,11 +1185,13 @@ int getTriggerActionConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setTriggerActionConfig(void* context, BS2_DEVICE_ID id)
+int setTriggerActionConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2TriggerActionConfig config = { 0, };
 	string msg;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 
 	msg = "How many trigger-action do you want to register?";
 	config.numItems = (uint8_t)Utility::getInput<uint32_t>(msg);
@@ -1200,19 +1252,21 @@ int setTriggerActionConfig(void* context, BS2_DEVICE_ID id)
 	return cc.setTriggerActionConfig(id, config);
 }
 
-int removeTriggerActionConfig(void* context, BS2_DEVICE_ID id)
+int removeTriggerActionConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2TriggerActionConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	return cc.setTriggerActionConfig(id, config);
 }
 
-int updateDeviceVolume(void* context, BS2_DEVICE_ID id)
+int updateDeviceVolume(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2DisplayConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getDisplayConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -1224,11 +1278,12 @@ int updateDeviceVolume(void* context, BS2_DEVICE_ID id)
 	return cc.setDisplayConfig(id, config);
 }
 
-int getBarcodeConfig(void* context, BS2_DEVICE_ID id)
+int getBarcodeConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2BarcodeConfig config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getBarcodeConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -1236,17 +1291,18 @@ int getBarcodeConfig(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setBarcodeConfig(void* context, BS2_DEVICE_ID id)
+int setBarcodeConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2BarcodeConfig config = { 0, };
 	string msg;
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getBarcodeConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
-	config.useBarcode = Utility::isYes("Would you like to use barcode function? [y/n]");
+	config.useBarcode = Utility::isYes("Would you like to use barcode function?");
 
 	if (config.useBarcode)
 	{
@@ -1261,11 +1317,12 @@ int setBarcodeConfig(void* context, BS2_DEVICE_ID id)
 	return cc.setBarcodeConfig(id, config);
 }
 
-int getRS485Config(void* context, BS2_DEVICE_ID id)
+int getRS485Config(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	BS2Rs485Config config = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getRS485Config(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		cc.print(config);
@@ -1273,12 +1330,14 @@ int getRS485Config(void* context, BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int setRS485Config(void* context, BS2_DEVICE_ID id)
+int setRS485Config(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
 	DeviceControl dc(context);
 	BS2Rs485Config config = { 0, };
 	string msg;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 
 	BS2SimpleDeviceInfo info = {0,};
 	int sdkResult = dc.getDeviceInfo(id, info);
@@ -1326,12 +1385,12 @@ int setRS485Config(void* context, BS2_DEVICE_ID id)
 		}
 	}
 
-	msg = "Would you like to use IntelligentPD-related settings? [y/n]";
+	msg = "Would you like to use IntelligentPD-related settings?";
 	config.intelligentInfo.supportConfig = Utility::isYes(msg);
 
 	if (config.intelligentInfo.supportConfig)
 	{
-		msg = "Would you like to use an exception code? [y/n]";
+		msg = "Would you like to use an exception code?";
 		config.intelligentInfo.useExceptionCode = Utility::isYes(msg);
 		if (config.intelligentInfo.useExceptionCode)
 		{
@@ -1354,14 +1413,135 @@ int setRS485Config(void* context, BS2_DEVICE_ID id)
 	return cc.setRS485Config(id, config);
 }
 
-int getDeviceCapabilities(void* context, BS2_DEVICE_ID id)
+int getDeviceCapabilities(void* context, const DeviceInfo& device)
 {
 	DeviceControl dc(context);
 	BS2DeviceCapabilities cap = { 0, };
 
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = dc.getDeviceCapabilities(id, cap);
 	if (BS_SDK_SUCCESS == sdkResult)
 		dc.print(cap);
 
 	return sdkResult;
+}
+
+int getInputConfigEx(void* context, const DeviceInfo& device)
+{
+	// As of 2021.08.03, only IM-120 is supported
+	ConfigControl cc(context);
+	BS2InputConfigEx config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getInputConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
+}
+
+int setInputConfigEx(void* context, const DeviceInfo& device)
+{
+	// As of 2021.08.03, only IM-120 is supported
+	ConfigControl cc(context);
+	BS2InputConfigEx config = { 0, };
+	string msg;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	const int STOP_N_SET = -1;
+
+	int sdkResult = cc.getInputConfigEx(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	msg = "Please enter number of inputs.";
+	config.numInputs = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please enter number of supervised inputs.";
+	config.numSupervised = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	while (true)
+	{
+		msg = "What input port would you like to set? [-1(Exit), 0, ..., %d]";
+		int idx = Utility::getInput<int>(msg, config.numSupervised - 1);
+		if (STOP_N_SET == idx)
+			break;
+
+		config.inputs[idx].portIndex = (uint8_t)idx;
+
+		msg = "Please enter the switch type. (N/O: 0, N/C: 1)";
+		config.inputs[idx].switchType = (BS2_SWITCH_TYPE)Utility::getInput<uint32_t>(msg);
+
+		msg = "Please enter the duration.";
+		config.inputs[idx].duration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+		stringstream strmMsg;
+		strmMsg << "Please enter the type of resistance value for supervised input." << endl;
+		strmMsg << "[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised]";
+		config.inputs[idx].supervisedResistor = (uint8_t)Utility::getInput<uint32_t>(strmMsg.str());
+	}
+
+	return cc.setInputConfigEx(id, config);
+}
+
+int getRelayActionConfig(void* context, const DeviceInfo& device)
+{
+	// As of 2021.08.03, only IM-120 is supported
+	ConfigControl cc(context);
+	BS2RelayActionConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getRelayActionConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cc.print(config);
+
+	return sdkResult;
+}
+
+int setRelayActionConfig(void* context, const DeviceInfo& device)
+{
+	// As of 2021.08.03, only IM-120 is supported
+	ConfigControl cc(context);
+	BS2RelayActionConfig config = { 0, };
+	string msg;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	const int STOP_N_SET = -1;
+
+	int sdkResult = cc.getRelayActionConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.deviceID = id;
+
+	while (true)
+	{
+		msg = "What relay port would you like to set? [-1(Exit), 0, ..., %d]";
+		int idxRelay = Utility::getInput<int>(msg, BS2_MAX_RELAY_ACTION - 1);
+		if (STOP_N_SET == idxRelay)
+			break;
+
+		config.relay[idxRelay].port = (uint8_t)idxRelay;
+
+		msg = "Do you want to set an alarm for RS485 disconnection?";
+		config.relay[idxRelay].disconnEnabled = Utility::isYes(msg);
+
+		while (true)
+		{
+			msg = "What input port would you like to set? [-1(Exit), 0, ..., %d]";
+			int idxInput = Utility::getInput<int>(msg, BS2_MAX_RELAY_ACTION_INPUT - 1);
+			if (STOP_N_SET == idxInput)
+				break;
+
+			config.relay[idxRelay].input[idxInput].port = (uint8_t)idxInput;
+
+			msg = "Please enter the type of relay action input [0: None, 1: Linkage]";
+			config.relay[idxRelay].input[idxInput].type = (BS2_RELAY_ACTION_INPUT_TYPE)Utility::getInput<uint32_t>(msg);
+
+			msg = "Please enter the mask of relay action input [0: None, 0x01: Alarm, 0x02: Fault]";
+			config.relay[idxRelay].input[idxInput].mask = (BS2_RELAY_ACTION_INPUT_MASK)Utility::getInput<uint32_t>(msg);
+		}
+	}
+
+	return cc.setRelayActionConfig(id, config);
 }

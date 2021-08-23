@@ -286,6 +286,42 @@ int ConfigControl::setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config
 	return sdkResult;
 }
 
+int ConfigControl::getInputConfigEx(BS2_DEVICE_ID id, BS2InputConfigEx& config)
+{
+	int sdkResult = BS2_GetInputConfigEx(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetInputConfigEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config)
+{
+	int sdkResult = BS2_SetInputConfigEx(context_, id, const_cast<BS2InputConfigEx*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetInputConfigEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config)
+{
+	int sdkResult = BS2_GetRelayActionConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetRelayActionConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionConfig& config)
+{
+	int sdkResult = BS2_SetRelayActionConfig(context_, id, const_cast<BS2RelayActionConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetRelayActionConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -582,9 +618,9 @@ void ConfigControl::print(const BS2InputConfig& config) const
 {
 	TRACE("==[BS2InputConfig]==");
 	TRACE("+--distance : %u", config.numInputs);
-	TRACE("|--emissionRate : %u", config.numSupervised);
+	TRACE("|--numSupervised : %u", config.numSupervised);
 
-	for (uint8_t idx = 0; idx < config.numInputs; idx++)
+	for (uint8_t idx = 0; idx < config.numSupervised; idx++)
 	{
 		TRACE("+--Port(%u)", idx);
 		TRACE("   |--portIndex : %u", config.supervised_inputs[idx].portIndex);
@@ -807,4 +843,42 @@ void ConfigControl::print(const BS2Rs485SlaveDevice& device) const
 	TRACE("|  |  |--deviceType : %u", device.deviceType);
 	TRACE("|  |  |--enableOSDP : %u", device.enableOSDP);
 	TRACE("|  |  |--connected : %u", device.connected);
+}
+
+void ConfigControl::print(const BS2InputConfigEx& config) const
+{
+	TRACE("==[BS2InputConfigEx]==");
+	TRACE("+--numInputs : %u", config.numInputs);
+	TRACE("|--numSupervised : %u", config.numSupervised);
+
+	for (uint8_t idx = 0; idx < config.numSupervised; idx++)
+	{
+		TRACE("+--inputs (%u)", idx);
+		TRACE("   |--portIndex : %u", config.inputs[idx].portIndex);
+		TRACE("   |--switchType : %u", config.inputs[idx].switchType);
+		TRACE("   |--duration : %u", config.inputs[idx].duration);
+		TRACE("   |--supervisedResistor : %u", config.inputs[idx].supervisedResistor);
+	}
+}
+
+void ConfigControl::print(const BS2RelayActionConfig& config) const
+{
+	TRACE("==[BS2RelayActionConfig]==");
+	TRACE("+--deviceID : %u", config.deviceID);
+
+	for (uint8_t idxRelay = 0; idxRelay < BS2_MAX_RELAY_ACTION; idxRelay++)
+	{
+		TRACE("+--relay (%u)", idxRelay);
+		TRACE("   |--port : %u", config.relay[idxRelay].port);
+		TRACE("   |--disconnEnabled : %u", config.relay[idxRelay].disconnEnabled);
+
+		for (uint8_t idxInput = 0; idxInput < BS2_MAX_RELAY_ACTION_INPUT; idxInput++)
+		{
+			TRACE("   |--input(%u) -> port: %u, type: %u, mask: %u",
+				idxInput,
+				config.relay[idxRelay].input[idxInput].port,
+				config.relay[idxRelay].input[idxInput].type,
+				config.relay[idxRelay].input[idxInput].mask);
+		}
+	}
 }

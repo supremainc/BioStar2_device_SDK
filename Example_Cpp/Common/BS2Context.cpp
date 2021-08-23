@@ -216,3 +216,14 @@ int BS2Context::setSSLHandler()
 
 	return sdkResult;
 }
+
+int BS2Context::setNotificationListener(OnAlarmFired fpAlarmFired, OnInputDetected fpInputDetected, OnConfigChanged fpConfigChanged)
+{
+	int sdkResult = BS2_SetNotificationListener(context_, fpAlarmFired, fpInputDetected, fpConfigChanged);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetNotificationListener call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}

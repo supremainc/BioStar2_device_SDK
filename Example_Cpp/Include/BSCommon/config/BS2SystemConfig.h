@@ -64,7 +64,7 @@ typedef struct {
 	BS2_BOOL reserved0;                                  ///< 1 byte   (write protected)
 	uint8_t reserved[2];                                 ///< 2 bytes
 	uint32_t useCardOperationMask;			   			 ///< 4 Bytes (bitmask , no use 0 postion bit - 0~30 bit, valid data- 31 bit)
-	uint8_t reserved2[16];                               ///< 20 bytes (reserved)
+	uint8_t reserved2[16];                               ///< 16 bytes (reserved)
 } BS2SystemConfig;
 
 #endif	// __BS2_SYSTEM_CONFIG_H__

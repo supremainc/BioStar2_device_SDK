@@ -204,6 +204,11 @@ enum {
 	BS2_EVENT_BREAK_GLASS 							= 0xC100, // ~ 0xC1FF;
 	BS2_EVENT_MEMORY_FULL_MIGRATION 				= 0xC200,        // Memory full and swap partition
 
+	// Relay Action (Linakge & Latching)
+	BS2_EVENT_RELAY_ACTION_ON					= 0xC300,
+	BS2_EVENT_RELAY_ACTION_OFF					= 0xC400,
+	BS2_EVENT_RELAY_ACTION_KEEP					= 0xC500,
+
 	/**
 	 *  sub event code
 	 */
@@ -397,6 +402,11 @@ typedef struct {
 			BS2_DOOR_ID doorID[4];
 			uint8_t reserved[12];
 		} interlock;
+		struct {
+			BS2_PORT relayPort;
+			BS2_PORT inputPort;
+			uint8_t reserved[28];
+		} relayAction;
 	};
 	union {								///< 2 bytes
 		BS2_EVENT_CODE code;

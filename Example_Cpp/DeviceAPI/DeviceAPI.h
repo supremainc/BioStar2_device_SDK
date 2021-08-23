@@ -70,6 +70,10 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_RS485CONFIG,
 	MENU_DEV_SET_RS485CONFIG,
 	MENU_DEV_GET_DEVICECAPABILITIES,
+	MENU_DEV_GET_INPUTCONFIGEX,
+	MENU_DEV_SET_INPUTCONFIGEX,
+	MENU_DEV_GET_RELAYACTIONCONFIG,
+	MENU_DEV_SET_RELAYACTIONCONFIG,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -120,6 +124,10 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_RS485CONFIG,		"BS2_GetRS485Config"},
 	{MENU_DEV_SET_RS485CONFIG,		"BS2_SetRS485Config"},
 	{MENU_DEV_GET_DEVICECAPABILITIES,	"BS2_GetDeviceCapabilities"},
+	{MENU_DEV_GET_INPUTCONFIGEX,		"BS2_GetInputConfigEx"},
+	{MENU_DEV_SET_INPUTCONFIGEX,		"BS2_SetInputConfigEx"},
+	{MENU_DEV_GET_RELAYACTIONCONFIG,	"BS2_GetRelayActionConfig"},
+	{MENU_DEV_SET_RELAYACTIONCONFIG,	"BS2_SetRelayActionConfig"},
 };
 
 
@@ -141,29 +149,33 @@ int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
 int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
 BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
-int getFingerprintConfig(void* context, BS2_DEVICE_ID id);
-int setFingerprintConfig(void* context, BS2_DEVICE_ID id);
-int getFaceConfig(void* context, BS2_DEVICE_ID id);
-int setFaceConfig(void* context, BS2_DEVICE_ID id);
-int getSystemConfig(void* context, BS2_DEVICE_ID id);
-int setSystemConfig(void* context, BS2_DEVICE_ID id);
-int getDesFireCardConfigEx(void* context, BS2_DEVICE_ID id);
-int setDesFireCardConfigEx(void* context, BS2_DEVICE_ID id);
-int getAuthConfigEx(void* context, BS2_DEVICE_ID id);
-int setAuthConfigEx(void* context, BS2_DEVICE_ID id);
-int getFaceConfigEx(void* context, BS2_DEVICE_ID id);
-int setFaceConfigEx(void* context, BS2_DEVICE_ID id);
-int getThermalCameraConfig(void* context, BS2_DEVICE_ID id);
-int setThermalCameraConfig(void* context, BS2_DEVICE_ID id);
-int getEventConfig(void* context, BS2_DEVICE_ID id);
-int setEventConfig(void* context, BS2_DEVICE_ID id);
-int getInputConfig(void* context, BS2_DEVICE_ID id);
-int getTriggerActionConfig(void* context, BS2_DEVICE_ID id);
-int setTriggerActionConfig(void* context, BS2_DEVICE_ID id);
-int removeTriggerActionConfig(void* context, BS2_DEVICE_ID id);
-int updateDeviceVolume(void* context, BS2_DEVICE_ID id);
-int getBarcodeConfig(void* context, BS2_DEVICE_ID id);
-int setBarcodeConfig(void* context, BS2_DEVICE_ID id);
-int getRS485Config(void* context, BS2_DEVICE_ID id);
-int setRS485Config(void* context, BS2_DEVICE_ID id);
-int getDeviceCapabilities(void* context, BS2_DEVICE_ID id);
+int getFingerprintConfig(void* context, const DeviceInfo& device);
+int setFingerprintConfig(void* context, const DeviceInfo& device);
+int getFaceConfig(void* context, const DeviceInfo& device);
+int setFaceConfig(void* context, const DeviceInfo& device);
+int getSystemConfig(void* context, const DeviceInfo& device);
+int setSystemConfig(void* context, const DeviceInfo& device);
+int getDesFireCardConfigEx(void* context, const DeviceInfo& device);
+int setDesFireCardConfigEx(void* context, const DeviceInfo& device);
+int getAuthConfigEx(void* context, const DeviceInfo& device);
+int setAuthConfigEx(void* context, const DeviceInfo& device);
+int getFaceConfigEx(void* context, const DeviceInfo& device);
+int setFaceConfigEx(void* context, const DeviceInfo& device);
+int getThermalCameraConfig(void* context, const DeviceInfo& device);
+int setThermalCameraConfig(void* context, const DeviceInfo& device);
+int getEventConfig(void* context, const DeviceInfo& device);
+int setEventConfig(void* context, const DeviceInfo& device);
+int getInputConfig(void* context, const DeviceInfo& device);
+int getTriggerActionConfig(void* context, const DeviceInfo& device);
+int setTriggerActionConfig(void* context, const DeviceInfo& device);
+int removeTriggerActionConfig(void* context, const DeviceInfo& device);
+int updateDeviceVolume(void* context, const DeviceInfo& device);
+int getBarcodeConfig(void* context, const DeviceInfo& device);
+int setBarcodeConfig(void* context, const DeviceInfo& device);
+int getRS485Config(void* context, const DeviceInfo& device);
+int setRS485Config(void* context, const DeviceInfo& device);
+int getDeviceCapabilities(void* context, const DeviceInfo& device);
+int getInputConfigEx(void* context, const DeviceInfo& device);
+int setInputConfigEx(void* context, const DeviceInfo& device);
+int getRelayActionConfig(void* context, const DeviceInfo& device);
+int setRelayActionConfig(void* context, const DeviceInfo& device);

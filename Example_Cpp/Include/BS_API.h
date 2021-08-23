@@ -77,6 +77,7 @@
 #include "BSCommon/config/BS2ThermalCameraConfig.h"
 #include "BSCommon/config/BS2BarcodeConfig.h"
 #include "BSCommon/protocol/BS2DeviceInfo.h"
+#include "BSCommon/config/BS2RelayActionConfig.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -727,6 +728,10 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetThermalCameraConfig(void* context
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetThermalCameraConfig(void* context, BS2_DEVICE_ID deviceId, const BS2ThermalCameraConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, BS2BarcodeConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetBarcodeConfig(void* context, BS2_DEVICE_ID deviceId, const BS2BarcodeConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetInputConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2InputConfigEx* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetInputConfigEx(void* context, BS2_DEVICE_ID deviceId, const BS2InputConfigEx* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetRelayActionConfig(void* context, BS2_DEVICE_ID deviceId, BS2RelayActionConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRelayActionConfig(void* context, BS2_DEVICE_ID deviceId, const BS2RelayActionConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
@@ -807,6 +812,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_MakePinCodeWithKey(void* context, ch
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ComputeCRC16CCITT(unsigned char* data, uint32_t dataLen, uint16_t* crc);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCardModel(char* modelName, BS2_CARD_MODEL* cardModel);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceCapabilities(void* context, BS2_DEVICE_ID deviceId, BS2DeviceCapabilities* capabilities);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RunAction(void* context, BS2_DEVICE_ID deviceId, const BS2Action* action);
 
 // Slave Control api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice** slaveDeviceObj, uint32_t* slaveDeviceCount);

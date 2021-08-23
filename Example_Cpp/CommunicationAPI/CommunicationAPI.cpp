@@ -8,7 +8,7 @@
 #include "../Common/AccessControl.h"
 #include <memory>
 
-std::shared_ptr<int> ptr;
+//std::shared_ptr<int> ptr;
 
 extern void TRACE(const char* fmt, ...);
 using namespace std;
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 int setSSLHandler()
 {
 #ifndef _DEBUG
-	if (Utility::isYes("Do you want to listen by SSL connection? [y/n]"))
+	if (Utility::isYes("Do you want to listen by SSL connection?"))
 #endif
 	{
 		return BS2Context::getInstance()->setSSLHandler();
@@ -320,8 +320,7 @@ int connectViaIP(void* context, DeviceList& deviceList)
 int connectSlave(void* context, DeviceList& deviceList)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utility::getInput<char>("Do you want to find slave devices? [y/n]");
-	if ('y' == selected || 'Y' == selected)
+	if (Utility::isYes("Do you want to find slave devices?"))
 	{
 		displayConnectedDevices(deviceList);
 		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
@@ -360,8 +359,7 @@ int connectSlave(void* context, DeviceList& deviceList)
 int connectWiegand(void* context, DeviceList& deviceList)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utility::getInput<char>("Do you want to find wiegand devices? [y/n]");
-	if ('y' == selected || 'Y' == selected)
+	if (Utility::isYes("Do you want to find wiegand devices?"))
 	{
 		displayConnectedDevices(deviceList);
 		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
@@ -383,7 +381,7 @@ int connectWiegand(void* context, DeviceList& deviceList)
 
 uint32_t getSelectedIndex()
 {
-	return Utility::getInput<uint32_t>("Select ID:");
+	return Utility::getInput<uint32_t>("Select number:");
 }
 
 int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
@@ -790,7 +788,7 @@ int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList)
 	int sdkResult = BS_SDK_SUCCESS;
 	FILE* fp = NULL;
 
-	bool isWrite = Utility::isYes("Do you want to write face template to file? [y/n]");
+	bool isWrite = Utility::isYes("Do you want to write face template to file?");
 	if (isWrite)
 	{
 		displayConnectedDevices(deviceList, true);

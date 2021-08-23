@@ -166,8 +166,7 @@ int connectViaIP(void* context, DeviceInfo& device)
 int connectSlave(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utility::getInput<char>("Do you want to find slave devices? [y/n]");
-	if ('y' == selected || 'Y' == selected)
+	if (Utility::isYes("Do you want to find slave devices?"))					  
 	{
 		BS2_DEVICE_ID slaveID = 0;
 		ConfigControl cc(context);
@@ -195,8 +194,7 @@ int connectSlave(void* context, DeviceInfo& device)
 int connectWiegand(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char selected = Utility::getInput<char>("Do you want to find wiegand devices? [y/n]");
-	if ('y' == selected || 'Y' == selected)
+	if (Utility::isYes("Do you want to find wiegand devices?"))
 	{
 		BS2_DEVICE_ID wiegandID = 0;
 		int sdkResult = searchWiegand(context, device.id_, wiegandID);
@@ -209,7 +207,7 @@ int connectWiegand(void* context, DeviceInfo& device)
 
 uint32_t getSelectedIndex()
 {
-	return Utility::getInput<uint32_t>("Select ID:");
+	return Utility::getInput<uint32_t>("Select number:");
 }
 
 int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
@@ -548,7 +546,7 @@ BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info)
 	for (uint32_t index = 0; index < info.slaveDevices_.size(); index++)
 		printf("%u - (S)\n", info.slaveDevices_[index]);
 
-	return Utility::getInput<BS2_DEVICE_ID>("Select ID:");
+	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 }
 
 int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id)
@@ -655,8 +653,7 @@ int writeCard(UserControl& uc, BS2_DEVICE_ID id)
 	memcpy(card.credentials.templateData, fpTemplate, BS2_FINGER_TEMPLATE_SIZE);
 	card.header.duressMask = false;
 
-	char flag = Utility::getInput<char>("Do you want register access group ID? [y/n]");
-	if ('y' == flag || 'Y' == flag)
+	if (Utility::isYes("Do you want register access group ID?"))
 	{
 		stringstream msg;
 		msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
