@@ -358,6 +358,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_ENR_USR_SCAN_N_LOAD:
 			sdkResult = uc.enrollUserFaceExScanAndLoad(id);
 			break;
+		case MENU_USR_ACT_USR:
+			sdkResult = uc.activateUser(id);
+			break;
 		case MENU_USR_EXTRACT_TEMPLATE_FACEEX:
 			sdkResult = extractTemplateFaceEx(context, id);
 			break;

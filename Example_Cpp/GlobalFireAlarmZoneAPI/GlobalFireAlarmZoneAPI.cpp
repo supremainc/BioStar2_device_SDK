@@ -154,13 +154,15 @@ int main(int argc, char* argv[])
 
 	sdkContext = BS2Context::getInstance()->getContext();
 
-#ifdef RUN_SSL
-	if (BS_SDK_SUCCESS != setSSLHandler())
+	bool sslMode = Utility::isYes("Do you want to connect your device with SSL?");
+	if (sslMode)
 	{
-		BS2Context::getInstance()->releaseInstance();
-		return -1;
+		if (BS_SDK_SUCCESS != setSSLHandler())
+		{
+			BS2Context::getInstance()->releaseInstance();
+			return -1;
+		}
 	}
-#endif // RUN_SSL
 
 	// Create SDK context and initialize
 	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())

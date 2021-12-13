@@ -7,7 +7,6 @@
 *.pdb
 *.lastbuildstate
 *.ilk
-*.exe
 *.pch
 *.opendb
 *.sdf
@@ -25,6 +24,8 @@
 *.ldb
 *.asp
 *.bmp
+*.lib
+*.dll
 **/Debug
 **/Release
 **/*.tlog
@@ -34,3 +35,4 @@
 **/.vs/Example_Cpp/v14
 **/bin
 **/obj
+**/Lib

@@ -17,12 +17,15 @@ CommControl::~CommControl()
 {
 }
 
-int CommControl::searchDevices(vector<BS2SimpleDeviceInfo>& devices)
+int CommControl::searchDevices(vector<BS2SimpleDeviceInfo>& devices, string hostIP)
 {
 	BS2_DEVICE_ID* devicesIDObj = NULL;
 	uint32_t numOfDevices(0);
 
-	int sdkResult = BS2_SearchDevices(context_);
+	int sdkResult = (0 == hostIP.size()) ?
+		BS2_SearchDevices(context_) :
+		BS2_SearchDevicesEx(context_, hostIP.c_str());
+
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_SearchDevices call failed: %d", sdkResult);

@@ -71,6 +71,7 @@ public:
 	int makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& templateEx, BS2UserFaceExBlob* userBlob);
 	int enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card = NULL, BS2Fingerprint* finger = NULL, BS2Face* face = NULL, BS2FaceEx* faceEx = NULL);
 	int enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id);
+	int activateUser(BS2_DEVICE_ID id);
 
 	int updateCardTypeCRC(BS2SmartCardData& card);
 	int updateCardCRC(BS2SmartCardData& card);

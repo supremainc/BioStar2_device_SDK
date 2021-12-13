@@ -20,9 +20,4 @@
 
 typedef uint16_t BS2_PACKET_SEQ;
 
-typedef struct {
-	uint32_t		value1;
-	uint32_t		value2;
-} BS2PayloadHeader;
-
 #endif	// __BS2_PAKCET_H__

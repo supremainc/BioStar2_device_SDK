@@ -51,9 +51,5 @@ typedef struct {
 	uint8_t reserved[2];                          ///< packing
 } BS2EventExtInfo;
 
-typedef struct {
-	BS2_EVENT_ID id;                              ///< 4 bytes
-	BS2PayloadHeader payload;                     ///< 8 bytes
-} BS2EventExtHeader;
 
 #endif /* __BS2_EVENT_EXT_H__ */

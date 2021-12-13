@@ -66,6 +66,7 @@ public:
 	static uint32_t convertTimeString2UTC(std::string time);
 	static uint32_t getResourceSize(std::string file);
 	static bool getResourceFromFile(std::string file, std::shared_ptr<uint8_t> buffer, uint32_t size = 0);
+	static bool setResourceToFile(std::string file, uint8_t* buffer, uint32_t size);
 	static bool setResourceToFile(std::string file, std::shared_ptr<uint8_t> buffer, uint32_t size);
 
 	static std::string replaceValue(std::string data, std::string token, std::string replase);

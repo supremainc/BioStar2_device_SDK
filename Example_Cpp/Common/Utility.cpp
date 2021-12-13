@@ -109,6 +109,19 @@ bool Utility::getResourceFromFile(string file, shared_ptr<uint8_t> buffer, uint3
 	return true;
 }
 
+bool Utility::setResourceToFile(string file, uint8_t* buffer, uint32_t size)
+{
+	if (0 == file.size() || !buffer || 0 == size)
+		return false;
+
+	ofstream os;
+	os.open(file, ios::binary | ios::trunc);
+	os.write(reinterpret_cast<char*>(buffer), size);
+	os.close();
+
+	return true;
+}
+
 bool Utility::setResourceToFile(string file, shared_ptr<uint8_t> buffer, uint32_t size)
 {
 	if (0 == file.size() || !buffer || 0 == size)

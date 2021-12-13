@@ -1180,6 +1180,45 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int UserControl::activateUser(BS2_DEVICE_ID id)
+{
+	string uid;
+	uid.resize(BS2_USER_ID_SIZE);
+	uid = Utility::getInput<string>("Please enter a user ID :");
+	if (BS2_USER_ID_SIZE < uid.size())
+	{
+		TRACE("User ID is too big.");
+		return BS_SDK_ERROR_INVALID_PARAM;
+	}
+
+	uint32_t numUser = 1;
+	BS2_USER_MASK userMask = BS2_USER_MASK_ALL;
+	BS2UserBlob userBlob = { 0, };
+	int sdkResult = BS2_GetUserDatas(context_, id, const_cast<char*>(uid.c_str()), numUser, &userBlob, userMask);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetUserDatas call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	printHeader(userBlob);
+	//print(userBlob.cardObjs, userBlob.user.numCards);
+	//print(userBlob.fingerObjs, userBlob.user.numFingers);
+	//print(userBlob.faceObjs, userBlob.user.numFaces);
+
+	if (Utility::isYes("Activate the current user?"))
+		userBlob.user.flag = BS2_USER_FLAG_UPDATED;
+	else
+		userBlob.user.flag = BS2_USER_FLAG_DISABLED;
+
+	sdkResult = BS2_EnrolUser(context_, id, &userBlob, 1, 1);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_EnrolUser call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+
 int UserControl::getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, uint32_t* width, uint32_t* height)
 {
 	int sdkResult = BS2_GetLastFingerprintImage(context_, id, imageObj, width, height);

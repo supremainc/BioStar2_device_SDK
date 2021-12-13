@@ -13,8 +13,8 @@ BioStar2 Device SDK development framework allows developers to seamlessly integr
 SDK supports the following platforms:
 * [Windows 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Window/lib/x86)
 * [Windows 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Window/lib/x64)
-* [Ubuntu 16.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x86)
-* [Ubuntu 16.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x64)
+* [Ubuntu 18.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x86)
+* [Ubuntu 18.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x64)
 
 ### Learn More About The BioStar2 Device SDK
 
@@ -26,8 +26,14 @@ Learn how to create a context for device management and connect devices. [Watch 
 
 ### Example
 
-The SDK currently being distributed comes with C # examples. This github provides additional C ++ examples. 
-[C++Example](https://github.com/supremainc/BioStar2_device_SDK/tree/master/Example_Cpp)(Write in Visual C++ 2015)
+**1.** The SDK currently being distributed comes with C # examples. This github provides additional C ++ examples. 
+* [C++ Example](https://github.com/supremainc/BioStar2_device_SDK/tree/master/Example_Cpp)(Write in Visual C++ 2015)
+
+**2.** To run the example, after installing the supplied SDK (Maybe 'C:/Program Files (x86)/BioStar 2 Device SDK'), copy the Include and Lib directories to the appropriate path.
+* [C++ Example Include](https://github.com/supremainc/BioStar2_device_SDK/tree/master/Example_Cpp/Include)
+* [C++ Example Lib](https://github.com/supremainc/BioStar2_device_SDK/tree/master/Example_Cpp/Lib)
+* [C# Example Lib](https://github.com/supremainc/BioStar2_device_SDK/tree/master/Example_Csharp/cli/csharp/common/lib)
+
 <br>
 <br>
 
@@ -36,6 +42,37 @@ The SDK currently being distributed comes with C # examples. This github provide
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk./doku.php?id=en:release_note).
 <br>
+<br>
+
+### V2.8.2.3 released 11/29/2021:
+
+**Modified Features**
+
+**1.** Supported Linux environments have been upgraded to Ubuntu 18.04.
+|SDK Version|Supported Linux Version|
+|---|---|
+|Before V2.8.2|Ubuntu 16.04|
+|Later V2.8.2|Ubuntu 18.04|
+
+**2.** OpenSSL has been modified to support 1.1.1i from the existing 1.0.2n.
+* Refer to Building a Development Environment
+
+**3.** Fixed an issue where a BS_SDK_ERROR_SOCKET_IS_NOT_CONNECTED error occurred when calling BS2_GetFactoryConfig on an IPv6 operating device.
+
+**4.** Fixed an issue that could cause a BS_SDK_ERROR_TIMEOUT error when enrolling many image-based users on FSF2 devices.
+
+**5.** Fixed the problem that BS2_SetDebugExCallback does not work after 2.7.2.20.
+
+**6.** Removed incorrect support configuration for FSF2 (WLAN).
+
+**7.** Removed incorrect support configuration for XS2 (VoIP).
+
+**8.** Added incorrect support configuration for BER2 devices (Wiegand).
+
+**9.** Fix reserved2 resizing error due to adding useScreenSaver in C# example.
+
+**10.** There were fixes for stabilizing the code inside the SDK.
+
 <br>
 
 ### V2.8.1.0 released 08/05/2021:
@@ -122,10 +159,10 @@ Refer to API BS2_SetDisplayConfig
 **6.** Fixed the issue that CPU Usages goes up to 99% when BS2_SearchDevices is called repeatedly in a 4-core environment.
 
 **7.** FaceStation F2 Only The meaning and setting values of lightCondition in the BS2FaceConfig have been changed as follows.
-| |Supported Ver.|Meaning|0|1|2|3|
-|---|---|---|---|---|---|---|
-|As-Is|1.0.0 ~ 1.0.5|Ambient Brightness|Indoor|Outdoor|Auto|-|
-|To-Be|1.1.0 or higher|Light Brightness|Normal|High|- `(Deprecated)`|Not used|
+|Supported Ver.|Meaning|0|1|2|3|
+|---|---|---|---|---|---|
+|1.0.0 ~ 1.0.5|Ambient Brightness|Indoor|Outdoor|Auto|-|
+|1.1.0 or higher|Light Brightness|Normal|High|- `(Deprecated)`|Not used|
 
 <br>
 
