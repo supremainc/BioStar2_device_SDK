@@ -11,10 +11,11 @@ BioStar2 Device SDK development framework allows developers to seamlessly integr
 ### Get Started
 
 SDK supports the following platforms:
-* [Windows 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Window/lib/x86)
-* [Windows 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Window/lib/x64)
-* [Ubuntu 18.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x86)
-* [Ubuntu 18.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK/Lib/Linux/lib/x64)
+![SDKComponent](https://kb.supremainc.com/bs2sdk/doku.php?id=en:getting_started#sdk_components)
+* [Windows 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
+* [Windows 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
+* [Ubuntu 18.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
+* [Ubuntu 18.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
 
 ### Learn More About The BioStar2 Device SDK
 
