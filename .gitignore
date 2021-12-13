@@ -24,8 +24,6 @@
 *.ldb
 *.asp
 *.bmp
-*.lib
-*.dll
 **/Debug
 **/Release
 **/*.tlog
