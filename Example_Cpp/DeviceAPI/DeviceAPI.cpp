@@ -3,6 +3,7 @@
 #include "DeviceAPI.h"
 #include "../Common/Utility.h"
 #include "../Common/CommControl.h"
+#include "../Common/LogControl.h"
 
 #pragma warning(disable:4800)
 
@@ -19,7 +20,7 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		cout << Utility::getEventString(id, *event, timezone) << endl;
+		cout << LogControl::getEventString(id, *event, timezone) << endl;
 	}
 }
 
@@ -29,7 +30,7 @@ void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE te
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		cout << Utility::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
+		cout << LogControl::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
 	}
 }
 
@@ -577,7 +578,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			{
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
-				cout << Utility::getEventString(id, event, timezone) << endl;
+				cout << LogControl::getEventString(id, event, timezone) << endl;
 
 				if (event.image & 0x01)
 				{
@@ -647,7 +648,7 @@ int getFingerprintConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFingerprintConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -677,7 +678,7 @@ int getFaceConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFaceConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -707,7 +708,7 @@ int getSystemConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getSystemConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -753,7 +754,7 @@ int getDesFireCardConfigEx(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getDesFireCardConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -791,7 +792,7 @@ int getAuthConfigEx(void* context, const DeviceInfo& device)
 
 	int sdkResult = cc.getAuthConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -996,7 +997,7 @@ int getFaceConfigEx(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFaceConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1060,7 +1061,7 @@ int getThermalCameraConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getThermalCameraConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1106,7 +1107,7 @@ int getEventConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getEventConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1167,7 +1168,7 @@ int getInputConfig(void* context, const DeviceInfo& device)
 
 	sdkResult = cc.getInputConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1180,7 +1181,7 @@ int getTriggerActionConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getTriggerActionConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1271,7 +1272,7 @@ int updateDeviceVolume(void* context, const DeviceInfo& device)
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
-	cc.print(config);
+	ConfigControl::print(config);
 
 	config.volume = 10;
 
@@ -1286,7 +1287,7 @@ int getBarcodeConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getBarcodeConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1325,7 +1326,7 @@ int getRS485Config(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getRS485Config(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1421,7 +1422,7 @@ int getDeviceCapabilities(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = dc.getDeviceCapabilities(id, cap);
 	if (BS_SDK_SUCCESS == sdkResult)
-		dc.print(cap);
+		DeviceControl::print(cap);
 
 	return sdkResult;
 }
@@ -1435,7 +1436,7 @@ int getInputConfigEx(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getInputConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }
@@ -1493,7 +1494,7 @@ int getRelayActionConfig(void* context, const DeviceInfo& device)
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getRelayActionConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }

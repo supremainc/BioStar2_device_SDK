@@ -389,7 +389,7 @@ int ConfigControl::resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB)
 	return sdkResult;
 }
 
-void ConfigControl::print(const BS2SystemConfig& config) const
+void ConfigControl::print(const BS2SystemConfig& config)
 {
 	TRACE("==[BS2SystemConfig]==");
 	TRACE("timezone:%d", config.timezone);
@@ -408,7 +408,7 @@ void ConfigControl::print(const BS2SystemConfig& config) const
 	TRACE("useCardOperationMask:0x%08x", config.useCardOperationMask);
 }
 
-void ConfigControl::print(const BS2DisplayConfig& config) const
+void ConfigControl::print(const BS2DisplayConfig& config)
 {
 	TRACE("==[BS2DisplayConfig]==");
 	TRACE("language:%u", config.language);
@@ -434,7 +434,7 @@ void ConfigControl::print(const BS2DisplayConfig& config) const
 	TRACE("useScreenSaver:%u", config.useScreenSaver);
 }
 
-void ConfigControl::print(const BS2IpConfig& config) const
+void ConfigControl::print(const BS2IpConfig& config)
 {
 	TRACE("==[BS2IpConfig]==");
 	TRACE("connectionMode:%s", config.connectionMode ? "D2S" : "S2D");
@@ -450,7 +450,7 @@ void ConfigControl::print(const BS2IpConfig& config) const
 	TRACE("sslServerPort:%u", config.sslServerPort);
 }
 
-void ConfigControl::print(const BS2FactoryConfig& config) const
+void ConfigControl::print(const BS2FactoryConfig& config)
 {
 	TRACE("==[BS2FactoryConfig]==");
 	TRACE("deviceID:%u", config.deviceID);
@@ -468,7 +468,7 @@ void ConfigControl::print(const BS2FactoryConfig& config) const
 		config.firmwareVer.major, config.firmwareVer.minor, config.firmwareVer.ext, config.firmwareRev);
 }
 
-void ConfigControl::print(const BS2FingerprintConfig& config) const
+void ConfigControl::print(const BS2FingerprintConfig& config)
 {
 	TRACE("==[BS2FingerprintConfig]==");
 	TRACE("securityLevel:%u", config.securityLevel);
@@ -484,7 +484,7 @@ void ConfigControl::print(const BS2FingerprintConfig& config) const
 	TRACE("checkDuplicate:%u", config.checkDuplicate);
 }
 
-void ConfigControl::print(const BS2FaceConfig& config) const
+void ConfigControl::print(const BS2FaceConfig& config)
 {
 	TRACE("==[BS2FaceConfig]==");
 	TRACE("securityLevel:%u", config.securityLevel);
@@ -498,7 +498,7 @@ void ConfigControl::print(const BS2FaceConfig& config) const
 	TRACE("checkDuplicate:%u", config.checkDuplicate);
 }
 
-void ConfigControl::print(const BS2DesFireCardConfigEx& config) const
+void ConfigControl::print(const BS2DesFireCardConfigEx& config)
 {
 	TRACE("==[BS2DesFireCardConfigEx]==");
 	TRACE("appMasterKey:%s", Utility::getHexaString(config.desfireAppKey.appMasterKey, 16).c_str());	// maybe 0
@@ -508,7 +508,7 @@ void ConfigControl::print(const BS2DesFireCardConfigEx& config) const
 	TRACE("fileWriteKeyNumber:%u", config.desfireAppKey.fileWriteKeyNumber);
 }
 
-void ConfigControl::print(const BS2AuthConfigExt& config) const
+void ConfigControl::print(const BS2AuthConfigExt& config)
 {
 	TRACE("==[BS2AuthConfigExt]==");
 	TRACE("+--extAuthSchedule");
@@ -563,7 +563,7 @@ void ConfigControl::print(const BS2AuthConfigExt& config) const
 	TRACE("+--numOperators : %u", config.numOperators);
 }
 
-void ConfigControl::print(const BS2FaceConfigExt& config) const
+void ConfigControl::print(const BS2FaceConfigExt& config)
 {
 	TRACE("==[BS2FaceConfigExt]==");
 	TRACE("+--thermalCheckMode : %u", config.thermalCheckMode);
@@ -588,7 +588,7 @@ void ConfigControl::print(const BS2FaceConfigExt& config) const
 	TRACE("+--faceCheckOrder : %u", config.faceCheckOrder);
 }
 
-void ConfigControl::print(const BS2ThermalCameraConfig& config) const
+void ConfigControl::print(const BS2ThermalCameraConfig& config)
 {
 	TRACE("==[BS2ThermalCameraConfig]==");
 	TRACE("+--distance : %u", config.distance);
@@ -602,7 +602,7 @@ void ConfigControl::print(const BS2ThermalCameraConfig& config) const
 	TRACE("+--compensationTemperature : %d", config.compensationTemperature);
 }
 
-void ConfigControl::print(const BS2EventConfig& config) const
+void ConfigControl::print(const BS2EventConfig& config)
 {
 	TRACE("==[BS2EventConfig]==");
 	TRACE("+--numImageEventFilter : %u", config.numImageEventFilter);
@@ -614,7 +614,7 @@ void ConfigControl::print(const BS2EventConfig& config) const
 	}
 }
 
-void ConfigControl::print(const BS2InputConfig& config) const
+void ConfigControl::print(const BS2InputConfig& config)
 {
 	TRACE("==[BS2InputConfig]==");
 	TRACE("+--distance : %u", config.numInputs);
@@ -630,7 +630,7 @@ void ConfigControl::print(const BS2InputConfig& config) const
 	}
 }
 
-void ConfigControl::print(const BS2SupervisedInputConfig& config) const
+void ConfigControl::print(const BS2SupervisedInputConfig& config)
 {
 	TRACE("   +--[BS2SupervisedInputConfig]");
 	print(config.shortInput);
@@ -639,14 +639,14 @@ void ConfigControl::print(const BS2SupervisedInputConfig& config) const
 	print(config.offInput);
 }
 
-void ConfigControl::print(const BS2SVInputRange& inputRange) const
+void ConfigControl::print(const BS2SVInputRange& inputRange)
 {
 	TRACE("      +--[BS2SVInputRange]");
 	TRACE("         |--minValue : %u", inputRange.minValue);
 	TRACE("         +--maxValue : %u", inputRange.maxValue);
 }
 
-void ConfigControl::print(const BS2TriggerActionConfig& config) const
+void ConfigControl::print(const BS2TriggerActionConfig& config)
 {
 	TRACE("==[BS2TriggerActionConfig]==");
 	for (int idx = 0; idx < config.numItems; idx++)
@@ -657,7 +657,7 @@ void ConfigControl::print(const BS2TriggerActionConfig& config) const
 	}
 }
 
-void ConfigControl::print(const BS2Trigger& trigger) const
+void ConfigControl::print(const BS2Trigger& trigger)
 {
 	TRACE("==[BS2Trigger]==");
 	switch (trigger.type)
@@ -690,7 +690,7 @@ void ConfigControl::print(const BS2Trigger& trigger) const
 	}
 }
 
-void ConfigControl::print(const BS2Action& action) const
+void ConfigControl::print(const BS2Action& action)
 {
 	TRACE("==[BS2Action]==");
 	switch (action.type)
@@ -796,7 +796,7 @@ void ConfigControl::print(const BS2Action& action) const
 	}
 }
 
-void ConfigControl::print(const BS2BarcodeConfig& config) const
+void ConfigControl::print(const BS2BarcodeConfig& config)
 {
 	TRACE("==[BS2BarcodeConfig]==");
 	TRACE("+--useBarcode : %u", config.useBarcode);
@@ -804,7 +804,7 @@ void ConfigControl::print(const BS2BarcodeConfig& config) const
 }
 
 
-void ConfigControl::print(const BS2Rs485Config& config) const
+void ConfigControl::print(const BS2Rs485Config& config)
 {
 	TRACE("==[BS2Rs485Config]==");
 	TRACE("+--mode : %u", config.mode);
@@ -824,7 +824,7 @@ void ConfigControl::print(const BS2Rs485Config& config) const
 	TRACE("+  +--osdpID : %u", config.intelligentInfo.osdpID);
 }
 
-void ConfigControl::print(const BS2Rs485Channel& channel) const
+void ConfigControl::print(const BS2Rs485Channel& channel)
 {
 	TRACE("|  |--baudRate : %u", channel.baudRate);
 	TRACE("|  |--channelIndex : %u", channel.channelIndex);
@@ -837,7 +837,7 @@ void ConfigControl::print(const BS2Rs485Channel& channel) const
 	}
 }
 
-void ConfigControl::print(const BS2Rs485SlaveDevice& device) const
+void ConfigControl::print(const BS2Rs485SlaveDevice& device)
 {
 	TRACE("|  |  |--deviceID : %u", device.deviceID);
 	TRACE("|  |  |--deviceType : %u", device.deviceType);
@@ -845,7 +845,7 @@ void ConfigControl::print(const BS2Rs485SlaveDevice& device) const
 	TRACE("|  |  |--connected : %u", device.connected);
 }
 
-void ConfigControl::print(const BS2InputConfigEx& config) const
+void ConfigControl::print(const BS2InputConfigEx& config)
 {
 	TRACE("==[BS2InputConfigEx]==");
 	TRACE("+--numInputs : %u", config.numInputs);
@@ -861,7 +861,7 @@ void ConfigControl::print(const BS2InputConfigEx& config) const
 	}
 }
 
-void ConfigControl::print(const BS2RelayActionConfig& config) const
+void ConfigControl::print(const BS2RelayActionConfig& config)
 {
 	TRACE("==[BS2RelayActionConfig]==");
 	TRACE("+--deviceID : %u", config.deviceID);

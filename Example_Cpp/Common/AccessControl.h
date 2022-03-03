@@ -18,10 +18,10 @@ public:
 	int getAllAccessSchedule(BS2_DEVICE_ID id, std::vector<BS2Schedule>& schedules);
 
 
-private:
-	void print(const BS2Schedule& schedule) const;
-	void print(const BS2DaySchedule& schedule) const;
-	void print(const BS2HolidaySchedule schedule) const;
+public:
+	static void print(const BS2Schedule& schedule);
+	static void print(const BS2DaySchedule& schedule);
+	static void print(const BS2HolidaySchedule schedule);
 
 
 private:

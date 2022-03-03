@@ -51,7 +51,7 @@ int AccessControl::getAllAccessSchedule(BS2_DEVICE_ID id, vector<BS2Schedule>& s
 	return sdkResult;
 }
 
-void AccessControl::print(const BS2Schedule& schedule) const
+void AccessControl::print(const BS2Schedule& schedule)
 {
 	TRACE("==[BS2Schedule]==");
 	TRACE("id:%d", schedule.id);
@@ -79,7 +79,7 @@ void AccessControl::print(const BS2Schedule& schedule) const
 		print(schedule.holidaySchedules[idx]);
 }
 
-void AccessControl::print(const BS2DaySchedule& schedule) const
+void AccessControl::print(const BS2DaySchedule& schedule)
 {
 	TRACE("numPeriods:%u", schedule.numPeriods);
 	if (0 < schedule.numPeriods)
@@ -96,7 +96,7 @@ void AccessControl::print(const BS2DaySchedule& schedule) const
 	}
 };
 
-void AccessControl::print(const BS2HolidaySchedule schedule) const
+void AccessControl::print(const BS2HolidaySchedule schedule)
 {
 	TRACE("id:%u", schedule.id);
 	print(schedule.schedules);

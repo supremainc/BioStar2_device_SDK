@@ -21,14 +21,14 @@ static DeviceList deviceList;
 void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 {
 	int32_t timezone = deviceList.getTimezone(id);
-	cout << Utility::getEventString(id, *event, timezone) << endl;
+	cout << LogControl::getEventString(id, *event, timezone) << endl;
 }
 
 // Thermal supported callback
 void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE temperature)
 {
 	int32_t timezone = deviceList.getTimezone(id);
-	cout << Utility::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
+	cout << LogControl::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
 }
 
 
@@ -729,7 +729,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			{
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
-				cout << Utility::getEventString(id, event, timezone) << endl;
+				cout << LogControl::getEventString(id, event, timezone) << endl;
 
 				if (event.image & 0x01)
 				{
@@ -866,7 +866,7 @@ int getFactoryConfig(void* context, BS2_DEVICE_ID id)
 
 	int sdkResult = cc.getFactoryConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
-		cc.print(config);
+		ConfigControl::print(config);
 
 	return sdkResult;
 }

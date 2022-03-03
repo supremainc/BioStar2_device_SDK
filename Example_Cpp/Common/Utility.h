@@ -16,6 +16,9 @@
 #define BITMAP_SIGNATURE_SIZE		14
 #define MAX_BUFFER_SIZE				1024
 
+#define DELIMITER_COMMA				','
+#define DELIMITER_COLON				':'
+
 
 typedef struct __BITMAPINFOHEADER
 {
@@ -77,9 +80,6 @@ public:
 	template <typename T>
 	static T convAString2Int(const std::string& data);
 
-	static std::string getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone);
-	static std::string getEventStringWithThermal(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature);
-
 	static std::string getHexaString(const uint8_t* data, uint32_t size);
 	static int saveBMP(FILE* fp, unsigned char* data, int width, int height);
 
@@ -92,6 +92,9 @@ public:
 	static std::string convertHexByte2String(const std::string& input);
 	static int hex_value(char hex_digit);
 	static std::string convertString2HexByte(const std::string& input);
+
+	template <typename T>
+	static std::string convertArrayToString(const T* data, int numOfData, char delimiter);
 
 private:
 	static void writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits);
@@ -135,4 +138,17 @@ inline T Utility::convAString2Int(const std::string& data)
 		return (T)0;
 
 	return static_cast<T>(atoi(data.c_str()));
+}
+
+template <typename T>
+inline std::string Utility::convertArrayToString(const T* data, int numOfData, char delimiter)
+{
+	std::ostringstream str;
+	if (0 < numOfData)
+	{
+		str << static_cast<int>(data[0]);
+		for (int i = 1; i < numOfData; i++)
+			str << delimiter << static_cast<int>(data[i]);
+	}
+	return str.str();
 }

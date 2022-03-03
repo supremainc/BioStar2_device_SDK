@@ -58,29 +58,29 @@ public:
 	int resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB = true);
 
 public:
-	void print(const BS2SystemConfig& config) const;
-	void print(const BS2DisplayConfig& config) const;
-	void print(const BS2IpConfig& config) const;
-	void print(const BS2FactoryConfig& config) const;
-	void print(const BS2FingerprintConfig& config) const;
-	void print(const BS2FaceConfig& config) const;
-	void print(const BS2DesFireCardConfigEx& config) const;
-	void print(const BS2AuthConfigExt& config) const;
-	void print(const BS2FaceConfigExt& config) const;
-	void print(const BS2ThermalCameraConfig& config) const;
-	void print(const BS2EventConfig& config) const;
-	void print(const BS2InputConfig& config) const;
-	void print(const BS2SupervisedInputConfig& config) const;
-	void print(const BS2SVInputRange& inputRange) const;
-	void print(const BS2TriggerActionConfig& config) const;
-	void print(const BS2Trigger& trigger) const;
-	void print(const BS2Action& action) const;
-	void print(const BS2BarcodeConfig& config) const;
-	void print(const BS2Rs485Config& config) const;
-	void print(const BS2Rs485Channel& channel) const;
-	void print(const BS2Rs485SlaveDevice& device) const;
-	void print(const BS2InputConfigEx& config) const;
-	void print(const BS2RelayActionConfig& config) const;
+	static void print(const BS2SystemConfig& config);
+	static void print(const BS2DisplayConfig& config);
+	static void print(const BS2IpConfig& config);
+	static void print(const BS2FactoryConfig& config);
+	static void print(const BS2FingerprintConfig& config);
+	static void print(const BS2FaceConfig& config);
+	static void print(const BS2DesFireCardConfigEx& config);
+	static void print(const BS2AuthConfigExt& config);
+	static void print(const BS2FaceConfigExt& config);
+	static void print(const BS2ThermalCameraConfig& config);
+	static void print(const BS2EventConfig& config);
+	static void print(const BS2InputConfig& config);
+	static void print(const BS2SupervisedInputConfig& config);
+	static void print(const BS2SVInputRange& inputRange);
+	static void print(const BS2TriggerActionConfig& config);
+	static void print(const BS2Trigger& trigger);
+	static void print(const BS2Action& action);
+	static void print(const BS2BarcodeConfig& config);
+	static void print(const BS2Rs485Config& config);
+	static void print(const BS2Rs485Channel& channel);
+	static void print(const BS2Rs485SlaveDevice& device);
+	static void print(const BS2InputConfigEx& config);
+	static void print(const BS2RelayActionConfig& config);
 
 
 private:

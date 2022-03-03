@@ -82,8 +82,6 @@ public:
 	int writeCard(BS2_DEVICE_ID id, const BS2SmartCardData* card);
 	int eraseCard(BS2_DEVICE_ID id);
 
-	void print(const BS2Card& card);
-
 	int getUserBlobUserID(BS2User& user);
 	int getUserBlobUserName(BS2UserBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo);
 	int getUserBlobUserName(BS2UserBlobEx& userBlob, const BS2SimpleDeviceInfo& deviceInfo);
@@ -143,27 +141,29 @@ public:
 	int enrollUserFaceEx_WithImage_Multi(BS2_DEVICE_ID id);
 #endif
 
-private:
-	void dumpHexa(const uint8_t* data, uint32_t size);
-	void print(const BS2UserBlob& userBlob);
-	void print(const BS2UserFaceExBlob& userBlob);
-	void printHeader(const BS2UserBlob& userBlob);
-	void printHeaderFaceEx(const BS2UserFaceExBlob& userBlob);
-	void print(const BS2User& user);
-	void print(const BS2UserSetting& settings);
-	void print(const BS2UserSettingEx& settings);
-	void print(const BS2UserPhoto& photo);
-	void print(const BS2CSNCard* card, uint8_t numCard);
-	void print(const BS2Fingerprint* finger, uint8_t numFinger);
-	void print(const BS2Face* face, uint8_t numFace);
-	void print(const BS2FaceEx* face, uint8_t numFace);
-	void print(const BS2TemplateEx& templateEx);
-
-	void printCardSmartHeader(const BS2SmartCardHeader& header);
-	void printCardSmartCredential(const BS2SmartCardCredentials& cred);
-	void printCardAOC(const BS2AccessOnCardData& aoc);
-	void printCardSmart(const BS2SmartCardData& card);
-	void printCardCSN(const BS2CSNCard& card);
+public:
+	static void dumpHexa(const uint8_t* data, uint32_t size);
+	static void print(const BS2Card& card);
+	static void print(const BS2UserBlob& userBlob);
+	static void print(const BS2UserBlobEx& userBlob);
+	static void print(const BS2UserFaceExBlob& userBlob);
+	static void printHeader(const BS2UserBlob& userBlob);
+	static void printHeaderFaceEx(const BS2UserFaceExBlob& userBlob);
+	static void print(const BS2User& user);
+	static void print(const BS2UserSetting& settings);
+	static void print(const BS2UserSettingEx& settings);
+	static void print(const BS2UserPhoto& photo);
+	static void print(const BS2CSNCard* card, uint8_t numCard);
+	static void print(const BS2Fingerprint* finger, uint8_t numFinger);
+	static void print(const BS2Face* face, uint8_t numFace);
+	static void print(const BS2FaceEx* face, uint8_t numFace);
+	static void print(const BS2TemplateEx& templateEx);
+	static void print(const BS2Job& job);
+	static void printCardSmartHeader(const BS2SmartCardHeader& header);
+	static void printCardSmartCredential(const BS2SmartCardCredentials& cred);
+	static void printCardAOC(const BS2AccessOnCardData& aoc);
+	static void printCardSmart(const BS2SmartCardData& card);
+	static void printCardCSN(const BS2CSNCard& card);
 
 
 private:

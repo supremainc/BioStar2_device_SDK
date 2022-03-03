@@ -2428,25 +2428,42 @@ void UserControl::dumpHexa(const uint8_t* data, uint32_t size)
 void UserControl::print(const BS2UserBlob& userBlob)
 {
 	TRACE("==[BS2UserBlob]==");
+	TRACE("user_name:%s", userBlob.user_name);
+	TRACE("accessGroupId:%s", Utility::convertArrayToString<BS2_ACCESS_GROUP_ID>(userBlob.accessGroupId, BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER, DELIMITER_COMMA).c_str());
 	print(userBlob.user);
 	print(userBlob.setting);
-	TRACE("user_name:%s", userBlob.user_name);
 	print(userBlob.user_photo);
 	print(userBlob.cardObjs, userBlob.user.numCards);
 	print(userBlob.fingerObjs, userBlob.user.numFingers);
 	print(userBlob.faceObjs, userBlob.user.numFaces);
-	for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
-	{
-		TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
-	}
+	//for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
+	//{
+	//	TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
+	//}
+}
+
+void UserControl::print(const BS2UserBlobEx& userBlob)
+{
+	TRACE("==[BS2UserBlobEx]==");
+	TRACE("user_name:%s", userBlob.user_name);
+	TRACE("phrase:%s", string((char*)userBlob.phrase, BS2_USER_PHRASE_SIZE).c_str());
+	TRACE("accessGroupId:%s", Utility::convertArrayToString<BS2_ACCESS_GROUP_ID>(userBlob.accessGroupId, BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER, DELIMITER_COMMA).c_str());
+	print(userBlob.user);
+	print(userBlob.setting);
+	print(userBlob.user_photo);
+	print(userBlob.cardObjs, userBlob.user.numCards);
+	print(userBlob.fingerObjs, userBlob.user.numFingers);
+	print(userBlob.faceObjs, userBlob.user.numFaces);
+	print(userBlob.job);
 }
 
 void UserControl::print(const BS2UserFaceExBlob& userBlob)
 {
 	TRACE("==[BS2UserFaceExBlob]==");
+	TRACE("user_name:%s", userBlob.user_name);
+	TRACE("accessGroupId:%s", Utility::convertArrayToString<BS2_ACCESS_GROUP_ID>(userBlob.accessGroupId, BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER, DELIMITER_COMMA).c_str());
 	print(userBlob.user);
 	print(userBlob.setting);
-	TRACE("user_name:%s", userBlob.user_name);
 	if (userBlob.user_photo_obj)
 		print(*userBlob.user_photo_obj);
 	if (userBlob.cardObjs && 0 < userBlob.user.numCards)
@@ -2456,78 +2473,80 @@ void UserControl::print(const BS2UserFaceExBlob& userBlob)
 	if (userBlob.faceExObjs && 0 < userBlob.user.numFaces)
 		print(userBlob.faceExObjs, userBlob.user.numFaces);
 	print(userBlob.settingEx);
-	for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
-	{
-		TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
-	}
+	//for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
+	//{
+	//	TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
+	//}
 }
 
 void UserControl::printHeader(const BS2UserBlob& userBlob)
 {
 	TRACE("==[BS2UserBlob Header]==");
+	TRACE("user_name:%s", userBlob.user_name);
+	TRACE("accessGroupId:%s", Utility::convertArrayToString<BS2_ACCESS_GROUP_ID>(userBlob.accessGroupId, BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER, DELIMITER_COMMA).c_str());
 	print(userBlob.user);
 	print(userBlob.setting);
-	TRACE("user_name:%s", userBlob.user_name);
 	print(userBlob.user_photo);
-	for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
-	{
-		TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
-	}
+	//for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
+	//{
+	//	TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
+	//}
 }
 
 void UserControl::printHeaderFaceEx(const BS2UserFaceExBlob& userBlob)
 {
 	TRACE("==[BS2UserFaceExBlob Header]==");
+	TRACE("user_name:%s", userBlob.user_name);
+	TRACE("accessGroupId:%s", Utility::convertArrayToString<BS2_ACCESS_GROUP_ID>(userBlob.accessGroupId, BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER, DELIMITER_COMMA).c_str());
 	print(userBlob.user);
 	print(userBlob.setting);
 	print(userBlob.settingEx);
-	TRACE("user_name:%s", userBlob.user_name);
 	if (userBlob.user_photo_obj)
 		print(*userBlob.user_photo_obj);
-	for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
-	{
-		TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
-	}
+	//for (int i = 0; i < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER; i++)
+	//{
+	//	TRACE("[%d] accessGroupId:%u", i, userBlob.accessGroupId[i]);
+	//}
 }
 
 void UserControl::print(const BS2User& user)
 {
-	TRACE("==[BS2User]==");
-	TRACE("userID:%s", user.userID);
-	TRACE("formatVersion:%u", user.formatVersion);
-	TRACE("flag:%u", user.flag);
-	TRACE("version:%u", user.version);
-	TRACE("numCards:%u", user.numCards);
-	TRACE("numFingers:%u", user.numFingers);
-	TRACE("numFaces:%u", user.numFaces);
-	TRACE("authGroupID:%u", user.authGroupID);
-	TRACE("faceChecksum:%u", user.faceChecksum);
+	TRACE(" ==[BS2User]==");
+	TRACE(" userID:%s", user.userID);
+	TRACE(" formatVersion:%u", user.formatVersion);
+	TRACE(" flag:%u", user.flag);
+	TRACE(" version:%u", user.version);
+	TRACE(" numCards:%u", user.numCards);
+	TRACE(" numFingers:%u", user.numFingers);
+	TRACE(" numFaces:%u", user.numFaces);
+	TRACE(" authGroupID:%u", user.authGroupID);
+	TRACE(" faceChecksum:%u", user.faceChecksum);
 }
 
 void UserControl::print(const BS2UserSetting& settings)
 {
-	TRACE("==[BS2UserSetting]==");
-	TRACE("startTime:%u", settings.startTime);
-	TRACE("endTime:%u", settings.endTime);
-	TRACE("fingerAuthMode:%u", settings.fingerAuthMode);
-	TRACE("cardAuthMode:%u", settings.cardAuthMode);
-	TRACE("idAuthMode:%u", settings.idAuthMode);
-	TRACE("securityLevel:%u", settings.securityLevel);
+	TRACE(" ==[BS2UserSetting]==");
+	TRACE(" startTime:%u", settings.startTime);
+	TRACE(" endTime:%u", settings.endTime);
+	TRACE(" fingerAuthMode:%u", settings.fingerAuthMode);
+	TRACE(" cardAuthMode:%u", settings.cardAuthMode);
+	TRACE(" idAuthMode:%u", settings.idAuthMode);
+	TRACE(" securityLevel:%u", settings.securityLevel);
 }
 
 void UserControl::print(const BS2UserSettingEx& settings)
 {
-	TRACE("==[BS2UserSettingEx]==");
-	TRACE("faceAuthMode:%u", settings.faceAuthMode);
-	TRACE("fingerprintAuthMode:%u", settings.fingerprintAuthMode);
-	TRACE("cardAuthMode:%u", settings.cardAuthMode);
-	TRACE("idAuthMode:%u", settings.idAuthMode);
+	TRACE(" ==[BS2UserSettingEx]==");
+	TRACE(" faceAuthMode:%u", settings.faceAuthMode);
+	TRACE(" fingerprintAuthMode:%u", settings.fingerprintAuthMode);
+	TRACE(" cardAuthMode:%u", settings.cardAuthMode);
+	TRACE(" idAuthMode:%u", settings.idAuthMode);
 }
 
 void UserControl::print(const BS2UserPhoto& photo)
 {
-	TRACE("==[BS2UserPhoto]==");
-	TRACE("size:%u", photo.size);
+	TRACE(" ==[BS2UserPhoto]==");
+	TRACE(" size:%u", photo.size);
 
 	if (0 < photo.size)
 	{
@@ -2539,36 +2558,44 @@ void UserControl::print(const BS2UserPhoto& photo)
 
 void UserControl::print(const BS2CSNCard* card, uint8_t numCard)
 {
-	TRACE("==[BS2CSNCard]==");
+	if (!card)
+		return;
+
+	TRACE(" ==[BS2CSNCard]==");
 	for (int i = 0; i < numCard; i++)
 	{
-		TRACE("[%d] type:%u", i, card[i].type);
-		TRACE("[%d] size:%u", i, card[i].size);
-		//TRACE([%d] "data:%s", i, card[i].data);
+		TRACE(" [%d] type:%u, size:%u", i, card[i].type, card[i].size);
+		//TRACE(" [%d] data:%s", i, card[i].data);
 	}
 }
 
 void UserControl::print(const BS2Fingerprint* finger, uint8_t numFinger)
 {
-	TRACE("==[BS2Fingerprint]==");
+	if (!finger)
+		return;
+
+	TRACE(" ==[BS2Fingerprint]==");
 	for (int i = 0; i < numFinger; i++)
 	{
-		TRACE("[%d] index:%u", i, finger[i].index);
-		TRACE("[%d] flag:%u", i, finger[i].flag);
-		//TRACE("[%d] data:%s", i, finger[i].data[0]);
-		//TRACE("[%d] data:%s", i, finger[i].data[1]);
+		TRACE(" [%d] index:%u, flag:%u", i, finger[i].index, finger[i].flag);
+		//TRACE(" [%d] data:%s", i, finger[i].data[0]);
+		//TRACE(" [%d] data:%s", i, finger[i].data[1]);
 	}
 }
 
 void UserControl::print(const BS2Face* face, uint8_t numFace)
 {
-	TRACE("==[BS2Face]==");
+	if (!face)
+		return;
+
+	TRACE(" ==[BS2Face]==");
 	for (int i = 0; i < numFace; i++)
 	{
-		TRACE("[%d] faceIndex:%u", i, face[i].faceIndex);
-		TRACE("[%d] numOfTemplate:%u", i, face[i].numOfTemplate);
-		TRACE("[%d] flag:%u", i, face[i].flag);
-		TRACE("[%d] imageLen:%u", i, face[i].imageLen);
+		TRACE(" [%d] faceIndex:%u, numOfTemplate:%u, flag:%u, imageLen:%u", i,
+			face[i].faceIndex,
+			face[i].numOfTemplate,
+			face[i].flag,
+			face[i].imageLen);
 
 		//for (int row = 0; row < BS2_TEMPLATE_PER_FACE; row++)
 		//{
@@ -2583,36 +2610,46 @@ void UserControl::print(const BS2Face* face, uint8_t numFace)
 
 void UserControl::print(const BS2Card& card)
 {
-	TRACE("==[BS2Card]==");
-	TRACE("isSmartCard:%s", card.isSmartCard ? "Smart" : "CSN");
+	TRACE(" ==[BS2Card]==");
+	TRACE(" isSmartCard:%s", card.isSmartCard ? "Smart" : "CSN");
 	if (card.isSmartCard)
 		printCardSmart(card.smartCard);
 	else
 		printCardCSN(card.card);
 }
 
+void UserControl::print(const BS2Job& job)
+{
+	TRACE(" ==[BS2Job]==");
+	TRACE(" numJobs:%u", job.numJobs);
+	for (int i = 0; i < job.numJobs; i++)
+	{
+		TRACE(" [%d], code:%u, label:%u", i, job.jobs[i].code, job.jobs[i].label);
+	}
+}
+
 void UserControl::printCardSmartHeader(const BS2SmartCardHeader& header)
 {
-	TRACE("==[BS2SmartCardHeader]==");
-	TRACE("hdrCRC:%u", header.hdrCRC);
-	TRACE("cardCRC:%u", header.cardCRC);
-	TRACE("cardType:%u", header.cardType);
-	TRACE("numOfTemplate:%u", header.numOfTemplate);
-	TRACE("templateSize:%u", header.templateSize);
-	TRACE("issueCount:%u", header.issueCount);
-	TRACE("duressMask:%u", header.duressMask);
-	TRACE("cardAuthMode:0x%x", header.cardAuthMode);
-	TRACE("useAlphanumericID:%u", header.useAlphanumericID);
+	TRACE("  ==[BS2SmartCardHeader]==");
+	TRACE("  hdrCRC:%u", header.hdrCRC);
+	TRACE("  cardCRC:%u", header.cardCRC);
+	TRACE("  cardType:%u", header.cardType);
+	TRACE("  numOfTemplate:%u", header.numOfTemplate);
+	TRACE("  templateSize:%u", header.templateSize);
+	TRACE("  issueCount:%u", header.issueCount);
+	TRACE("  duressMask:%u", header.duressMask);
+	TRACE("  cardAuthMode:0x%x", header.cardAuthMode);
+	TRACE("  useAlphanumericID:%u", header.useAlphanumericID);
 }
 
 void UserControl::printCardSmartCredential(const BS2SmartCardCredentials& cred)
 {
-	TRACE("==[BS2SmartCardCredentials]==");
+	TRACE("  ==[BS2SmartCardCredentials]==");
 }
 
 void UserControl::printCardAOC(const BS2AccessOnCardData& aoc)
 {
-	TRACE("==[BS2AccessOnCardData]==");
+	TRACE("  ==[BS2AccessOnCardData]==");
 	for (int i = 0; i < BS2_SMART_CARD_MAX_ACCESS_GROUP_COUNT; i++)
 	{
 		if (0 == aoc.accessGroupID[i])
@@ -2620,13 +2657,13 @@ void UserControl::printCardAOC(const BS2AccessOnCardData& aoc)
 		cout << aoc.accessGroupID[i] << ",";
 	}
 	cout << endl;
-	TRACE("startTime:%u", aoc.startTime);
-	TRACE("endTime:%u", aoc.endTime);
+	TRACE("  startTime:%u", aoc.startTime);
+	TRACE("  endTime:%u", aoc.endTime);
 }
 
 void UserControl::printCardSmart(const BS2SmartCardData& card)
 {
-	TRACE("==[BS2SmartCardData]==");
+	TRACE(" ==[BS2SmartCardData]==");
 	printCardSmartHeader(card.header);
 	dumpHexa(card.cardID, BS2_CARD_DATA_SIZE);
 	printCardSmartCredential(card.credentials);
@@ -2635,21 +2672,25 @@ void UserControl::printCardSmart(const BS2SmartCardData& card)
 
 void UserControl::printCardCSN(const BS2CSNCard& card)
 {
-	TRACE("==[BS2CSNCard]==");
-	TRACE("type:%u", card.type);
-	TRACE("size:%u", card.size);
+	TRACE(" ==[BS2CSNCard]==");
+	TRACE(" type:%u", card.type);
+	TRACE(" size:%u", card.size);
 	dumpHexa(card.data, BS2_CARD_DATA_SIZE);
 }
 
 void UserControl::print(const BS2FaceEx* face, uint8_t numFace)
 {
-	TRACE("==[BS2FaceEx]==");
+	if (!face)
+		return;
+
+	TRACE(" ==[BS2FaceEx]==");
 	for (int i = 0; i < numFace; i++)
 	{
-		TRACE("[%d] faceIndex:%u", i, face[i].faceIndex);
-		TRACE("[%d] numOfTemplate:%u", i, face[i].numOfTemplate);
-		TRACE("[%d] flag:%u", i, face[i].flag);
-		TRACE("[%d] imageLen:%u", i, face[i].imageLen);
+		TRACE(" [%d] faceIndex:%u, numOfTemplate:%u, flag:%u, imageLen:%u", i,
+			face[i].faceIndex,
+			face[i].numOfTemplate,
+			face[i].flag,
+			face[i].imageLen);
 
 		if (1 == face[i].flag)
 		{
@@ -2668,9 +2709,8 @@ void UserControl::print(const BS2FaceEx* face, uint8_t numFace)
 
 void UserControl::print(const BS2TemplateEx& templateEx)
 {
-	TRACE("==[BS2TemplateEx]==");
-	TRACE("isIR : %u", templateEx.isIR);
-	TRACE("data[0] : %x, data[551] : %x", templateEx.data[0], templateEx.data[551]);
+	TRACE("  ==[BS2TemplateEx]==");
+	TRACE("  isIR:%u, data[0]:%x, data[551]:%x", templateEx.isIR, templateEx.data[0], templateEx.data[551]);
 }
 
 #if TEST_CODE

@@ -4,6 +4,7 @@
 #include "UserAPI.h"
 #include "../Common/Utility.h"
 #include "../Common/CommControl.h"
+#include "../Common/LogControl.h"
 
 
 extern void TRACE(const char* fmt, ...);
@@ -19,7 +20,7 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		cout << Utility::getEventString(id, *event, timezone) << endl;
+		cout << LogControl::getEventString(id, *event, timezone) << endl;
 	}
 }
 
@@ -30,7 +31,7 @@ void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE te
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		cout << Utility::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
+		cout << LogControl::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
 	}
 }
 
@@ -490,7 +491,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 			{
 				BS2Event& event = logObj[index];
 				latestIndex = event.id;
-				cout << Utility::getEventString(id, event, timezone) << endl;
+				cout << LogControl::getEventString(id, event, timezone) << endl;
 
 				if (event.image & 0x01)
 				{
@@ -599,7 +600,7 @@ int scanCard(UserControl& uc, BS2_DEVICE_ID id)
 	BS2Card card = { 0, };
 	int sdkResult = uc.scanCard(id, &card);
 	if (BS_SDK_SUCCESS == sdkResult)
-		uc.print(card);
+		UserControl::print(card);
 
 	return sdkResult;
 }

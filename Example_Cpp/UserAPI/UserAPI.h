@@ -51,24 +51,25 @@ enum EN_MENU_DEV
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
 {
-	{MENU_USR_BREAK,				"Exit"},
-	{MENU_USR_GET_USR,				"Get user from device" },
-	{MENU_USR_GET_USR_FACEEX,		"Get FaceEx user from device" },
-	{MENU_USR_GET_ALLUSR,			"Get all users from device" },
-	{MENU_USR_GET_ALLUSR_FACEEX,	"Get all users from FaceEx device" },
-	{MENU_USR_ENR_USR,				"Enroll user to device (BS2UserBlob)" },
-	{MENU_USR_ENR_USR_SMALL,		"Enroll user to device (BS2UserSmallBlob)" },
-	{MENU_USR_ENR_USR_FACEEX,		"Enroll user to FaceEx device"},
-	{MENU_USR_ENR_USR_SCAN_N_LOAD,	"Enroll user with scanned and loaded image for faceEx"},
-	{MENU_USR_ACT_USR,				"Enable/Disable user"},
+	{MENU_USR_BREAK,						"Exit"},
+	{MENU_USR_GET_USR,						"Get user from device" },
+	{MENU_USR_GET_USR_FACEEX,				"Get FaceEx user from device" },
+	{MENU_USR_GET_ALLUSR,					"Get all users from device" },
+	{MENU_USR_GET_ALLUSR_FACEEX,			"Get all users from FaceEx device" },
+	{MENU_USR_ENR_USR,						"Enroll user to device (BS2UserBlob)" },
+	{MENU_USR_ENR_USR_SMALL,				"Enroll user to device (BS2UserSmallBlob)" },
+	{MENU_USR_ENR_USR_FACEEX,				"Enroll user to FaceEx device"},
+	{MENU_USR_ENR_USR_SCAN_N_LOAD,			"Enroll user with scanned and loaded image for faceEx"},
+	{MENU_USR_ACT_USR,						"Enable/Disable user"},
 	{MENU_USR_EXTRACT_TEMPLATE_FACEEX,		"Extract faceEx template from FSF2"},
 	{MENU_USR_GET_NORMALIZE_IMAGE_FACEEX,	"Get normalize image from FSF2"},
-	{MENU_USR_GET_LASTFPIMAGE,		"Get last fingerprint image from device"},
-	{MENU_USR_REM_USR,				"Remove a user " },
-	{MENU_USR_REM_ALLUSR,			"Remove all users" },
-	{MENU_USR_SMARTCARD_SCAN,		"Smartcard scan"},
-	{MENU_USR_SMARTCARD_WRITE,		"Smartcard write"},
-	{MENU_USR_SMARTCARD_ERASE,		"Smartcard erase"},
+	{MENU_USR_GET_LASTFPIMAGE,				"Get last fingerprint image from device"},
+	{MENU_USR_REM_USR,						"Remove a user " },
+	{MENU_USR_REM_ALLUSR,					"Remove all users" },
+
+	{MENU_USR_SMARTCARD_SCAN,				"Smartcard scan"},
+	{MENU_USR_SMARTCARD_WRITE,				"Smartcard write"},
+	{MENU_USR_SMARTCARD_ERASE,				"Smartcard erase"},
 };
 
 
