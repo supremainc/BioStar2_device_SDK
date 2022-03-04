@@ -28,16 +28,9 @@ public:
 	int updateResource(BS2_DEVICE_ID id);
 	int getDeviceCapabilities(BS2_DEVICE_ID id, BS2DeviceCapabilities& cap);
 
-	int getAuthOperatorLevelEx(BS2_DEVICE_ID id);
-	int setAuthOperatorLevelEx(BS2_DEVICE_ID id);
-	int removeAuthOperatorLevelEx(BS2_DEVICE_ID id);
-	int getAllAuthOperatorLevelEx(BS2_DEVICE_ID id);
-	int removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id);
-
 	static void print(const BS2SimpleDeviceInfo& info);
 	static void print(const BS2SimpleDeviceInfoEx& info);
 	static void print(const BS2IPv6DeviceInfo& info);
-	void print(const BS2AuthOperatorLevel& opr);
 	static void print(const BS2DeviceCapabilities& info);
 
 private:

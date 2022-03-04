@@ -275,49 +275,6 @@ int DeviceControl::getDeviceCapabilities(BS2_DEVICE_ID id, BS2DeviceCapabilities
 	return sdkResult;
 }
 
-int DeviceControl::getAuthOperatorLevelEx(BS2_DEVICE_ID id)
-{
-	stringstream msg;
-	msg << "Please enter operators UID. ex)ID1 ID2 ID3 ...\n";
-	string inStrArrOprs = Utility::getLine(msg.str());
-	int sdkResult = BS_SDK_ERROR_CANNOT_FIND_OPERATOR;
-
-	if (0 < inStrArrOprs.size())
-	{
-		BS2UIDArray arr;
-		vector<string> listOprs = Utility::tokenizeString(inStrArrOprs);
-		arr.append(listOprs);
-
-		uint32_t inNumOfOpr = arr.getSize();
-		uint32_t outNumOfOpr(0);
-		BS2AuthOperatorLevel* oprLevelObj = NULL;
-
-		sdkResult = BS2_GetAuthOperatorLevelEx(context_, id, reinterpret_cast<BS2_USER_ID*>(arr.getPtr()), inNumOfOpr, &oprLevelObj, &outNumOfOpr);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_GetAuthOperatorLevelEx call failed: %d", sdkResult);
-			return sdkResult;
-		}
-
-		for (uint32_t index = 0; index < outNumOfOpr; index++)
-			print(oprLevelObj[index]);
-
-		if (oprLevelObj)
-			BS2_ReleaseObject(oprLevelObj);
-	}
-
-	return sdkResult;
-}
-
-int DeviceControl::removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id)
-{
-	int sdkResult = BS2_RemoveAllAuthOperatorLevelEx(context_, id);
-	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_RemoveAllAuthOperatorLevelEx call failed: %d", sdkResult);
-
-	return sdkResult;
-}
-
 void DeviceControl::print(const BS2SimpleDeviceInfo& info)
 {
 	TRACE("==[BS2SimpleDeviceInfo]==");
@@ -378,26 +335,6 @@ void DeviceControl::print(const BS2IPv6DeviceInfo& info)
 	{
 		TRACE("allocatedIpAddressV6[%u] : %s", index, info.allocatedIpAddressV6[index]);
 	}
-}
-
-void DeviceControl::print(const BS2AuthOperatorLevel& opr)
-{
-	TRACE("==[BS2AuthOperatorLevel]==");
-	TRACE("userID : %s", opr.userID);
-	string strLevel;
-	switch (opr.level)
-	{
-	case BS2_OPERATOR_LEVEL_ADMIN:
-		strLevel = "Admin";
-		break;
-	case BS2_OPERATOR_LEVEL_CONFIG:
-		strLevel = "Config-Operator";
-		break;
-	case BS2_OPERATOR_LEVEL_USER:
-		strLevel = "User-Operator";
-		break;
-	}
-	TRACE("level : %s", strLevel.c_str());
 }
 
 void DeviceControl::print(const BS2DeviceCapabilities& info)

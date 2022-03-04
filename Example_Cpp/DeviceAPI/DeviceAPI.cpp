@@ -368,17 +368,6 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_GET_SPCDEVINFO:
 			sdkResult = dc.getSpecifiedDeviceInfo(getSelectedDeviceID(device));
 			break;
-		case MENU_DEV_GET_AUTH_OPRLEVELEX:
-			sdkResult = dc.getAuthOperatorLevelEx(getSelectedDeviceID(device));
-			break;
-		case MENU_DEV_GET_ALLAUTH_OPRLEVELEX:
-			break;
-		case MENU_DEV_SET_AUTH_OPRLEVELEX:
-			break;
-		case MENU_DEV_REM_AUTH_OPRLEVELEX:
-			break;
-		case MENU_DEV_REM_ALLAUTH_OPRLEVELEX:
-			break;
 
 		case MENU_DEV_GET_FINGERPRINTCONFIG:
 			sdkResult = getFingerprintConfig(context, device);

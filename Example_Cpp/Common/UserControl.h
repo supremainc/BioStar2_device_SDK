@@ -24,6 +24,7 @@ class BS2UIDArray
 {
 public:
 	BS2UIDArray() : uid(NULL) {}
+	BS2UIDArray(const std::vector<std::string>& list) : uid(NULL) {append(list);}
 	virtual ~BS2UIDArray() { if (uid) delete[] uid; }
 
 	void append(const std::string& user) { listUser.push_back(user); }

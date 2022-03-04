@@ -3,6 +3,7 @@
 #include "ConfigControl.h"
 #include "BS_Errno.h"
 #include "Utility.h"
+#include "UserControl.h"
 
 
 extern void TRACE(const char* fmt, ...);
@@ -156,6 +157,24 @@ int ConfigControl::setDesFireCardConfigEx(BS2_DEVICE_ID id, const BS2DesFireCard
 	int sdkResult = BS2_SetDesFireCardConfigEx(context_, id, const_cast<BS2DesFireCardConfigEx*>(&config));
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_SetDesFireCardConfigEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getAuthConfig(BS2_DEVICE_ID id, BS2AuthConfig& config)
+{
+	int sdkResult = BS2_GetAuthConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetAuthConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setAuthConfig(BS2_DEVICE_ID id, const BS2AuthConfig& config)
+{
+	int sdkResult = BS2_SetAuthConfig(context_, id, const_cast<BS2AuthConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetAuthConfig call failed: %d", sdkResult);
 
 	return sdkResult;
 }
@@ -388,6 +407,134 @@ int ConfigControl::resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB)
 
 	return sdkResult;
 }
+
+int ConfigControl::getOperatorInAuthConfig(BS2_DEVICE_ID id, vector<BS2AuthOperatorLevel>& oprList)
+{
+	// Operators in the old FW devices
+	BS2AuthConfig config = { 0, };
+
+	int sdkResult = getAuthConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	for (int idx = 0; idx < config.numOperators; idx++)
+	{
+		BS2AuthOperatorLevel opr = { 0, };
+		memcpy(&config.operators[idx], &opr, sizeof(BS2AuthOperatorLevel));
+		oprList.push_back(opr);
+	}
+
+	return sdkResult;
+}
+
+int ConfigControl::setOperatorInAuthConfig(BS2_DEVICE_ID id, const vector<BS2AuthOperatorLevel>& oprList)
+{
+	// Operators in the old FW devices
+	BS2AuthConfig config = { 0, };
+
+	int sdkResult = getAuthConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	int numOfOperators = config.numOperators;
+	bool overwrited = false;
+	for (auto opr : oprList)
+	{
+		for (int idx = 0; idx < config.numOperators; idx++)
+		{
+			if (string(opr.userID) == config.operators[idx].userID)
+			{
+				memcpy(&opr, &config.operators[idx], sizeof(BS2AuthOperatorLevel));
+				overwrited = true;
+				break;
+			}
+		}
+
+		if (!overwrited)
+		{
+			if (config.numOperators < BS2_MAX_OPERATORS)
+				memcpy(&opr, &config.operators[numOfOperators++], sizeof(BS2AuthOperatorLevel));
+			else
+				TRACE("Number of operators are MAX %d.", BS2_MAX_OPERATORS);
+		}
+	}
+
+	return setAuthConfig(id, config);
+}
+
+int ConfigControl::getAuthOperatorLevelEx(BS2_DEVICE_ID id, const vector<string>& oprIDs, vector<BS2AuthOperatorLevel>& oprList)
+{
+	BS2UIDArray arr(oprIDs);
+	uint32_t numOfOpr(0);
+	BS2AuthOperatorLevel* oprLevelObj = NULL;
+
+	//int sdkResult = BS2_GetAuthOperatorLevelEx(context_, id, (BS2_USER_ID*)oprIDs.data(), oprIDs.size(), &oprLevelObj, &numOfOpr);
+	int sdkResult = BS2_GetAuthOperatorLevelEx(context_, id, (BS2_USER_ID*)arr.getPtr(), arr.getSize(), &oprLevelObj, &numOfOpr);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetAuthOperatorLevelEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	for (uint32_t index = 0; index < numOfOpr; index++)
+		oprList.push_back(oprLevelObj[index]);
+
+	if (oprLevelObj)
+		BS2_ReleaseObject(oprLevelObj);
+
+	return sdkResult;
+}
+
+int ConfigControl::getAllAuthOperatorLevelEx(BS2_DEVICE_ID id, vector<BS2AuthOperatorLevel>& oprList)
+{
+	uint32_t numOfOpr(0);
+	BS2AuthOperatorLevel* oprLevelObj = NULL;
+
+	int sdkResult = BS2_GetAllAuthOperatorLevelEx(context_, id, &oprLevelObj, &numOfOpr);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetAllAuthOperatorLevelEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	for (uint32_t index = 0; index < numOfOpr; index++)
+		oprList.push_back(oprLevelObj[index]);
+
+	if (oprLevelObj)
+		BS2_ReleaseObject(oprLevelObj);
+
+	return sdkResult;
+}
+
+int ConfigControl::setAuthOperatorLevelEx(BS2_DEVICE_ID id, const vector<BS2AuthOperatorLevel>& oprList)
+{
+	int sdkResult = BS2_SetAuthOperatorLevelEx(context_, id, const_cast<BS2AuthOperatorLevel*>(oprList.data()), oprList.size());
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetAuthOperatorLevelEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::removeAuthOperatorLevelEx(BS2_DEVICE_ID id, const vector<string>& oprIDs)
+{
+	BS2UIDArray arr(oprIDs);
+
+	int sdkResult = BS2_RemoveAuthOperatorLevelEx(context_, id, (BS2_USER_ID*)arr.getPtr(), arr.getSize());
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_RemoveAuthOperatorLevelEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id)
+{
+	int sdkResult = BS2_RemoveAllAuthOperatorLevelEx(context_, id);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_RemoveAllAuthOperatorLevelEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 
 void ConfigControl::print(const BS2SystemConfig& config)
 {
@@ -883,4 +1030,48 @@ void ConfigControl::print(const BS2RelayActionConfig& config)
 				config.relay[idxRelay].input[idxInput].mask);
 		}
 	}
+}
+
+void ConfigControl::print(const std::vector<BS2AuthOperatorLevel>& list)
+{
+	TRACE("==[BS2AuthOperatorLevel]==");
+	for (uint32_t idx = 0; idx < list.size(); idx++)
+	{
+		ostringstream str;
+		str << "userID: " << list[idx].userID;
+		switch (list[idx].level)
+		{
+		case BS2_OPERATOR_LEVEL_ADMIN:
+			str << ", level: Admin";
+			break;
+		case BS2_OPERATOR_LEVEL_CONFIG:
+			str << ", level: Config-Operator";
+			break;
+		case BS2_OPERATOR_LEVEL_USER:
+			str << ", level: User-Operator";
+			break;
+		}
+
+		TRACE("[%d] %s", idx, str.str().c_str());
+	}
+}
+
+void ConfigControl::print(const BS2AuthOperatorLevel& opr)
+{
+	TRACE("==[BS2AuthOperatorLevel]==");
+	TRACE("userID : %s", opr.userID);
+	string strLevel;
+	switch (opr.level)
+	{
+	case BS2_OPERATOR_LEVEL_ADMIN:
+		strLevel = "Admin";
+		break;
+	case BS2_OPERATOR_LEVEL_CONFIG:
+		strLevel = "Config-Operator";
+		break;
+	case BS2_OPERATOR_LEVEL_USER:
+		strLevel = "User-Operator";
+		break;
+	}
+	TRACE("level : %s", strLevel.c_str());
 }

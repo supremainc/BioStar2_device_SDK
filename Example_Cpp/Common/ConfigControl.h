@@ -31,6 +31,8 @@ public:
 	int setFaceConfig(BS2_DEVICE_ID id, const BS2FaceConfig& config);
 	int getDesFireCardConfigEx(BS2_DEVICE_ID id, BS2DesFireCardConfigEx& config);
 	int setDesFireCardConfigEx(BS2_DEVICE_ID id, const BS2DesFireCardConfigEx& config);
+	int getAuthConfig(BS2_DEVICE_ID id, BS2AuthConfig& config);
+	int setAuthConfig(BS2_DEVICE_ID id, const BS2AuthConfig& config);
 	int getAuthConfigEx(BS2_DEVICE_ID id, BS2AuthConfigExt& config);
 	int setAuthConfigEx(BS2_DEVICE_ID id, const BS2AuthConfigExt& config);
 	int getFaceConfigEx(BS2_DEVICE_ID id, BS2FaceConfigExt& config);
@@ -49,6 +51,14 @@ public:
 	int setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config);
 	int getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config);
 	int setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionConfig& config);
+
+	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
+	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
+	int getAuthOperatorLevelEx(BS2_DEVICE_ID id, const std::vector<std::string>& oprIDs, std::vector<BS2AuthOperatorLevel>& oprList);
+	int getAllAuthOperatorLevelEx(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
+	int setAuthOperatorLevelEx(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
+	int removeAuthOperatorLevelEx(BS2_DEVICE_ID id, const std::vector<std::string>& oprIDs);
+	int removeAllAuthOperatorLevelEx(BS2_DEVICE_ID id);
 
 	int updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode = BS2_CONNECTION_MODE_SERVER_TO_DEVICE);
 	int updateConnectModeDevice2Server(BS2_DEVICE_ID id, std::string serverIP, BS2_PORT serverPort);
@@ -81,6 +91,8 @@ public:
 	static void print(const BS2Rs485SlaveDevice& device);
 	static void print(const BS2InputConfigEx& config);
 	static void print(const BS2RelayActionConfig& config);
+	static void print(const std::vector<BS2AuthOperatorLevel>& list);
+	static void print(const BS2AuthOperatorLevel& opr);
 
 
 private:

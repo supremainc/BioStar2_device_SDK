@@ -377,6 +377,17 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_REM_ALLUSR:
 			sdkResult = uc.removeAllUser(id);
 			break;
+
+		case MENU_USR_GET_OPERATOR:
+			sdkResult = getOperators(context, id);
+			break;
+		case MENU_USR_SET_OPERATOR:
+			sdkResult = setOperators(context, id);
+			break;
+		case MENU_USR_REM_OPERATOR:
+			sdkResult = removeOperators(context, id);
+			break;
+
 		case MENU_USR_SMARTCARD_SCAN:
 			sdkResult = scanCard(uc, id);
 			break;
@@ -590,6 +601,112 @@ int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id)
 	if (imageObj)
 	{
 		BS2_ReleaseObject(imageObj);
+	}
+
+	return sdkResult;
+}
+
+int getOperators(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	vector<BS2Operator> oprList;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (Utility::isYes("Are you sure you want to get ALL operators?"))
+	{
+		sdkResult = cc.getAllAuthOperatorLevelEx(id, oprList);
+	}
+	else
+	{
+		ostringstream msg;
+		msg << "Please enter operators UID. ex)ID1 ID2 ID3 ..." << endl;
+		string arrOprIDs = Utility::getLine(msg.str());
+		if (0 == arrOprIDs.size())
+			return BS_SDK_SUCCESS;
+
+		vector<string> oprIDs = Utility::tokenizeString(arrOprIDs);
+
+		sdkResult = cc.getAuthOperatorLevelEx(id, oprIDs, oprList);
+	}
+
+	switch (sdkResult)
+	{
+	case BS_SDK_SUCCESS:				// New version FW
+		break;
+
+	case BS_SDK_ERROR_NOT_SUPPORTED:	// Old version FW
+		sdkResult = cc.getOperatorInAuthConfig(id, oprList);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+		break;
+
+	default:
+		return sdkResult;
+	}
+
+	ConfigControl::print(oprList);
+	cout << "Count of operator: " << oprList.size() << endl;
+
+	return sdkResult;
+}
+
+int setOperators(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	vector<BS2Operator> oprList;
+
+	while (true)
+	{
+		BS2Operator opr = { 0, };
+		string userID = Utility::getInput<string>("Please enter the userID to set as the operator. [0:Stop]:");
+		if (userID == "0")
+		{
+			break;
+		}
+		else if (BS2_USER_ID_SIZE < userID.size())
+		{
+			TRACE("Size of userID is %d", BS2_USER_ID_SIZE);
+			continue;
+		}
+
+		strcpy(opr.userID, userID.c_str());
+		ostringstream msg;
+		msg << "Please enter the level of the operator:" << endl;
+		msg << " (0: Not operator, 1: Admin, 2: Config operator, 3: User operator)" << endl;
+		BS2_OPERATOR_LEVEL level = (BS2_OPERATOR_LEVEL)Utility::getInput<uint32_t>(msg.str());
+		opr.level = level;
+		oprList.push_back(opr);
+	}
+
+	int sdkResult = BS_SDK_SUCCESS;
+	if (0 < oprList.size())
+	{
+		sdkResult = cc.setAuthOperatorLevelEx(id, oprList);
+	}
+
+	return sdkResult;
+}
+
+int removeOperators(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (Utility::isYes("Are you sure you want to delete ALL operators?"))
+	{
+		sdkResult = cc.removeAllAuthOperatorLevelEx(id);
+	}
+	else
+	{
+		ostringstream msg;
+		msg << "Please enter operators UID. ex)ID1 ID2 ID3 ..." << endl;
+		string arrOprIDs = Utility::getLine(msg.str());
+		if (0 == arrOprIDs.size())
+			return BS_SDK_SUCCESS;
+
+		vector<string> oprIDs = Utility::tokenizeString(arrOprIDs);
+
+		sdkResult = cc.removeAuthOperatorLevelEx(id, oprIDs);
 	}
 
 	return sdkResult;

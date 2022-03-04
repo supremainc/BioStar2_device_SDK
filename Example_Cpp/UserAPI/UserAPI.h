@@ -44,6 +44,11 @@ enum EN_MENU_DEV
 	MENU_USR_GET_LASTFPIMAGE,
 	MENU_USR_REM_USR,
 	MENU_USR_REM_ALLUSR,
+
+	MENU_USR_GET_OPERATOR,
+	MENU_USR_SET_OPERATOR,
+	MENU_USR_REM_OPERATOR,
+
 	MENU_USR_SMARTCARD_SCAN,
 	MENU_USR_SMARTCARD_WRITE,
 	MENU_USR_SMARTCARD_ERASE,
@@ -66,6 +71,10 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_GET_LASTFPIMAGE,				"Get last fingerprint image from device"},
 	{MENU_USR_REM_USR,						"Remove a user " },
 	{MENU_USR_REM_ALLUSR,					"Remove all users" },
+
+	{MENU_USR_GET_OPERATOR,					"Get operators from device"},
+	{MENU_USR_SET_OPERATOR,					"Set operators to device"},
+	{MENU_USR_REM_OPERATOR,					"Remove operators in device"},
 
 	{MENU_USR_SMARTCARD_SCAN,				"Smartcard scan"},
 	{MENU_USR_SMARTCARD_WRITE,				"Smartcard write"},
@@ -97,3 +106,6 @@ int writeCard(UserControl& uc, BS2_DEVICE_ID id);
 int eraseCard(UserControl& uc, BS2_DEVICE_ID id);
 int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id);
 int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id);
+int getOperators(void* context, BS2_DEVICE_ID id);
+int setOperators(void* context, BS2_DEVICE_ID id);
+int removeOperators(void* context, BS2_DEVICE_ID id);
