@@ -34,6 +34,7 @@ enum EN_MENU_TOP
 	MENU_TOP_SEARCH_SLAVE = 3,
 	MENU_TOP_SEARCH_WIEGAND = 4,
 	MENU_TOP_VIEW_DEVICE = 5,
+	MENU_TOP_CONNECT_USB = 6,
 };
 
 std::vector<MENU_ITEM> menuInfoTop =
@@ -44,6 +45,7 @@ std::vector<MENU_ITEM> menuInfoTop =
 	{MENU_TOP_SEARCH_SLAVE,		"Discover and add slave device"},
 	{MENU_TOP_SEARCH_WIEGAND,	"Discover and add wiegand device" },
 	{MENU_TOP_VIEW_DEVICE,		"View all devices"},
+	{MENU_TOP_CONNECT_USB,		"Connect USB device"},
 };
 
 enum EN_MENU_COMM
@@ -83,9 +85,33 @@ enum EN_MENU_COMM
 
 	MENU_USER_ENROLL_FACE,
 	MENU_USER_ENROLL_FACEEX,
+	MENU_USER_ENROLL_MULTIPLE,
+
 	MENU_CONF_UPD_DEVICE_2_SERVER,
 	MENU_CONF_UPD_SERVER_2_DEVICE,
-	MENU_USER_ENROLL_MULTIPLE,
+};
+
+enum EN_MENU_USB
+{
+	MENU_USB_BREAK = MENU_BREAK,
+	MENU_USB_GET_USR_DBINFO_FROMDIR,
+	MENU_USB_GET_USR_LIST_FROMDIR,
+	MENU_USB_GET_USR_INFO_FROMDIR,
+	MENU_USB_GET_USR_DATA_FROMDIR,
+	MENU_USB_GET_USR_INFOEX_FROMDIR,
+	MENU_USB_GET_USR_DATAEX_FROMDIR,
+	MENU_USB_GET_USRSMALL_INFO_FROMDIR,
+	MENU_USB_GET_USRSMALL_DATA_FROMDIR,
+	MENU_USB_GET_USRSMALL_INFOEX_FROMDIR,
+	MENU_USB_GET_USRSMALL_DATAEX_FROMDIR,
+	MENU_USB_GET_USRFACEEX_INFO_FROMDIR,
+	MENU_USB_GET_USRFACEEX_DATA_FROMDIR,
+
+	MENU_USB_GET_FILTEREDLOG_FROMDIR,
+	MENU_USB_GET_LOG_FROMDIR,
+	MENU_USB_GET_LOG_BLOB_FROMDIR,
+	MENU_USB_GET_LOG_SMALLBLOB_FROMDIR,
+	MENU_USB_GET_LOG_SMALLBLOBEX_FROMDIR,
 };
 
 std::vector<MENU_ITEM> menuInfoCommAPI =
@@ -126,10 +152,33 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 
 	{MENU_USER_ENROLL_FACE,					"BS2_EnrolUser"},
 	{MENU_USER_ENROLL_FACEEX,				"BS2_EnrollUserFaceEx to CS40"},
+	{MENU_USER_ENROLL_MULTIPLE,				"Enroll multiple users"},
 
 	{MENU_CONF_UPD_DEVICE_2_SERVER,			"Update device to server connection"},
 	{MENU_CONF_UPD_SERVER_2_DEVICE,			"Update server to device connection"},
-	{MENU_USER_ENROLL_MULTIPLE,		"Enroll multiple users"},
+};
+
+std::vector<MENU_ITEM> menuInfoUSBAPI =
+{
+	{MENU_COMM_BREAK,						"Exit"},
+	{MENU_USB_GET_USR_DBINFO_FROMDIR,		"BS2_GetUserDatabaseInfoFromDir"},
+	{MENU_USB_GET_USR_LIST_FROMDIR,			"BS2_GetUserListFromDir"},
+	{MENU_USB_GET_USR_INFO_FROMDIR,			"BS2_GetUserInfosFromDir"},
+	{MENU_USB_GET_USR_DATA_FROMDIR,			"BS2_GetUserDatasFromDir"},
+	{MENU_USB_GET_USR_INFOEX_FROMDIR,		"BS2_GetUserInfosExFromDir"},
+	{MENU_USB_GET_USR_DATAEX_FROMDIR,		"BS2_GetUserDatasExFromDir"},
+	{MENU_USB_GET_USRSMALL_INFO_FROMDIR,	"BS2_GetUserSmallInfosFromDir"},
+	{MENU_USB_GET_USRSMALL_DATA_FROMDIR,	"BS2_GetUserSmallDatasFromDir"},
+	{MENU_USB_GET_USRSMALL_INFOEX_FROMDIR,	"BS2_GetUserSmallInfosExFromDir"},
+	{MENU_USB_GET_USRSMALL_DATAEX_FROMDIR,	"BS2_GetUserSmallDatasExFromDir"},
+	{MENU_USB_GET_USRFACEEX_INFO_FROMDIR,	"BS2_GetUserFaceExInfosFromDir"},
+	{MENU_USB_GET_USRFACEEX_DATA_FROMDIR,	"BS2_GetUserFaceExDatasFromDir"},
+
+	{MENU_USB_GET_FILTEREDLOG_FROMDIR,		"BS2_GetFilteredLogFromDir"},
+	{MENU_USB_GET_LOG_FROMDIR,				"BS2_GetLogFromDir"},
+	{MENU_USB_GET_LOG_BLOB_FROMDIR,			"BS2_GetLogBlobFromDir"},
+	{MENU_USB_GET_LOG_SMALLBLOB_FROMDIR,	"BS2_GetLogSmallBlobFromDir",},
+	{MENU_USB_GET_LOG_SMALLBLOBEX_FROMDIR,	"BS2_GetLogSmallBlobExFromDir",},
 };
 
 
@@ -169,3 +218,13 @@ int getAllAccessSchedule(void* context, BS2_DEVICE_ID id);
 int connectTestDevice2(void* context);
 int connectTestDevice3(void* context);
 #endif
+int runUSBAPIs();
+int getUserDatabaseInfoFromDir();
+int getUserListFromDir();
+int getUserInfosFromDir(int menuItem);
+int getUserDatasFromDir(int menuItem);
+int getFilteredLogFromDir();
+int getLogFromDir();
+int getLogBlobFromDir();
+int getLogSmallBlobFromDir();
+int getLogSmallBlobExFromDir();

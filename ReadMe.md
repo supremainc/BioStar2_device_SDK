@@ -45,6 +45,58 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
+### V2.8.2.5 Beta released 02/16/2022:
+
+**New Features**
+
+**1.** In devices supporting Ver.3 (GDPR supported), the following functions have been added to read USB files.
+
+The functions below correspond to cases where the user information encryption key of the device has been changed by calling the BS2_SetDataEncryptKey function in the past.
+For the newly added key parameter, you can specify the key set in the past.
+* API BS2_GetUserDatabaseInfoFromDirWithKey has been added
+* API BS2_GetUserListFromDirWithKey has been added
+* API BS2_GetUserInfosFromDirWithKey has been added
+* API BS2_GetUserDatasFromDirWithKey has been added
+* API BS2_GetUserInfosExFromDirWithKey has been added
+* API BS2_GetUserDatasExFromDirWithKey has been added
+* API BS2_GetLogFromDirWithKey has been added
+* API BS2_GetFilteredLogFromDirWithKey has been added
+* API BS2_GetUserSmallInfosFromDirWithKey has been added
+* API BS2_GetUserSmallDatasFromDirWithKey has been added
+* API BS2_GetUserSmallInfosExFromDirWithKey has been added
+* API BS2_GetUserSmallDatasExFromDirWithKey has been added
+* API BS2_GetUserInfosFaceExFromDirWithKey has been added
+* API BS2_GetUserDatasFaceExFromDirWithKey has been added
+* API BS2_GetLogBlobFromDirWithKey has been added
+* API BS2_GetLogSmallBlobFromDirWithKey has been added
+* API BS2_GetLogSmallBlobExFromDirWithKey has been added
+
+**Modified Features**
+
+**1.** The USB file reading function has been modified to support Ver.3 (GDPR supported).
+The functions below correspond to cases where the device's user information encryption key has never been changed by calling the BS2_SetDataEncryptKey function in the past.
+The functions below decrypt the encryption information with the default key value and get it.
+
+* Refer to API BS2_GetUserDatabaseInfoFromDir
+* Refer to API BS2_GetUserListFromDir
+* Refer to API BS2_GetUserInfosFromDir
+* Refer to API BS2_GetUserDatasFromDir
+* Refer to API BS2_GetUserInfosExFromDir
+* Refer to API BS2_GetUserDatasExFromDir
+* Refer to API BS2_GetLogFromDir
+* Refer to API BS2_GetFilteredLogFromDir
+* Refer to API BS2_GetUserSmallInfosFromDir
+* Refer to API BS2_GetUserSmallDatasFromDir
+* Refer to API BS2_GetUserSmallInfosExFromDir
+* Refer to API BS2_GetUserSmallDatasExFromDir
+* Refer to API BS2_GetUserInfosFaceExFromDir
+* Refer to API BS2_GetUserDatasFaceExFromDir
+* Refer to API BS2_GetLogBlobFromDir
+* Refer to API BS2_GetLogSmallBlobFromDir
+* Refer to API BS2_GetLogSmallBlobExFromDir
+
+<br>
+
 ### V2.8.2.3 released 11/29/2021:
 
 **Modified Features**
@@ -440,6 +492,14 @@ Refer to API BS2_FactoryReset
 
 
 ### Release Notes (Beta)
+<br>
+
+### V2.8.2.4 Beta released 01/13/2022:
+
+**Modified Features**
+
+**1.** Removed libxml2 library dependancy from SDK.
+<br>
 <br>
 
 ### V2.7.2.18 Beta released 04/19/2021:

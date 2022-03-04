@@ -40,6 +40,32 @@ void TRACE(const char* fmt, ...)
 }
 
 
+BS2InstantContext::BS2InstantContext()
+{
+	context_ = BS2_AllocateContext();
+}
+
+BS2InstantContext::~BS2InstantContext()
+{
+	BS2_ReleaseContext(context_);
+}
+
+void* BS2InstantContext::getContext()
+{
+	return context_;
+}
+
+int BS2InstantContext::init()
+{
+	return BS2_Initialize(context_);
+}
+
+int BS2InstantContext::setDeviceEventListener(OnDeviceFound cbFound, OnDeviceAccepted cbAccepted, OnDeviceConnected cbConnected, OnDeviceDisconnected cbDisconnected)
+{
+	return BS2_SetDeviceEventListener(context_, cbFound, cbAccepted, cbConnected, cbDisconnected);
+}
+
+
 uint32_t BS2Context::OnPreferMethod(BS2_DEVICE_ID deviceID)
 {
 	return BS2_SSL_METHOD_MASK_TLS1 | BS2_SSL_METHOD_MASK_TLS1_1 | BS2_SSL_METHOD_MASK_TLS1_2;
@@ -98,6 +124,10 @@ void BS2Context::onDebugMessage(uint32_t level, uint32_t module, const char* msg
 	case DEBUG_MODULE_API:              strModule = "[API]             "; break;
 	case DEBUG_MODULE_MISC:             strModule = "[Misc]            "; break;
 	case DEBUG_MODULE_PACKET:           strModule = "[Packet]          "; break;
+	case DEBUG_MODULE_MOBILEACCESS:		strModule = "[MobileAccess]    "; break;
+	case DEBUG_MODULE_NOTIFY_MANAGER:   strModule = "[NotifyManager]   "; break;
+	case DEBUG_MODULE_EVENT:			strModule = "[Event]           "; break;
+	case DEBUG_MODULE_USB:				strModule = "[USB]             "; break;
 	}
 
 	cout << strLevel << strModule << msg << endl;

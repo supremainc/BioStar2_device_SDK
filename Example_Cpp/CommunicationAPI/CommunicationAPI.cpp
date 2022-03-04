@@ -6,6 +6,7 @@
 #include "../Common/LogControl.h"
 #include "../Common/UserControl.h"
 #include "../Common/AccessControl.h"
+#include "../Common/BS2UsbContext.h"
 #include <memory>
 
 //std::shared_ptr<int> ptr;
@@ -224,6 +225,9 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 		case MENU_TOP_VIEW_DEVICE:
 			displayConnectedDevices(deviceList, true, true);
 			break;
+		case MENU_TOP_CONNECT_USB:
+			runUSBAPIs();
+			return;
 
 		default:
 			break;
@@ -1076,3 +1080,516 @@ int connectTestDevice3(void* context)
 	return sdkResult;
 }
 #endif
+
+int runUSBAPIs()
+{
+	int sdkResult = BS_SDK_SUCCESS;
+	int selectedTop(0);
+
+	cout << endl << endl << "== USB Test ==" << endl;
+
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_USB_BREAK != (selectedTop = showMenu(menuInfoUSBAPI)))
+	{
+		switch (selectedTop)
+		{
+		case MENU_USB_BREAK:
+			return BS_SDK_SUCCESS;
+		case MENU_USB_GET_USR_DBINFO_FROMDIR:
+			sdkResult = getUserDatabaseInfoFromDir();
+			break;
+		case MENU_USB_GET_USR_LIST_FROMDIR:
+			sdkResult = getUserListFromDir();
+			break;
+		case MENU_USB_GET_USR_INFO_FROMDIR:
+		case MENU_USB_GET_USR_INFOEX_FROMDIR:
+		case MENU_USB_GET_USRSMALL_INFO_FROMDIR:
+		case MENU_USB_GET_USRSMALL_INFOEX_FROMDIR:
+		case MENU_USB_GET_USRFACEEX_INFO_FROMDIR:
+			sdkResult = getUserInfosFromDir(selectedTop);
+			break;
+		case MENU_USB_GET_USR_DATA_FROMDIR:
+		case MENU_USB_GET_USR_DATAEX_FROMDIR:
+		case MENU_USB_GET_USRSMALL_DATA_FROMDIR:
+		case MENU_USB_GET_USRSMALL_DATAEX_FROMDIR:
+		case MENU_USB_GET_USRFACEEX_DATA_FROMDIR:
+			sdkResult = getUserDatasFromDir(selectedTop);
+			break;
+
+		case MENU_USB_GET_FILTEREDLOG_FROMDIR:
+			sdkResult = getFilteredLogFromDir();
+			break;
+		case MENU_USB_GET_LOG_FROMDIR:
+			sdkResult = getLogFromDir();
+			break;
+		case MENU_USB_GET_LOG_BLOB_FROMDIR:
+			sdkResult = getLogBlobFromDir();
+			break;
+		case MENU_USB_GET_LOG_SMALLBLOB_FROMDIR:
+			sdkResult = getLogSmallBlobFromDir();
+			break;
+		case MENU_USB_GET_LOG_SMALLBLOBEX_FROMDIR:
+			sdkResult = getLogSmallBlobExFromDir();
+			break;
+		default:
+			break;
+		}
+	}
+
+	return sdkResult;
+}
+
+vector<string> userIDList;
+int onIsAcceptableUID(const char* uid)
+{
+	for (auto item : userIDList)
+	{
+		if (item == uid)
+			return 1;
+	}
+	return 0;
+}
+
+int getUserDatabaseInfoFromDir()
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	IsAcceptableUserID ptrAccept = NULL;
+	userIDList.clear();
+	if (Utility::isYes("Do you want to filter users?"))
+	{
+		cout << "Enter the user ID to allow. [0: Stop]" << endl;
+		while (true)
+		{
+			string uid = Utility::getInput<string>("UserID:");
+			if (uid == "0")
+				break;
+			else if (BS2_USER_ID_SIZE < uid.size())
+				continue;
+
+			userIDList.push_back(uid);
+		}
+
+		ptrAccept = onIsAcceptableUID;
+	}
+
+	uint32_t numUsers(0), numCards(0), numFingers(0), numFaces(0);
+
+	BS2UsbContext usbCtx(usbPath);
+	int sdkResult = usbCtx.getUserDatabaseInfoFromDir(numUsers, numCards, numFingers, numFaces, ptrAccept);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		cout << "Num of users:" << numUsers << endl;
+		cout << "Num of cards:" << numCards << endl;
+		cout << "Num of Fingers:" << numFingers << endl;
+		cout << "Num of Faces:" << numFaces << endl;
+	}
+
+	return sdkResult;
+}
+
+int getUserListFromDir()
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	IsAcceptableUserID ptrAccept = NULL;
+	userIDList.clear();
+	if (Utility::isYes("Do you want to filter users?"))
+	{
+		cout << "Enter the user ID to allow. [0: Stop]" << endl;
+		while (true)
+		{
+			string uid = Utility::getInput<string>("UserID:");
+			if (uid == "0")
+				break;
+			else if (BS2_USER_ID_SIZE < uid.size())
+				continue;
+
+			userIDList.push_back(uid);
+		}
+
+		ptrAccept = onIsAcceptableUID;
+	}
+
+	vector<string> userIDs;
+
+	BS2UsbContext usbCtx(usbPath);
+	int sdkResult = usbCtx.getUserListFromDir(ptrAccept, userIDs);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		uint32_t count(0);
+		uint32_t total(userIDs.size());
+		for (auto uid : userIDs)
+		{
+			cout << "User(" << ++count << "/" << total << "): " << uid << endl;
+			if (uid == "0")
+				break;
+		}
+	}
+
+	return sdkResult;
+}
+
+int getUserInfosFromDir(int menuItem)
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	vector<string> userIDs;
+	cout << "Enter the user ID to import from the USB device. [0: Stop]" << endl;
+	while (true)
+	{
+		string uid = Utility::getInput<string>("UserID:");
+		if (uid == "0")
+			break;
+		else if (BS2_USER_ID_SIZE < uid.size())
+			continue;
+
+		uid.resize(BS2_USER_ID_SIZE);
+		userIDs.push_back(uid);
+	}
+	if (0 == userIDs.size())
+	{
+		cout << "User not found." << endl;
+		return BS_SDK_SUCCESS;
+	}
+
+	BS2UsbContext usbCtx(usbPath);
+	int sdkResult = BS_SDK_SUCCESS;
+
+	switch (menuItem)
+	{
+	case MENU_USB_GET_USR_INFO_FROMDIR:
+		{
+			vector<BS2UserBlob> userBlob;
+			sdkResult = usbCtx.getUserInfosFromDir(userIDs, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				for (auto user : userBlob)
+					UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USR_INFOEX_FROMDIR:
+		{
+			vector<BS2UserBlobEx> userBlob;
+			sdkResult = usbCtx.getUserInfosExFromDir(userIDs, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				for (auto user : userBlob)
+					UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USRSMALL_INFO_FROMDIR:
+		{
+			vector<BS2UserSmallBlob> userBlob;
+			sdkResult = usbCtx.getUserSmallInfosFromDir(userIDs, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				//for (auto user : userBlob)
+				//	UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USRSMALL_INFOEX_FROMDIR:
+		{
+			vector<BS2UserSmallBlobEx> userBlob;
+			sdkResult = usbCtx.getUserSmallInfosExFromDir(userIDs, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				//for (auto user : userBlob)
+				//	UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USRFACEEX_INFO_FROMDIR:
+		{
+			vector<BS2UserFaceExBlob> userBlob;
+			sdkResult = usbCtx.getUserInfosFaceExFromDir(userIDs, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				for (auto user : userBlob)
+					UserControl::print(user);
+			}
+		}
+		break;
+
+	default:
+		return BS_SDK_SUCCESS;
+	}
+
+	return sdkResult;
+}
+
+int getUserDatasFromDir(int menuItem)
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	vector<string> userIDs;
+	cout << "Enter the user ID to import from the USB device. [0: Stop]" << endl;
+	while (true)
+	{
+		string uid = Utility::getInput<string>("UserID:");
+		if (uid == "0")
+			break;
+		else if (BS2_USER_ID_SIZE < uid.size())
+			continue;
+
+		uid.resize(BS2_USER_ID_SIZE);
+		userIDs.push_back(uid);
+	}
+
+	if (0 == userIDs.size())
+	{
+		cout << "User not found." << endl;
+		return BS_SDK_SUCCESS;
+	}
+
+	BS2_USER_MASK userMask = BS2_USER_MASK_DATA | BS2_USER_MASK_SETTING;
+	cout << "Enter the user mask you need." << endl;
+	if (Utility::isYes("Do you want access group?"))
+		userMask |= BS2_USER_MASK_ACCESS_GROUP;
+	if (Utility::isYes("Do you want user name?"))
+		userMask |= BS2_USER_MASK_NAME;
+	if (Utility::isYes("Do you want user PIN?"))
+		userMask |= BS2_USER_MASK_PIN;
+	if (Utility::isYes("Do you want user image?"))
+		userMask |= BS2_USER_MASK_PHOTO;
+	if (Utility::isYes("Do you want cards?"))
+		userMask |= BS2_USER_MASK_CARD;
+	if (Utility::isYes("Do you want fingerprints?"))
+		userMask |= BS2_USER_MASK_FINGER;
+	if (Utility::isYes("Do you want faces?"))
+	{
+		ostringstream msg;
+		msg << " What device type is it?" << endl;
+		msg << "  0. FaceStation 2" << endl;
+		msg << "  1. FaceStation F2" << endl;
+		msg << "  2. No face device" << endl;
+		int type = Utility::getInput<int>(msg.str());
+		switch (type)
+		{
+		case 0:
+			userMask |= BS2_USER_MASK_FACE;
+			break;
+		case 1:
+			userMask |= BS2_USER_MASK_FACE_EX;
+			break;
+		default:
+			break;
+		}
+	}
+
+	BS2UsbContext usbCtx(usbPath);
+	int sdkResult = BS_SDK_SUCCESS;
+
+	switch (menuItem)
+	{
+	case MENU_USB_GET_USR_DATA_FROMDIR:
+		{
+			vector<BS2UserBlob> userBlob;
+			sdkResult = usbCtx.getUserDatasFromDir(userIDs, userMask, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				for (auto user : userBlob)
+					UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USR_DATAEX_FROMDIR:
+		{
+			vector<BS2UserBlobEx> userBlob;
+			sdkResult = usbCtx.getUserDatasExFromDir(userIDs, userMask, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				for (auto user : userBlob)
+					UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USRSMALL_DATA_FROMDIR:
+		{
+			vector<BS2UserSmallBlob> userBlob;
+			sdkResult = usbCtx.getUserSmallDatasFromDir(userIDs, userMask, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				//for (auto user : userBlob)
+				//	UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USRSMALL_DATAEX_FROMDIR:
+		{
+			vector<BS2UserSmallBlobEx> userBlob;
+			sdkResult = usbCtx.getUserSmallDatasExFromDir(userIDs, userMask, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				//for (auto user : userBlob)
+				//	UserControl::print(user);
+			}
+		}
+		break;
+
+	case MENU_USB_GET_USRFACEEX_DATA_FROMDIR:
+		{
+			vector<BS2UserFaceExBlob> userBlob;
+			sdkResult = usbCtx.getUserDatasFaceExFromDir(userIDs, userMask, userBlob);
+			if (BS_SDK_SUCCESS == sdkResult)
+			{
+				for (auto user : userBlob)
+					UserControl::print(user);
+			}
+		}
+		break;
+
+	default:
+		return BS_SDK_SUCCESS;
+	}
+
+	return sdkResult;
+}
+
+
+int getFilteredLogFromDir()
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	string uid;
+	uid = Utility::getInput<string>("Please enter a user ID :");
+	if (BS2_USER_ID_SIZE < uid.size())
+	{
+		TRACE("User ID is too big.");
+		return BS_SDK_ERROR_INVALID_PARAM;
+	}
+	uid.resize(BS2_USER_ID_SIZE);
+
+	BS2_EVENT_CODE eventCode = (BS2_EVENT_CODE)Utility::getInput<uint32_t>("Which event do you want to get? [0: All]");
+
+#ifdef _DEBUG
+	BS2_TIMESTAMP startTime = 0;
+	BS2_TIMESTAMP endTime = 0;
+#else
+	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
+	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
+
+	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
+	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
+#endif
+	
+	uint8_t tnaKey = (uint8_t)Utility::getInput<uint32_t>("Which tnaKey do you want to get? [0: All, 1-16]");
+	if (BS2_MAX_TNA_KEY < tnaKey)
+	{
+		TRACE("Invalid tnaKey: %u", tnaKey);
+		return BS_SDK_ERROR_INVALID_PARAM;
+	}
+
+	BS2UsbContext usbCtx(usbPath);
+	vector<BS2Event> eventList;
+	int sdkResult = usbCtx.getFilteredLogFromDir(const_cast<char*>(uid.c_str()), eventCode, startTime, endTime, tnaKey, eventList);
+	LogControl::print(eventList.data(), eventList.size());
+
+	cout << "Count: " << eventList.size() << endl;
+	return sdkResult;
+}
+
+int getLogFromDir()
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	BS2_EVENT_ID eventID = Utility::getInput<BS2_EVENT_ID>("What is the ID of the last log which you have? [0: None]");
+
+	uint32_t amount = Utility::getInput<uint32_t>("How many logs do you want to get? [0: All]");
+
+	BS2UsbContext usbCtx(usbPath);
+	vector<BS2Event> eventList;
+	int sdkResult = usbCtx.getLogFromDir(eventID, amount, eventList);
+	LogControl::print(eventList.data(), eventList.size());
+
+	cout << "Count: " << eventList.size() << endl;
+	return sdkResult;
+}
+
+int getLogBlobFromDir()
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	BS2_EVENT_ID eventID = Utility::getInput<BS2_EVENT_ID>("What is the ID of the last log which you have? [0: None]");
+
+	uint32_t amount = Utility::getInput<uint32_t>("How many logs do you want to get? [0: All]");
+
+	BS2UsbContext usbCtx(usbPath);
+	vector<BS2EventBlob> eventList;
+	int sdkResult = usbCtx.getLogBlobFromDir(BS2_EVENT_MASK_ALL, eventID, amount, eventList);
+	LogControl::print(eventList.data(), eventList.size());
+
+	return sdkResult;
+}
+
+int getLogSmallBlobFromDir()
+{
+	stringstream msg;
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	BS2_EVENT_ID eventID = Utility::getInput<BS2_EVENT_ID>("What is the ID of the last log which you have? [0: None]");
+
+	uint32_t amount = Utility::getInput<uint32_t>("How many logs do you want to get? [0: All]");
+	
+	BS2UsbContext usbCtx(usbPath);
+	vector<BS2EventSmallBlob> eventList;
+	int sdkResult = usbCtx.getLogSmallBlobFromDir(BS2_EVENT_MASK_ALL, eventID, amount, eventList);
+	LogControl::print(eventList.data(), eventList.size());
+
+	for (auto item : eventList)
+	{
+		if (0 < item.imageSize && item.imageObj)
+			BS2_ReleaseObject(item.imageObj);
+	}
+
+	return sdkResult;
+}
+
+int getLogSmallBlobExFromDir()
+{
+	string usbPath = BS2UsbContext::getUSBPath();
+	if (0 == usbPath.size())
+		return BS_SDK_SUCCESS;
+
+	BS2_EVENT_ID eventID = Utility::getInput<BS2_EVENT_ID>("What is the ID of the last log which you have? [0: None]");
+
+	uint32_t amount = Utility::getInput<uint32_t>("How many logs do you want to get? [0: All]");
+
+	BS2UsbContext usbCtx(usbPath);
+	vector<BS2EventSmallBlobEx> eventList;
+	int sdkResult = usbCtx.getLogSmallBlobExFromDir(BS2_EVENT_MASK_ALL, eventID, amount, eventList);
+	LogControl::print(eventList.data(), eventList.size());
+
+	for (auto item : eventList)
+	{
+		if (0 < item.imageSize && item.imageObj)
+			BS2_ReleaseObject(item.imageObj);
+	}
+
+	return sdkResult;
+}

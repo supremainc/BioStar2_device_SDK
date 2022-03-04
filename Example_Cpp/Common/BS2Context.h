@@ -3,6 +3,21 @@
 #include "BS_API.h"
 
 
+class BS2InstantContext
+{
+public:
+	BS2InstantContext();
+	~BS2InstantContext();
+	void* getContext();
+	int init();
+	int setDeviceEventListener(OnDeviceFound cbFound, OnDeviceAccepted cbAccepted, OnDeviceConnected cbConnected, OnDeviceDisconnected);
+
+
+protected:
+	void* context_;
+};
+
+
 class BS2Context
 {
 public:

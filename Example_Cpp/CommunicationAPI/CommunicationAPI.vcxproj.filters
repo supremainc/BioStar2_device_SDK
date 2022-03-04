@@ -57,6 +57,9 @@
     <ClInclude Include="..\Common\AccessControl.h">
       <Filter>BSCommon</Filter>
     </ClInclude>
+    <ClInclude Include="..\Common\BS2UsbContext.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -90,6 +93,9 @@
       <Filter>BSCommon</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\AccessControl.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\BS2UsbContext.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
   </ItemGroup>
