@@ -31,6 +31,7 @@ public:
 	void* getContext() {return context_;}
 	int setDeviceEventListener(OnDeviceAccepted fpAccepted, OnDeviceConnected fpConnected, OnDeviceDisconnected fpDisconnected);
 	int setNotificationListener(OnAlarmFired fpAlarmFired, OnInputDetected fpInputDetected, OnConfigChanged fpConfigChanged);
+	int setBarcodeScanListener(OnBarcodeScanned fpBarcodeScan);
 	int setServerPort(BS2_PORT port);
 	int setSSLHandler();
 

@@ -257,3 +257,14 @@ int BS2Context::setNotificationListener(OnAlarmFired fpAlarmFired, OnInputDetect
 
 	return sdkResult;
 }
+
+int BS2Context::setBarcodeScanListener(OnBarcodeScanned fpBarcodeScan)
+{
+	int sdkResult = BS2_SetBarcodeScanListener(context_, fpBarcodeScan);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetBarcodeScanListener call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}

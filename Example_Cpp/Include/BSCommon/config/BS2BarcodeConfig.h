@@ -12,7 +12,10 @@ enum {
 typedef struct {
 	BS2_BOOL useBarcode;
     uint8_t scanTimeout;
-    uint8_t reserved[14];
+    BS2_BOOL bypassData;		// BDP-488 1.2
+    BS2_BOOL treatAsCSN;		// BDP-488 1.1
+
+    uint8_t reserved[12];
 } BS2BarcodeConfig;
 
 #endif

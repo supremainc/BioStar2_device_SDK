@@ -452,6 +452,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_BARCODECONFIG:
 			sdkResult = setBarcodeConfig(context, device);
 			break;
+		case MENU_DEV_TURNON_QRBYPASS:
+			sdkResult = turnOnQRBypass(context, device);
+			break;
+		case MENU_DEV_TURNOFF_QRBYPASS:
+			sdkResult = turnOffQRBypass(context, device);
+			break;
 		case MENU_DEV_GET_RS485CONFIG:
 			sdkResult = getRS485Config(context, device);
 			break;
@@ -1292,6 +1298,11 @@ int getBarcodeConfig(void* context, const DeviceInfo& device)
 	return sdkResult;
 }
 
+void onBarcodeScanned(BS2_DEVICE_ID id, const char* barcode)
+{
+	cout << "Device:" << id << ", Scanned barcode:" << barcode << endl;
+}
+
 int setBarcodeConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
@@ -1304,7 +1315,6 @@ int setBarcodeConfig(void* context, const DeviceInfo& device)
 		return sdkResult;
 
 	config.useBarcode = Utility::isYes("Would you like to use barcode function?");
-
 	if (config.useBarcode)
 	{
 		char buf[128] = { 0, };
@@ -1314,6 +1324,52 @@ int setBarcodeConfig(void* context, const DeviceInfo& device)
 		msg = buf;
 		config.scanTimeout = (uint8_t)Utility::getInput<uint32_t>(msg);
 	}
+
+	config.bypassData = Utility::isYes("Would you like to use QR-bypass?");
+	sdkResult = BS2Context::getInstance()->setBarcodeScanListener(config.bypassData ? onBarcodeScanned : NULL);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.treatAsCSN = Utility::isYes("Do you want the barcode to use only number like CSN?");
+
+	return cc.setBarcodeConfig(id, config);
+}
+
+int turnOffQRBypass(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2BarcodeConfig config = { 0, };
+	string msg;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getBarcodeConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.bypassData = false;
+
+	sdkResult = cc.setBarcodeConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	return BS2Context::getInstance()->setBarcodeScanListener(NULL);
+}
+
+int turnOnQRBypass(void* context, const DeviceInfo& device)
+{
+	int sdkResult = BS2Context::getInstance()->setBarcodeScanListener(onBarcodeScanned);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	ConfigControl cc(context);
+	BS2BarcodeConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	sdkResult = cc.getBarcodeConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.bypassData = true;
 
 	return cc.setBarcodeConfig(id, config);
 }

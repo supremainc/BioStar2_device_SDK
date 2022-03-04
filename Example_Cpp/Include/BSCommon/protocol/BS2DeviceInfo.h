@@ -377,7 +377,19 @@ typedef struct {
 	 */
 	uint8_t intelligentPDSupported: 1;
 
-	uint8_t unused2: 7;		///< 1 byte
+	uint8_t unused1: 2;
+
+	/*
+	 * If true, smartCardByteOrder is supported.
+	 */
+	uint8_t smartCardByteOrderSupported: 1;		// BDP-511
+
+	/*
+	 * If true, treatAsCSN is supported.
+	 */
+	uint8_t treatAsCSNSupported: 1;		// BDP-488
+
+	uint8_t unused2: 3;		///< 1 byte
 
 	uint8_t reserved[431];		///< 431 bytes
 } BS2DeviceCapabilities;

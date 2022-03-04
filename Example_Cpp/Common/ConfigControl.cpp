@@ -801,6 +801,8 @@ void ConfigControl::print(const BS2BarcodeConfig& config)
 	TRACE("==[BS2BarcodeConfig]==");
 	TRACE("+--useBarcode : %u", config.useBarcode);
 	TRACE("+--scanTimeout : %u", config.scanTimeout);
+	TRACE("+--bypassData : %u", config.bypassData);
+	TRACE("+--treatAsCSN : %u", config.treatAsCSN);
 }
 
 

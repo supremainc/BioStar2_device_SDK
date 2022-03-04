@@ -84,6 +84,8 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_BARCODECONFIG,
 	MENU_DEV_SET_BARCODECONFIG,
+	MENU_DEV_TURNON_QRBYPASS,
+	MENU_DEV_TURNOFF_QRBYPASS,
 
 	MENU_DEV_GET_RS485CONFIG,
 	MENU_DEV_SET_RS485CONFIG,
@@ -159,6 +161,8 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_BARCODECONFIG,		"BS2_GetBarcodeConfig"},
 	{MENU_DEV_SET_BARCODECONFIG,		"BS2_SetBarcodeConfig"},
+	{MENU_DEV_TURNON_QRBYPASS,			"Turn On QR Bypass"},
+	{MENU_DEV_TURNOFF_QRBYPASS,			"Turn Off QR Bypass"},
 
 	{MENU_DEV_GET_RS485CONFIG,			"BS2_GetRS485Config"},
 	{MENU_DEV_SET_RS485CONFIG,			"BS2_SetRS485Config"},
@@ -214,6 +218,8 @@ int removeTriggerActionConfig(void* context, const DeviceInfo& device);
 int updateDeviceVolume(void* context, const DeviceInfo& device);
 int getBarcodeConfig(void* context, const DeviceInfo& device);
 int setBarcodeConfig(void* context, const DeviceInfo& device);
+int turnOnQRBypass(void* context, const DeviceInfo& device);
+int turnOffQRBypass(void* context, const DeviceInfo& device);
 int getRS485Config(void* context, const DeviceInfo& device);
 int setRS485Config(void* context, const DeviceInfo& device);
 int getDeviceCapabilities(void* context, const DeviceInfo& device);

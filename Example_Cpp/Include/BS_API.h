@@ -515,6 +515,7 @@ typedef void (*OnLogReceived)(BS2_DEVICE_ID deviceId, const BS2Event* event);
 typedef void (*OnLogReceivedEx)(BS2_DEVICE_ID deviceId, const BS2Event* event, BS2_TEMPERATURE temperature);
 typedef void (*OnAlarmFired)(BS2_DEVICE_ID deviceId, const BS2Event* event);
 typedef void (*OnInputDetected)(BS2_DEVICE_ID deviceId, const BS2Event* event);
+typedef void (*OnBarcodeScanned)(BS2_DEVICE_ID deviceId, const char* barcode);
 typedef void (*OnConfigChanged)(BS2_DEVICE_ID deviceId, uint32_t configMask);
 typedef void (*OnVerifyUser)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, uint8_t isCard, uint8_t cardType, const uint8_t* data, uint32_t dataLen);
 typedef void (*OnIdentifyUser)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, BS2_FINGER_TEMPLATE_FORMAT format, const uint8_t* templateData, uint32_t templateSize);
@@ -555,15 +556,18 @@ typedef void (*CBDebugPrint)(char* msg);
 #define DEBUG_MODULE_API				(DEBUG_API)
 #define DEBUG_MODULE_MISC				(0x1 << 7)
 #define DEBUG_MODULE_PACKET				(0x1 << 8)
-#define DEBUG_MOBILEACCESS				(0x1 << 9)
+#define DEBUG_MODULE_MOBILEACCESS		(0x1 << 9)
 #define DEBUG_MODULE_NOTIFY_MANAGER		(0x1 << 10)
+#define DEBUG_MODULE_EVENT				(0x1 << 11)
+#define DEBUG_MODULE_USB				(0x1 << 12)
 #define DEBUG_MODULE_ALL				(DEBUG_ALL)
 #define DEBUG_LOG_FATAL					(0x1 << 0)
 #define DEBUG_LOG_ERROR					(0x1 << 1)
 #define DEBUG_LOG_WARN					(0x1 << 2)
-#define DEBUG_LOG_INFO					(0x1 << 3)
-// #define DEBUG_LOG_TRACE				(0x1 << 4)
+#define DEBUG_LOG_API					(0x1 << 3)		// Print IN and OUT of API
+#define DEBUG_LOG_INFO					(0x1 << 4)
 #define DEBUG_LOG_TRACE					(0x1 << 8)		// Modified bit mask value (V2.6.3.12)
+#define DEBUG_LOG_SYSTEM				(0x0000000F)	// DEBUG_LOG_FATAL | DEBUG_LOG_ERROR | DEBUG_LOG_WARN | DEBUG_LOG_API
 #define DEBUG_LOG_OPERATION_ALL			(0x000000FF)	// Output support except trace logs (V2.6.3.12)
 #define DEBUG_LOG_ALL					(0xFFFFFFFF)
 typedef void (*CBDebugExPrint)(uint32_t level, uint32_t module, const char* msg);
@@ -606,6 +610,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetNotificationListener(void* contex
 											OnAlarmFired ptrAlarmFired,
 											OnInputDetected ptrInputDetected,
 											OnConfigChanged ptrConfigChanged);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetBarcodeScanListener(void* context,
+											OnBarcodeScanned ptrBarcodeScanned);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetServerPort(void* context, BS2_PORT serverPort);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchDevices(void* context);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchDevicesEx(void* context, const char* hostipAddr);
@@ -914,8 +920,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnrolUserEx(void* context, BS2_DEVIC
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnrollUserEx(void* context, BS2_DEVICE_ID deviceId, BS2UserBlobEx* userBlob, uint32_t userCount, uint8_t overwrite);
 
 //USB Exported 
-BS_API_EXPORT void* BS_CALLING_CONVENTION BS2_AllocateUsbContext(const char* szDir);
-BS_API_EXPORT void BS_CALLING_CONVENTION BS2_ReleaseUsbContext(void* context);
+DEPRECATED_FUNC BS_API_EXPORT void* BS_CALLING_CONVENTION BS2_AllocateUsbContext(const char* szDir);
+DEPRECATED_FUNC BS_API_EXPORT void BS_CALLING_CONVENTION BS2_ReleaseUsbContext(void* context);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatabaseInfoFromDir(void* context, const char* szDir, uint32_t* numUsers, uint32_t* numCards, uint32_t* numFingers, uint32_t* numFaces, IsAcceptableUserID ptrIsAcceptableUserID);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserListFromDir(void* context, const char* szDir, char** uidsObj, uint32_t* numUid, IsAcceptableUserID ptrIsAcceptableUserID);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserBlob* userBlob);
@@ -1070,6 +1076,25 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceEx(void* context, BS
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceEx(void* context, BS2_DEVICE_ID deviceId, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask);
+
+//USB Exported (+V2.8.2.4)
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatabaseInfoFromDirWithKey(void* context, const char* szDir, uint32_t* numUsers, uint32_t* numCards, uint32_t* numFingers, uint32_t* numFaces, IsAcceptableUserID ptrIsAcceptableUserID, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserListFromDirWithKey(void* context, const char* szDir, char** uidsObj, uint32_t* numUid, IsAcceptableUserID ptrIsAcceptableUserID, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserBlob* userBlob, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserBlob* userBlob, BS2_USER_MASK userMask, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosExFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserBlobEx* userBlob, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasExFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserBlobEx* userBlob, BS2_USER_MASK userMask, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogFromDirWithKey(void* context, const char* szDir, BS2_EVENT_ID eventId, uint32_t amount, BS2Event** logsObj, uint32_t* numLog, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFilteredLogFromDirWithKey(void* context, const char* szDir, char* uid, BS2_EVENT_CODE eventCode, BS2_TIMESTAMP start, BS2_TIMESTAMP end, uint8_t tnakey, BS2Event** logsObj, uint32_t* numLog, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserSmallInfosFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserSmallBlob* userBlob, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserSmallDatasFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserSmallBlob* userBlob, BS2_USER_MASK userMask, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserSmallInfosExFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserSmallBlobEx* userBlob, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserSmallDatasExFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserSmallBlobEx* userBlob, BS2_USER_MASK userMask, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceExFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceExFromDirWithKey(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogBlobFromDirWithKey(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventBlob** logsObj, uint32_t* numLog, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobFromDirWithKey(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog, const BS2EncryptKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobExFromDirWithKey(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlobEx** logsObj, uint32_t* numLog, const BS2EncryptKey* key);
 
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_VerifyUserFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, BS2UserFaceExBlob* userBlob);
 

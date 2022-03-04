@@ -117,7 +117,6 @@ typedef struct {
 typedef struct {
 	BS2_CARD_BYTE_ORDER byteOrder;             ///< 1 byte
 	BS2_BOOL useWiegandFormat;                 ///< 1 byte
-
 	BS2_CARD_DATA_TYPE dataType;               ///< 1 byte
 	BS2_BOOL useSecondaryKey;                  ///< 1 byte
 
@@ -126,11 +125,10 @@ typedef struct {
 	BS2DesFireCard desfire;                    ///< 40 bytes
 
 	BS2_UID formatID;                          ///< 4 bytes (card format ID / use only application)
-	
-	BS2_BOOL cipher;						   ///< 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
-	
-	uint8_t reserved[23];                      ///< 23 bytes (packing)
 
+	BS2_BOOL cipher;						   ///< 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
+	BS2_CARD_BYTE_ORDER smartCardByteOrder;    ///< 1 byte (0: MSB, 1: LSB)
+	uint8_t reserved[22];                      ///< 22 bytes (packing)
 } BS2CardConfig;                               ///< 120 bytes
 
 /**
