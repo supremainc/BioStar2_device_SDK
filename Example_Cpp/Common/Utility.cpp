@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+#include <sys/timeb.h>
 #include "../Common/Utility.h"
 
 #define STR2INT(x)			isdigit(x.c_str()[0]) ? atoi(x.c_str()) : 0;
@@ -29,6 +30,41 @@ string Utility::getIPAddress(uint32_t ip)
 		(ip & 0x0000FF00) >> 8,
 		(ip & 0x00FF0000) >> 16,
 		(ip & 0xFF000000) >> 24);
+
+	return buf;
+}
+
+string Utility::getLocalTime(bool milliSec)
+{
+	struct timeb tb;
+	struct tm tstruct;
+	char buf[128] = { 0, };
+
+	ftime(&tb);
+	if (0 == localtime_s(&tstruct, &tb.time))
+	{
+		if (milliSec)
+		{
+			sprintf(buf, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+				tstruct.tm_year + 1900,
+				tstruct.tm_mon + 1,
+				tstruct.tm_mday,
+				tstruct.tm_hour,
+				tstruct.tm_min,
+				tstruct.tm_sec,
+				tb.millitm);
+		}
+		else
+		{
+			sprintf(buf, "%04d-%02d-%02d %02d:%02d:%02d",
+				tstruct.tm_year + 1900,
+				tstruct.tm_mon + 1,
+				tstruct.tm_mday,
+				tstruct.tm_hour,
+				tstruct.tm_min,
+				tstruct.tm_sec);
+		}
+	}
 
 	return buf;
 }

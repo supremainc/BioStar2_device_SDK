@@ -64,6 +64,7 @@ public:
 	static T getInput(std::string msgFormat, ...);
 	static std::string getLine(std::string msg);
 
+	static std::string getLocalTime(bool milliSec = true);
 	static std::string getIPAddress(uint32_t ip);
 	static std::string convertTimeUTC2String(uint32_t utcTime);
 	static uint32_t convertTimeString2UTC(std::string time);

@@ -10,13 +10,17 @@
 #include <sstream>
 #include <fstream>
 #include "BS2Context.h"
+#include "Utility.h"
 #include "BS_API.h"
 #include "BS_Errno.h"
 
+using namespace std;
+
 
 BS2Context* BS2Context::sdk_ = NULL;
-
-using namespace std;
+ofstream BS2Context::file_;
+bool BS2Context::writeToFile_ = false;
+const string OUTPUT_FILENAME_WHEN_USING_CALLBACK = "sdk_callback.log";
 
 const string ssl_server_root_crt = "../resource/server/ssl_server_root.crt";
 const string ssl_server_crt = "../resource/server/ssl_server.crt";
@@ -130,7 +134,19 @@ void BS2Context::onDebugMessage(uint32_t level, uint32_t module, const char* msg
 	case DEBUG_MODULE_USB:				strModule = "[USB]             "; break;
 	}
 
-	cout << strLevel << strModule << msg << endl;
+	ostringstream streamMsg;
+	streamMsg << Utility::getLocalTime() << " ";
+	streamMsg << strLevel << strModule << msg << endl;
+	if (!writeToFile_)
+	{
+		cout << streamMsg.str();
+	}
+	else
+	{
+		if (!file_.is_open())
+			file_.open(OUTPUT_FILENAME_WHEN_USING_CALLBACK);
+		BS2Context::file_.write(streamMsg.str().c_str(), streamMsg.str().size());
+	}
 }
 
 
@@ -197,13 +213,15 @@ int BS2Context::initSDK(BS2_PORT port)
 }
 
 
+void BS2Context::setDebugCallbackLog(uint32_t level, uint32_t module, bool writeToFile)
+{
+	writeToFile_ = writeToFile;
+	BS2_SetDebugExCallback(&BS2Context::onDebugMessage, level, module);
+}
+
 void BS2Context::setDebugFileLog(uint32_t level, uint32_t module, const char* path)
 {
-#if OLD_CODE
-	BS2_SetDebugExCallback(&BS2Context::onDebugMessage, level, module);
-#else
 	BS2_SetDebugFileLog(level, module, path);
-#endif
 }
 
 

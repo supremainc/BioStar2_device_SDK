@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BS_API.h"
+#include <fstream>
 
 
 class BS2InstantContext
@@ -24,6 +25,7 @@ public:
 	static BS2Context* getInstance();
 	void releaseInstance();
 
+	static void setDebugCallbackLog(uint32_t level, uint32_t module, bool writeToFile = false);
 	static void setDebugFileLog(uint32_t level, uint32_t module, const char* path);
 
 	static void onDebugMessage(uint32_t level, uint32_t module, const char* msg);
@@ -52,4 +54,6 @@ private:
 private:
 	static BS2Context* sdk_;
 	void* context_;
+	static std::ofstream file_;
+	static bool writeToFile_;
 };
