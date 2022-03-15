@@ -826,11 +826,32 @@ int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)
 {
 	UserControl uc(context);
 	BS2TemplateEx templateEx = { 0, };
-	return uc.extractTemplateFaceEx(id, templateEx);
+	int sdkResult = uc.extractTemplateFaceEx(id, templateEx);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	return sdkResult;
 }
 
 int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id)
 {
 	UserControl uc(context);
-	return uc.getNormalizedImageFaceEx(id);
+
+	uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
+	uint32_t imageLen = 0;
+
+	int sdkResult = uc.getNormalizedImageFaceEx(id, imageData, imageLen);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		BS2FaceEx faceEx = { 0, };
+		faceEx.faceIndex = 0;
+		faceEx.numOfTemplate = 1;
+		faceEx.flag = BS2_FACE_EX_FLAG_WARPED;
+		faceEx.imageLen = imageLen;
+		faceEx.irImageLen = 0;
+		memcpy(faceEx.imageData, imageData, faceEx.imageLen);
+		sdkResult = uc.enrollUserFaceEx(id, NULL, NULL, NULL, &faceEx);
+	}
+
+	return sdkResult;
 }
