@@ -112,6 +112,7 @@ int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
 	BS2Context::setDebugFileLog(DEBUG_LOG_SYSTEM, DEBUG_MODULE_ALL, ".");
+	//BS2Context::setDebugCallbackLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL);
 
 	TRACE("Version: %s", BS2_Version());
 
@@ -1470,14 +1471,19 @@ int getFilteredLogFromDir()
 	if (0 == usbPath.size())
 		return BS_SDK_SUCCESS;
 
-	string uid;
-	uid = Utility::getInput<string>("Please enter a user ID :");
-	if (BS2_USER_ID_SIZE < uid.size())
+	string userID = Utility::getInput<string>("Please enter a user ID [0: All]");
+	if (BS2_USER_ID_SIZE < userID.size())
 	{
 		TRACE("User ID is too big.");
 		return BS_SDK_ERROR_INVALID_PARAM;
 	}
-	uid.resize(BS2_USER_ID_SIZE);
+
+	char* uid = NULL;
+	if (userID != "0")
+	{
+		userID.resize(BS2_USER_ID_SIZE);
+		uid = const_cast<char*>(userID.c_str());
+	}
 
 	BS2_EVENT_CODE eventCode = (BS2_EVENT_CODE)Utility::getInput<uint32_t>("Which event do you want to get? [0: All]");
 
@@ -1501,7 +1507,7 @@ int getFilteredLogFromDir()
 
 	BS2UsbContext usbCtx(usbPath);
 	vector<BS2Event> eventList;
-	int sdkResult = usbCtx.getFilteredLogFromDir(const_cast<char*>(uid.c_str()), eventCode, startTime, endTime, tnaKey, eventList);
+	int sdkResult = usbCtx.getFilteredLogFromDir(uid, eventCode, startTime, endTime, tnaKey, eventList);
 	LogControl::print(eventList.data(), eventList.size());
 
 	cout << "Count: " << eventList.size() << endl;

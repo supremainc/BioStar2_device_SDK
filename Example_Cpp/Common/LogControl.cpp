@@ -47,20 +47,20 @@ string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32
 	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
 #endif
 	case BS2_EVENT_UNMASKED_FACE_DETECTED:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s)",
-			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server");
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s)",
+			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server");
 		break;
 
 	case BS2_EVENT_RELAY_ACTION_ON:
 	case BS2_EVENT_RELAY_ACTION_OFF:
 	case BS2_EVENT_RELAY_ACTION_KEEP:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) relayPort(%u) inputPort(%u)",
-			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.relayAction.relayPort, event.relayAction.inputPort);
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) relayPort(%u) inputPort(%u)",
+			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.relayAction.relayPort, event.relayAction.inputPort);
 		break;
 
 	default:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d)",
-			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID);
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d)",
+			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID);
 		break;
 	}
 
@@ -91,13 +91,13 @@ string LogControl::getEventStringWithThermal(BS2_DEVICE_ID id, const BS2Event& e
 	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
 #endif
 	case BS2_EVENT_UNMASKED_FACE_DETECTED:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
-			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
+			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
 		break;
 
 	default:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) temperature(%.2f)",
-			id, event.mainCode, event.subCode, event.dateTime + timezone, event.deviceID, temper);
+		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) temperature(%.2f)",
+			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, temper);
 		break;
 	}
 
@@ -130,7 +130,8 @@ int LogControl::getLogSmallBlob(BS2_DEVICE_ID id)
 
 int LogControl::getLogSmallBlobEx(BS2_DEVICE_ID id)
 {
-	uint16_t mask = BS2_EVENT_MASK_USER_ID | BS2_EVENT_MASK_TEMPERATURE;
+	//uint16_t mask = BS2_EVENT_MASK_USER_ID | BS2_EVENT_MASK_TEMPERATURE;
+	uint16_t mask = BS2_EVENT_MASK_ALL;	 
 	const uint32_t FROM_FIRST = 0;
 	BS2_EVENT_ID eID = FROM_FIRST;
 	uint32_t amount(0), numLog(0);
@@ -154,8 +155,8 @@ int LogControl::getLogSmallBlobEx(BS2_DEVICE_ID id)
 
 void LogControl::print(const BS2Event& log)
 {
-	TRACE("id:%u, dateTime:%u, deviceID:%u, userID:%s, code:%u, param:%u, image:%u",
-		log.id, log.dateTime, log.deviceID, log.userID, log.code, log.param, log.image);
+	TRACE("id:%u, dateTime:%s, deviceID:%u, userID:%s, code:%u, param:%u, image:%u",
+		log.id, Utility::convertTimeUTC2String(log.dateTime).c_str(), log.deviceID, log.userID, log.code, log.param, log.image);
 }
 
 void LogControl::print(const BS2Event* logs, uint32_t numLog)
@@ -166,8 +167,10 @@ void LogControl::print(const BS2Event* logs, uint32_t numLog)
 
 void LogControl::print(const BS2EventBlob& log)
 {
-	TRACE("eventMask:%u, id:%u, dateTime:%u, deviceID:%u, mainCode:%u, subCode:%u, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u",
-		log.eventMask, log.id, log.info.dateTime, log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize);
+	TRACE("eventMask:0x%04x, id:%u, dateTime:%s, deviceID:%u, mainCode:%x, subCode:%x, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u",
+		log.eventMask, log.id,
+		Utility::convertTimeUTC2String(log.info.dateTime).c_str(),
+		log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize);
 }
 
 void LogControl::print(const BS2EventBlob* logs, uint32_t numLog)
@@ -196,13 +199,17 @@ void LogControl::print(const BS2EventSmallBlob& log)
 {
 	if (0 < log.imageSize)
 	{
-		TRACE("eventMask:%u, id:%u, dateTime:%u, deviceID:%u, mainCode:%u, subCode:%u, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u, imageObj:%p",
-			log.eventMask, log.id, log.info.dateTime, log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize, log.imageObj);
+		TRACE("eventMask:0x%04x, id:%u, dateTime:%s, deviceID:%u, mainCode:%x, subCode:%x, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u, imageObj:%p",
+			log.eventMask, log.id,
+			Utility::convertTimeUTC2String(log.info.dateTime).c_str(),
+			log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize, log.imageObj);
 	}
 	else
 	{
-		TRACE("eventMask:%u, id:%u, dateTime:%u, deviceID:%u, mainCode:%u, subCode:%u, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u",
-			log.eventMask, log.id, log.info.dateTime, log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize);
+		TRACE("eventMask:0x%04x, id:%u, dateTime:%s, deviceID:%u, mainCode:%x, subCode:%x, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u",
+			log.eventMask, log.id,
+			Utility::convertTimeUTC2String(log.info.dateTime).c_str(),
+			log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize);
 	}
 }
 #endif
@@ -236,13 +243,17 @@ void LogControl::print(const BS2EventSmallBlobEx& log)
 	float temper = (float)log.temperature / (float)100.0;
 	if (0 < log.imageSize)
 	{
-		TRACE("eventMask:%u, id:%u, dateTime:%u, deviceID:%u, mainCode:%u, subCode:%u, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u, imageObj:%p, temperature : %.2f",
-			log.eventMask, log.id, log.info.dateTime, log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize, log.imageObj, temper);
+		TRACE("eventMask:0x%04x, id:%u, dateTime:%s, deviceID:%u, mainCode:%x, subCode:%x, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u, imageObj:%p, temperature : %.2f",
+			log.eventMask, log.id, 
+			Utility::convertTimeUTC2String(log.info.dateTime).c_str(),
+			log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize, log.imageObj, temper);
 	}
 	else
 	{
-		TRACE("eventMask:%u, id:%u, dateTime:%u, deviceID:%u, mainCode:%u, subCode:%u, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u, temperature : %.2f",
-			log.eventMask, log.id, log.info.dateTime, log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize, temper);
+		TRACE("eventMask:0x%04x, id:%u, dateTime:%s, deviceID:%u, mainCode:%x, subCode:%x, userID:%s, tnaKey:%u, jobCode:%u, imageSize:%u, temperature : %.2f",
+			log.eventMask, log.id,
+			Utility::convertTimeUTC2String(log.info.dateTime).c_str(),
+			log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize, temper);
 	}
 }
 #endif
@@ -258,6 +269,6 @@ void LogControl::print(const BS2EventExtInfo& info)
 	TRACE("==[BS2EventExtInfo]==");
 	TRACE("  dateTime : %u", info.dateTime);
 	TRACE("  deviceID : %u", info.deviceID);
-	TRACE("  mainCode : %u", info.mainCode);
-	TRACE("  subCode : %u", info.subCode);
+	TRACE("  mainCode : %x", info.mainCode);
+	TRACE("  subCode : %x", info.subCode);
 }
