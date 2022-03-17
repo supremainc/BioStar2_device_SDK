@@ -9,6 +9,15 @@ using System.Threading;
 using System.Data.SQLite;
 using System.Net;
 
+
+/////////////////////////////////////////////////////////////
+//
+// 2021.08.02
+// Examples for ServerMatching are no longer provided.
+// Please refer only at code level.
+//
+/////////////////////////////////////////////////////////////
+
 namespace Suprema
 {
     using BS2_USER_MASK = UInt32;
@@ -33,6 +42,7 @@ namespace Suprema
         public abstract void execute();
     }
 
+    /*
     abstract class VerifyUserTask : BaseTask
     {
         protected abstract BS2ErrorCode find(ref BS2UserSmallBlob userBlob);
@@ -339,7 +349,7 @@ namespace Suprema
             }
         }
     }
-
+    */
     class DataBaseHandler : IDisposable
     {
         SQLiteConnection connection;
@@ -1553,7 +1563,7 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Insert a userEx into database", insertUserIntoDatabaseEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Insert a userEx into device", insertUserIntoDeviceEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get supported User Mask", getUserMask));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Start server matching", serverMatching));
+            //functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Start server matching", serverMatching));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get user list with Infos (USB)", listUserInfos));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get user list with Datas (USB)", listUserDatas));
@@ -3911,7 +3921,9 @@ namespace Suprema
         }
 
 
-        private IntPtr sdkContext;
+        //private IntPtr sdkContext;
+
+        /*
         private ServerMatchingTask matchingTask;
 
         public void VerifyUser(UInt32 deviceId, UInt16 seq, byte isCard, byte cardType, IntPtr data, UInt32 dataLen)
@@ -4021,6 +4033,7 @@ namespace Suprema
             cbOnIdentifyUser = null;
             matchingTask = null;
         }
+        */
 
         private int cbAcceptableUserID(string uid)
         {

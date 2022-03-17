@@ -67,9 +67,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Suprema.UFMatcher">
-      <HintPath>..\..\..\common\lib\x86\Suprema.UFMatcher.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.97.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139">
@@ -125,9 +122,13 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\BS_SDK_V2_$(PlatformName).dll" "$(TargetDir)BS_SDK_V2.dll"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libeay32.dll" "$(TargetDir)"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libssl32.dll" "$(TargetDir)"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\ssleay32.dll" "$(TargetDir)"</PreBuildEvent>
+if $(PlatformName)==x64 (
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libssl-1_1-x64.dll" "$(TargetDir)"
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libcrypto-1_1-x64.dll" "$(TargetDir)"
+) else (
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libssl-1_1.dll" "$(TargetDir)"
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libcrypto-1_1.dll" "$(TargetDir)"
+)</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

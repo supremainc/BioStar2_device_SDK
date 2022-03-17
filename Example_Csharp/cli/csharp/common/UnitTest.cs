@@ -186,7 +186,7 @@ namespace Suprema
         private string ssl_server_crt = "../../../../../resource/server/ssl_server.crt";
         private string ssl_server_pem = "../../../../../resource/server/ssl_server.pem";
         private string ssl_server_passwd = "supremaserver";
-        private API.OnSendRootCA cbOnSendRootCA = null;
+        //private API.OnSendRootCA cbOnSendRootCA = null;
         private API.CBDebugExPrint cbDebugExPrint = null;
 
         private IntPtr ptr_server_root_crt = IntPtr.Zero;
@@ -445,7 +445,7 @@ namespace Suprema
             cbOnDeviceAccepted = null;
             cbOnDeviceConnected = null;
             cbOnDeviceDisconnected = null;
-            cbOnSendRootCA = null;
+            //cbOnSendRootCA = null;
         }
 
         public void runWithoutConnection()
@@ -486,7 +486,7 @@ namespace Suprema
             cbOnDeviceAccepted = null;
             cbOnDeviceConnected = null;
             cbOnDeviceDisconnected = null;
-            cbOnSendRootCA = null;
+            //cbOnSendRootCA = null;
         }
 
         bool SearchAndConnectDevice(ref UInt32 deviceID)
@@ -1242,7 +1242,7 @@ namespace Suprema
             cbOnDeviceAccepted = null;
             cbOnDeviceConnected = null;
             cbOnDeviceDisconnected = null;
-            cbOnSendRootCA = null;
+            //cbOnSendRootCA = null;
 
         }
 

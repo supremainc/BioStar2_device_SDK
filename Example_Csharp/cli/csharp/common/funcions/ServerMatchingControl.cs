@@ -7,6 +7,16 @@ using System.IO;
 using System.Threading;
 using System.Data.SQLite;
 
+
+/////////////////////////////////////////////////////////////
+//
+// 2021.08.02
+// Examples for ServerMatching are no longer provided.
+// Please refer only at code level.
+//
+/////////////////////////////////////////////////////////////
+
+/*
 namespace Suprema
 {
     abstract class BaseTask
@@ -942,7 +952,7 @@ namespace Suprema
             IntPtr deviceObjList = IntPtr.Zero;
             API.BS2_GetDevices(sdkContext, out deviceObjList, out numDevice);
 
-            Console.WriteLine("����� ��ġ ����: " + numDevice);
+            Console.WriteLine("Number of connected devices: " + numDevice);
             if (numDevice > 0)
             {
                 BS2SimpleDeviceInfo deviceInfo;
@@ -956,7 +966,7 @@ namespace Suprema
                             deviceID);
                 }
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
-                Console.WriteLine("����� ��ġ ����: " + numDevice);
+                Console.WriteLine("Number of connected devices: " + numDevice);
             }
 
             API.BS2_ReleaseObject(deviceObjList);
@@ -996,13 +1006,18 @@ namespace Suprema
             bool cardSupported = Convert.ToBoolean(deviceInfo.cardSupported);
             bool fingerSupported = Convert.ToBoolean(deviceInfo.fingerSupported);
             bool pinSupported = Convert.ToBoolean(deviceInfo.pinSupported);
+            bool qrSupported = Convert.ToBoolean(deviceInfoEx.supported | (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_QR);
+
+            bool fingerScanSupported = Convert.ToBoolean(deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FINGER_SCAN);
+            bool faceScanSupported = Convert.ToBoolean(deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_SCAN);
+            bool faceExScanSupported = Convert.ToBoolean(deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN);
 
             privateIDAuthMode.Add(BS2IDAuthModeEnum.PROHIBITED);
 
             if (cardSupported)
             {
                 privateCardAuthMode.Add(BS2CardAuthModeEnum.PROHIBITED);
-                privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_ONLY);                
+                privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_ONLY);
 
                 if (pinSupported)
                 {
@@ -1010,7 +1025,7 @@ namespace Suprema
 
                     privateIDAuthMode.Add(BS2IDAuthModeEnum.ID_PIN);
 
-                    if (fingerSupported)
+                    if (fingerScanSupported)
                     {
                         privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_BIOMETRIC_OR_PIN);
                         privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_BIOMETRIC_PIN);
@@ -1022,7 +1037,7 @@ namespace Suprema
                     }
                 }
 
-                if (fingerSupported)
+                if (fingerScanSupported)
                 {
                     privateCardAuthMode.Add(BS2CardAuthModeEnum.CARD_BIOMETRIC);
 
@@ -1031,7 +1046,7 @@ namespace Suprema
                     privateIDAuthMode.Add(BS2IDAuthModeEnum.ID_BIOMETRIC);
                 }
             }
-            else if (fingerSupported)
+            else if (fingerScanSupported)
             {
                 if (pinSupported)
                 {
@@ -1055,6 +1070,9 @@ namespace Suprema
             userBlob.user.formatVersion = 0;
             userBlob.user.faceChecksum = 0;
             userBlob.user.authGroupID = 0;
+            userBlob.user.numCards = 0;
+            userBlob.user.numFingers = 0;
+            userBlob.user.numFaces = 0;
             userBlob.user.flag = 0;
 
             userBlob.cardObjs = IntPtr.Zero;
@@ -1131,7 +1149,7 @@ namespace Suprema
                 }
             }
 
-            if (fingerSupported)
+            if (fingerScanSupported)
             {
                 Console.WriteLine("Enter the security level for this user: [{0}: {1}, {2}: {3}, {4}: {5}(default), {6}: {7}, {8}: {9}]",
                                 (byte)BS2UserSecurityLevelEnum.LOWER,
@@ -1265,7 +1283,7 @@ namespace Suprema
             }
 
             if (cardSupported)
-            {   
+            {
                 Console.WriteLine("How many cards do you want to register? [1(default) - {0}]", BS2Environment.BS2_MAX_NUM_OF_CARD_PER_USER);
                 Console.Write(">>>> ");
                 userBlob.user.numCards = Util.GetInput((byte)1);
@@ -1303,7 +1321,56 @@ namespace Suprema
                 }
             }
 
-            if (fingerSupported)
+            // +2.8 XS2 QR support
+            if (qrSupported)
+            {
+                Console.WriteLine("Would you like to register the QR code string to be used for authentication? [y/n]");
+                Console.Write(">>>> ");
+                if (Util.IsYes())
+                {
+                    Console.WriteLine("Enter the ASCII QR code.");
+                    Console.WriteLine("  [ASCII code consisting of values between 32 and 126].");
+                    Console.Write(">>>> ");
+                    string qrCode = Console.ReadLine();
+
+                    IntPtr qrCodePtr = Marshal.StringToHGlobalAnsi(qrCode);
+                    BS2CSNCard qrCard = Util.AllocateStructure<BS2CSNCard>();
+                    result = (BS2ErrorCode)API.BS2_WriteQRCode(qrCodePtr, ref qrCard);
+                    if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                    {
+                        Console.WriteLine("Got error({0}).", result);
+                    }
+                    else
+                    {
+                        int numOfRealloc = userBlob.user.numCards + 1;
+                        int structSize = Marshal.SizeOf(typeof(BS2CSNCard));
+                        byte[] tempCard = new byte[structSize * userBlob.user.numCards];
+
+                        if (0 < userBlob.user.numCards && IntPtr.Zero != userBlob.cardObjs)
+                        {
+                            Marshal.Copy(userBlob.cardObjs, tempCard, 0, structSize * userBlob.user.numCards);
+                            Marshal.FreeHGlobal(userBlob.cardObjs);
+                        }
+
+                        userBlob.cardObjs = Marshal.AllocHGlobal(structSize * numOfRealloc);
+                        if (0 < userBlob.user.numCards)
+                        {
+                            Marshal.Copy(tempCard, 0, userBlob.cardObjs, structSize * userBlob.user.numCards);
+                        }
+
+                        IntPtr curCardObjs = userBlob.cardObjs + structSize * userBlob.user.numCards;
+
+                        byte[] qrArray = Util.StructToBytes<BS2CSNCard>(ref qrCard);
+                        Marshal.Copy(qrArray, 0, curCardObjs, structSize);
+                        userBlob.user.numCards++;
+
+                        Marshal.FreeHGlobal(qrCodePtr);
+                    }
+                }
+            }
+            // +V2.8 XS2 QR support
+
+            if (fingerScanSupported)
             {
                 Console.WriteLine("How many fingerprints do you want to register? [1(default) - {0}]", BS2Environment.BS2_MAX_NUM_OF_FINGER_PER_USER);
                 Console.Write(">>>> ");
@@ -1590,3 +1657,4 @@ namespace Suprema
         }
     }
 }
+*/

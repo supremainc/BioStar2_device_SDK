@@ -325,6 +325,8 @@ namespace Suprema
         BS_SDK_ERROR_CANNOT_UPGRADE                         = -2003,
         BS_SDK_ERROR_DEVICE_LOCKED                          = -2004,
         BS_SDK_ERROR_CANNOT_SEND_TO_SERVER                  = -2005,
+        BS_SDK_ERROR_CANNOT_UPGRADE_MEMORY                  = -2006,
+        BS_SDK_ERROR_UPGRADE_NOT_SUPPORTED                  = -2007,
 
         //SSL
         BS_SDK_ERROR_SSL_INIT                                = -3000,
@@ -376,7 +378,14 @@ namespace Suprema
         CSN = 0x01,
         SECURE = 0x02,
         ACCESS = 0x03,
+
+        CSN_MOBILE = 0x04,
+        WIEGAND_MOBILE = 0x05,
+        QR = 0x06,
+        SECURE_QR = 0x07,
+
         WIEGAND = 0x0A,
+        CONFIG_CARD = 0x0B,
     }
 
     [Flags]
@@ -405,6 +414,16 @@ namespace Suprema
         ODPW = 4, // mifare AND em card
         OAPW = 5, // ALL card
         ODSPW = 6,  // SAM socket model
+
+        PMPW = 20,
+        PIPW = 21,
+        PEPW = 22,
+        PHPW = 23,
+        PDPW = 24,
+        PAPW = 25,
+        PDSPW = 26,
+
+        ALL = 30,	// All Binary Model
     }
 
     [Flags]
@@ -675,9 +694,13 @@ namespace Suprema
         XPASS_D2_REV    = 0x1B,     // [+2.7]
         XPASS_D2_KEYPAD_REV = 0x1C, // [+2.7]
         FACESTATION_F2_FP = 0x1D,   // FSF2 support
-        FACESTATION_F2 = 0x1E,      // FSF2 support
+        FACESTATION_F2  = 0x1E,     // FSF2 support
+        XSTATION_2_QR   = 0x1F,     // [+2.8]
+        XSTATION_2      = 0x20,     // [+2.8]
+        IM_120          = 0x21,     // [+2.8.1]
+        XSTATION_2_FP   = 0x22,     // [+2.8.1]
 
-        TYPE_MAX        = FACESTATION_F2,
+        TYPE_MAX        = XSTATION_2_FP,
         //UNKNOWN         = 0xFF,
     }
 
@@ -837,7 +860,8 @@ namespace Suprema
         NONE = 0,
         SCHEDULE = 1,
         EMERGENCY = 2,
-        OPERATOR = 4
+        OPERATOR = 4,
+	    ALL = 0xFF,
     }
 
     [Flags]
@@ -1189,7 +1213,7 @@ namespace Suprema
 
         ACCESS_DENIED_FACE_DETECTION = 0x190A,
         ACCESS_DENIED_CAMERA_CAPTURE = 0x190B,
-        ACCESS_DENIED_FAKE_FINGER = 0x1900C,
+        ACCESS_DENIED_FAKE_FINGER = 0x190C,
         ACCESS_DENIED_DEVICE_ZONE_ENTRANCE_LIMIT = 0x190D,
         ACCESS_DENIED_INTRUSION_ALARM = 0x190E,
         ACCESS_DENIED_INTERLOCK = 0x190F,
@@ -1335,7 +1359,148 @@ namespace Suprema
         ZONE_AUTH_LIMIT_VIOLATION = 0xA500,
         GLOBAL_AUTH_LIMIT_EXCUSED = 0xA600,
 
+        // Relay Action (Linakge & Latching)
+        RELAY_ACTION_ON = 0xC300,
+        RELAY_ACTION_OFF = 0xC400,
+        RELAY_ACTION_KEEP = 0xC500,
+
         GLOBAL_APB_EXCUSED = 0x8000
+    }
+
+    [Flags]
+    public enum BS2SubEventCodeEnum
+    {
+        SUB_EVENT_MASK = 0x00FF,
+
+        VERIFY_ID_PIN = 0x01,
+        VERIFY_ID_FINGER = 0x02,
+        VERIFY_ID_FINGER_PIN = 0x03,
+        VERIFY_ID_FACE = 0x04,
+        VERIFY_ID_FACE_PIN = 0x05,
+        VERIFY_CARD = 0x06,
+        VERIFY_CARD_PIN = 0x07,
+        VERIFY_CARD_FINGER = 0x08,
+        VERIFY_CARD_FINGER_PIN = 0x09,
+        VERIFY_CARD_FACE = 0x0A,
+        VERIFY_CARD_FACE_PIN = 0x0B,
+        VERIFY_AOC = 0x0C,
+        VERIFY_AOC_PIN = 0x0D,
+        VERIFY_AOC_FINGER = 0x0E,
+        VERIFY_AOC_FINGER_PIN = 0x0F,
+        VERIFY_CARD_FACE_FINGER = 0x10,
+        VERIFY_CARD_FINGER_FACE = 0x11,
+        VERIFY_ID_FACE_FINGER = 0x12,
+        VERIFY_ID_FINGER_FACE = 0x13,
+
+        VERIFY_MOBLIE_CARD = 0x16,
+        VERIFY_MOBILE_CARD_PIN = 0x17,
+        VERIFY_MOBILE_CARD_FINGER = 0x18,
+        VERIFY_MOBILE_CARD_FINGER_PIN = 0x19,
+        VERIFY_MOBILE_CARD_FACE = 0x1A,
+        VERIFY_MOBILE_CARD_FACE_PIN = 0x1B,
+        VERIFY_MOBILE_CARD_FACE_FINGER = 0x20,
+        VERIFY_MOBILE_CARD_FINGER_FACE = 0x21,
+
+        // Identified authentication mode
+        IDENTIFY_FINGER = 0x01,
+        IDENTIFY_FINGER_PIN = 0x02,
+        IDENTIFY_FACE = 0x03,
+        IDENTIFY_FACE_PIN = 0x04,
+        IDENTIFY_FACE_FINGER = 0x05,
+        IDENTIFY_FACE_FINGER_PIN = 0x06,
+        IDENTIFY_FINGER_FACE = 0x07,
+        IDENTIFY_FINGER_FACE_PIN = 0x08,
+
+        // Reason to be failed
+        ENROLL_FAIL_INVALID_FACE = 0x01,
+        UPDATE_FAIL_INVALID_FACE = 0x01,
+
+        // Reason to be failed
+        DUAL_AUTH_FAIL_TIMEOUT = 0x01,
+        DUAL_AUTH_FAIL_ACCESS_GROUP = 0x02,
+
+        // Bypass mode - soft violation
+        BYPASS_NO_VIOLATION = 0x00,
+        BYPASS_THERMAL_VIOLATION = 0x01,
+        BYPASS_MASK_VIOLATION = 0x02,
+        BYPASS_MASK_THERMAL_VIOLATION = 0x03,
+
+        // Reason to be failed
+        HIGH_TEMPERATURE = 0x00,
+        NO_TEMPERATURE = 0x01,
+        UNMASKED_FACE = 0x02,
+
+        // Failed credential
+        CREDENTIAL_ID = 0x01,
+        CREDENTIAL_CARD = 0x02,
+        CREDENTIAL_PIN = 0x03,
+        CREDENTIAL_FINGER = 0x04,
+        CREDENTIAL_FACE = 0x05,
+        CREDENTIAL_AOC_PIN = 0x06,
+        CREDENTIAL_AOC_FINGER = 0x07,
+        CREDENTIAL_MOBILE_CARD = 0x08,
+
+        // Reason to be failed
+        AUTH_FAIL_INVALID_AUTH_MODE = 0x01,
+        AUTH_FAIL_INVALID_CREDENTIAL = 0x02,
+        AUTH_FAIL_TIMEOUT = 0x03,
+        AUTH_FAIL_MATCHING_REFUSAL = 0x04,
+
+        // Reason to be denied
+        ACCESS_DENIED_ACCESS_GROUP = 0x01,
+        ACCESS_DENIED_DISABLED = 0x02,
+        ACCESS_DENIED_EXPIRED = 0x03,
+        ACCESS_DENIED_ON_BLACKLIST = 0x04,
+        ACCESS_DENIED_APB = 0x05,
+        ACCESS_DENIED_TIMED_APB = 0x06,
+        ACCESS_DENIED_SCHEDULED_LOCK = 0x07,
+        ACCESS_DENIED_FORCED_LOCK = 0x07,		// Deprecated in V2.4.0.
+        ACCESS_EXCUSED_APB = 0x08,
+        ACCESS_EXCUSED_TIMED_APB = 0x09,
+        ACCESS_DENIED_FACE_DETECTION = 0x0A,
+        ACCESS_DENIED_CAMERA_CAPTURE = 0x0B,
+        ACCESS_DENIED_FAKE_FINGER = 0x0C,
+        ACCESS_DENIED_DEVICE_ZONE_ENTRANCE_LIMIT = 0x0D,
+        ACCESS_DENIED_INTRUSION_ALARM = 0x0E,
+        ACCESS_DENIED_INTERLOCK = 0x0F,
+        ACCESS_EXCUSED_AUTH_LIMIT = 0x10,
+        ACCESS_DENIED_AUTH_LIMIT = 0x11,
+        ACCESS_DENIED_ANTI_TAILGATE = 0x12,
+        ACCESS_DENIED_HIGH_TEMPERATURE = 0x13,
+        ACCESS_DENIED_NO_TEMPERATURE = 0x14,
+        ACCESS_DENIED_UNMASKED_FACE = 0x15,
+
+        // Door flag type
+        DOOR_FLAG_SCHEDULE = BS2DoorFlagEnum.SCHEDULE,
+        DOOR_FLAG_OPERATOR = BS2DoorFlagEnum.OPERATOR,
+        DOOR_FLAG_EMERGENCY = BS2DoorFlagEnum.EMERGENCY,
+
+        // Floor flag type
+        FLOOR_FLAG_SCHEDULE = BS2FloorFlagEnum.SCHEDULE,
+        FLOOR_FLAG_OPERATOR = BS2FloorFlagEnum.OPERATOR,
+        FLOOR_FLAG_ACTION = BS2FloorFlagEnum.ACTION,
+        FLOOR_FLAG_EMERGENCY = BS2FloorFlagEnum.EMERGENCY,
+
+        // Antipassback violation type
+        ZONE_HARD_APB = 0x01,
+        ZONE_SOFT_APB = 0x02,
+
+        // Device Zone Entrance limit violation type
+        DEVICE_ZONE_HARD_ENTRANCE_LIMIT_COUNT = 0x01,
+        DEVICE_ZONE_SOFT_ENTRANCE_LIMIT_COUNT = 0x02,
+        DEVICE_ZONE_HARD_ENTRANCE_LIMIT_TIME = 0x03,
+        DEVICE_ZONE_SOFT_ENTRANCE_LIMIT_TIME = 0x04,
+
+        // InterlockZone violation type
+        INTERLOCKZONE_DOOR_OPEN = 0x01,
+        INTERLOCK_INPUT_DETECT = 0x02,
+
+        // Authentication Limit violation type
+        ZONE_HARD_AUTH_LIMIT = 0x01,
+        ZONE_SOFT_AUTH_LIMIT = 0x02,
+        ZONE_SCHEDULE_AUTH_LIMIT = 0x03,
+        ZONE_COUNT_AUTH_LIMIT = 0x04,
+        ZONE_USER_AUTH_LIMIT = 0x05
     }
 
     [Flags]
@@ -1548,9 +1713,106 @@ namespace Suprema
         BS2_SUPPORT_DST = 0x00000004,
         BS2_SUPPORT_DESFIREEX = 0x00000008,
         BS2_SUPPORT_FACE_EX = 0x00000010,       // F2 support
+        BS2_SUPPORT_QR = 0x00000020,            // [+2.8]
 
         BS2_SUPPORT_FINGER_SCAN = 0x00010000,
         BS2_SUPPORT_FACE_SCAN = 0x00020000,
         BS2_SUPPORT_FACE_EX_SCAN = 0x00040000,
+        BS2_SUPPORT_QR_SCAN = 0x00080000,       // [+2.8]
+
+        BS2_SUPPORT_ALL = BS2_SUPPORT_RS485EX |
+                          BS2_SUPPORT_CARDEX |
+                          BS2_SUPPORT_DST |
+                          BS2_SUPPORT_DESFIREEX |
+                          BS2_SUPPORT_FACE_EX |
+                          BS2_SUPPORT_QR |
+                          BS2_SUPPORT_FINGER_SCAN |
+                          BS2_SUPPORT_FACE_SCAN |
+                          BS2_SUPPORT_FACE_EX_SCAN |
+                          BS2_SUPPORT_QR_SCAN,
+    }
+
+    [Flags]
+    public enum BS2DeviceStatus
+    {
+        NORMAL,
+        LOCKED,
+        RTC_ERROR,
+        WAITING_INPUT,
+        WAITING_DHCP,
+        SCAN_FINGER,
+        SCAN_CARD,
+        SUCCESS,
+        FAIL,
+        DURESS,
+        PROCESS_CONFIG_CARD,
+        SUCCESS_CONFIG_CARD,
+        SCAN_FACE,
+        RESERVED3,
+        RESERVED4,
+
+        NUM_OF_STATUS,
+    }
+
+    [Flags]
+    public enum BS2CapabilitySystemSupport
+    {
+        SYSTEM_SUPPORT_CAMERA   = 0x01,
+	    SYSTEM_SUPPORT_TAMPER   = 0x02,
+	    SYSTEM_SUPPORT_WLAN     = 0x04,
+	    SYSTEM_SUPPORT_DISPLAY  = 0x08,
+	    SYSTEM_SUPPORT_THERMAL  = 0x10,
+	    SYSTEM_SUPPORT_MASK     = 0x20,
+	    SYSTEM_SUPPORT_FACEEX   = 0x40,
+	}
+
+    [Flags]
+    public enum BS2CapabilityCardSupport : uint
+    {
+        CARD_SUPPORT_EM               = 0x00000001,
+        CARD_SUPPORT_HIDPROX          = 0x00000002,
+        CARD_SUPPORT_MIFAREFELICA     = 0x00000004,
+        CARD_SUPPORT_ICLASS           = 0x00000008,
+        CARD_SUPPORT_CLASSICPLUS      = 0x00000010,
+        CARD_SUPPORT_DESFIREEV1       = 0x00000020,
+        CARD_SUPPORT_SRSE             = 0x00000040,
+        CARD_SUPPORT_SEOS             = 0x00000080,
+        CARD_SUPPORT_NFC              = 0x00000100,
+        CARD_SUPPORT_BLE              = 0x00000200,
+        CARD_SUPPORT_USECARDOPERATION = 0x80000000,
+    }
+
+    [Flags]
+    public enum BS2CapabilityFunctionSupport
+    {
+        FUNCTION_SUPPORT_INTELLIGENTPD = 0x01,
+    }
+
+    [Flags]
+    public enum BS2SupervisedResistor
+    {
+        SUPERVISED_RESISTOR_1K      = 0,
+        SUPERVISED_RESISTOR_2_2K    = 1,
+        SUPERVISED_RESISTOR_4_7K    = 2,
+        SUPERVISED_RESISTOR_10K     = 3,
+
+        SUPERVISED_RESISTOR_UNUSED  = 254,
+    }
+
+    [Flags]
+    public enum BS2RelayActionInputType
+    {
+	    RELAY_ACTION_INPUT_TYPE_NONE	 = 0x00,
+	    RELAY_ACTION_INPUT_TYPE_LINKAGE  = 0x01,
+	    RELAY_ACTION_INPUT_TYPE_LATCHING = 0x02,
+	    RELAY_ACTION_INPUT_TYPE_RELEASE  = 0x03,
+    }
+
+    [Flags]
+    public enum BS2RelayActionInputMask
+    {
+	    RELAY_ACTION_INPUT_MASK_NONE	= 0x00,
+	    RELAY_ACTION_INPUT_MASK_ALARM	= 0x01,
+	    RELAY_ACTION_INPUT_MASK_FAULT	= 0x02,
     }
 }

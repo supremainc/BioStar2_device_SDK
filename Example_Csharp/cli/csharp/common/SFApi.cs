@@ -48,7 +48,11 @@ namespace Suprema
             {BS2DeviceTypeEnum.XPASS_D2_REV,    "XPass D2 Rev"},
             {BS2DeviceTypeEnum.XPASS_D2_KEYPAD_REV, "XPass D2 Keypad Rev"},
             {BS2DeviceTypeEnum.FACESTATION_F2_FP, "FaceStation F2 FP"},     // FSF2 support
-            {BS2DeviceTypeEnum.FACESTATION_F2, "FaceStation F2"},           // FSF2 support
+            {BS2DeviceTypeEnum.FACESTATION_F2,  "FaceStation F2"},          // FSF2 support
+            {BS2DeviceTypeEnum.XSTATION_2_QR,   "X-Station 2 QR"},
+            {BS2DeviceTypeEnum.XSTATION_2,      "X-Station 2"},
+            {BS2DeviceTypeEnum.IM_120,         "Input Module 120"},
+            {BS2DeviceTypeEnum.XSTATION_2_FP,   "X-Station 2 FP"},
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -83,6 +87,9 @@ namespace Suprema
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void OnConfigChanged(UInt32 deviceId, UInt32 configMask);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnBarcodeScanned(UInt32 deviceId, string barcode);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void OnVerifyUser(UInt32 deviceId, UInt16 seq, byte isCard, byte cardType, IntPtr data, UInt32 dataLen);
@@ -153,6 +160,9 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetNotificationListener(IntPtr context, OnAlarmFired cbOnAlarmFired, OnInputDetected cbOnInputDetected, OnConfigChanged cbOnConfigChanged);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetBarcodeScanListener(IntPtr context, OnBarcodeScanned cbOnBarcodeScanned);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void BS2_ReleaseContext(IntPtr context);
@@ -286,6 +296,9 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_EraseCard(IntPtr context, UInt32 deviceId);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_WriteQRCode(IntPtr qrText, ref BS2CSNCard card);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Config API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_ClearDatabase(IntPtr context, UInt32 deviceId);
@@ -334,6 +347,24 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetThermalCameraConfig(IntPtr context, UInt32 deviceId, ref BS2ThermalCameraConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetBarcodeConfig(IntPtr context, UInt32 deviceId, out BS2BarcodeConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetBarcodeConfig(IntPtr context, UInt32 deviceId, ref BS2BarcodeConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetInputConfigEx(IntPtr context, UInt32 deviceId, out BS2InputConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetInputConfigEx(IntPtr context, UInt32 deviceId, ref BS2InputConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetRelayActionConfig(IntPtr context, UInt32 deviceId, out BS2RelayActionConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetRelayActionConfig(IntPtr context, UInt32 deviceId, ref BS2RelayActionConfig config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetStatusConfig(IntPtr context, UInt32 deviceId, out BS2StatusConfig config);
@@ -584,6 +615,12 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_UpdateResource(IntPtr context, UInt32 deviceId, ref BS2ResourceElement resourceElement, byte keepVerifyingSlaveDevice, OnProgressChanged cbProgressChanged);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetDeviceCapabilities(IntPtr context, UInt32 deviceId, out BS2DeviceCapabilities info);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_RunAction(IntPtr context, UInt32 deviceId, out BS2Action action);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void BS2_SetKeepAliveTimeout(IntPtr context, long ms);
@@ -848,6 +885,9 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_ExtractTemplateFaceEx(IntPtr context, UInt32 deviceId, IntPtr imageData, UInt32 imageDataLen, int isWarped, out BS2TemplateEx templateEx);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetNormalizedImageFaceEx(IntPtr context, UInt32 deviceId, IntPtr unwarpedImage, UInt32 unwarpedImageLen, IntPtr warpedImage, out UInt32 warpedImageLen);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Lift API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetLift(IntPtr context, UInt32 deviceId, IntPtr LiftIds, UInt32 LiftIdCount, out IntPtr LiftObj, out UInt32 numLift);
@@ -961,6 +1001,12 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         //extern public static int BS2_GetLogBlobFromDir(IntPtr context, string szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
         extern public static int BS2_GetLogBlobFromDir(IntPtr context, IntPtr szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLogSmallBlobFromDir(IntPtr context, IntPtr szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLogSmallBlobExFromDir(IntPtr context, IntPtr szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
 
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< WRAPPER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */        
         public static BS2ErrorCode CSP_BS2_GetAllAccessSchedule(IntPtr context, UInt32 deviceId, out CSP_BS2Schedule[] accessScheduleObj, out UInt32 numAccessSchedule)

@@ -470,7 +470,6 @@ namespace Suprema
             // Enroll test user
             enrollUserEx(sdkContext, deviceID, slaveID, "testuser", "1", "1122");
 
-            BS2ErrorCode result;
             Console.WriteLine("Do you want update card config? [y/n]");
             Console.Write(">>>> ");
             if (Util.IsYes())
@@ -490,44 +489,76 @@ namespace Suprema
             if (0 == slaveList.Count())
                 return;
 
-            UInt32 slaveID = 0;
-            Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
-            Console.WriteLine("1. Get slave auth mode for AuthConfig");
-            Console.WriteLine("2. Set slave auth mode for AuthConfig");
-            Console.WriteLine("3. Get slave card config");
-            Console.WriteLine("4. Set slave card config");
-            Console.WriteLine("5. Exit");
-            Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
-            Console.WriteLine("Please, choose a number.");
-            Console.Write(">>>> ");
-            switch (Util.GetInput((UInt16)0))
+            while (true)
             {
-                case 1:
-                    slaveID = printSlaveList(slaveList);
-                    if (0 < slaveID)
-                        getSlaveExAuthMode(sdkContext, slaveID);
-                    break;
+                UInt32 slaveID = 0;
+                Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
+                Console.WriteLine("1. Get slave auth mode for AuthConfig");
+                Console.WriteLine("2. Set slave auth mode for AuthConfig");
+                Console.WriteLine("3. Get slave card config");
+                Console.WriteLine("4. Set slave card config");
+                Console.WriteLine("5. Get InputConfigEx config");
+                Console.WriteLine("6. Set InputConfigEx config");
+                Console.WriteLine("7. Get RelayAction config");
+                Console.WriteLine("8. Set RelayAction config");
 
-                case 2:
-                    slaveID = printSlaveList(slaveList);
-                    if (0 < slaveID)
-                        setSlaveExAuthMode(sdkContext, slaveID);
-                    break;
+                Console.WriteLine("9. Exit");
+                Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
+                Console.WriteLine("Please, choose a number.");
+                Console.Write(">>>> ");
+                switch (Util.GetInput((UInt16)0))
+                {
+                    case 1:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            getSlaveExAuthMode(sdkContext, slaveID);
+                        break;
 
-                case 3:
-                    slaveID = printSlaveList(slaveList);
-                    if (0 < slaveID)
-                        getSlaveExCardConfig(sdkContext, slaveID);
-                    break;
+                    case 2:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            setSlaveExAuthMode(sdkContext, slaveID);
+                        break;
 
-                case 4:
-                    slaveID = printSlaveList(slaveList);
-                    if (0 < slaveID)
-                        setSlaveExCardConfig(sdkContext, deviceID, slaveID);
-                    break;
+                    case 3:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            getSlaveExCardConfig(sdkContext, slaveID);
+                        break;
 
-                default:
-                    return;
+                    case 4:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            setSlaveExCardConfig(sdkContext, deviceID, slaveID);
+                        break;
+
+                    case 5:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            getInputConfigEx(sdkContext, slaveID);
+                        break;
+
+                    case 6:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            setInputConfigEx(sdkContext, slaveID);
+                        break;
+
+                    case 7:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            getRelayActionConfig(sdkContext, slaveID);
+                        break;
+
+                    case 8:
+                        slaveID = printSlaveList(slaveList);
+                        if (0 < slaveID)
+                            setRelayActionConfig(sdkContext, slaveID);
+                        break;
+
+                    default:
+                        return;
+                }
             }
         }
 
@@ -730,6 +761,148 @@ namespace Suprema
             changeAuthMode(sdkContext, deviceID, isMasterDevice, false);
         }
 
+        public void getInputConfigEx(IntPtr sdkContext, UInt32 slaveID)
+        {
+            BS2InputConfigEx config;
+            Console.WriteLine("Trying to get InputConfigEx configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, slaveID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setInputConfigEx(IntPtr sdkContext, UInt32 slaveID)
+        {
+	        // As of 2021.08.03, only IM-120 is supported
+	        BS2InputConfigEx config = Util.AllocateStructure<BS2InputConfigEx>();
+
+	        const int STOP_N_SET = -1;
+
+	        BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, slaveID, out config);
+	        if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+	        Console.WriteLine("Please enter number of inputs.");
+            Console.Write(">>>> ");
+            config.numInputs = Convert.ToByte(Util.GetInput());
+
+	        Console.WriteLine("Please enter number of supervised inputs.");
+            Console.Write(">>>> ");
+            config.numSupervised = Convert.ToByte(Util.GetInput());
+
+	        while (true)
+	        {
+		        Console.WriteLine("What input port would you like to set? [-1(Exit), 0, ..., {0}]", config.numSupervised - 1);
+                Console.Write(">>>> ");
+                int idx = Util.GetInput();
+		        if (STOP_N_SET == idx)
+			        break;
+
+		        config.inputs[idx].portIndex = Convert.ToByte(idx);
+
+		        Console.WriteLine("Please enter the switch type. (N/O: 0(default), N/C: 1)");
+                Console.Write(">>>> ");
+                config.inputs[idx].switchType = Util.GetInput((byte)BS2SwitchTypeEnum.NORMAL_OPEN);
+
+		        Console.WriteLine("Please enter the duration.");
+                Console.Write(">>>> ");
+                config.inputs[idx].duration = Util.GetInput((UInt16)50);
+
+		        Console.WriteLine("Please enter the type of resistance value for supervised input.");
+		        Console.WriteLine("[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised]");
+                Console.Write(">>>> ");
+                config.inputs[idx].supervisedResistor = Util.GetInput((byte)BS2SupervisedResistor.SUPERVISED_RESISTOR_UNUSED);
+	        }
+
+            Console.WriteLine("Trying to set InputConfigEx configuration");
+            result = (BS2ErrorCode)API.BS2_SetInputConfigEx(sdkContext, slaveID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
+        public void getRelayActionConfig(IntPtr sdkContext, UInt32 slaveID)
+        {
+            BS2RelayActionConfig config;
+            Console.WriteLine("Trying to get RelayAction configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRelayActionConfig(sdkContext, slaveID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setRelayActionConfig(IntPtr sdkContext, UInt32 slaveID)
+        {
+            // As of 2021.08.03, only IM-120 is supported
+            BS2RelayActionConfig config = Util.AllocateStructure<BS2RelayActionConfig>();
+
+            const int STOP_N_SET = -1;
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRelayActionConfig(sdkContext, slaveID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+   	        config.deviceID = slaveID;
+
+            while (true)
+            {
+                Console.WriteLine("What relay port would you like to set? [-1(Exit), 0, ..., {0}]", BS2Environment.BS2_MAX_RELAY_ACTION - 1);
+                Console.Write(">>>> ");
+                int idxRelay = Util.GetInput();
+                if (STOP_N_SET == idxRelay)
+                    break;
+
+                config.relay[idxRelay].port = Convert.ToByte(idxRelay);
+
+                Console.WriteLine("Do you want to set an alarm for RS485 disconnection?");
+                Console.Write(">>>> ");
+                config.relay[idxRelay].disconnEnabled = Convert.ToByte(Util.IsYes());
+
+	            while (true)
+	            {
+                    Console.WriteLine("What input port would you like to set? [-1(Exit), 0, ..., {0}]", BS2Environment.BS2_MAX_RELAY_ACTION_INPUT - 1);
+                    Console.Write(">>>> ");
+                    int idxInput = Util.GetInput();
+                    if (STOP_N_SET == idxInput)
+                        break;
+
+		            config.relay[idxRelay].input[idxInput].port = Convert.ToByte(idxInput);
+
+                    Console.WriteLine("Please enter the type of relay action input [0: None, 1: Linkage]");
+                    Console.Write(">>>> ");
+		            config.relay[idxRelay].input[idxInput].type =
+                        Util.GetInput((byte)BS2RelayActionInputType.RELAY_ACTION_INPUT_TYPE_NONE);
+
+                    Console.WriteLine("Please enter the mask of relay action input [0: None, 0x01: Alarm, 0x02: Fault]");
+                    Console.Write(">>>> ");
+		            config.relay[idxRelay].input[idxInput].mask =
+                        Util.GetInput((byte)BS2RelayActionInputMask.RELAY_ACTION_INPUT_MASK_NONE);
+                }
+            }
+
+            Console.WriteLine("Trying to set RelayActionConfig configuration");
+            result = (BS2ErrorCode)API.BS2_SetRelayActionConfig(sdkContext, slaveID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
         void print(IntPtr sdkContext, BS2Rs485SlaveDevice slaveDevice)
         {
             Console.WriteLine(">>>> SlaveDevice id[{0, 10}] type[{1, 3}] model[{2, 16}] enable[{3}], connected[{4}]", 
@@ -749,6 +922,44 @@ namespace Suprema
                                 API.productNameDictionary[(BS2DeviceTypeEnum)slaveExDevice.deviceType],
                                 Convert.ToBoolean(slaveExDevice.enableOSDP),
                                 Convert.ToBoolean(slaveExDevice.connected));
+        }
+
+        void print(BS2InputConfigEx config)
+        {
+            Console.WriteLine(">>>> InputConfigEx configuration");
+            Console.WriteLine("     +--numInputs : {0}", config.numInputs);
+            Console.WriteLine("     |--numSupervised : {0}", config.numSupervised);
+
+            for (byte idx = 0; idx < config.numSupervised; idx++)
+            {
+                Console.WriteLine("     +--inputs ({0})", idx);
+                Console.WriteLine("        |--portIndex : {0}", config.inputs[idx].portIndex);
+                Console.WriteLine("        |--switchType : {0}", config.inputs[idx].switchType);
+                Console.WriteLine("        |--duration : {0}", config.inputs[idx].duration);
+                Console.WriteLine("        |--supervisedResistor : {0}", config.inputs[idx].supervisedResistor);
+            }
+        }
+
+        void print(BS2RelayActionConfig config)
+        {
+            Console.WriteLine(">>>> RelayAction configuraion");
+            Console.WriteLine("     +--deviceID : {0}", config.deviceID);
+
+            for (byte idxRelay = 0; idxRelay < BS2Environment.BS2_MAX_RELAY_ACTION; idxRelay++)
+            {
+                Console.WriteLine("     +--relay ({0})", idxRelay);
+                Console.WriteLine("        |--port : {0}", config.relay[idxRelay].port);
+                Console.WriteLine("        |--disconnEnabled : {0}", config.relay[idxRelay].disconnEnabled);
+
+                for (byte idxInput = 0; idxInput < BS2Environment.BS2_MAX_RELAY_ACTION_INPUT; idxInput++)
+                {
+                    Console.WriteLine("        |--input({0}) -> port: {1}, type: {2}, mask: {3}",
+                        idxInput,
+                        config.relay[idxRelay].input[idxInput].port,
+                        config.relay[idxRelay].input[idxInput].type,
+                        config.relay[idxRelay].input[idxInput].mask);
+                }
+            }
         }
 
         string getAuthInfo(BS2AuthConfig config)

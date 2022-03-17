@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>게시\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -25,7 +26,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -70,9 +70,6 @@
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Suprema.UFMatcher">
-      <HintPath>..\..\..\common\lib\x86\Suprema.UFMatcher.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.97.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139">
@@ -116,6 +113,11 @@
       <ProductName>Microsoft .NET Framework 4 Client Profile%28x86 및 x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1</ProductName>
@@ -130,11 +132,13 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\BS_SDK_V2_$(PlatformName).dll" "$(TargetDir)BS_SDK_V2.dll"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libeay32.dll" "$(TargetDir)"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libssl32.dll" "$(TargetDir)"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\ssleay32.dll" "$(TargetDir)"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\UFMatcher.dll" "$(TargetDir)UFMatcher.dll"
-copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\UFLicense.lic" "$(TargetDir)UFLicense.lic"</PreBuildEvent>
+if $(PlatformName)==x64 (
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libssl-1_1-x64.dll" "$(TargetDir)"
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libcrypto-1_1-x64.dll" "$(TargetDir)"
+) else (
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libssl-1_1.dll" "$(TargetDir)"
+    copy "$(ProjectDir)..\..\..\common\lib\$(PlatformName)\libcrypto-1_1.dll" "$(TargetDir)"
+)</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

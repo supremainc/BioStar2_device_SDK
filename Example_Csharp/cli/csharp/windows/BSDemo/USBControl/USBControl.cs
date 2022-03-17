@@ -28,6 +28,7 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Filtering log", getFilteredLog));
             //functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get image log", getImageLog));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get logBlob", getLogBlob));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get logSmallBlobEx", getLogSmallBlobEx));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get database Info", getDatabaseInfo));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get user list only", listOnlyUser));
@@ -413,6 +414,76 @@ namespace Suprema
             while (getAllLog);
         }
 
+        void getLogSmallBlobEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            const UInt32 defaultLogPageSize = 1024;
+            Type structureType = typeof(BS2EventSmallBlobEx);
+            int structSize = Marshal.SizeOf(structureType);
+            bool getAllLog = false;
+            UInt32 lastEventId = 0;
+            UInt32 amount;
+            IntPtr outEventLogObjs = IntPtr.Zero;
+            UInt32 outNumEventLogs = 0;
+
+            Console.WriteLine("Enter the path of exported usb directory which you want to get.");
+            Console.Write(">>>> ");
+            string strDir = Console.ReadLine();
+
+            if (!Directory.Exists(strDir))
+            {
+                Console.WriteLine("Invalid path");
+                return;
+            }
+
+            Console.WriteLine("What is the ID of the last log which you have? [0: None]");
+            Console.Write(">>>> ");
+            lastEventId = Util.GetInput((UInt32)0);
+            Console.WriteLine("How many logs do you want to get? [0: All]");
+            Console.Write(">>>> ");
+            amount = Util.GetInput((UInt32)0);
+
+            if (amount == 0)
+            {
+                getAllLog = true;
+                amount = defaultLogPageSize;
+            }
+
+            do
+            {
+                outEventLogObjs = IntPtr.Zero;
+                IntPtr ptrDir = Marshal.StringToHGlobalAnsi(strDir);
+                BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetLogSmallBlobExFromDir(sdkContext, ptrDir, (ushort)BS2EventMaskEnum.ALL, lastEventId, amount, out outEventLogObjs, out outNumEventLogs);
+                Marshal.FreeHGlobal(ptrDir);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                    break;
+                }
+
+                if (outNumEventLogs > 0)
+                {
+                    IntPtr curEventLogObjs = outEventLogObjs;
+                    for (UInt32 idx = 0; idx < outNumEventLogs; idx++)
+                    {
+                        BS2EventSmallBlobEx eventLog = (BS2EventSmallBlobEx)Marshal.PtrToStructure(curEventLogObjs, structureType);
+
+                        print(idx, eventLog);
+
+                        curEventLogObjs += structSize;
+                        lastEventId = eventLog.id;
+                    }
+
+                    API.BS2_ReleaseObject(outEventLogObjs);
+                }
+
+                if (outNumEventLogs < defaultLogPageSize)
+                {
+                    break;
+                }
+            }
+            while (getAllLog);
+        }
+
         private void NormalLogReceived(UInt32 deviceID, IntPtr log)
         {
             if (log != IntPtr.Zero)
@@ -459,7 +530,7 @@ namespace Suprema
         public void getDatabaseInfo(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             IntPtr outUidObjs = IntPtr.Zero;
-            UInt32 numUserIds = 0;
+            //UInt32 numUserIds = 0;
             API.IsAcceptableUserID cbIsAcceptableUserID = new API.IsAcceptableUserID(cbAcceptableUserID); // we don't need to user id filtering
 
             Console.WriteLine("Enter the path of exported usb directory which you want to get.");
@@ -830,6 +901,22 @@ namespace Suprema
                 Console.WriteLine("Got error({0}).", result);
                 return;
             }
+        }
+
+        void print(UInt32 idx, BS2EventSmallBlobEx eventLog)
+        {
+            DateTime eventTime = Util.ConvertFromUnixTimestamp(eventLog.info.dateTime);
+
+            byte[] userID = new byte[BS2Environment.BS2_USER_ID_SIZE];
+            Array.Clear(userID, 0, BS2Environment.BS2_USER_ID_SIZE);
+            Array.Copy(eventLog.objectID, userID, userID.Length);
+
+            Console.WriteLine("Got log(idx[{0}], timestamp[{1}], event id[{2}], userID[{3}], jobcode[{4}]).",
+                                        idx,
+                                        eventTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                                        eventLog.id,
+                                        System.Text.Encoding.ASCII.GetString(userID).TrimEnd('\0'),
+                                        eventLog.jobCode);
         }
 
         [DllImport("kernel32.dll")]
