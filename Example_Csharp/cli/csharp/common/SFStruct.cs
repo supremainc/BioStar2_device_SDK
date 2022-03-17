@@ -1691,7 +1691,7 @@ namespace Suprema
         public UInt32[] accessGroupId;
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 7)]
+    [StructLayout(LayoutKind.Explicit, Size = BS2Environment.BS2_USER_ID_SIZE)]
     public struct BS2EventDetail
     {
         [FieldOffset(0)] public UInt32 doorID;
