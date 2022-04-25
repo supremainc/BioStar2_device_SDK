@@ -369,10 +369,10 @@ int connectWiegand(void* context, DeviceList& deviceList)
 	int sdkResult = BS_SDK_SUCCESS;
 	if (Utility::isYes("Do you want to find wiegand devices?"))
 	{
-		displayConnectedDevices(deviceList);
+		displayConnectedDevices(deviceList, true);
 		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 
-		if (!deviceList.findDevice(masterID))
+		if (!deviceList.findDevice(masterID) && !deviceList.findSlave(masterID))
 		{
 			cout << "Abort wiegand device discovery" << endl;
 			return BS_SDK_ERROR_CANNOT_FIND_DEVICE;

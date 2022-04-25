@@ -247,6 +247,7 @@ namespace Suprema
             Console.WriteLine("     |--thermalSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_THERMAL));
             Console.WriteLine("     |--maskSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_MASK));
             Console.WriteLine("     |--faceExSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_FACEEX));
+            Console.WriteLine("     |--voipExSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_VOIPEX));
 
 	        Console.WriteLine("     |--[Card Supported]");
 	        Console.WriteLine("     |--mask : 0x{0}", Convert.ToString(info.cardSupportedMask, 16));
@@ -279,6 +280,13 @@ namespace Suprema
 	        }
 
             Console.WriteLine("     |--intelligentPDSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_INTELLIGENTPD));
+            Console.WriteLine("     |--updateUserSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_UPDATEUSER));
+            Console.WriteLine("     |--simulatedUnlockSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_SIMULATEDUNLOCK));
+            Console.WriteLine("     |--smartCardByteOrderSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_SMARTCARDBYTEORDER));
+            Console.WriteLine("     |--treatAsCSNSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_TREATASCSN));
+            Console.WriteLine("     |--rtspSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_RTSP));
+
+            Console.WriteLine("     |--maxVoipExtensionNumbers : {0}", info.maxVoipExtensionNumbers);
         }
     }
 }

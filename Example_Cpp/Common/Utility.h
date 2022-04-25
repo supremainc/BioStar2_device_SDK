@@ -125,7 +125,7 @@ inline std::vector<T> Utility::tokenizeInteger(const std::string& data, const ch
 	std::stringstream ss(data);
 	while (std::getline(ss, tokenized, delimiter))
 	{
-		T tok = str2int<T>(tokenized);
+		T tok = convAString2Int<T>(tokenized);
 		result.push_back(tok);
 	}
 

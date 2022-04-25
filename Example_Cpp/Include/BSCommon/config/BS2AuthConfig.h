@@ -29,7 +29,7 @@ enum {
 
 	BS2_AUTH_TIMEOUT_MIN 		= 3,
 	BS2_AUTH_TIMEOUT_MAX 		= 20,
-#if defined(FACESTATION2) || defined(FACELITE) || defined(FACESTATION_F2)
+#if defined(FACESTATION2) || defined(FACELITE) || defined(FACESTATION_F2) || defined(BIOSTATION3)
 	BS2_AUTH_TIMEOUT_DEFAULT	= 5,
 #else
 	BS2_AUTH_TIMEOUT_DEFAULT	= 10,

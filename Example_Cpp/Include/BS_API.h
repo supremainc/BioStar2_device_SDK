@@ -231,6 +231,8 @@ typedef struct
 		BS2_SUPPORT_FACE_EX_SCAN	= 0x00040000,
 		BS2_SUPPORT_QR_SCAN			= 0x00080000,
 
+		BS2_SUPPORT_VOIPEX			= 0x01000000,
+
 		BS2_SUPPORT_ALL     		= BS2_SUPPORT_RS485EX |
 									  BS2_SUPPORT_CARDEX |
 									  BS2_SUPPORT_DST |
@@ -240,7 +242,8 @@ typedef struct
 									  BS2_SUPPORT_FINGER_SCAN |
 									  BS2_SUPPORT_FACE_SCAN |
 									  BS2_SUPPORT_FACE_EX_SCAN |
-									  BS2_SUPPORT_QR_SCAN,
+									  BS2_SUPPORT_QR_SCAN |
+									  BS2_SUPPORT_VOIPEX,
 	};
 
 	uint32_t supported;

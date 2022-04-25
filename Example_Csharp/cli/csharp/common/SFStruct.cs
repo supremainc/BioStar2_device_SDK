@@ -640,7 +640,8 @@ namespace Suprema
 
         public byte cipher;     // 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 23)]
+        public byte smartCardByteOrder;             // [+ V2.8.2.7]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 22)]
         public byte[] reserved;
     }
 
@@ -1608,7 +1609,7 @@ namespace Suprema
         public byte numCards;
         public byte numFingers;
         public byte numFaces;
-        public byte reserved;
+        public byte infoMask;       // [+V2.8.3]
 #if OLD_CODE
         public UInt32 fingerChecksum;
 #else
@@ -1689,6 +1690,18 @@ namespace Suprema
         public byte[] phrase;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_ACCESS_GROUP_PER_USER)]
         public UInt32[] accessGroupId;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]     // [+V2.8.3]
+    public struct BS2UserStatistic
+    {
+        public UInt32 numUsers;
+        public UInt32 numCards;
+        public UInt32 numFingerprints;
+        public UInt32 numFaces;
+        public UInt32 numNames;
+        public UInt32 numImages;
+        public UInt32 numPhrases;
     }
 
     [StructLayout(LayoutKind.Explicit, Size = BS2Environment.BS2_USER_ID_SIZE)]
@@ -2881,6 +2894,7 @@ namespace Suprema
         //maskSupported: 1;
         //faceExSupported: 1;
         //unused: 1;
+	    //voipExSupported: 1;
 	    public UInt32 cardSupportedMask;
         //EM: 1;
         //HIDProx: 1;
@@ -2897,7 +2911,14 @@ namespace Suprema
 	    public BS2AuthSupported authSupported;
 	    public byte functionSupported;
         //intelligentPDSupported: 1;
-        //unused2: 7;
+   	    //updateUserSupported: 1;
+	    //simulatedUnlockSupported: 1;
+        //smartCardByteOrderSupported: 1;
+        //treatAsCSNSupported: 1;
+        //rtspSupported: 1;
+        //unused2: 2;
+	    public byte maxVoipExtensionNumbers;        // [+V2.8.3]
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 431)]
 	    public byte[] reserved;
     }

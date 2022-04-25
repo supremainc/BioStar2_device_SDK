@@ -47,6 +47,23 @@ enum {
 
 typedef uint32_t BS2_USER_MASK;
 
+
+/**
+ * BS2_USER_INFO_MASK
+ */
+enum {
+	BS2_USER_INFO_MASK_PHRASE 	= 0x01,
+	BS2_USER_INFO_MASK_JOB_CODE = 0x02,
+	BS2_USER_INFO_MASK_NAME 	= 0x04,
+	BS2_USER_INFO_MASK_PHOTO 	= 0x08,
+	BS2_USER_INFO_MASK_PIN 		= 0x10,
+	BS2_USER_INFO_MASK_CARD 	= 0x20,
+	BS2_USER_INFO_MASK_FINGER 	= 0x40,
+	BS2_USER_INFO_MASK_FACE 	= 0x80,
+};
+
+typedef uint8_t BS2_USER_INFO_MASK;
+
 /**
  *	constants
  */
@@ -157,7 +174,7 @@ typedef struct {
 	uint8_t				numCards;			///< 1 byte
 	uint8_t				numFingers;			///< 1 byte
 	uint8_t				numFaces;			///< 1 byte
-	uint8_t				reserved2[1];		///< 1 byte
+	uint8_t				infoMask;			///< 1 byte
 
 #if BS2_SDK_V1_BUILD
 	BS2_CHECKSUM		fingerChecksum;		///< 4 bytes
@@ -201,5 +218,15 @@ typedef struct {
 
 	uint8_t             reserved[28];           ///< 28 bytes (packing)
 } BS2UserSettingEx;
+
+typedef struct {
+	uint32_t numUsers;
+	uint32_t numCards;
+	uint32_t numFingerprints;
+	uint32_t numFaces;
+	uint32_t numNames;
+	uint32_t numImages;
+	uint32_t numPhrases;
+} BS2UserStatistic;
 
 #endif	// __BS2_USER_H__

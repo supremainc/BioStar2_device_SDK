@@ -45,6 +45,20 @@ bool DeviceList::findDevice(BS2_DEVICE_ID id) const
 	return (devList_.find(id) != devList_.end());
 }
 
+bool DeviceList::findSlave(BS2_DEVICE_ID slaveID) const
+{
+	for (auto item : devList_)
+	{
+		for (auto id : item.second->slaveDevices_)
+		{
+			if (slaveID == id)
+				return true;
+		}
+	}
+
+	return false;
+}
+
 shared_ptr<DeviceInfo>& DeviceList::getDevice(BS2_DEVICE_ID id)
 {
 	return devList_[id];
@@ -61,7 +75,11 @@ bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID)
 	if (it == devList_.end())
 		return false;
 
-	devList_[hostID]->slaveDevices_.push_back(slaveID);
+	auto& vec = devList_[hostID]->slaveDevices_;
+	auto its = find(vec.begin(), vec.end(), slaveID);
+	if (its == vec.end())
+		vec.push_back(slaveID);
+
 	return true;
 }
 
@@ -70,8 +88,12 @@ bool DeviceList::appendWiegand(BS2_DEVICE_ID hostID, BS2_DEVICE_ID wiegandID)
 	auto it = devList_.find(hostID);
 	if (it == devList_.end())
 		return false;
+	
+	auto& vec = devList_[hostID]->wiegandDevices_;
+	auto itw = find(vec.begin(), vec.end(), wiegandID);
+	if (itw == vec.end())
+		vec.push_back(wiegandID);
 
-	devList_[hostID]->wiegandDevices_.push_back(wiegandID);
 	return true;
 }
 

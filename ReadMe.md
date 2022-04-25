@@ -45,14 +45,11 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
-### V2.8.2.7 Beta released 02/23/2022:
+### V2.8.2.9 released 04/14/2022:
 
-**New Features**
+**Modified Features**
 
-**1.** A barcode bypass function has been added so that you can subscribe to barcodes from devices that can scan barcodes.
-* Refer to Structure BS2BarcodeConfig
-* API BS2_SetBarcodeScanListener has been added
-* Callback OnBarcodeScanned has been added
+**1.** Fix the problem that the device connection is disconnected in case of a simple communication error in SSL connection mode.
 
 <br>
 
@@ -453,12 +450,33 @@ Refer to API BS2_FactoryReset
 ### Release Notes (Beta)
 <br>
 
+### V2.8.2.7 Beta released 02/23/2022:
+
+**New Features**
+
+**1.** A barcode bypass function has been added so that you can subscribe to barcodes from devices that can scan barcodes.
+* Refer to Structure BS2BarcodeConfig
+* API BS2_SetBarcodeScanListener has been added
+* Callback OnBarcodeScanned has been added
+
+**2.** A function (Treat as CSN) has been added that allows you to treat Barcodes the same as regular CSN cards.
+* Refer to Structure BS2BarcodeConfig
+
+**3.** It has been modified to set the byte order of the smart card.
+* Refer to Structure BS2CardConfig
+* Refer to API BS2_GetCardConfig
+* Refer to API BS2_SetCardConfig
+
+**4.** Updated system support information for Smart card byte order, Treat as CSN function.
+* Refer to Structure BS2DeviceCapabilities
+* Refer to API BS2_GetDeviceCapabilities
+<br>
+
 ### V2.8.2.5 Beta released 02/16/2022:
 
 **New Features**
 
 **1.** In devices supporting Ver.3 (GDPR supported), the following functions have been added to read USB files.
-
 The functions below correspond to cases where the user information encryption key of the device has been changed by calling the BS2_SetDataEncryptKey function in the past.
 For the newly added key parameter, you can specify the key set in the past.
 * API BS2_GetUserDatabaseInfoFromDirWithKey has been added
@@ -502,6 +520,11 @@ The functions below decrypt the encryption information with the default key valu
 * Refer to API BS2_GetLogBlobFromDir
 * Refer to API BS2_GetLogSmallBlobFromDir
 * Refer to API BS2_GetLogSmallBlobExFromDir
+
+**2.** The following functions are deprecated.
+* API BS2_AllocateUsbContext deprecated
+* API BS2_ReleaseUsbContext deprecated
+
 <br>
 <br>
 

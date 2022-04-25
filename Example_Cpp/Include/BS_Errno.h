@@ -86,6 +86,7 @@
 #define BS_SDK_ERROR_NOT_LOOKING_FRONT                      -329
 #define BS_SDK_ERROR_OCCLUDED_MOUTH                         -330
 #define BS_SDK_ERROR_MATCH_FAIL                             -331
+#define BS_SDK_ERROR_INCOMPATIBLE_FACE                      -332
 
 //File I/O errors
 #define BS_SDK_ERROR_CANNOT_OPEN_DIR                        -400

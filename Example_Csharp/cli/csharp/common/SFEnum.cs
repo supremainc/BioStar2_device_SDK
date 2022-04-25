@@ -86,6 +86,8 @@ namespace Suprema
         BS_SDK_ERROR_NOT_LOOKING_FRONT                      = -329,
         BS_SDK_ERROR_OCCLUDED_MOUTH                         = -330,
         BS_SDK_ERROR_MATCH_FAIL                             = -331,
+        BS_SDK_ERROR_INCOMPATIBLE_FACE                      = -332,     // [+V2.8.3]
+
 
         //File I/O errors
         BS_SDK_ERROR_CANNOT_OPEN_DIR                        = -400,
@@ -835,6 +837,8 @@ namespace Suprema
         WELCOME = 0,
         AUTH_SUCCESS = 1,
         AUTH_FAIL = 2,
+        ALARM_1 = 3,    // FISSDK-95  Add missing sound index
+        ALARM_2 = 4,    // FISSDK-95  Add missing sound index
     }
 
     [Flags]
@@ -1118,6 +1122,19 @@ namespace Suprema
     }
 
     [Flags]
+    public enum BS2UserInfoMaskEnum      // [+V2.8.3]
+    {
+ 	    PHRASE 	    = 0x01,
+	    JOB_CODE    = 0x02,
+	    NAME 	    = 0x04,
+	    PHOTO 	    = 0x08,
+	    PIN 		= 0x10,
+	    CARD 	    = 0x20,
+	    FINGER 	    = 0x40,
+	    FACE 	    = 0x80,
+    }
+
+    [Flags]
     public enum BS2EventCodeEnum
     {
         ALL = 0x0000,
@@ -1217,6 +1234,12 @@ namespace Suprema
         ACCESS_DENIED_DEVICE_ZONE_ENTRANCE_LIMIT = 0x190D,
         ACCESS_DENIED_INTRUSION_ALARM = 0x190E,
         ACCESS_DENIED_INTERLOCK = 0x190F,
+        ACCESS_EXCUSED_AUTH_LIMIT = 0x1910,         // [+V2.8.3]
+        ACCESS_DENIED_AUTH_LIMIT = 0x1911,          // [+V2.8.3]
+        ACCESS_DENIED_ANTI_TAILGATE = 0x1912,       // [+V2.8.3]
+        ACCESS_DENIED_HIGH_TEMPERATURE = 0x1913,    // [+V2.8.3]
+        ACCESS_DENIED_NO_TEMPERATURE = 0x1914,      // [+V2.8.3]
+        ACCESS_DENIED_UNMASKED_FACE = 0x1915,       // [+V2.8.3]
 
         USER_ENROLL_SUCCESS = 0x2000,
         USER_ENROLL_FAIL = 0x2100,
@@ -1227,6 +1250,8 @@ namespace Suprema
         USER_DELETE_ALL_SUCCESS = 0x2600,
         USER_ISSUE_AOC_SUCCESS = 0x2700,
         USER_DUPLICATE_CREDENTIAL = 0x2800,
+       	USER_UPDATE_PARTIAL_SUCCESS = 0x2900,   // [+V2.8.3]
+	    USER_UPDATE_PARTIAL_FAIL = 0x2A00,      // [+V2.8.3]
 
         DEVICE_SYSTEM_RESET = 0x3000,
         DEVICE_SYSTEM_STARTED = 0x3100,
@@ -1261,6 +1286,10 @@ namespace Suprema
         DEVICE_AC_SUCCESS = 0x4900,
 
         DOOR_UNLOCKED = 0x5000,
+        DOOR_UNLOCKED_BY_BUTTON = 0x5001,           // [+V2.8.3]
+        DOOR_UNLOCKED_BY_OPERATOR = 0x5002,         // [+V2.8.3]
+        DOOR_UNLOCKED_BY_SIMULATED_BUTTON = 0x5003, // [+V2.8.3]
+        DOOR_UNLOCKED_BY_VOIP = 0x5004,             // [+V2.8.3]
         DOOR_LOCKED = 0x5100,
         DOOR_OPENED = 0x5200,
         DOOR_CLOSED = 0x5300,
@@ -1414,6 +1443,14 @@ namespace Suprema
         // Reason to be failed
         ENROLL_FAIL_INVALID_FACE = 0x01,
         UPDATE_FAIL_INVALID_FACE = 0x01,
+        ENROLL_FAIL_MISMATCHED_FORMAT = 0x02,       // [+V2.8.3]
+        UPDATE_FAIL_MISMATCHED_FORMAT = 0x02,       // [+V2.8.3]
+        ENROLL_FAIL_FULL_CREDENTIAL = 0x03,         // [+V2.8.3]
+        UPDATE_FAIL_FULL_CREDENTIAL = 0x03,         // [+V2.8.3]
+        ENROLL_FAIL_INVALID_USER = 0x04,            // [+V2.8.3]
+        UPDATE_FAIL_INVALID_USER = 0x04,            // [+V2.8.3]
+        ENROLL_FAIL_INTERNAL_ERROR = 0x09,          // [+V2.8.3]
+        UPDATE_FAIL_INTERNAL_ERROR = 0x09,          // [+V2.8.3]
 
         // Reason to be failed
         DUAL_AUTH_FAIL_TIMEOUT = 0x01,
@@ -1439,6 +1476,7 @@ namespace Suprema
         CREDENTIAL_AOC_PIN = 0x06,
         CREDENTIAL_AOC_FINGER = 0x07,
         CREDENTIAL_MOBILE_CARD = 0x08,
+        CREDENTIAL_QR = 0x09,             // [+ V2.8.2.7]
 
         // Reason to be failed
         AUTH_FAIL_INVALID_AUTH_MODE = 0x01,
@@ -1516,6 +1554,8 @@ namespace Suprema
         TNA_KEY = 0x0040,
         JOB_CODE = 0x0080,
         IMAGE = 0x0100,
+        TEMPERATURE = 0X0200,               // [+ V2.8.2.7]
+        QR_DATA = 0X0400,                   // [+ V2.8.2.7]
        
         ALL = 0xFFFF,
     }
@@ -1764,6 +1804,7 @@ namespace Suprema
 	    SYSTEM_SUPPORT_THERMAL  = 0x10,
 	    SYSTEM_SUPPORT_MASK     = 0x20,
 	    SYSTEM_SUPPORT_FACEEX   = 0x40,
+        SYSTEM_SUPPORT_VOIPEX   = 0x80,         // [+V2.8.3]
 	}
 
     [Flags]
@@ -1785,7 +1826,12 @@ namespace Suprema
     [Flags]
     public enum BS2CapabilityFunctionSupport
     {
-        FUNCTION_SUPPORT_INTELLIGENTPD = 0x01,
+        FUNCTION_SUPPORT_INTELLIGENTPD      = 0x01,
+        FUNCTION_SUPPORT_UPDATEUSER         = 0x02,     // [V2.8.3]
+        FUNCTION_SUPPORT_SIMULATEDUNLOCK    = 0x04,     // [V2.8.3]
+        FUNCTION_SUPPORT_SMARTCARDBYTEORDER = 0x08,
+        FUNCTION_SUPPORT_TREATASCSN         = 0x10,
+        FUNCTION_SUPPORT_RTSP               = 0x20,     // [V2.8.3]
     }
 
     [Flags]

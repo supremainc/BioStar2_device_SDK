@@ -30,8 +30,10 @@ enum {
 	BS2_CONFIG_MASK_EX_FACE         = 0x00000004,
 	BS2_CONFIG_MASK_EX_THERMAL_CAMERA  = 0x00000008,
 	BS2_CONFIG_MASK_EX_BARCODE  	= 0x00000010,
-	BS2_CONFIG_MASK_EX_INPUT_EX    	= 0x00000020,	///< Extended Input configuration
+	BS2_CONFIG_MASK_EX_INPUT_EX 	= 0x00000020,	///< Extended Input configuration
 	BS2_CONFIG_MASK_EX_RELAY_ACTION = 0x00000040,	///< Relay Action(Linkage & Latching) configuration
+	BS2_CONFIG_MASK_EX_RTSP         = 0x00000080,	///< RTSP configuration
+	BS2_CONFIG_MASK_EX_VOIP			= 0x00000100,	///< Voip configuration
 };
 
 #define BS2_CONFIG_MASK_EX_ALL			0xFFFFFFFF	///< 4 bytes

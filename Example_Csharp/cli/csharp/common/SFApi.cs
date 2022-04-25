@@ -1008,6 +1008,58 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetLogSmallBlobExFromDir(IntPtr context, IntPtr szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
 
+        // With key
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserDatabaseInfoFromDirWithKey(IntPtr context, IntPtr szDir, out UInt32 numUsers, out UInt32 numCards, out UInt32 numFingers, out UInt32 numFaces, IsAcceptableUserID cbIsAcceptableUserID, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserListFromDirWithKey(IntPtr context, IntPtr szDir, out IntPtr outUidObjs, out UInt32 outNumUids, IsAcceptableUserID cbIsAcceptableUserID, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserInfosFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserBlob[] userBlobs, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserDatasFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserBlob[] userBlobs, UInt32 userMask, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserInfosExFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserBlobEx[] userBlobs, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserDatasExFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserBlobEx[] userBlobs, UInt32 userMask, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserSmallInfosFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserSmallBlob[] userBlob, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserSmallDatasFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserSmallBlob[] userBlob, BS2_USER_MASK userMask, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserSmallInfosExFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserSmallBlobEx[] userBlob, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserSmallDatasExFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserSmallBlobEx[] userBlob, BS2_USER_MASK userMask, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLogFromDirWithKey(IntPtr context, IntPtr szDir, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLogBlobFromDirWithKey(IntPtr context, IntPtr szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog, out BS2EncryptKey keyInfo);
+        
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetFilteredLogFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uid, UInt16 eventCode, UInt32 start, UInt32 end, byte tnakey, out IntPtr logObjs, out UInt32 numLog, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLogSmallBlobFromDirWithKey(IntPtr context, IntPtr szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLogSmallBlobExFromDirWithKey(IntPtr context, IntPtr szDir, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserInfosFaceExFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserFaceExBlob[] userBlob, out BS2EncryptKey keyInfo);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserDatasFaceExFromDirWithKey(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserFaceExBlob[] userBlob, BS2_USER_MASK userMask, out BS2EncryptKey keyInfo);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< WRAPPER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */        
         public static BS2ErrorCode CSP_BS2_GetAllAccessSchedule(IntPtr context, UInt32 deviceId, out CSP_BS2Schedule[] accessScheduleObj, out UInt32 numAccessSchedule)
         {

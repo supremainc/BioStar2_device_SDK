@@ -179,7 +179,10 @@ typedef struct {
 	 */
 	uint8_t faceExSupported: 1;
 
-	uint8_t unused: 1;		///< 1 byte
+	/*
+	 * If true, BS2VoipConfigEx is supported.
+	 */
+	uint8_t voipExSupported: 1;		// BDP-567
 
 	/*
 	 * Mask for card type supported by the device
@@ -375,9 +378,17 @@ typedef struct {
 	/*
 	 * If true, intelligentPD is supported.
 	 */
-	uint8_t intelligentPDSupported: 1;
+	uint8_t intelligentPDSupported: 1;		// BDP-92
 
-	uint8_t unused1: 2;
+	/*
+	 * If true, partial update is supported.
+	 */
+	uint8_t updateUserSupported: 1;		// BDP-561
+
+	/*
+	 * If true, simulatedUnlock is supported.
+	 */
+	uint8_t simulatedUnlockSupported: 1;		// BDP-523
 
 	/*
 	 * If true, smartCardByteOrder is supported.
@@ -389,9 +400,19 @@ typedef struct {
 	 */
 	uint8_t treatAsCSNSupported: 1;		// BDP-488
 
-	uint8_t unused2: 3;		///< 1 byte
+	/*
+	 * If true, RTSP is supported.
+	 */
+	uint8_t rtspSupported: 1;		// BDP-568
 
-	uint8_t reserved[431];		///< 431 bytes
+	uint8_t unused2: 2;		///< 1 byte
+
+	/*
+	 * Maximum number of VOIP extension numbers that can be stored on the device
+	 */
+	uint8_t maxVoipExtensionNumbers;		///< 1 byte
+
+	uint8_t reserved[430];		///< 430 bytes
 } BS2DeviceCapabilities;
 
 #endif	// __BS2_DEVICE_INFO_H__

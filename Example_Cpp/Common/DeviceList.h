@@ -34,6 +34,7 @@ public:
 	bool appendDevice(BS2_DEVICE_ID id, BS2_DEVICE_TYPE type, uint32_t ip, BS2_PORT port, int32_t timezone);
 	bool removeDevice(BS2_DEVICE_ID id);
 	bool findDevice(BS2_DEVICE_ID id) const;
+	bool findSlave(BS2_DEVICE_ID slaveID) const;
 	std::shared_ptr<DeviceInfo>& getDevice(BS2_DEVICE_ID id);
 	void clearDevices();
 
