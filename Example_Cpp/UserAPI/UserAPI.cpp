@@ -766,12 +766,52 @@ int writeCard(UserControl& uc, BS2_DEVICE_ID id)
 		return sdkResult;
 
 	uint8_t fpTemplate[BS2_FINGER_TEMPLATE_SIZE] = { 0, };
-	cout << "Now scan your fingerprint." << endl;
-	sdkResult = uc.scanTemplate(id, fpTemplate);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
+	BS2TemplateEx templateEx = { 0, };
 
-	memcpy(card.credentials.templateData, fpTemplate, BS2_FINGER_TEMPLATE_SIZE);
+	if (Utility::isYes("Do you want to include fingerprint templates?"))
+	{
+		cout << "Now scan your fingerprint." << endl;
+		sdkResult = uc.scanTemplate(id, fpTemplate);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		card.header.numOfTemplate = 1;
+		card.header.numOfFaceTemplate = 0;
+		card.header.cardAuthMode = BS2_AUTH_MODE_CARD_BIOMETRIC_OR_PIN;
+		card.header.cardAuthModeEx = BS2_AUTH_MODE_NONE;
+	}
+	else if (Utility::isYes("Do you want to include VisualFace template?"))
+	{
+		cout << "Now scan your face." << endl;
+
+		sdkResult = uc.extractTemplateFaceEx(id, templateEx);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		card.header.numOfTemplate = 0;
+		card.header.numOfFaceTemplate = 1;
+		card.header.cardAuthMode = BS2_AUTH_MODE_NONE;
+		card.header.cardAuthModeEx = BS2_EXT_AUTH_MODE_CARD_FACE_OR_PIN;
+	}
+	else
+	{
+		card.header.numOfTemplate = 0;
+		card.header.numOfFaceTemplate = 0;
+		card.header.cardAuthMode = BS2_AUTH_MODE_CARD_PIN;
+		card.header.cardAuthModeEx = BS2_AUTH_MODE_NONE;
+	}
+
+	if (0 < card.header.numOfTemplate)
+	{
+		memcpy(card.credentials.templateData, fpTemplate, BS2_FINGER_TEMPLATE_SIZE);
+		card.header.templateSize = BS2_FINGER_TEMPLATE_SIZE;
+	}
+	else if (0 < card.header.numOfFaceTemplate)
+	{
+		memcpy(card.credentials.templateData, templateEx.data, BS2_FACE_EX_TEMPLATE_SIZE);
+		card.header.templateSize = BS2_FACE_EX_TEMPLATE_SIZE;
+	}
+
 	card.header.duressMask = false;
 
 	if (Utility::isYes("Do you want register access group ID?"))
@@ -803,10 +843,7 @@ int writeCard(UserControl& uc, BS2_DEVICE_ID id)
 	card.accessOnData.endTime = endTime;
 
 	card.header.cardType = BS2_CARD_TYPE_ACCESS;
-	card.header.numOfTemplate = 1;
-	card.header.templateSize = BS2_FINGER_TEMPLATE_SIZE;
 	card.header.issueCount = 1;
-	card.header.cardAuthMode = BS2_AUTH_MODE_CARD_BIOMETRIC_OR_PIN;
 	card.header.useAlphanumericID = false;
 
 	if (BS_SDK_SUCCESS != uc.updateCardTypeCRC(card) ||
