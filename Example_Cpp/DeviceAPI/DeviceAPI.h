@@ -92,6 +92,9 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_RELAYACTIONCONFIG,
 	MENU_DEV_SET_RELAYACTIONCONFIG,
+
+	MENU_DEV_GET_WLANCONFIG,
+	MENU_DEV_SET_WLANCONFIG,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -164,6 +167,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_RELAYACTIONCONFIG,	"BS2_GetRelayActionConfig"},
 	{MENU_DEV_SET_RELAYACTIONCONFIG,	"BS2_SetRelayActionConfig"},
+
+	{MENU_DEV_GET_WLANCONFIG,			"BS2_GetWlanConfig"},
+	{MENU_DEV_SET_WLANCONFIG,			"BS2_SetWlanConfig"},
 };
 
 
@@ -217,3 +223,5 @@ int getInputConfigEx(void* context, const DeviceInfo& device);
 int setInputConfigEx(void* context, const DeviceInfo& device);
 int getRelayActionConfig(void* context, const DeviceInfo& device);
 int setRelayActionConfig(void* context, const DeviceInfo& device);
+int getWLANConfig(void* context, const DeviceInfo& device);
+int setWLANConfig(void* context, const DeviceInfo& device);

@@ -51,6 +51,8 @@ public:
 	int setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config);
 	int getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config);
 	int setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionConfig& config);
+	int getWLANConfig(BS2_DEVICE_ID id, BS2WlanConfig& config);
+	int setWLANConfig(BS2_DEVICE_ID id, const BS2WlanConfig& config);
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -91,6 +93,7 @@ public:
 	static void print(const BS2Rs485SlaveDevice& device);
 	static void print(const BS2InputConfigEx& config);
 	static void print(const BS2RelayActionConfig& config);
+	static void print(const BS2WlanConfig& config);
 	static void print(const std::vector<BS2AuthOperatorLevel>& list);
 	static void print(const BS2AuthOperatorLevel& opr);
 

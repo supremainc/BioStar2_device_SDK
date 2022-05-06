@@ -341,6 +341,24 @@ int ConfigControl::setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionCo
 	return sdkResult;
 }
 
+int ConfigControl::getWLANConfig(BS2_DEVICE_ID id, BS2WlanConfig& config)
+{
+	int sdkResult = BS2_GetWlanConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetWlanConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setWLANConfig(BS2_DEVICE_ID id, const BS2WlanConfig& config)
+{
+	int sdkResult = BS2_SetWlanConfig(context_, id, const_cast<BS2WlanConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetWlanConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -1030,6 +1048,17 @@ void ConfigControl::print(const BS2RelayActionConfig& config)
 				config.relay[idxRelay].input[idxInput].mask);
 		}
 	}
+}
+
+void ConfigControl::print(const BS2WlanConfig& config)
+{
+	TRACE("==[BS2WlanConfig]==");
+	TRACE("+--enabled : %u", config.enabled);
+	TRACE("+--operationMode : %u", config.operationMode);
+	TRACE("+--authType : %u", config.authType);
+	TRACE("+--encryptionType : %u", config.encryptionType);
+	TRACE("+--essid : %s", config.essid);
+	TRACE("+--authKey : %s", config.authKey);
 }
 
 void ConfigControl::print(const std::vector<BS2AuthOperatorLevel>& list)

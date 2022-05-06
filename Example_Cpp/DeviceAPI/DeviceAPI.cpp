@@ -468,6 +468,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_RELAYACTIONCONFIG:
 			sdkResult = setRelayActionConfig(context, device);
 			break;
+		case MENU_DEV_GET_WLANCONFIG:
+			sdkResult = getWLANConfig(context, device);
+			break;
+		case MENU_DEV_SET_WLANCONFIG:
+			sdkResult = setWLANConfig(context, device);
+			break;
 		default:
 			break;
 		}
@@ -1590,4 +1596,82 @@ int setRelayActionConfig(void* context, const DeviceInfo& device)
 	}
 
 	return cc.setRelayActionConfig(id, config);
+}
+
+int getWLANConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2WlanConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getWLANConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setWLANConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2WlanConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getWLANConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Do you want to use the WLAN?";
+	if (Utility::isYes(msg))
+	{
+		config.enabled = true;
+
+		msg = "Select the operation mode of the WLAN. [0: Infrastructure, 1: Ad-hoc]";
+		config.operationMode = (BS2_WLAN_OPMODE)Utility::getInput<uint32_t>(msg);
+
+		ostringstream methodMsg;
+		methodMsg << "Select the WLAN authentication method." << endl;
+		methodMsg << " - 0: Open authentication" << endl;
+		methodMsg << " - 1: Shared authentication" << endl;
+		methodMsg << " - 2: WPA-PSK" << endl;
+		methodMsg << " - 3: WPA2-PSK" << endl;
+		config.authType = (BS2_WLAN_AUTH_TYPE)Utility::getInput<uint32_t>(methodMsg.str());
+
+		ostringstream encMsg;
+		encMsg << "Select the WLAN encryption method." << endl;
+		encMsg << " - 0: None" << endl;
+		encMsg << " - 1: WEP" << endl;
+		encMsg << " - 2: TKIP/AES" << endl;
+		encMsg << " - 3: AES" << endl;
+		encMsg << " - 4: TKIP" << endl;
+		config.encryptionType = (BS2_WLAN_ENC_TYPE)Utility::getInput<uint32_t>(encMsg.str());
+
+ESSID_AGAIN:
+		msg = "Enter the ESSID of the WLAN?";
+		string essID = Utility::getInput<string>(msg);
+		if (BS2_WLAN_SSID_SIZE < essID.size())
+		{
+			cout << "Max ESSID size is " << BS2_WLAN_SSID_SIZE << endl;
+			goto ESSID_AGAIN;
+		}
+		memset(config.essid, 0x0, BS2_WLAN_SSID_SIZE);
+		strcpy(config.essid, essID.c_str());
+
+AUTHKEY_AGAIN:
+		msg = "Enter the authentication key of the WLAN?";
+		string authKey = Utility::getInput<string>(msg);
+		if (BS2_WLAN_KEY_SIZE < authKey.size())
+		{
+			cout << "Max Authentication key size is " << BS2_WLAN_KEY_SIZE << endl;
+			goto AUTHKEY_AGAIN;
+		}
+		memset(config.authKey, 0x0, BS2_WLAN_KEY_SIZE);
+		strcpy(config.authKey, authKey.c_str());
+	}
+	else
+	{
+		config.enabled = false;
+	}
+
+	return cc.setWLANConfig(id, config);
 }
