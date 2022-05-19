@@ -25,6 +25,7 @@ public:
 	int lockDevice(BS2_DEVICE_ID id);
 	int unlockDevice(BS2_DEVICE_ID id);
 	int upgradeFirmware(BS2_DEVICE_ID id);
+	int upgradeFirmware(const std::vector<BS2_DEVICE_ID>& devices);
 	int updateResource(BS2_DEVICE_ID id);
 	int getDeviceCapabilities(BS2_DEVICE_ID id, BS2DeviceCapabilities& cap);
 

@@ -111,7 +111,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::setDebugFileLog(DEBUG_LOG_SYSTEM, DEBUG_MODULE_ALL, ".");
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
 	//BS2Context::setDebugCallbackLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL);
 
 	TRACE("Version: %s", BS2_Version());
@@ -218,8 +218,8 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 			sdkResult = connectViaIP(context, deviceList);
 			break;
 		case MENU_TOP_SEARCH_SLAVE:
-			sdkResult = connectSlave(context, deviceList);
-			break;
+			slaveMenu(context, deviceList);
+			return;
 		case MENU_TOP_SEARCH_WIEGAND:
 			sdkResult = connectWiegand(context, deviceList);
 			break;
@@ -325,7 +325,69 @@ int connectViaIP(void* context, DeviceList& deviceList)
 	return sdkResult;
 }
 
-int connectSlave(void* context, DeviceList& deviceList)
+void slaveMenu(void* context, DeviceList& deviceList)
+{
+	DeviceControl dc(context);
+	BS2_DEVICE_ID masterID(0);
+	int sdkResult = BS_SDK_SUCCESS;
+	vector<BS2_DEVICE_ID> selectedIDs;
+	bool selectedOrder = false;
+
+	bool menuBreak = false;
+	while (!menuBreak)
+	{
+		uint32_t selected = showMenu(menuInfoSlave);
+		switch (selected)
+		{
+		case MENU_SLV_BREAK:
+			menuBreak = true;
+			break;
+		case MENU_SLV_GET_CONFIG_RS485EX:
+			masterID = selectDeviceID(deviceList, false, false);
+			sdkResult = getSlaveConnectionStatus(context, masterID);
+			break;
+		case MENU_SLV_SEARCH_DEVICE:
+			sdkResult = searchAndAddSlave(context, deviceList);
+			break;
+		case MENU_SLV_UPG_FIRMWARE:
+			if (!selectedOrder)
+			{
+				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				selectedOrder = true;
+			}
+			sdkResult = dc.upgradeFirmware(selectedIDs);
+			break;
+		case MENU_SLV_GET_CONFIG_FACTORY:
+			if (!selectedOrder)
+			{
+				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				selectedOrder = true;
+			}
+			sdkResult = getFactoryConfigMulti(context, selectedIDs);
+			break;
+		case MENU_SLV_GET_CONFIG_STATUS:
+			if (!selectedOrder)
+			{
+				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				selectedOrder = true;
+			}
+			sdkResult = getStatusConfigMulti(context, selectedIDs);
+			break;
+		case MENU_SLV_SET_CONFIG_STATUS:
+			if (!selectedOrder)
+			{
+				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				selectedOrder = true;
+			}
+			sdkResult = setStatusConfigMulti(context, selectedIDs);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+int searchAndAddSlave(void* context, DeviceList& deviceList)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	if (Utility::isYes("Do you want to find slave devices?"))
@@ -347,18 +409,18 @@ int connectSlave(void* context, DeviceList& deviceList)
 		switch (type)
 		{
 		case BS2_DEVICE_TYPE_CORESTATION_40:
-			sdkResult = searchCSTSlave(context, masterID, slaveID);
+			sdkResult = searchCSTSlave(context, deviceList, masterID);
 			break;
 
 		default:
 			sdkResult = cc.updateRS485OperationMode(masterID, BS2_RS485_MODE_MASTER);
 			if (BS_SDK_SUCCESS == sdkResult)
-				sdkResult = searchSlave(context, masterID, slaveID);
+				sdkResult = searchSlave(context, deviceList, masterID);
 			break;
 		}
 
-		if (BS_SDK_SUCCESS == sdkResult && 0 < slaveID)
-			deviceList.appendSlave(masterID, slaveID);
+		//if (BS_SDK_SUCCESS == sdkResult && 0 < slaveID)
+		//	deviceList.appendSlave(masterID, slaveID);
 	}
 
 	return sdkResult;
@@ -392,7 +454,7 @@ uint32_t getSelectedIndex()
 	return Utility::getInput<uint32_t>("Select number:");
 }
 
-int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
+int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
 {
 	CommControl cm(context);
 	vector<BS2Rs485SlaveDevice> slaveList;
@@ -402,25 +464,40 @@ int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
 
 	displaySlaveList(slaveList);
 
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= slaveList.size())
+	bool connectAll = false;
+	if (Utility::isYes("Do you want to add all discovered slave devices?"))
+		connectAll = true;
+
+	for (auto slaveDevice : slaveList)
 	{
-		BS2_DEVICE_ID id = slaveList[selected - 1].deviceID;
-
-		TRACE("Now connect to slave device (Host:%u, Slave:%u)", masterID, id);
-
-		sdkResult = cm.addSlaveDevice(masterID, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		slaveID = id;
-		cout << "Added slave " << slaveID << endl;
+		if (connectAll)
+		{
+			slaveDevice.enableOSDP = true;
+		}
+		else
+		{
+			ostringstream oss;
+			oss << "Do you want to add slave device " << slaveDevice.deviceID << " ?";
+			slaveDevice.enableOSDP = Utility::isYes(oss.str());
+		}
+	}
+	
+	sdkResult = cm.addSlaveDevice(masterID, slaveList);
+	
+	for (auto slaveDevice : slaveList)
+	{
+		if (slaveDevice.enableOSDP)
+		{
+			BS2_DEVICE_ID id = slaveDevice.deviceID;
+			cout << "Added slave " << id << endl;
+			deviceList.appendSlave(masterID, id);
+		}
 	}
 
 	return sdkResult;
 }
 
-int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
+int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
 {
 	stringstream msg;
 	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
@@ -446,20 +523,34 @@ int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveI
 
 	displayCSTSlaveList(slaveList);
 
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= slaveList.size())
+	bool connectAll = false;
+	if (Utility::isYes("Do you want to add all discovered slave devices?"))
+		connectAll = true;
+
+	for (auto slaveDevice : slaveList)
 	{
-		BS2_DEVICE_ID id = slaveList[selected - 1].deviceID;
-		uint8_t chPort = slaveList[selected - 1].channelInfo;
+		if (connectAll)
+		{
+			slaveDevice.enableOSDP = true;
+		}
+		else
+		{
+			ostringstream oss;
+			oss << "Do you want to add slave device " << slaveDevice.deviceID << "?";
+			slaveDevice.enableOSDP = Utility::isYes(oss.str());
+		}
+	}
 
-		TRACE("Now connect to slave device (Host:%u, Slave:%u, Channel:%u)", masterID, id, chPort);
+	sdkResult = cm.addCSTSlaveDevice(masterID, chSelected, slaveList);
 
-		sdkResult = cm.addCSTSlaveDevice(masterID, chPort, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		slaveID = id;
-		cout << "Added slave " << slaveID << endl;
+	for (auto slaveDevice : slaveList)
+	{
+		if (slaveDevice.enableOSDP)
+		{
+			BS2_DEVICE_ID id = slaveDevice.deviceID;
+			cout << "Added slave " << id << endl;
+			deviceList.appendSlave(masterID, id);
+		}
 	}
 
 	return sdkResult;
@@ -497,6 +588,21 @@ BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave, bo
 {
 	displayConnectedDevices(deviceList, includeSlave, includeWiegand);
 	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
+}
+
+void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand)
+{
+	cout << "==> Select upgrade order." << endl;
+	selectedDevices.clear();
+	displayConnectedDevices(deviceList, includeSlave, includeWiegand);
+	while (true)
+	{
+		BS2_DEVICE_ID id = Utility::getInput<BS2_DEVICE_ID>("Please enter the slave device ID by order (0: Stop) :");
+		if (0 == id)
+			break;
+		selectedDevices.push_back(id);
+	}
+	masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the master device ID :");
 }
 
 int runAPIs(void* context, const DeviceList& deviceList)
@@ -727,6 +833,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 
 	do
 	{
+		numOfLog = 0;
 		sdkResult = BS2_GetLog(context, id, latestIndex, MAX_RECV_LOG_AMOUNT, &logObj, &numOfLog);
 		if (BS_SDK_SUCCESS == sdkResult)
 		{
@@ -872,6 +979,210 @@ int getFactoryConfig(void* context, BS2_DEVICE_ID id)
 	int sdkResult = cc.getFactoryConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int getFactoryConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+
+	for (auto id : devices)
+	{
+		sdkResult = getFactoryConfig(context, id);
+	}
+
+	return sdkResult;
+}
+
+int getSlaveConnectionStatus(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	int sdkResult = BS_SDK_SUCCESS;
+
+	BS2Rs485ConfigEX config = { 0, };
+	sdkResult = cc.getRS485ConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::printRS485Status(config);
+
+	return sdkResult;
+}
+// int getRS485ExConfig(void* context, const vector<BS2_DEVICE_ID>& devices)
+// {
+// 	ConfigControl cc(context);
+// 	int sdkResult = BS_SDK_SUCCESS;
+
+// 	for (auto id : devices)
+// 	{
+// 		BS2Rs485ConfigEX config = { 0, };
+// 		sdkResult = cc.getRS485ConfigEx(id, config);
+// 		if (BS_SDK_SUCCESS == sdkResult)
+// 			ConfigControl::print(config);
+// 	}
+
+// 	return sdkResult;
+// }
+
+int getStatusConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2StatusConfig config = {0,};
+
+	int sdkResult = cc.getStatusConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+	
+	return sdkResult;
+}
+
+int getStatusConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+
+	for (auto id : devices)
+	{
+		sdkResult = getStatusConfig(context, id);
+	}
+
+	return sdkResult;
+}
+
+int setStatusConfig(void* context, BS2_DEVICE_ID id)
+{
+	ConfigControl cc(context);
+	BS2StatusConfig config = { 0, };
+
+	int sdkResult = cc.getStatusConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	for (uint32_t idx = 0; idx < BS2_DEVICE_STATUS_NUM; idx++)
+	{
+		cout << "LED" << idx << " - enabled:" << config.led[idx].enabled << ", count:" << config.led[idx].count << endl;
+		ostringstream oss;
+		oss << "Do you want to enable LED #" << idx << "/" << BS2_DEVICE_STATUS_NUM << "?" << endl;
+		config.led[idx].enabled = (BS2_BOOL)Utility::getInput<uint32_t>(oss.str());
+		if (config.led[idx].enabled)
+		{
+			string msg = "How many times do you want to repeat the LED signal? (0: Infinite)";
+			config.led[idx].count = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			for (uint32_t lidx = 0; lidx < BS2_LED_SIGNAL_NUM; lidx++)
+			{
+				if (Utility::isNo("Add LED signal?"))
+					break;
+
+				oss.str("");
+				oss << "Please select the LED color." << endl;
+				oss << " - 0: Off" << endl;
+				oss << " - 1: Red" << endl;
+				oss << " - 2: Yellow" << endl;
+				oss << " - 3: Green" << endl;
+				oss << " - 4: Cyan" << endl;
+				oss << " - 5: Blue" << endl;
+				oss << " - 6: Magenta" << endl;
+				oss << " - 7: White" << endl;
+				config.led[idx].signal[lidx].color = (uint8_t)Utility::getInput<uint32_t>(oss.str());
+
+				msg = "Please insert the LED duration.";
+				config.led[idx].signal[lidx].duration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+				msg = "Please insert the LED delay.";
+				config.led[idx].signal[lidx].delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+			}
+		}
+	}
+	
+	for (uint32_t idx = 0; idx < BS2_DEVICE_STATUS_NUM; idx++)
+	{
+		cout << "Buzzer" << idx << " - enabled:" << config.buzzer[idx].enabled << ", count:" << config.buzzer[idx].count << endl;
+		ostringstream oss;
+		oss << "Do you want to enable BUZZER #" << idx << "/" << BS2_DEVICE_STATUS_NUM << "?" << endl;
+		config.buzzer[idx].enabled = (BS2_BOOL)Utility::getInput<uint32_t>(oss.str());
+		if (config.buzzer[idx].enabled)
+		{
+			string msg = "How many times do you want to repeat the BUZZER signal? (0: Infinite)";
+			config.buzzer[idx].count = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			for (uint32_t bidx = 0; bidx < BS2_BUZZER_SIGNAL_NUM; bidx++)
+			{
+				if (Utility::isNo("Add BUZZER signal?"))
+					break;
+
+				oss.str("");
+				oss << "Please select the BUZZER tone." << endl;
+				oss << " - 0: Off" << endl;
+				oss << " - 1: Low" << endl;
+				oss << " - 2: Middle" << endl;
+				oss << " - 3: High" << endl;
+				config.buzzer[idx].signal[bidx].tone = (BS2_BUZZER_TONE)Utility::getInput<uint32_t>(oss.str());
+
+				msg = "Do you want to use fadeout option?";
+				config.buzzer[idx].signal[bidx].fadeout = (BS2_BOOL)Utility::getInput<uint32_t>(msg);
+
+				msg = "Please insert the BUZZER duration.";
+				config.buzzer[idx].signal[bidx].duration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+				msg = "Please insert the BUZZER delay.";
+				config.buzzer[idx].signal[bidx].delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+			}
+		}
+	}
+
+	return cc.setStatusConfig(id, config);
+}
+
+int setStatusConfigValue(void* context, BS2_DEVICE_ID id, int value)
+{
+	ConfigControl cc(context);
+	BS2StatusConfig config = { 0, };
+
+	int sdkResult = cc.getStatusConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	config.led[0].enabled = 1;
+	config.led[0].count = value;
+	for (uint32_t lidx = 0; lidx < BS2_LED_SIGNAL_NUM; lidx++)
+	{
+		config.led[0].signal[lidx].color = (BS2_LED_COLOR)value;
+		config.led[0].signal[lidx].duration = (uint16_t)value;
+		config.led[0].signal[lidx].delay = (uint16_t)value;
+	}
+	for (uint32_t idx = 1; idx < BS2_DEVICE_STATUS_NUM; idx++)
+	{
+		config.led[idx].enabled = 0;
+		config.led[idx].count = 0;
+	}
+
+	config.buzzer[0].enabled = 1;
+	config.buzzer[0].count = value;
+	for (uint32_t bidx = 0; bidx < BS2_BUZZER_SIGNAL_NUM; bidx++)
+	{
+		config.buzzer[0].signal[bidx].tone = (BS2_BUZZER_TONE)value;
+		config.buzzer[0].signal[bidx].fadeout = (BS2_BOOL)value;
+		config.buzzer[0].signal[bidx].duration = (uint16_t)value;
+		config.buzzer[0].signal[bidx].delay = (uint16_t)value;
+	}
+	for (uint32_t idx = 0; idx < BS2_DEVICE_STATUS_NUM; idx++)
+	{
+		config.buzzer[idx].enabled = 0;
+		config.buzzer[idx].count = 0;
+	}
+
+	return cc.setStatusConfig(id, config);
+}
+
+int setStatusConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+
+#ifdef _FOR_TEST
+	for (auto id : devices)
+	{
+		sdkResult = setStatusConfigValue(context, id, 2);
+	}
+#endif
 
 	return sdkResult;
 }

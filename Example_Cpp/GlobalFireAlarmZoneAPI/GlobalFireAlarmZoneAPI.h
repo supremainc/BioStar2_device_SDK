@@ -31,8 +31,6 @@ enum EN_MENU_TOP
 	MENU_TOP_BREAK = MENU_BREAK,
 	MENU_TOP_SEARCH_N_CONN = 1,
 	MENU_TOP_DIRECT_IPADDR = 2,
-	MENU_TOP_SEARCH_SLAVE = 3,
-	MENU_TOP_SEARCH_WIEGAND = 4,
 	MENU_TOP_VIEW_DEVICE = 5,
 };
 
@@ -41,9 +39,7 @@ std::vector<MENU_ITEM> menuInfoTop =
 	{MENU_TOP_BREAK,			"Exit and API test"},
 	{MENU_TOP_SEARCH_N_CONN,	"Connection (Discover and connect)"},
 	{MENU_TOP_DIRECT_IPADDR,	"Connection (Direct connect with IP/Port)"},
-	{MENU_TOP_SEARCH_SLAVE,		"Discover and add slave device"},
-	{MENU_TOP_SEARCH_WIEGAND,	"Discover and add wiegand device" },
-	{MENU_TOP_VIEW_DEVICE,		"View all devices"},
+	{MENU_TOP_VIEW_DEVICE,		"View (Connected devices)"},
 };
 
 enum EN_MENU_COMM
@@ -81,16 +77,12 @@ uint32_t showMenu(std::vector<MENU_ITEM>& info);
 uint32_t getSelectedIndex();
 int searchAndConnect(void* context, DeviceList& deviceList);
 int connectViaIP(void* context, DeviceList& deviceList);
-int connectSlave(void* context, DeviceList& deviceList);
-int connectWiegand(void* context, DeviceList& deviceList);
-int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID);
-int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID);
-int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID);
 void displayDeviceList(const std::vector<BS2SimpleDeviceInfo>& devices);
 void displaySlaveList(const std::vector<BS2Rs485SlaveDevice>& devices);
 void displayCSTSlaveList(const std::vector<BS2Rs485SlaveDeviceEX>& devices);
 void displayWiegandList(const std::vector<BS2_DEVICE_ID>& devices);
 BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave = false, bool includeWiegand = false);
+void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand);
 int runAPIs(void* context, const DeviceList& deviceList);
 int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);

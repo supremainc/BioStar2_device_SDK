@@ -42,10 +42,32 @@ std::vector<MENU_ITEM> menuInfoTop =
 	{MENU_TOP_BREAK,			"Exit and API test"},
 	{MENU_TOP_SEARCH_N_CONN,	"Connection (Discover and connect)"},
 	{MENU_TOP_DIRECT_IPADDR,	"Connection (Direct connect with IP/Port)"},
-	{MENU_TOP_SEARCH_SLAVE,		"Discover and add slave device"},
-	{MENU_TOP_SEARCH_WIEGAND,	"Discover and add wiegand device" },
-	{MENU_TOP_VIEW_DEVICE,		"View all devices"},
-	{MENU_TOP_CONNECT_USB,		"Connect USB device"},
+	{MENU_TOP_SEARCH_SLAVE,		"Slave (Discover and add)"},
+	{MENU_TOP_SEARCH_WIEGAND,	"Wiegand (Discover and add)" },
+	{MENU_TOP_VIEW_DEVICE,		"View (Connected devices)"},
+	{MENU_TOP_CONNECT_USB,		"Connection (USB)"},
+};
+
+enum EN_MENU_SLAVE
+{
+	MENU_SLV_BREAK = MENU_BREAK,
+	MENU_SLV_GET_CONFIG_RS485EX = 1,
+	MENU_SLV_SEARCH_DEVICE,
+	MENU_SLV_UPG_FIRMWARE,
+	MENU_SLV_GET_CONFIG_FACTORY,
+	MENU_SLV_GET_CONFIG_STATUS,
+	MENU_SLV_SET_CONFIG_STATUS,
+};
+
+std::vector<MENU_ITEM> menuInfoSlave =
+{
+	{MENU_SLV_BREAK,				"Exit"},
+	{MENU_SLV_GET_CONFIG_RS485EX,	"Connected status (of slave devices)"},
+	{MENU_SLV_SEARCH_DEVICE,		"Discover and add (slave devices)"},
+	{MENU_SLV_UPG_FIRMWARE,			"Upgrade firmware"},
+	{MENU_SLV_GET_CONFIG_FACTORY,	"Get config (Factory)"},
+	{MENU_SLV_GET_CONFIG_STATUS,	"Get config (Status)"},
+	{MENU_SLV_SET_CONFIG_STATUS,	"Set config (Status)"},
 };
 
 enum EN_MENU_COMM
@@ -189,16 +211,18 @@ uint32_t showMenu(std::vector<MENU_ITEM>& info);
 uint32_t getSelectedIndex();
 int searchAndConnect(void* context, DeviceList& deviceList);
 int connectViaIP(void* context, DeviceList& deviceList);
-int connectSlave(void* context, DeviceList& deviceList);
+void slaveMenu(void* context, DeviceList& deviceList);
+int searchAndAddSlave(void* context, DeviceList& deviceList);
 int connectWiegand(void* context, DeviceList& deviceList);
-int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID);
-int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID);
+int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
+int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
 int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID);
 void displayDeviceList(const std::vector<BS2SimpleDeviceInfo>& devices);
 void displaySlaveList(const std::vector<BS2Rs485SlaveDevice>& devices);
 void displayCSTSlaveList(const std::vector<BS2Rs485SlaveDeviceEX>& devices);
 void displayWiegandList(const std::vector<BS2_DEVICE_ID>& devices);
 BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave = false, bool includeWiegand = false);
+void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand);
 int runAPIs(void* context, const DeviceList& deviceList);
 int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
@@ -208,6 +232,13 @@ int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList);
 int updateConnectModeDevice2Server(void* context, BS2_DEVICE_ID id);
 int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id);
 int getFactoryConfig(void* context, BS2_DEVICE_ID id);
+int getFactoryConfigMulti(void* context, const std::vector<BS2_DEVICE_ID>& devices);
+int getSlaveConnectionStatus(void* context, BS2_DEVICE_ID id);
+int getStatusConfig(void* context, BS2_DEVICE_ID id);
+int getStatusConfigMulti(void* context, const std::vector<BS2_DEVICE_ID>& devices);
+int setStatusConfig(void* context, BS2_DEVICE_ID id);
+int setStatusConfigValue(void* context, BS2_DEVICE_ID id, int value);
+int setStatusConfigMulti(void* context, const std::vector<BS2_DEVICE_ID>& devices);
 #if 0
 DWORD WINAPI onWaiting(LPVOID lpParam);
 void waitForConnection();

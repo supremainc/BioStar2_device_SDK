@@ -167,18 +167,18 @@ int connectSlave(void* context, DeviceInfo& device)
 		switch (device.type_)
 		{
 		case BS2_DEVICE_TYPE_CORESTATION_40:
-			sdkResult = searchCSTSlave(context, device.id_, slaveID);
+			sdkResult = searchCSTSlave(context, device.slaveDevices_, device.id_);
 			break;
 
 		default:
 			sdkResult = cc.updateRS485OperationMode(device.id_, BS2_RS485_MODE_MASTER);
 			if (BS_SDK_SUCCESS == sdkResult)
-				sdkResult = searchSlave(context, device.id_, slaveID);
+				sdkResult = searchSlave(context, device.slaveDevices_, device.id_);
 			break;
 		}
 
-		if (BS_SDK_SUCCESS == sdkResult && 0 < slaveID)
-			device.slaveDevices_.push_back(slaveID);
+		//if (BS_SDK_SUCCESS == sdkResult && 0 < slaveID)
+		//	device.slaveDevices_.push_back(slaveID);
 	}
 
 	return sdkResult;
@@ -203,7 +203,7 @@ uint32_t getSelectedIndex()
 	return Utility::getInput<uint32_t>("Select number:");
 }
 
-int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
+int searchSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID)
 {
 	CommControl cm(context);
 	vector<BS2Rs485SlaveDevice> slaveList;
@@ -213,25 +213,40 @@ int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
 
 	displaySlaveList(slaveList);
 
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= slaveList.size())
+	bool connectAll = false;
+	if (Utility::isYes("Do you want to add all discovered slave devices?"))
+		connectAll = true;
+
+	for (auto slaveDevice : slaveList)
 	{
-		BS2_DEVICE_ID id = slaveList[selected - 1].deviceID;
-
-		TRACE("Now connect to slave device (Host:%u, Slave:%u)", masterID, id);
-
-		sdkResult = cm.addSlaveDevice(masterID, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		slaveID = id;
-		cout << "Added slave " << slaveID << endl;
+		if (connectAll)
+		{
+			slaveDevice.enableOSDP = true;
+		}
+		else
+		{
+			ostringstream oss;
+			oss << "Do you want to add slave device " << slaveDevice.deviceID << " ?";
+			slaveDevice.enableOSDP = Utility::isYes(oss.str());
+		}
+	}
+	
+	sdkResult = cm.addSlaveDevice(masterID, slaveList);
+	
+	for (auto slaveDevice : slaveList)
+	{
+		if (slaveDevice.enableOSDP)
+		{
+			BS2_DEVICE_ID id = slaveDevice.deviceID;
+			cout << "Added slave " << id << endl;
+			deviceList.push_back(id);
+		}
 	}
 
 	return sdkResult;
 }
 
-int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
+int searchCSTSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID)
 {
 	stringstream msg;
 	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
@@ -257,25 +272,38 @@ int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveI
 
 	displayCSTSlaveList(slaveList);
 
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= slaveList.size())
+	bool connectAll = false;
+	if (Utility::isYes("Do you want to add all discovered slave devices?"))
+		connectAll = true;
+
+	for (auto slaveDevice : slaveList)
 	{
-		BS2_DEVICE_ID id = slaveList[selected - 1].deviceID;
-		uint8_t chPort = slaveList[selected - 1].channelInfo;
+		if (connectAll)
+		{
+			slaveDevice.enableOSDP = true;
+		}
+		else
+		{
+			ostringstream oss;
+			oss << "Do you want to add slave device " << slaveDevice.deviceID << "?";
+			slaveDevice.enableOSDP = Utility::isYes(oss.str());
+		}
+	}
 
-		TRACE("Now connect to slave device (Host:%u, Slave:%u, Channel:%u)", masterID, id, chPort);
+	sdkResult = cm.addCSTSlaveDevice(masterID, chSelected, slaveList);
 
-		sdkResult = cm.addCSTSlaveDevice(masterID, chPort, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		slaveID = id;
-		cout << "Added slave " << slaveID << endl;
+	for (auto slaveDevice : slaveList)
+	{
+		if (slaveDevice.enableOSDP)
+		{
+			BS2_DEVICE_ID id = slaveDevice.deviceID;
+			cout << "Added slave " << id << endl;
+			deviceList.push_back(id);
+		}
 	}
 
 	return sdkResult;
 }
-
 
 int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID)
 {
@@ -496,8 +524,8 @@ void displayDeviceList(const vector<BS2SimpleDeviceInfo>& devices)
 			Utility::getIPAddress(info.ipv4Address).c_str(),
 			info.port,
 			(info.connectedIP == 0xFFFFFFFF) ? "" : Utility::getIPAddress(info.connectedIP).c_str(),
-			CONNECT_MODE[info.connectionMode],
-			DEVICE_NAME[info.type],
+			Utility::getStringOfConnectMode(info.connectionMode).c_str(),
+			Utility::getStringOfDeviceType(info.type).c_str(),
 			info.dualIDSupported);
 	}
 }
@@ -512,7 +540,7 @@ void displaySlaveList(const vector<BS2Rs485SlaveDevice>& devices)
 		printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d\n",
 			++index,
 			info.deviceID,
-			DEVICE_NAME[info.deviceType],
+			Utility::getStringOfDeviceType(info.deviceType).c_str(),
 			info.enableOSDP,
 			info.connected);
 	}
@@ -528,7 +556,7 @@ void displayCSTSlaveList(const vector<BS2Rs485SlaveDeviceEX>& devices)
 		printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d, Channel:%u\n",
 			++index,
 			info.deviceID,
-			DEVICE_NAME[info.deviceType],
+			Utility::getStringOfDeviceType(info.deviceType).c_str(),
 			info.enableOSDP,
 			info.connected,
 			info.channelInfo);
@@ -566,12 +594,12 @@ int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone)
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	char buffer[1024] = { 0, };
 	BS2Event* logObj = NULL;
 	uint32_t numOfLog = 0;
 
 	do
 	{
+		numOfLog = 0;
 		sdkResult = BS2_GetLog(context, id, latestIndex, MAX_RECV_LOG_AMOUNT, &logObj, &numOfLog);
 		if (BS_SDK_SUCCESS == sdkResult)
 		{

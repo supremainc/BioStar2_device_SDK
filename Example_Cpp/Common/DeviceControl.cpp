@@ -222,6 +222,31 @@ int DeviceControl::upgradeFirmware(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int DeviceControl::upgradeFirmware(const vector<BS2_DEVICE_ID>& devices)
+{
+	string file = Utility::getLine("Enter the path and name of firmware:");
+
+	int sdkResult = BS_SDK_SUCCESS;
+	uint32_t fileLen = Utility::getResourceSize(file);
+	shared_ptr<uint8_t> buffer(new uint8_t[fileLen], ArrayDeleter<uint8_t>());
+	if (0 < fileLen && Utility::getResourceFromFile(file, buffer, fileLen))
+	{
+		for (auto id : devices)
+		{
+			sdkResult = BS2_UpgradeFirmware(context_, id, buffer.get(), fileLen, 0, onUpgrade);
+			if (BS_SDK_SUCCESS != sdkResult)
+				TRACE("BS2_UpgradeFirmware call failed: %d", sdkResult);
+		}
+	}
+	else
+	{
+		TRACE("The file could not be read.(%s)", file.c_str());
+		return BS_SDK_ERROR_FILE_IO;
+	}
+
+	return sdkResult;
+}
+
 void DeviceControl::onUpgrade(BS2_DEVICE_ID id, uint32_t percent)
 {
 	TRACE("%u%% upgraded (id:%u)", percent, id);

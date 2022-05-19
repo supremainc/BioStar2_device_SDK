@@ -31,12 +31,10 @@ public:
 
 	// Slave
 	int searchSlaveDevice(BS2_DEVICE_ID id, std::vector<BS2Rs485SlaveDevice>& slaveList);
-	int addSlaveDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID slaveID);
-	int deleteSlaveDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID slaveID);
+	int addSlaveDevice(BS2_DEVICE_ID id, const std::vector<BS2Rs485SlaveDevice>& slaveList);
 	// Slave (CST)
 	int searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, std::vector<BS2Rs485SlaveDeviceEX>& slaveList);
-	int addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, BS2_DEVICE_ID slaveID);
-	int deleteCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, BS2_DEVICE_ID slaveID);
+	int addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, const std::vector<BS2Rs485SlaveDeviceEX>& slaveList);
 
 	// Wiegand
 	int searchWiegandDevice(BS2_DEVICE_ID id, std::vector<BS2_DEVICE_ID>& wiegandList);

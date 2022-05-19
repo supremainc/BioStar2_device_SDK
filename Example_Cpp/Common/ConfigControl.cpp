@@ -107,6 +107,24 @@ int ConfigControl::getInputConfig(BS2_DEVICE_ID id, BS2InputConfig& config)
 	return sdkResult;
 }
 
+int ConfigControl::getStatusConfig(BS2_DEVICE_ID id, BS2StatusConfig& config) const
+{
+	int sdkResult = BS2_GetStatusConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetStatusConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setStatusConfig(BS2_DEVICE_ID id, const BS2StatusConfig& config) const
+{
+	int sdkResult = BS2_SetStatusConfig(context_, id, const_cast<BS2StatusConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetStatusConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::getFingerprintConfig(BS2_DEVICE_ID id, BS2FingerprintConfig& config)
 {
 	int sdkResult = BS2_GetFingerprintConfig(context_, id, &config);
@@ -301,6 +319,15 @@ int ConfigControl::setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config
 	int sdkResult = BS2_SetRS485Config(context_, id, const_cast<BS2Rs485Config*>(&config));
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getRS485ConfigEx(BS2_DEVICE_ID id, BS2Rs485ConfigEX& config)
+{
+	int sdkResult = BS2_GetRS485ConfigEx(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetRS485ConfigEx call failed: %d", sdkResult);
 
 	return sdkResult;
 }
@@ -631,6 +658,33 @@ void ConfigControl::print(const BS2FactoryConfig& config)
 		config.bscoreVer.major, config.bscoreVer.minor, config.bscoreVer.ext, config.bscoreRev);
 	TRACE("firmwareVer:%d.%d.%d(%s)",
 		config.firmwareVer.major, config.firmwareVer.minor, config.firmwareVer.ext, config.firmwareRev);
+}
+
+void ConfigControl::print(const BS2StatusConfig& config)
+{
+	TRACE("==[BS2StatusConfig]==");
+	for (uint32_t idx = 0; idx < BS2_DEVICE_STATUS_NUM; idx++)
+	{
+		TRACE("LED Index: %u, enabled: %u, count: %u", idx, config.led[idx].enabled, config.led[idx].count);
+		for (uint32_t sigidx = 0; sigidx < BS2_LED_SIGNAL_NUM; sigidx++)
+			TRACE(" -- Signal %u [color: %u, duration: %u, delay: %u]",
+				sigidx,
+				config.led[idx].signal[sigidx].color,
+				config.led[idx].signal[sigidx].duration,
+				config.led[idx].signal[sigidx].delay);
+	}
+	
+	for (uint32_t idx = 0; idx < BS2_DEVICE_STATUS_NUM; idx++)
+	{
+		TRACE("Buzzer Index: %u, enabled: %u, count: %u", idx, config.buzzer[idx].enabled, config.buzzer[idx].count);
+		for (uint32_t sigidx = 0; sigidx < BS2_BUZZER_SIGNAL_NUM; sigidx++)
+			TRACE(" -- Signal %u [tone: %u, fadeOut: %u, duration: %u, delay: %u]",
+				sigidx,
+				config.buzzer[idx].signal[sigidx].tone,
+				config.buzzer[idx].signal[sigidx].fadeout,
+				config.buzzer[idx].signal[sigidx].duration,
+				config.buzzer[idx].signal[sigidx].delay);
+	}
 }
 
 void ConfigControl::print(const BS2FingerprintConfig& config)
@@ -1010,6 +1064,23 @@ void ConfigControl::print(const BS2Rs485SlaveDevice& device)
 	TRACE("|  |  |--deviceType : %u", device.deviceType);
 	TRACE("|  |  |--enableOSDP : %u", device.enableOSDP);
 	TRACE("|  |  |--connected : %u", device.connected);
+}
+
+void ConfigControl::printRS485Status(const BS2Rs485ConfigEX& config)
+{
+	for (uint32_t cidx = 0; cidx < config.numOfChannels; cidx++)
+	{
+		for (uint32_t didx = 0; didx < config.channels[cidx].numOfDevices; didx++)
+		{
+			TRACE("-- Channel: %u, Mode: %u, Baudrate: %u, Device: %u, Connected: %u, Enable: %u",
+				cidx,
+				config.mode[cidx],
+				config.channels[cidx].baudRate,
+				config.channels[cidx].slaveDevices[didx].deviceID,
+				config.channels[cidx].slaveDevices[didx].connected,
+				config.channels[cidx].slaveDevices[didx].enableOSDP);
+		}
+	}
 }
 
 void ConfigControl::print(const BS2InputConfigEx& config)

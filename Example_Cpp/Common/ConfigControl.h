@@ -25,6 +25,8 @@ public:
 	int getFactoryConfig(BS2_DEVICE_ID id, BS2FactoryConfig& config);
 	int getInputConfig(BS2_DEVICE_ID id, BS2InputConfig& config);
 
+	int getStatusConfig(BS2_DEVICE_ID id, BS2StatusConfig& config) const;
+	int setStatusConfig(BS2_DEVICE_ID id, const BS2StatusConfig& config) const;
 	int getFingerprintConfig(BS2_DEVICE_ID id, BS2FingerprintConfig& config);
 	int setFingerprintConfig(BS2_DEVICE_ID id, const BS2FingerprintConfig& config);
 	int getFaceConfig(BS2_DEVICE_ID id, BS2FaceConfig& config);
@@ -47,6 +49,7 @@ public:
 	int setBarcodeConfig(BS2_DEVICE_ID id, const BS2BarcodeConfig& config);
 	int getRS485Config(BS2_DEVICE_ID id, BS2Rs485Config& config);
 	int setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config);
+	int getRS485ConfigEx(BS2_DEVICE_ID id, BS2Rs485ConfigEX& config);
 	int getInputConfigEx(BS2_DEVICE_ID id, BS2InputConfigEx& config);
 	int setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config);
 	int getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config);
@@ -74,6 +77,7 @@ public:
 	static void print(const BS2DisplayConfig& config);
 	static void print(const BS2IpConfig& config);
 	static void print(const BS2FactoryConfig& config);
+	static void print(const BS2StatusConfig& config);
 	static void print(const BS2FingerprintConfig& config);
 	static void print(const BS2FaceConfig& config);
 	static void print(const BS2DesFireCardConfigEx& config);
@@ -89,6 +93,7 @@ public:
 	static void print(const BS2Action& action);
 	static void print(const BS2BarcodeConfig& config);
 	static void print(const BS2Rs485Config& config);
+	static void printRS485Status(const BS2Rs485ConfigEX& config);
 	static void print(const BS2Rs485Channel& channel);
 	static void print(const BS2Rs485SlaveDevice& device);
 	static void print(const BS2InputConfigEx& config);

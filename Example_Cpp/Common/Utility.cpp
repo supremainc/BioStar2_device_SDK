@@ -332,7 +332,7 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 	case BS2_DEVICE_TYPE_BIOLITE_N2:
 		return "BLN2";
 	case BS2_DEVICE_TYPE_XPASS2:
-		return "Xps2";
+		return "XP2";
 	case BS2_DEVICE_TYPE_XPASS_S3:
 		return "XpsS3";
 	case BS2_DEVICE_TYPE_BIOENTRY_R2:

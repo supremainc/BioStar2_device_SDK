@@ -108,90 +108,13 @@ int CommControl::searchSlaveDevice(BS2_DEVICE_ID id, vector<BS2Rs485SlaveDevice>
 	return sdkResult;
 }
 
-int CommControl::addSlaveDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID slaveID)
+int CommControl::addSlaveDevice(BS2_DEVICE_ID id, const vector<BS2Rs485SlaveDevice>& slaveList)
 {
-	BS2Rs485SlaveDevice* slaveDeviceObj = NULL;
-	uint32_t slaveDeviceCount = 0;
-	bool found(false);
-
-	int sdkResult = BS2_GetSlaveDevice(context_, id, &slaveDeviceObj, &slaveDeviceCount);
+	int sdkResult = BS2_SetSlaveDevice(context_, id, const_cast<BS2Rs485SlaveDevice*>(slaveList.data()), slaveList.size());
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
-		TRACE("BS2_GetSlaveDevice call failed: %d", sdkResult);
-		return sdkResult;
+		TRACE("BS2_SetSlaveDevice call failed: %d", sdkResult);
 	}
-
-	for (uint32_t index = 0; index < slaveDeviceCount; index++)
-	{
-		if (slaveDeviceObj[index].deviceID == slaveID)
-		{
-			if (slaveDeviceObj[index].enableOSDP == false)
-			{
-				slaveDeviceObj[index].enableOSDP = true;
-
-				sdkResult = BS2_SetSlaveDevice(context_, id, slaveDeviceObj, slaveDeviceCount);
-			}
-
-			found = true;
-			break;
-		}
-	}
-
-	if (!found)
-	{
-		TRACE("The slave device(%u) could not be found under (%u).", slaveID, id);
-		sdkResult = BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-	}
-
-	if (slaveDeviceObj)
-		BS2_ReleaseObject(slaveDeviceObj);
-
-	return sdkResult;
-}
-
-int CommControl::deleteSlaveDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID slaveID)
-{
-	BS2Rs485SlaveDevice* slaveDeviceObj = NULL;
-	uint32_t slaveDeviceCount = 0;
-	bool found(false);
-
-	int sdkResult = BS2_GetSlaveDevice(context_, id, &slaveDeviceObj, &slaveDeviceCount);
-	if (BS_SDK_SUCCESS == sdkResult)
-	{
-		for (uint32_t index = 0; index < slaveDeviceCount; index++)
-		{
-			if (slaveDeviceObj[index].deviceID == slaveID)
-			{
-				if (slaveDeviceObj[index].enableOSDP == true)
-				{
-					slaveDeviceObj[index].enableOSDP = false;
-
-					sdkResult = BS2_SetSlaveDevice(context_, id, slaveDeviceObj, slaveDeviceCount);
-				}
-
-				found = true;
-				break;
-			}
-		}
-
-		if (!found)
-		{
-			TRACE("The slave device(%u) could not be found under (%u).", slaveID, id);
-			sdkResult = BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-		}
-	}
-	else if (BS_SDK_ERROR_CANNOT_FIND_DEVICE == sdkResult)
-	{
-		sdkResult = BS2_RemoveSlaveDevice(context_, slaveID);
-	}
-	else
-	{
-		TRACE("BS2_GetSlaveDevice call failed: %d", sdkResult);
-		sdkResult = BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-	}
-
-	if (slaveDeviceObj)
-		BS2_ReleaseObject(slaveDeviceObj);
 
 	return sdkResult;
 }
@@ -220,80 +143,13 @@ int CommControl::searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, ve
 	return sdkResult;
 }
 
-int CommControl::addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, BS2_DEVICE_ID slaveID)
+int CommControl::addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, const vector<BS2Rs485SlaveDeviceEX>& slaveList)
 {
-	BS2Rs485SlaveDeviceEX* slaveDeviceObj = NULL;
-	uint32_t slaveDeviceCount = 0;
-	uint32_t outputPort = 0;
-	bool found(false);
-
-	int sdkResult = BS2_GetSlaveExDevice(context_, id, channelPort, &slaveDeviceObj, &outputPort, &slaveDeviceCount);
+	int sdkResult = BS2_SetSlaveExDevice(context_, id, channelPort, const_cast<BS2Rs485SlaveDeviceEX*>(slaveList.data()), slaveList.size());
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
-		TRACE("BS2_GetSlaveExDevice call failed: %d", sdkResult);
-		return sdkResult;
+		TRACE("BS2_SetSlaveExDevice call failed: %d", sdkResult);
 	}
-
-	for (uint32_t index = 0; index < slaveDeviceCount; index++)
-	{
-		if (slaveDeviceObj[index].deviceID == slaveID)
-		{
-			if (slaveDeviceObj[index].enableOSDP == false)
-			{
-				slaveDeviceObj[index].enableOSDP = true;
-
-				sdkResult = BS2_SetSlaveExDevice(context_, id, outputPort, slaveDeviceObj, slaveDeviceCount);
-			}
-
-			found = true;
-			break;
-		}
-	}
-
-	if (!found)
-	{
-		TRACE("The slave device(%u) could not be found under CST(%u).", slaveID, id);
-		sdkResult = BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-	}
-
-	if (slaveDeviceObj)
-		BS2_ReleaseObject(slaveDeviceObj);
-
-	return sdkResult;
-}
-
-
-int CommControl::deleteCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, BS2_DEVICE_ID slaveID)
-{
-	BS2Rs485SlaveDeviceEX *slaveDeviceObj = NULL;
-	uint32_t slaveDeviceCount = 0;
-	uint32_t outputPort = 0;
-	bool found(false);
-
-	int sdkResult = BS2_GetSlaveExDevice(context_, id, channelPort, &slaveDeviceObj, &outputPort, &slaveDeviceCount);
-	if (BS_SDK_SUCCESS == sdkResult)
-	{
-		for (uint32_t index = 0; index < slaveDeviceCount; index++)
-		{
-			if (slaveDeviceObj[index].deviceID == slaveID)
-			{
-				slaveDeviceObj[index].enableOSDP = false;
-
-				sdkResult = BS2_SetSlaveExDevice(context_, id, outputPort, slaveDeviceObj, slaveDeviceCount);
-			}
-
-			found = true;
-			break;
-		}
-	}
-	else
-	{
-		TRACE("BS2_GetSlaveExDevice call failed: %d", sdkResult);
-		sdkResult = BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-	}
-
-	if (slaveDeviceObj)
-		BS2_ReleaseObject(slaveDeviceObj);
 
 	return sdkResult;
 }

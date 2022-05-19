@@ -211,12 +211,6 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 		case MENU_TOP_DIRECT_IPADDR:
 			sdkResult = connectViaIP(context, deviceList);
 			break;
-		case MENU_TOP_SEARCH_SLAVE:
-			sdkResult = connectSlave(context, deviceList);
-			break;
-		case MENU_TOP_SEARCH_WIEGAND:
-			sdkResult = connectWiegand(context, deviceList);
-			break;
 		case MENU_TOP_VIEW_DEVICE:
 			displayConnectedDevices(deviceList, true, true);
 			break;
@@ -253,7 +247,7 @@ int searchAndConnect(void* context, DeviceList& deviceList)
 	displayDeviceList(searchedList);
 
 	uint32_t selected(0);
-	while (MENU_TOP_BREAK != (selected = getSelectedIndex()) && selected <= searchedList.size())
+	if (MENU_TOP_BREAK != (selected = getSelectedIndex()) && selected <= searchedList.size())
 	{
 		uint32_t ip = searchedList[selected - 1].ipv4Address;
 		string ipAddr = Utility::getIPAddress(ip);
@@ -316,173 +310,12 @@ int connectViaIP(void* context, DeviceList& deviceList)
 	return sdkResult;
 }
 
-int connectSlave(void* context, DeviceList& deviceList)
-{
-	int sdkResult = BS_SDK_SUCCESS;
-	if (Utility::isYes("Do you want to find slave devices?"))
-	{
-		displayConnectedDevices(deviceList);
-		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
-
-		if (!deviceList.findDevice(masterID))
-		{
-			cout << "Abort slave device discovery" << endl;
-			return BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-		}
-
-		auto device = deviceList.getDevice(masterID);
-		BS2_DEVICE_TYPE type = device->type_;
-		BS2_DEVICE_ID slaveID = 0;
-		ConfigControl cc(context);
-
-		switch (type)
-		{
-		case BS2_DEVICE_TYPE_CORESTATION_40:
-			sdkResult = searchCSTSlave(context, masterID, slaveID);
-			break;
-
-		default:
-			sdkResult = cc.updateRS485OperationMode(masterID, BS2_RS485_MODE_MASTER);
-			if (BS_SDK_SUCCESS == sdkResult)
-				sdkResult = searchSlave(context, masterID, slaveID);
-			break;
-		}
-
-		if (BS_SDK_SUCCESS == sdkResult && 0 < slaveID)
-			deviceList.appendSlave(masterID, slaveID);
-	}
-
-	return sdkResult;
-}
-
-int connectWiegand(void* context, DeviceList& deviceList)
-{
-	int sdkResult = BS_SDK_SUCCESS;
-	if (Utility::isYes("Do you want to find wiegand devices?"))
-	{
-		displayConnectedDevices(deviceList);
-		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
-
-		if (!deviceList.findDevice(masterID))
-		{
-			cout << "Abort wiegand device discovery" << endl;
-			return BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-		}
-
-		BS2_DEVICE_ID wiegandID = 0;
-		sdkResult = searchWiegand(context, masterID, wiegandID);
-		if (BS_SDK_SUCCESS == sdkResult)
-			deviceList.appendWiegand(masterID, wiegandID);
-	}
-
-	return sdkResult;
-}
 
 uint32_t getSelectedIndex()
 {
 	return Utility::getInput<uint32_t>("Select number:");
 }
 
-int searchSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
-{
-	CommControl cm(context);
-	vector<BS2Rs485SlaveDevice> slaveList;
-	int sdkResult = cm.searchSlaveDevice(masterID, slaveList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	displaySlaveList(slaveList);
-
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= slaveList.size())
-	{
-		BS2_DEVICE_ID id = slaveList[selected - 1].deviceID;
-
-		TRACE("Now connect to slave device (Host:%u, Slave:%u)", masterID, id);
-
-		sdkResult = cm.addSlaveDevice(masterID, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		slaveID = id;
-		cout << "Added slave " << slaveID << endl;
-	}
-
-	return sdkResult;
-}
-
-int searchCSTSlave(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& slaveID)
-{
-	stringstream msg;
-	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
-	uint32_t chSelected = Utility::getInput<uint32_t>(msg.str());
-	switch (chSelected)
-	{
-	case RS485_HOST_CH_0:
-	case RS485_HOST_CH_1:
-	case RS485_HOST_CH_2:
-	case RS485_HOST_CH_3:
-		break;
-	case 4:
-	default:
-		chSelected = RS485_HOST_CH_ALL;
-		break;
-	}
-
-	CommControl cm(context);
-	vector<BS2Rs485SlaveDeviceEX> slaveList;
-	int sdkResult = cm.searchCSTSlaveDevice(masterID, chSelected, slaveList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	displayCSTSlaveList(slaveList);
-
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= slaveList.size())
-	{
-		BS2_DEVICE_ID id = slaveList[selected - 1].deviceID;
-		uint8_t chPort = slaveList[selected - 1].channelInfo;
-
-		TRACE("Now connect to slave device (Host:%u, Slave:%u, Channel:%u)", masterID, id, chPort);
-
-		sdkResult = cm.addCSTSlaveDevice(masterID, chPort, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		slaveID = id;
-		cout << "Added slave " << slaveID << endl;
-	}
-
-	return sdkResult;
-}
-
-int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID)
-{
-	CommControl cm(context);
-	vector<BS2_DEVICE_ID> wiegandList;
-	int sdkResult = cm.searchWiegandDevice(masterID, wiegandList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	displayWiegandList(wiegandList);
-
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= wiegandList.size())
-	{
-		BS2_DEVICE_ID id = wiegandList[selected - 1];
-
-		TRACE("Now connect to wiegand device (Host:%u, Slave:%u)", masterID, id);
-
-		sdkResult = cm.addWiegandDevice(masterID, id);
-		if (BS_SDK_SUCCESS == sdkResult)
-		{
-			wiegandID = id;
-			cout << "Added wiegand slave " << wiegandID << endl;
-		}
-	}
-
-	return sdkResult;
-}
 
 BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave, bool includeWiegand)
 {
@@ -652,6 +485,7 @@ int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int tim
 
 	do
 	{
+		numOfLog = 0;
 		sdkResult = BS2_GetLog(context, id, latestIndex, MAX_RECV_LOG_AMOUNT, &logObj, &numOfLog);
 		if (BS_SDK_SUCCESS == sdkResult)
 		{
