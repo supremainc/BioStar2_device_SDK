@@ -45,6 +45,14 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
+### V2.8.2.10 Beta released 05/03/2022:
+
+**Modified Features**
+
+**1.** Fixed an issue where datetime information could be displayed abnormally if it was a device that supports GDPR when importing from USB.
+
+<br>
+
 ### V2.8.2.9 released 04/14/2022:
 
 **Modified Features**
