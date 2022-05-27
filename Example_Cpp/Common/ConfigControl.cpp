@@ -1265,3 +1265,47 @@ void ConfigControl::print(const BS2AuthOperatorLevel& opr)
 	}
 	TRACE("level : %s", strLevel.c_str());
 }
+
+void ConfigControl::printExtPhoneNumber(const BS2ExtensionNumber& extNumber)
+{
+	TRACE("  +--phoneNumber : %s", extNumber.phoneNumber);
+	TRACE("  +--description : %s", extNumber.description);
+}
+
+void ConfigControl::print(const BS2VoipConfigExt& config)
+{
+	TRACE("==[BS2VoipConfigExt]==");
+	TRACE("+--enabled : %u", config.enabled);
+	TRACE("+--useOutboundProxy : %u", config.useOutboundProxy);
+	TRACE("+--registrationDuration : %u", config.registrationDuration);
+	TRACE("+--address : %s", config.address);
+	TRACE("+--port : %u", config.port);
+	TRACE("+--volume : %u", config.volume);
+	TRACE("+--id : %s", config.id);
+	TRACE("+--password : %s", config.password);
+	TRACE("+--authorizationCode : %s", config.authorizationCode);
+	TRACE("+--outboundProxy");
+	TRACE("   +--address : %s", config.outboundProxy.address);
+	TRACE("   +--port : %u", config.outboundProxy.port);
+	TRACE("+--exitButton : %u", config.exitButton);
+	TRACE("+--numPhoneBook : %u", config.numPhoneBook);
+	TRACE("+--showExtensionNumber : %u", config.showExtensionNumber);
+	//if (config.showExtensionNumber)
+	//{
+		for (int idx = 0; idx < config.numPhoneBook; idx++)
+		{
+			TRACE("+--phonebook[%d]", idx);
+			printExtPhoneNumber(config.phonebook[idx]);
+		}
+	//}
+}
+
+void ConfigControl::print(const BS2RtspConfig& config)
+{
+	TRACE("==[BS2RtspConfig]==");
+	TRACE("+--id : %s", config.id);
+	TRACE("+--password : %s", config.password);
+	TRACE("+--address : %s", config.address);
+	TRACE("+--port : %u", config.port);
+	TRACE("+--enabled : %u", config.enabled);
+}

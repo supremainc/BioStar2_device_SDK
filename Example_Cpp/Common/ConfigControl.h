@@ -62,6 +62,10 @@ public:
 	int setCardConfig(BS2_DEVICE_ID id, const BS2CardConfig& config) const;
 	int getWLANConfig(BS2_DEVICE_ID id, BS2WlanConfig& config);
 	int setWLANConfig(BS2_DEVICE_ID id, const BS2WlanConfig& config);
+	int getVoipConfigExt(BS2_DEVICE_ID id, BS2VoipConfigExt& config) const;
+	int setVoipConfigExt(BS2_DEVICE_ID id, const BS2VoipConfigExt& config) const;
+	int getRtspConfig(BS2_DEVICE_ID id, BS2RtspConfig& config) const;
+	int setRtspConfig(BS2_DEVICE_ID id, const BS2RtspConfig& config) const;
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -107,6 +111,9 @@ public:
 	static void print(const BS2WlanConfig& config);
 	static void print(const std::vector<BS2AuthOperatorLevel>& list);
 	static void print(const BS2AuthOperatorLevel& opr);
+	static void printExtPhoneNumber(const BS2ExtensionNumber& extNumber);
+	static void print(const BS2VoipConfigExt& config);
+	static void print(const BS2RtspConfig& config);
 
 
 private:

@@ -95,6 +95,12 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_WLANCONFIG,
 	MENU_DEV_SET_WLANCONFIG,
+
+	MENU_DEV_GET_VOIPCONFIGEXT,
+	MENU_DEV_SET_VOIPCONFIGEXT,
+
+	MENU_DEV_GET_RTSPCONFIG,
+	MENU_DEV_SET_RTSPCONFIG,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -170,6 +176,12 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_WLANCONFIG,			"BS2_GetWlanConfig"},
 	{MENU_DEV_SET_WLANCONFIG,			"BS2_SetWlanConfig"},
+
+	{MENU_DEV_GET_VOIPCONFIGEXT,		"BS2_GetVoipConfigExt"},
+	{MENU_DEV_SET_VOIPCONFIGEXT,		"BS2_SetVoipConfigExt"},
+
+	{MENU_DEV_GET_RTSPCONFIG,			"BS2_GetRtspConfig"},
+	{MENU_DEV_SET_RTSPCONFIG,			"BS2_SetRtspConfig"},
 };
 
 
@@ -225,3 +237,7 @@ int getRelayActionConfig(void* context, const DeviceInfo& device);
 int setRelayActionConfig(void* context, const DeviceInfo& device);
 int getWLANConfig(void* context, const DeviceInfo& device);
 int setWLANConfig(void* context, const DeviceInfo& device);
+int getVoipConfigExt(void* context, const DeviceInfo& device);
+int setVoipConfigExt(void* context, const DeviceInfo& device);
+int getRtspConfig(void* context, const DeviceInfo& device);
+int setRtspConfig(void* context, const DeviceInfo& device);

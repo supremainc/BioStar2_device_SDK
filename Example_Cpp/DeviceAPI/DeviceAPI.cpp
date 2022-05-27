@@ -502,6 +502,18 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_WLANCONFIG:
 			sdkResult = setWLANConfig(context, device);
 			break;
+		case MENU_DEV_GET_VOIPCONFIGEXT:
+			sdkResult = getVoipConfigExt(context, device);
+			break;
+		case MENU_DEV_SET_VOIPCONFIGEXT:
+			sdkResult = setVoipConfigExt(context, device);
+			break;
+		case MENU_DEV_GET_RTSPCONFIG:
+			sdkResult = getRtspConfig(context, device);
+			break;
+		case MENU_DEV_SET_RTSPCONFIG:
+			sdkResult = setRtspConfig(context, device);
+			break;
 		default:
 			break;
 		}
@@ -1702,4 +1714,163 @@ AUTHKEY_AGAIN:
 	}
 
 	return cc.setWLANConfig(id, config);
+}
+
+int getVoipConfigExt(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2VoipConfigExt config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getVoipConfigExt(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setVoipConfigExt(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2VoipConfigExt config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getVoipConfigExt(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Do you want to use the VoIP Extension?";
+	if (Utility::isYes(msg))
+	{
+		config.enabled = true;
+
+		msg = "Do you want to use Outbound proxy?";
+		config.useOutboundProxy = (BS2_BOOL)Utility::isYes(msg);
+
+		msg = "Enter the interval in seconds to update the information on the SIP server. (60~600)";
+		config.registrationDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Enter the IP address of the SIP server.";
+		string ipAddr = Utility::getInput<string>(msg);
+		memset(config.address, 0x0, BS2_URL_SIZE);
+		memcpy(config.address, ipAddr.c_str(), ipAddr.size());
+
+		msg = "Enter the port of the SIP server. (default: 5061)";
+		config.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+
+		msg = "Enter the call volume of the intercom from 0 to 100. (default: 50)";
+		config.volume = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Enter the ID to connect to the SIP server.";
+		string sipID = Utility::getInput<string>(msg);
+		memset(config.id, 0x0, BS2_USER_ID_SIZE);
+		memcpy(config.id, sipID.c_str(), sipID.size());
+
+		msg = "Enter the password to connect to the SIP server.";
+		string sipPW = Utility::getInput<string>(msg);
+		memset(config.password, 0x0, BS2_USER_ID_SIZE);
+		memcpy(config.password, sipPW.c_str(), sipPW.size());
+
+		msg = "Enter the authorization code to connect to the SIP server.";
+		string authCode = Utility::getInput<string>(msg);
+		memset(config.authorizationCode, 0x0, BS2_USER_ID_SIZE);
+		memcpy(config.authorizationCode, authCode.c_str(), authCode.size());
+
+		msg = "Enter the address of the Outbound proxy server.";
+		string proxyAddr = Utility::getInput<string>(msg);
+		memset(config.outboundProxy.address, 0x0, BS2_URL_SIZE);
+		memcpy(config.outboundProxy.address, proxyAddr.c_str(), proxyAddr.size());
+
+		msg = "Enter the port of the Outbound proxy server.";
+		config.outboundProxy.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+
+		ostringstream msgStrm;
+		msgStrm << "Select the button symbol to be used as the exit button." << endl;
+		msgStrm << " - *: 0" << endl;
+		msgStrm << " - #: 1" << endl;
+		msgStrm << " - 0: 2" << endl;
+		msgStrm << " - ...." << endl;
+		msgStrm << " - 9: 11" << endl;
+		config.exitButton = (uint8_t)Utility::getInput<uint32_t>(msgStrm.str());
+
+		msg = "Do you want to show the extension phone book?";
+		config.showExtensionNumber = (BS2_BOOL)Utility::isYes(msg);
+
+		msg = "How many extension numbers would you like to register? (MAX: 128)";
+		config.numPhoneBook = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		memset(config.phonebook, 0x0, sizeof(config.phonebook));
+		for (uint8_t idx = 0; idx < config.numPhoneBook; idx++)
+		{
+			msgStrm.str("");
+			msgStrm << "Enter the extension phone number #" << idx;
+			string phoneNum = Utility::getInput<string>(msgStrm.str());
+			memcpy(config.phonebook[idx].phoneNumber, phoneNum.c_str(), phoneNum.size());
+
+			msgStrm.str("");
+			msgStrm << "Enter the extension phone number #" << idx << " description";
+			string phoneDesc = Utility::getInput<string>(msgStrm.str());
+			memcpy(config.phonebook[idx].description, phoneDesc.c_str(), phoneDesc.size());
+		}
+	}
+	else
+	{
+		config.enabled = false;
+	}
+
+	return cc.setVoipConfigExt(id, config);
+}
+
+int getRtspConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2RtspConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getRtspConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setRtspConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2RtspConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getRtspConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Do you want to use the RTSP server?";
+	if (Utility::isYes(msg))
+	{
+		config.enabled = true;
+
+		msg = "Enter the account for the RTSP server.";
+		string acc = Utility::getInput<string>(msg);
+		memset(config.id, 0x0, BS2_USER_ID_SIZE);
+		memcpy(config.id, acc.c_str(), acc.size());
+
+		msg = "Enter the password for the RTSP server.";
+		string pw = Utility::getInput<string>(msg);
+		memset(config.password, 0x0, BS2_USER_ID_SIZE);
+		memcpy(config.password, pw.c_str(), pw.size());
+
+		msg = "Enter the address of the RTSP server.";
+		string addr = Utility::getInput<string>(msg);
+		memset(config.address, 0x0, BS2_URL_SIZE);
+		memcpy(config.address, addr.c_str(), addr.size());
+
+		msg = "Enter the port of the RTSP server. (default: 554)";
+		config.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+	}
+	else
+	{
+		config.enabled = false;
+	}
+
+	return cc.setRtspConfig(id, config);
 }
