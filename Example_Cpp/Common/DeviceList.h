@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <mutex>
 #include "BS_API.h"
 
 
@@ -33,8 +34,8 @@ public:
 public:
 	bool appendDevice(BS2_DEVICE_ID id, BS2_DEVICE_TYPE type, uint32_t ip, BS2_PORT port, int32_t timezone);
 	bool removeDevice(BS2_DEVICE_ID id);
-	bool findDevice(BS2_DEVICE_ID id) const;
-	bool findSlave(BS2_DEVICE_ID slaveID) const;
+	bool findDevice(BS2_DEVICE_ID id) /*const*/;
+	bool findSlave(BS2_DEVICE_ID slaveID) /*const*/;
 	std::shared_ptr<DeviceInfo>& getDevice(BS2_DEVICE_ID id);
 	void clearDevices();
 
@@ -49,4 +50,5 @@ public:
 
 private:
 	std::map<BS2_DEVICE_ID, std::shared_ptr<DeviceInfo>> devList_;
+	std::mutex deviceListLock_;
 };

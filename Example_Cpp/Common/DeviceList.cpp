@@ -18,6 +18,8 @@ DeviceList::~DeviceList()
 
 bool DeviceList::appendDevice(BS2_DEVICE_ID id, BS2_DEVICE_TYPE type, uint32_t ip, BS2_PORT port, int32_t timezone)
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	shared_ptr<DeviceInfo> ptr(new DeviceInfo(id, type, ip, port, timezone));
 	auto result = devList_.insert(pair<BS2_DEVICE_ID, shared_ptr<DeviceInfo>>(id, ptr));
 	if (result.second == false)
@@ -32,6 +34,8 @@ bool DeviceList::appendDevice(BS2_DEVICE_ID id, BS2_DEVICE_TYPE type, uint32_t i
 
 bool DeviceList::removeDevice(BS2_DEVICE_ID id)
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	auto it = devList_.find(id);
 	if (it == devList_.end())
 		return false;
@@ -40,13 +44,17 @@ bool DeviceList::removeDevice(BS2_DEVICE_ID id)
 	return true;
 }
 
-bool DeviceList::findDevice(BS2_DEVICE_ID id) const
+bool DeviceList::findDevice(BS2_DEVICE_ID id) /*const*/
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	return (devList_.find(id) != devList_.end());
 }
 
-bool DeviceList::findSlave(BS2_DEVICE_ID slaveID) const
+bool DeviceList::findSlave(BS2_DEVICE_ID slaveID) /*const*/
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	for (auto item : devList_)
 	{
 		for (auto id : item.second->slaveDevices_)
@@ -61,16 +69,22 @@ bool DeviceList::findSlave(BS2_DEVICE_ID slaveID) const
 
 shared_ptr<DeviceInfo>& DeviceList::getDevice(BS2_DEVICE_ID id)
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	return devList_[id];
 }
 
 void DeviceList::clearDevices()
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	devList_.clear();
 }
 
 bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID)
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	auto it = devList_.find(hostID);
 	if (it == devList_.end())
 		return false;
@@ -85,6 +99,8 @@ bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID)
 
 bool DeviceList::appendWiegand(BS2_DEVICE_ID hostID, BS2_DEVICE_ID wiegandID)
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	auto it = devList_.find(hostID);
 	if (it == devList_.end())
 		return false;
@@ -99,6 +115,8 @@ bool DeviceList::appendWiegand(BS2_DEVICE_ID hostID, BS2_DEVICE_ID wiegandID)
 
 bool DeviceList::updateStatus(BS2_DEVICE_ID id, bool connected)
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	auto it = devList_.find(id);
 	if (it == devList_.end())
 		return false;
@@ -109,6 +127,8 @@ bool DeviceList::updateStatus(BS2_DEVICE_ID id, bool connected)
 
 int32_t DeviceList::getTimezone(BS2_DEVICE_ID id)
 {
+	lock_guard<mutex> lock(deviceListLock_);
+
 	auto it = devList_.find(id);
 	return it == devList_.end() ? 0 : it->second->timezone_;
 }
