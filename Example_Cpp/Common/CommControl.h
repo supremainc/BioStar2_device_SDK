@@ -24,6 +24,8 @@ public:
 
 
 public:
+	int setSearchTimeout(uint32_t sec);
+	int searchDevices(std::vector<BS2_DEVICE_ID>& devices);
 	int searchDevices(std::vector<BS2SimpleDeviceInfo>& devices, std::string hostIP = "");
 	int connectDevice(BS2_DEVICE_ID id);
 	int connectDevice(BS2_DEVICE_ID& id, std::string ip, BS2_PORT port = BS2_TCP_DEVICE_PORT_DEFAULT);

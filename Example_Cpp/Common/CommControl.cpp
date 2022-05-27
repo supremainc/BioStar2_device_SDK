@@ -17,6 +17,48 @@ CommControl::~CommControl()
 {
 }
 
+int CommControl::setSearchTimeout(uint32_t sec)
+{
+	int sdkResult = BS2_SetDeviceSearchingTimeout(context_, sec);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetDeviceSearchingTimeout call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::searchDevices(vector<BS2_DEVICE_ID>& devices)
+{
+	BS2_DEVICE_ID* devicesIDObj = NULL;
+	uint32_t numOfDevices(0);
+
+	int sdkResult = BS2_SearchDevices(context_);
+
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SearchDevices call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	sdkResult = BS2_GetDevices(context_, &devicesIDObj, &numOfDevices);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDevices call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	for (uint32_t index = 0; index < numOfDevices; index++)
+	{
+		devices.push_back(devicesIDObj[index]);
+	}
+
+	if (devicesIDObj)
+		BS2_ReleaseObject(devicesIDObj);
+
+	return sdkResult;
+}
+
 int CommControl::searchDevices(vector<BS2SimpleDeviceInfo>& devices, string hostIP)
 {
 	BS2_DEVICE_ID* devicesIDObj = NULL;
