@@ -1219,6 +1219,50 @@ int UserControl::activateUser(BS2_DEVICE_ID id)
 }
 
 
+int UserControl::getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, vector<string>& uidList)
+{
+	char* uidObj = NULL;
+	uint32_t numUID = 0;
+
+	int sdkResult = BS2_GetUserList(context_, id, &uidObj, &numUID, fpAcceptable);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetUserList call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	for (uint32_t idx = 0; idx < numUID; idx++)
+	{
+		uidList.push_back(string(uidObj[idx], BS2_USER_ID_SIZE));
+	}
+
+	if (uidObj)
+		BS2_ReleaseObject(uidObj);
+
+	return sdkResult;
+}
+
+int UserControl::getUserDatas(BS2_DEVICE_ID id, vector<string>& uidList, BS2_USER_MASK userMask, vector<BS2UserBlob>& userList)
+{
+	uint32_t userCount = uidList.size();
+	shared_ptr<BS2UserBlob> userBlob(new BS2UserBlob[userCount], ArrayDeleter<BS2UserBlob>());
+
+	int sdkResult = BS2_GetUserDatas(context_, id, reinterpret_cast<char*>(uidList.data()), userCount, userBlob.get(), userMask);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetUserDatas call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	for (uint32_t idx = 0; idx < userCount; idx++)
+	{
+		userList.push_back(userBlob.get()[idx]);
+	}
+
+	return sdkResult;
+}
+
+
 int UserControl::getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, uint32_t* width, uint32_t* height)
 {
 	int sdkResult = BS2_GetLastFingerprintImage(context_, id, imageObj, width, height);

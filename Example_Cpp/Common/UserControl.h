@@ -73,6 +73,8 @@ public:
 	int enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card = NULL, BS2Fingerprint* finger = NULL, BS2Face* face = NULL, BS2FaceEx* faceEx = NULL);
 	int enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id);
 	int activateUser(BS2_DEVICE_ID id);
+	int getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, std::vector<std::string>& uidList);
+	int getUserDatas(BS2_DEVICE_ID id, std::vector<std::string>& uidList, BS2_USER_MASK userMask, std::vector<BS2UserBlob>& userList);
 
 	int updateCardTypeCRC(BS2SmartCardData& card);
 	int updateCardCRC(BS2SmartCardData& card);
