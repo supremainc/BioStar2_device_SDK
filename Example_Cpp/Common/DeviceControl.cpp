@@ -137,6 +137,24 @@ int DeviceControl::setDeviceTime(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int DeviceControl::getDeviceTime(BS2_DEVICE_ID id, BS2_TIMESTAMP& currTime)
+{
+	int sdkResult = BS2_GetDeviceTime(context_, id, &currTime);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetDeviceTime call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int DeviceControl::setDeviceTime(BS2_DEVICE_ID id, BS2_TIMESTAMP& currTime)
+{
+	int sdkResult = BS2_SetDeviceTime(context_, id, currTime);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetDeviceTime call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int DeviceControl::clearDatabase(BS2_DEVICE_ID id)
 {
 	int sdkResult = BS2_ClearDatabase(context_, id);

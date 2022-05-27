@@ -19,6 +19,8 @@ public:
 	int getSpecifiedDeviceInfo(BS2_DEVICE_ID id);
 	int getDeviceTime(BS2_DEVICE_ID id);
 	int setDeviceTime(BS2_DEVICE_ID id);
+	int getDeviceTime(BS2_DEVICE_ID id, BS2_TIMESTAMP& currTime);
+	int setDeviceTime(BS2_DEVICE_ID id, BS2_TIMESTAMP& currTime);
 	int clearDatabase(BS2_DEVICE_ID id);
 	int factoryReset(BS2_DEVICE_ID id);
 	int rebootDevice(BS2_DEVICE_ID id);
