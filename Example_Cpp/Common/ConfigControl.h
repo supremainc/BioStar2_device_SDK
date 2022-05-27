@@ -54,6 +54,12 @@ public:
 	int setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config);
 	int getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config);
 	int setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionConfig& config);
+	int getWiegandMultiConfig(BS2_DEVICE_ID id, BS2WiegandMultiConfig& config) const;
+	int setWiegandMultiConfig(BS2_DEVICE_ID id, const BS2WiegandMultiConfig& config) const;
+	int getWiegandConfig(BS2_DEVICE_ID id, BS2WiegandConfig& config) const;
+	int setWiegandConfig(BS2_DEVICE_ID id, const BS2WiegandConfig& config) const;
+	int getCardConfig(BS2_DEVICE_ID id, BS2CardConfig& config) const;
+	int setCardConfig(BS2_DEVICE_ID id, const BS2CardConfig& config) const;
 	int getWLANConfig(BS2_DEVICE_ID id, BS2WlanConfig& config);
 	int setWLANConfig(BS2_DEVICE_ID id, const BS2WlanConfig& config);
 

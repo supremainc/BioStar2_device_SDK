@@ -368,6 +368,60 @@ int ConfigControl::setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionCo
 	return sdkResult;
 }
 
+int ConfigControl::getWiegandMultiConfig(BS2_DEVICE_ID id, BS2WiegandMultiConfig& config) const
+{
+	int sdkResult = BS2_GetWiegandMultiConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetWiegandMultiConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setWiegandMultiConfig(BS2_DEVICE_ID id, const BS2WiegandMultiConfig& config) const
+{
+	int sdkResult = BS2_SetWiegandMultiConfig(context_, id, const_cast<BS2WiegandMultiConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetWiegandMultiConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getWiegandConfig(BS2_DEVICE_ID id, BS2WiegandConfig& config) const
+{
+	int sdkResult = BS2_GetWiegandConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetWiegandConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setWiegandConfig(BS2_DEVICE_ID id, const BS2WiegandConfig& config) const
+{
+	int sdkResult = BS2_SetWiegandConfig(context_, id, const_cast<BS2WiegandConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetWiegandConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getCardConfig(BS2_DEVICE_ID id, BS2CardConfig& config) const
+{
+	int sdkResult = BS2_GetCardConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setCardConfig(BS2_DEVICE_ID id, const BS2CardConfig& config) const
+{
+	int sdkResult = BS2_SetCardConfig(context_, id, const_cast<BS2CardConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::getWLANConfig(BS2_DEVICE_ID id, BS2WlanConfig& config)
 {
 	int sdkResult = BS2_GetWlanConfig(context_, id, &config);
@@ -382,6 +436,42 @@ int ConfigControl::setWLANConfig(BS2_DEVICE_ID id, const BS2WlanConfig& config)
 	int sdkResult = BS2_SetWlanConfig(context_, id, const_cast<BS2WlanConfig*>(&config));
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_SetWlanConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getVoipConfigExt(BS2_DEVICE_ID id, BS2VoipConfigExt& config) const
+{
+	int sdkResult = BS2_GetVoipConfigExt(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetVoipConfigExt call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setVoipConfigExt(BS2_DEVICE_ID id, const BS2VoipConfigExt& config) const
+{
+	int sdkResult = BS2_SetVoipConfigExt(context_, id, const_cast<BS2VoipConfigExt*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetVoipConfigExt call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getRtspConfig(BS2_DEVICE_ID id, BS2RtspConfig& config) const
+{
+	int sdkResult = BS2_GetRtspConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetRtspConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setRtspConfig(BS2_DEVICE_ID id, const BS2RtspConfig& config) const
+{
+	int sdkResult = BS2_SetRtspConfig(context_, id, const_cast<BS2RtspConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetRtspConfig call failed: %d", sdkResult);
 
 	return sdkResult;
 }
