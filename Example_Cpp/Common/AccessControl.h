@@ -16,6 +16,7 @@ public:
 	int getAccessSchedule(BS2_DEVICE_ID id, BS2Schedule& schedule);
 	int setAccessSchedule(BS2_DEVICE_ID id, const BS2Schedule& schedule);
 	int getAllAccessSchedule(BS2_DEVICE_ID id, std::vector<BS2Schedule>& schedules);
+	int getAccessGroup(BS2_DEVICE_ID id, const BS2_ACCESS_GROUP_ID* groupIDs, uint32_t numOfIDs, std::vector<BS2AccessGroup>& groupList);
 
 
 public:

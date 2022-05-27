@@ -51,6 +51,27 @@ int AccessControl::getAllAccessSchedule(BS2_DEVICE_ID id, vector<BS2Schedule>& s
 	return sdkResult;
 }
 
+int AccessControl::getAccessGroup(BS2_DEVICE_ID id, const BS2_ACCESS_GROUP_ID* groupIDs, uint32_t numOfIDs, vector<BS2AccessGroup>& groupList)
+{
+	BS2AccessGroup* groupObjs = NULL;
+	uint32_t numOfGroup(0);
+	int sdkResult = BS2_GetAccessGroup(context_, id, const_cast<BS2_ACCESS_GROUP_ID*>(groupIDs), numOfIDs, &groupObjs, &numOfGroup);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetAccessGroup call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	for (uint32_t idx = 0; idx < numOfGroup; idx++)
+	{
+		groupList.push_back(groupObjs[idx]);
+	}
+
+	BS2_ReleaseObject(groupObjs);
+
+	return sdkResult;
+}
+
 void AccessControl::print(const BS2Schedule& schedule)
 {
 	TRACE("==[BS2Schedule]==");
