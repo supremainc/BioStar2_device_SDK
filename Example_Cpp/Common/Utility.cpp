@@ -363,6 +363,8 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 		return "IM-120";
 	case BS2_DEVICE_TYPE_XSTATION_2_FP:
 		return "XS2-Fp";
+	case BS2_DEVICE_TYPE_BIOSTATION_3:
+		return "BS3";
 	case BS2_DEVICE_TYPE_UNKNOWN:
 	default:
 		break;
