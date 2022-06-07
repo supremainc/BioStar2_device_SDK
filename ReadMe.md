@@ -45,11 +45,11 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
-### V2.8.2.11 Beta released 06/02/2022:
+### V2.8.2.12 Beta released 06/07/2022:
 
 **Modified Features**
 
-**1.** Fixed a problem that logs could not be retrieved normally when specifying the starting index and retrieve count from USB.
+**1.** Fixed an issue where date search might not work when importing logs by filtering from USB.
 
 <br>
 
@@ -456,6 +456,13 @@ Refer to API BS2_FactoryReset
 
 
 ### Release Notes (Beta)
+<br>
+
+### V2.8.2.11 Beta released 06/02/2022:
+
+**Modified Features**
+
+**1.** Fixed a problem that logs could not be retrieved normally when specifying the starting index and retrieve count from USB.
 <br>
 
 ### V2.8.2.10 Beta released 05/03/2022:

@@ -1798,16 +1798,16 @@ int getFilteredLogFromDir()
 
 	BS2_EVENT_CODE eventCode = (BS2_EVENT_CODE)Utility::getInput<uint32_t>("Which event do you want to get? [0: All]");
 
-#ifdef _DEBUG
-	BS2_TIMESTAMP startTime = 0;
-	BS2_TIMESTAMP endTime = 0;
-#else
+//#ifdef _DEBUG
+//	BS2_TIMESTAMP startTime = 0;
+//	BS2_TIMESTAMP endTime = 0;
+//#else
 	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
 	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
 
 	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
 	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
-#endif
+//#endif
 	
 	uint8_t tnaKey = (uint8_t)Utility::getInput<uint32_t>("Which tnaKey do you want to get? [0: All, 1-16]");
 	if (BS2_MAX_TNA_KEY < tnaKey)
