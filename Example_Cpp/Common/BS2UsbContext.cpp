@@ -527,7 +527,6 @@ int BS2UsbContext::getLogSmallBlobExFromDir(uint16_t eventMask, BS2_EVENT_ID eve
 {
 	BS2EventSmallBlobEx* smallBlobObj = NULL;
 	uint32_t numLog(0);
-	amount = 1024;
 	int sdkResult = BS2_GetLogSmallBlobExFromDir(context_, dir_.c_str(), eventMask, eventId, amount, &smallBlobObj, &numLog);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
