@@ -78,6 +78,8 @@
 #include "BSCommon/config/BS2BarcodeConfig.h"
 #include "BSCommon/protocol/BS2DeviceInfo.h"
 #include "BSCommon/config/BS2RelayActionConfig.h"
+#include "BSCommon/config/BS2VoipConfigExt.h"
+#include "BSCommon/config/BS2RtspConfig.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -741,6 +743,10 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetInputConfigEx(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetInputConfigEx(void* context, BS2_DEVICE_ID deviceId, const BS2InputConfigEx* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetRelayActionConfig(void* context, BS2_DEVICE_ID deviceId, BS2RelayActionConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRelayActionConfig(void* context, BS2_DEVICE_ID deviceId, const BS2RelayActionConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetVoipConfigExt(void* context, BS2_DEVICE_ID deviceId, BS2VoipConfigExt* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetVoipConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2VoipConfigExt* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetRtspConfig(void* context, BS2_DEVICE_ID deviceId, BS2RtspConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRtspConfig(void* context, BS2_DEVICE_ID deviceId, const BS2RtspConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
