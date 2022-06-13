@@ -4,6 +4,7 @@
 #include "../Common/Utility.h"
 #include "../Common/CommControl.h"
 #include "../Common/LogControl.h"
+#include "../Common/UserControl.h"
 
 #pragma warning(disable:4800)
 
@@ -685,16 +686,58 @@ int getFingerprintConfig(void* context, const DeviceInfo& device)
 int setFingerprintConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
+	UserControl uc(context);
 	BS2FingerprintConfig config = { 0, };
 
 	BS2_DEVICE_ID id = getSelectedDeviceID(device);
 	int sdkResult = cc.getFingerprintConfig(id, config);
-	if (BS_SDK_SUCCESS == sdkResult)
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	bool removeFirst = false;
+	string msg = "Select a fingerprint authentication security level. (0: Basic, 1: Highly secure, 2: The most highly secure)";
+	config.securityLevel = (BS2_FINGER_SECURITY_LEVEL)Utility::getInput<uint32_t>(msg);
+	msg = "Select a matching speed. (0: Automatic, 1: Basic, 2: High, 3: Very high)";
+	config.fastMode = (BS2_FINGER_FAST_MODE)Utility::getInput<uint32_t>(msg);
+	msg = "Select a sensitivity of the fingerprint sensor. (0: Lowest, 1-6: Level 1~6, 7: Highest)";
+	config.sensitivity = (BS2_FINGER_SENSITIVITY)Utility::getInput<uint32_t>(msg);
+	msg = "Select a sensor mode. (0: Always on, 1: Finger approach detection)";
+	config.sensorMode = (BS2_FINGER_SENSOR_MODE)Utility::getInput<uint32_t>(msg);
+	msg = "Select a fingerprint template format. (0: Suprema, 1: ISO, 2: ANSI)";
+	BS2_FINGER_TEMPLATE_FORMAT tempFormat = (BS2_FINGER_TEMPLATE_FORMAT)Utility::getInput<uint32_t>(msg);
+	if (config.templateFormat != tempFormat)
 	{
-		string msg = "Do you want to turn on the checkDuplicate option?";
-		config.checkDuplicate = Utility::isYes(msg);
-		sdkResult = cc.setFingerprintConfig(id, config);
+		ostringstream strm;
+		strm << "If the fingerprint format is changed," << endl;
+		strm << " the user's fingerprint must also be re-enrolled." << endl;
+		strm << " Do you want to proceed after deleting all users?" << endl;
+		strm << " - Y: Remove all users and set config" << endl;
+		strm << " - N: Keep previous template format";
+		if (Utility::isYes(strm.str()))
+		{
+			removeFirst = true;
+			config.templateFormat = tempFormat;
+		}
 	}
+	msg = "Enter the fingerprint scanning timeout in seconds";
+	config.scanTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
+	msg = "Do you want to turn on the advancedEnrollment option?";
+	config.advancedEnrollment = Utility::isYes(msg);
+	msg = "Do you want to turn on the showImage option?";
+	config.showImage = Utility::isYes(msg);
+	msg = "Select a LFD level. (0, Not use, 1: Strict, 2: More strict, 3: Most strict)";
+	config.lfdLevel = (BS2_FINGER_LFD_LEVEL)Utility::getInput<uint32_t>(msg);
+	msg = "Do you want to turn on the checkDuplicate option?";
+	config.checkDuplicate = Utility::isYes(msg);
+
+	if (removeFirst)
+	{
+		sdkResult = uc.removeAllUser(id);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+	}
+
+	sdkResult = cc.setFingerprintConfig(id, config);
 
 	return sdkResult;
 }
