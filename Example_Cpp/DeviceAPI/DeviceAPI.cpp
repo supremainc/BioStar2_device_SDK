@@ -397,6 +397,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_GET_SPCDEVINFO:
 			sdkResult = dc.getSpecifiedDeviceInfo(getSelectedDeviceID(device));
 			break;
+		case MENU_DEV_RST_CONFIG_EXCEPT_NETINFO:
+			sdkResult = cc.resetConfigExceptNetInfo(getSelectedDeviceID(device));
+			break;
+		case MENU_DEV_GET_DEVICECAPABILITIES:
+			sdkResult = getDeviceCapabilities(context, device);
+			break;
 
 		case MENU_DEV_GET_FINGERPRINTCONFIG:
 			sdkResult = getFingerprintConfig(context, device);
@@ -458,32 +464,17 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_REM_TRIGGERACTIONCONFIG:
 			sdkResult = removeTriggerActionConfig(context, device);
 			break;
-		case MENU_DEV_UPD_DEVICE_VOLUME:
-			sdkResult = updateDeviceVolume(context, device);
-			break;
-		case MENU_DEV_RST_CONFIG_EXCEPT_NETINFO:
-			sdkResult = cc.resetConfigExceptNetInfo(getSelectedDeviceID(device));
-			break;
 		case MENU_DEV_GET_BARCODECONFIG:
 			sdkResult = getBarcodeConfig(context, device);
 			break;
 		case MENU_DEV_SET_BARCODECONFIG:
 			sdkResult = setBarcodeConfig(context, device);
 			break;
-		case MENU_DEV_TURNON_QRBYPASS:
-			sdkResult = turnOnQRBypass(context, device);
-			break;
-		case MENU_DEV_TURNOFF_QRBYPASS:
-			sdkResult = turnOffQRBypass(context, device);
-			break;
 		case MENU_DEV_GET_RS485CONFIG:
 			sdkResult = getRS485Config(context, device);
 			break;
 		case MENU_DEV_SET_RS485CONFIG:
 			sdkResult = setRS485Config(context, device);
-			break;
-		case MENU_DEV_GET_DEVICECAPABILITIES:
-			sdkResult = getDeviceCapabilities(context, device);
 			break;
 		case MENU_DEV_GET_INPUTCONFIGEX:
 			sdkResult = getInputConfigEx(context, device);
@@ -514,6 +505,15 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 		case MENU_DEV_SET_RTSPCONFIG:
 			sdkResult = setRtspConfig(context, device);
+			break;
+		case MENU_DEV_UPD_DEVICE_VOLUME:
+			sdkResult = updateDeviceVolume(context, device);
+			break;
+		case MENU_DEV_TURNON_QRBYPASS:
+			sdkResult = turnOnQRBypass(context, device);
+			break;
+		case MENU_DEV_TURNOFF_QRBYPASS:
+			sdkResult = turnOffQRBypass(context, device);
 			break;
 		default:
 			break;
