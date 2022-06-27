@@ -111,6 +111,12 @@ public:
 	static void print(const BS2WlanConfig& config);
 	static void print(const std::vector<BS2AuthOperatorLevel>& list);
 	static void print(const BS2AuthOperatorLevel& opr);
+	static void printCard(const BS2MifareCard& card);
+	static void printCard(const BS2IClassCard& card);
+	static void printCard(const BS2DesFireCard& card);
+	static void print(const BS2CardConfig& config);
+	static void print(const BS2WiegandConfig& config);
+	static void printWiegandFormat(const BS2WiegandFormat& format);
 	static void printExtPhoneNumber(const BS2ExtensionNumber& extNumber);
 	static void print(const BS2VoipConfigExt& config);
 	static void print(const BS2RtspConfig& config);

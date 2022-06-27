@@ -91,12 +91,17 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_WLANCONFIG,
 	MENU_DEV_SET_WLANCONFIG,
 
+	MENU_DEV_SET_WIEGANDMULTICONFIG,
+
+	MENU_DEV_GET_WIEGANDCONFIG,
+	MENU_DEV_SET_WIEGANDCONFIG,
+
 	MENU_DEV_GET_VOIPCONFIGEXT,
 	MENU_DEV_SET_VOIPCONFIGEXT,
 
 	MENU_DEV_GET_RTSPCONFIG,
 	MENU_DEV_SET_RTSPCONFIG,
-	
+
 	MENU_DEV_UPD_DEVICE_VOLUME,
 
 	MENU_DEV_TURNON_QRBYPASS,
@@ -172,6 +177,11 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_WLANCONFIG,			"BS2_GetWlanConfig"},
 	{MENU_DEV_SET_WLANCONFIG,			"BS2_SetWlanConfig"},
 
+	{MENU_DEV_SET_WIEGANDMULTICONFIG,	"BS2_SetWiegandMultiConfig"},
+
+	{MENU_DEV_GET_WIEGANDCONFIG,		"BS2_GetWiegandConfig"},
+	{MENU_DEV_SET_WIEGANDCONFIG,		"BS2_SetWiegandConfig"},
+
 	{MENU_DEV_GET_VOIPCONFIGEXT,		"BS2_GetVoipConfigExt"},
 	{MENU_DEV_SET_VOIPCONFIGEXT,		"BS2_SetVoipConfigExt"},
 
@@ -237,6 +247,10 @@ int getRelayActionConfig(void* context, const DeviceInfo& device);
 int setRelayActionConfig(void* context, const DeviceInfo& device);
 int getWLANConfig(void* context, const DeviceInfo& device);
 int setWLANConfig(void* context, const DeviceInfo& device);
+int getWiegandConfig(void* context, const DeviceInfo& device);
+int setWiegandConfig(void* context, const DeviceInfo& device);
+uint16_t selectWiegandFormat(std::ostringstream& oss);
+int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device);
 int getVoipConfigExt(void* context, const DeviceInfo& device);
 int setVoipConfigExt(void* context, const DeviceInfo& device);
 int getRtspConfig(void* context, const DeviceInfo& device);

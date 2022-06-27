@@ -468,7 +468,7 @@ int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
 		connectAll = true;
 
-	for (auto slaveDevice : slaveList)
+	for (auto& slaveDevice : slaveList)
 	{
 		if (connectAll)
 		{
@@ -484,7 +484,7 @@ int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
 	
 	sdkResult = cm.addSlaveDevice(masterID, slaveList);
 	
-	for (auto slaveDevice : slaveList)
+	for (const auto& slaveDevice : slaveList)
 	{
 		if (slaveDevice.enableOSDP)
 		{
@@ -527,7 +527,7 @@ int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterI
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
 		connectAll = true;
 
-	for (auto slaveDevice : slaveList)
+	for (auto& slaveDevice : slaveList)
 	{
 		if (connectAll)
 		{
@@ -543,7 +543,7 @@ int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterI
 
 	sdkResult = cm.addCSTSlaveDevice(masterID, chSelected, slaveList);
 
-	for (auto slaveDevice : slaveList)
+	for (const auto& slaveDevice : slaveList)
 	{
 		if (slaveDevice.enableOSDP)
 		{
