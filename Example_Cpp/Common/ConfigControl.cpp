@@ -386,6 +386,60 @@ int ConfigControl::setWLANConfig(BS2_DEVICE_ID id, const BS2WlanConfig& config)
 	return sdkResult;
 }
 
+int ConfigControl::getCardConfig(BS2_DEVICE_ID id, BS2CardConfig& config)
+{
+	int sdkResult = BS2_GetCardConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setCardConfig(BS2_DEVICE_ID id, const BS2CardConfig& config)
+{
+	int sdkResult = BS2_SetCardConfig(context_, id, const_cast<BS2CardConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getWiegandConfig(BS2_DEVICE_ID id, BS2WiegandConfig& config)
+{
+	int sdkResult = BS2_GetWiegandConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetWiegandConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setWiegandConfig(BS2_DEVICE_ID id, const BS2WiegandConfig& config)
+{
+	int sdkResult = BS2_SetWiegandConfig(context_, id, const_cast<BS2WiegandConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetWiegandConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getWiegandMultiConfig(BS2_DEVICE_ID id, BS2WiegandMultiConfig& config)
+{
+	int sdkResult = BS2_GetWiegandMultiConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetWiegandMultiConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setWiegandMultiConfig(BS2_DEVICE_ID id, const BS2WiegandMultiConfig& config)
+{
+	int sdkResult = BS2_SetWiegandMultiConfig(context_, id, const_cast<BS2WiegandMultiConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetWiegandMultiConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -1174,4 +1228,73 @@ void ConfigControl::print(const BS2AuthOperatorLevel& opr)
 		break;
 	}
 	TRACE("level : %s", strLevel.c_str());
+}
+
+void ConfigControl::printCard(const BS2MifareCard& card)
+{
+	TRACE("+--mifare.primaryKey : %s", Utility::getHexaString(card.primaryKey, sizeof(card.primaryKey)).c_str());
+	TRACE("+--mifare.secondaryKey : %s", Utility::getHexaString(card.secondaryKey, sizeof(card.secondaryKey)).c_str());
+	TRACE("+--mifare.startBlockIndex : %u", card.startBlockIndex);
+}
+
+void ConfigControl::printCard(const BS2IClassCard& card)
+{
+	TRACE("+--iclass.primaryKey : %s", Utility::getHexaString(card.primaryKey, sizeof(card.primaryKey)).c_str());
+	TRACE("+--iclass.secondaryKey : %s", Utility::getHexaString(card.secondaryKey, sizeof(card.secondaryKey)).c_str());
+	TRACE("+--iclass.startBlockIndex : %u", card.startBlockIndex);
+}
+
+void ConfigControl::printCard(const BS2DesFireCard& card)
+{
+	TRACE("+--desfire.primaryKey : %s", Utility::getHexaString(card.primaryKey, sizeof(card.primaryKey)).c_str());
+	TRACE("+--desfire.secondaryKey : %s", Utility::getHexaString(card.secondaryKey, sizeof(card.secondaryKey)).c_str());
+	TRACE("+--desfire.appID : %s", Utility::getHexaString(card.appID, sizeof(card.appID)).c_str());
+	TRACE("+--desfire.fileID : %u", card.fileID);
+	TRACE("+--desfire.encryptionType : %u", card.encryptionType);
+	TRACE("+--desfire.operationMode : %u", card.operationMode);
+}
+
+void ConfigControl::print(const BS2CardConfig& config)
+{
+	TRACE("==[BS2CardConfig]==");
+	TRACE("+--byteOrder : %u", config.byteOrder);
+	TRACE("|--useWiegandFormat : %u", config.useWiegandFormat);
+	TRACE("|--dataType : %u", config.dataType);
+	TRACE("|--useSecondaryKey : %u", config.useSecondaryKey);
+	printCard(config.mifare);
+	printCard(config.iclass);
+	printCard(config.desfire);
+	TRACE("|--formatID : %u", config.formatID);
+	TRACE("|--cipher : %u", config.cipher);
+	TRACE("|--formatID : %u", config.formatID);
+	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
+}
+
+void ConfigControl::print(const BS2WiegandConfig& config)
+{
+	TRACE("==[BS2WiegandConfig]==");
+	TRACE("+--mode : %u", config.mode);
+	TRACE("|--useWiegandBypass : %u", config.useWiegandBypass);
+	TRACE("|--useFailCode : %u", config.useFailCode);
+	TRACE("|--failCode : %u", config.failCode);
+	TRACE("|--outPulseWidth : %u", config.outPulseWidth);
+	TRACE("|--outPulseInterval : %u", config.outPulseInterval);
+	TRACE("|--formatID : %u", config.formatID);
+	printWiegandFormat(config.format);
+	TRACE("|--wiegandInputMask : %u", config.wiegandInputMask);
+	TRACE("|--wiegandCardMask : %u", config.wiegandCardMask);
+	TRACE("|--wiegandCSNIndex : %u", config.wiegandCSNIndex);
+	TRACE("+--useWiegandUserID : %u", config.useWiegandUserID);
+}
+
+void ConfigControl::printWiegandFormat(const BS2WiegandFormat& format)
+{
+	TRACE("|--format");
+	TRACE("+--+--length : %u", format.length);
+	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_FIELDS; idx++)
+		TRACE("   |--idFields[%u] : %s", idx, Utility::convertArrayToString<uint8_t>(format.idFields[idx], BS2_WIEGAND_FIELD_SIZE, ',').c_str());
+	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_FIELDS; idx++)
+		TRACE("   |--parityFields[%u] : %s", idx, Utility::convertArrayToString<uint8_t>(format.parityFields[idx], BS2_WIEGAND_FIELD_SIZE, ',').c_str());
+	TRACE("   |--parityType : %s", Utility::convertArrayToString<BS2_WIEGAND_PARITY>(format.parityType, BS2_WIEGAND_MAX_PARITIES, ',').c_str());
+	TRACE("   |--parityPos : %s", Utility::convertArrayToString<uint8_t>(format.parityPos, BS2_WIEGAND_MAX_PARITIES, ',').c_str());
 }

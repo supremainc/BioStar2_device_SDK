@@ -15,6 +15,24 @@ static void* sdkContext = NULL;
 static BS2_DEVICE_ID connectedID = 0;
 static DeviceInfo deviceInfo = { 0, 0, 0, 51211, 0 };
 
+// Wiegand format preset
+enum
+{
+	BS2_WIEGAND_H10301_26,
+	BS2_WIEGAND_H10302_37,
+	BS2_WIEGAND_H10304_37,
+	BS2_WIEGAND_C1000_35,
+	BS2_WIEGAND_C1000_48,
+};
+
+const vector<pair<uint32_t, string>> WIEGAND_FORMAT_PRESET = {
+	{BS2_WIEGAND_H10301_26, "BS2_WIEGAND_H10301_26"},
+	{BS2_WIEGAND_H10302_37, "BS2_WIEGAND_H10302_37"},
+	{BS2_WIEGAND_H10304_37, "BS2_WIEGAND_H10304_37"},
+	{BS2_WIEGAND_C1000_35,  "BS2_WIEGAND_C1000_35"},
+	{BS2_WIEGAND_C1000_48,  "BS2_WIEGAND_C1000_48"},
+};
+
 
 void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 {
@@ -493,6 +511,15 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 		case MENU_DEV_SET_WLANCONFIG:
 			sdkResult = setWLANConfig(context, device);
+			break;
+		case MENU_DEV_SET_WIEGANDMULTICONFIG:
+			sdkResult = setWiegandMultiConfigWithPreset(context, device);
+			break;
+		case MENU_DEV_GET_WIEGANDCONFIG:
+			sdkResult = getWiegandConfig(context, device);
+			break;
+		case MENU_DEV_SET_WIEGANDCONFIG:
+			sdkResult = setWiegandConfig(context, device);
 			break;
 		case MENU_DEV_UPD_DEVICE_VOLUME:
 			sdkResult = updateDeviceVolume(context, device);
@@ -1745,4 +1772,339 @@ AUTHKEY_AGAIN:
 	}
 
 	return cc.setWLANConfig(id, config);
+}
+
+int getWiegandConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2WiegandConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getWiegandConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setWiegandConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2WiegandConfig config = { 0, };
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	int sdkResult = cc.getWiegandConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Select the wiegand I/O mode. (0: Input, 1: Output, 2: Input/Output)";
+	config.mode = (BS2_WIEGAND_MODE)Utility::getInput<uint32_t>(msg);
+	if (config.mode == BS2_WIEGAND_OUT_ONLY || config.mode == BS2_WIEGAND_IN_OUT)
+	{
+		msg = "Do you want to use the WiegandBypass?";
+		config.useWiegandBypass = Utility::isYes(msg);
+
+		if (!config.useWiegandBypass)
+		{
+			msg = "Do you want to use the FailCode?";
+			config.useFailCode = Utility::isYes(msg);
+			if (config.useFailCode)
+			{
+				msg = "Enter the FAILCODE in hexa-decimal 1byte like 0xFF.  0x";
+				config.failCode = Utility::getInputHexaChar<uint8_t>(msg);
+			}
+		}
+	}
+
+	msg = "Enter the outPulseWidth. (20~100 us, Default = 40)";
+	config.outPulseWidth = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Enter the outPulseInterval. (200~20000 us, Default = 10000)";
+	config.outPulseInterval = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Enter the wiegand format ID.";
+	config.formatID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+	// Format
+	msg = "Enter the LENGTH of the wiegand card format.";
+	config.format.length = Utility::getInput<uint32_t>(msg);
+
+	ostringstream iss;
+	iss << "Enter the ID FIELDs of the wiegand card. (Max. 32bytes)" << endl;
+	iss << "If you type 01 FE 00 00, " << endl;
+	iss << "then I will help insert to '0000................000001FE0000'";
+
+	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_FIELDS; idx++)
+	{
+		memset(config.format.idFields[idx], 0x0, BS2_WIEGAND_FIELD_SIZE);
+		ostringstream oss;
+		oss << iss.str() << endl;
+		oss << "[" << idx << "] ";
+		Utility::getLineWiegandBits<uint8_t>(oss.str(), config.format.idFields[idx], BS2_WIEGAND_FIELD_SIZE);
+	}
+
+	ostringstream pss;
+	pss << "Enter the PARITY FIELDs of the wiegand card. (Max. 32bytes)" << endl;
+	pss << "If you type 01 FF E0 00, " << endl;
+	pss << "then I will help insert to '0000................000001FFE000'";
+
+	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_PARITIES; idx++)
+	{
+		memset(config.format.parityFields[idx], 0x0, BS2_WIEGAND_FIELD_SIZE);
+		ostringstream oss;
+		oss << pss.str() << endl;
+		oss << "[" << idx << "] ";
+		Utility::getLineWiegandBits<uint8_t>(oss.str(), config.format.parityFields[idx], BS2_WIEGAND_FIELD_SIZE);
+	}
+
+	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_PARITIES; idx++)
+	{
+		msg = "Select the PARITY TYPE. (0: No check, 1: Check odd parity, 2: Check even parity)";
+		ostringstream oss;
+		oss << "[" << idx << "] " << msg;
+		config.format.parityType[idx] = (BS2_WIEGAND_PARITY)Utility::getInput<uint32_t>(oss.str());
+
+		msg = "Enter the PARITY POS.";
+		oss.str("");
+		oss << "[" << idx << "] " << msg;
+		config.format.parityPos[idx] = (uint8_t)Utility::getInput<uint32_t>(oss.str());
+	}
+
+	if (config.mode == BS2_WIEGAND_IN_ONLY || config.mode == BS2_WIEGAND_IN_OUT)
+	{
+		ostringstream oss;
+		oss << "Enter the WIEGAND CARD MASK for the wiegand input." << endl;
+		oss << "The device will accept wiegand signals that the configured formats." << endl;
+		config.wiegandInputMask = selectWiegandFormat(oss);
+	}
+
+	BS2CardConfig cardConfig = { 0, };
+	sdkResult = cc.getCardConfig(id, cardConfig);
+	if (sdkResult != BS_SDK_SUCCESS)
+		return sdkResult;
+
+	msg = "Do you want the device to process CSN cards with wiegand formats?";
+	if (Utility::isYes(msg))
+	{
+		cardConfig.useWiegandFormat = true;
+		cc.setCardConfig(id, cardConfig);
+
+		ostringstream oss;
+		oss << "Enter the CSN WIEGAND CARD INDEX for the device." << endl;
+		for (const auto& item : WIEGAND_FORMAT_PRESET)
+			oss << "  " << item.first << ": " << item.second << endl;
+
+		config.wiegandCSNIndex = (uint8_t)(Utility::getInput<uint32_t>(oss.str()) + 1);
+	}
+	else
+	{
+		cardConfig.useWiegandFormat = false;
+		cc.setCardConfig(id, cardConfig);
+	}
+
+	{
+		ostringstream oss;
+		oss << "Enter the WIEGAND CARD MASK for the device." << endl;
+		oss << "The device will accept CARDs that matches the configured formats." << endl;
+		config.wiegandCardMask = selectWiegandFormat(oss);
+	}
+
+	if (config.mode == BS2_WIEGAND_OUT_ONLY || config.mode == BS2_WIEGAND_IN_OUT)
+	{
+		msg = "Select the Wiegand data output FLAG. (0: None, 1: CardID, 2: UserID)";
+		config.useWiegandUserID = (uint8_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	return cc.setWiegandConfig(id, config);
+}
+
+uint16_t selectWiegandFormat(ostringstream& oss)
+{
+	uint32_t mask(0);
+	oss << "Select 0, 1, 2, ..." << endl;
+	for (const auto& item : WIEGAND_FORMAT_PRESET)
+		oss << "  " << item.first << ": " << item.second << endl;
+
+	auto inputDatas = Utility::getLineNumbers<uint32_t>(oss.str(), ',');
+	for (auto item : inputDatas)
+		mask |= (0x01 << item);
+
+	mask = mask << 0x01;	// Not using 0th bit.
+
+	return (uint16_t)mask;
+}
+
+
+int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2WiegandMultiConfig config = { 0, };
+
+	//////////////////////////////////////////////////////////////////////////
+	// H10301 26 bit format
+	config.formats[0].formatID = 1;
+	config.formats[0].format.length = 26;
+
+	config.formats[0].format.idFields[0][28] = 0x01;
+	config.formats[0].format.idFields[0][29] = 0xFE;
+	config.formats[0].format.idFields[1][29] = 0x01;
+	config.formats[0].format.idFields[1][30] = 0xFF;
+	config.formats[0].format.idFields[1][31] = 0xFE;
+
+	config.formats[0].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[0].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+
+	config.formats[0].format.parityPos[0] = 0;
+	config.formats[0].format.parityPos[1] = 25;
+
+	config.formats[0].format.parityFields[0][28] = 0x01;
+	config.formats[0].format.parityFields[0][29] = 0xFF;
+	config.formats[0].format.parityFields[0][30] = 0xE0;
+	config.formats[0].format.parityFields[1][30] = 0x1F;
+	config.formats[0].format.parityFields[1][31] = 0xFE;
+
+	//////////////////////////////////////////////////////////////////////////
+	// H10302 37 bit format
+	config.formats[1].formatID = 2;
+	config.formats[1].format.length = 37;
+
+	// H10302 uses only 1 field. The first field is from [0] ~ [31]
+	// If you convert the bits used on the field in binary, it is as below. 35 bit as card ID.
+	// 0000 1111 / 1111 1111 / 1111 1111 / 1111 1111 / 1111 1110        -> 0F / FF / FF / FF / FE
+	//     27    /     28    /     29    /    30     /    31
+	config.formats[1].format.idFields[0][27] = 0x0F;
+	config.formats[1].format.idFields[0][28] = 0xFF;
+	config.formats[1].format.idFields[0][29] = 0xFF;
+	config.formats[1].format.idFields[0][30] = 0xFF;
+	config.formats[1].format.idFields[0][31] = 0xFE;
+
+	config.formats[1].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[1].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+
+	config.formats[1].format.parityPos[0] = 0;
+	config.formats[1].format.parityPos[1] = 36;
+
+	// According to H10302, the first even parity calculates the bits starting from 1 ~ 18
+	// 000 0<parity bit 1111 / 1111 1111 / 1111 1100                -> 0F / FF / FC
+	//           27         /     28    /     29
+	config.formats[1].format.parityFields[0][27] = 0x0F;
+	config.formats[1].format.parityFields[0][28] = 0xFF;
+	config.formats[1].format.parityFields[0][29] = 0xFC;
+
+	// The second parity calculates the bits starting from 18 ~ 35. Since this is for the second parity bit,
+	// parityFields[1][0] ~ [1][31] is used.
+	// 0000 0111 / 1111 1111 / 1111 111 0<parity bit
+	//     29    /     30    /     31
+	config.formats[1].format.parityFields[1][29] = 0x07;
+	config.formats[1].format.parityFields[1][30] = 0xFF;
+	config.formats[1].format.parityFields[1][31] = 0xFE;
+
+	//////////////////////////////////////////////////////////////////////////
+	// H10304 37 bit format
+	config.formats[2].formatID = 3;
+	config.formats[2].format.length = 37;
+
+	config.formats[2].format.idFields[0][29] = 0x0F;
+	config.formats[2].format.idFields[0][30] = 0xFF;
+	config.formats[2].format.idFields[0][31] = 0xFE;
+	config.formats[2].format.idFields[1][27] = 0x0F;
+	config.formats[2].format.idFields[1][28] = 0xFF;
+	config.formats[2].format.idFields[1][29] = 0xF0;
+
+	config.formats[2].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[2].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+
+	config.formats[2].format.parityPos[0] = 0;
+	config.formats[2].format.parityPos[1] = 36;
+
+	config.formats[2].format.parityFields[0][27] = 0x0F;
+	config.formats[2].format.parityFields[0][28] = 0xFF;
+	config.formats[2].format.parityFields[0][29] = 0xFC;
+
+	config.formats[2].format.parityFields[1][29] = 0x07;
+	config.formats[2].format.parityFields[1][30] = 0xFF;
+	config.formats[2].format.parityFields[1][31] = 0xFE;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Corporate 1000 35 bit format
+	config.formats[3].formatID = 4;
+	config.formats[3].format.length = 35;
+
+	config.formats[3].format.idFields[0][27] = 0x01;
+	config.formats[3].format.idFields[0][28] = 0xFF;
+	config.formats[3].format.idFields[0][29] = 0xE0;
+	config.formats[3].format.idFields[1][29] = 0x1F;
+	config.formats[3].format.idFields[1][30] = 0xFF;
+	config.formats[3].format.idFields[1][31] = 0xFE;
+
+	config.formats[3].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[3].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[3].format.parityType[2] = BS2_WIEGAND_PARITY_ODD;
+
+	config.formats[3].format.parityPos[0] = 1;
+	config.formats[3].format.parityPos[1] = 34;
+	config.formats[3].format.parityPos[2] = 0;
+
+	config.formats[3].format.parityFields[0][27] = 0x01;
+	config.formats[3].format.parityFields[0][28] = 0xB6;
+	config.formats[3].format.parityFields[0][29] = 0xDB;
+	config.formats[3].format.parityFields[0][30] = 0x6D;
+	config.formats[3].format.parityFields[0][31] = 0xB6;
+
+	config.formats[3].format.parityFields[1][27] = 0x03;
+	config.formats[3].format.parityFields[1][28] = 0x6D;
+	config.formats[3].format.parityFields[1][29] = 0xB6;
+	config.formats[3].format.parityFields[1][30] = 0xDB;
+	config.formats[3].format.parityFields[1][31] = 0x6C;
+
+	config.formats[3].format.parityFields[2][27] = 0x03;
+	config.formats[3].format.parityFields[2][28] = 0xFF;
+	config.formats[3].format.parityFields[2][29] = 0xFF;
+	config.formats[3].format.parityFields[2][30] = 0xFF;
+	config.formats[3].format.parityFields[2][31] = 0xFF;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Corporate 1000 48 bit format
+	config.formats[4].formatID = 5;
+	config.formats[4].format.length = 48;
+
+	config.formats[4].format.idFields[0][26] = 0x3F;
+	config.formats[4].format.idFields[0][27] = 0xFF;
+	config.formats[4].format.idFields[0][28] = 0xFF;
+
+	config.formats[4].format.idFields[1][29] = 0xFF;
+	config.formats[4].format.idFields[1][30] = 0xFF;
+	config.formats[4].format.idFields[1][31] = 0xFE;
+
+	config.formats[4].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[4].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[4].format.parityType[2] = BS2_WIEGAND_PARITY_ODD;
+
+	config.formats[4].format.parityPos[0] = 1;
+	config.formats[4].format.parityPos[1] = 47;
+	config.formats[4].format.parityPos[2] = 0;
+
+	config.formats[4].format.parityFields[0][26] = 0x1B;
+	config.formats[4].format.parityFields[0][27] = 0x6D;
+	config.formats[4].format.parityFields[0][28] = 0xB6;
+	config.formats[4].format.parityFields[0][29] = 0xDB;
+	config.formats[4].format.parityFields[0][30] = 0x6D;
+	config.formats[4].format.parityFields[0][31] = 0xB6;
+
+	config.formats[4].format.parityFields[1][26] = 0x36;
+	config.formats[4].format.parityFields[1][27] = 0xDB;
+	config.formats[4].format.parityFields[1][28] = 0x6D;
+	config.formats[4].format.parityFields[1][29] = 0xB6;
+	config.formats[4].format.parityFields[1][30] = 0xDB;
+	config.formats[4].format.parityFields[1][31] = 0x6C;
+
+	config.formats[4].format.parityFields[2][26] = 0x7F;
+	config.formats[4].format.parityFields[2][27] = 0xFF;
+	config.formats[4].format.parityFields[2][28] = 0xFF;
+	config.formats[4].format.parityFields[2][29] = 0xFF;
+	config.formats[4].format.parityFields[2][30] = 0xFF;
+	config.formats[4].format.parityFields[2][31] = 0xFF;
+
+	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	return cc.setWiegandMultiConfig(id, config);
 }

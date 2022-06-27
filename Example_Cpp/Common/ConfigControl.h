@@ -56,6 +56,12 @@ public:
 	int setRelayActionConfig(BS2_DEVICE_ID id, const BS2RelayActionConfig& config);
 	int getWLANConfig(BS2_DEVICE_ID id, BS2WlanConfig& config);
 	int setWLANConfig(BS2_DEVICE_ID id, const BS2WlanConfig& config);
+	int getCardConfig(BS2_DEVICE_ID id, BS2CardConfig& config);
+	int setCardConfig(BS2_DEVICE_ID id, const BS2CardConfig& config);
+	int getWiegandConfig(BS2_DEVICE_ID id, BS2WiegandConfig& config);
+	int setWiegandConfig(BS2_DEVICE_ID id, const BS2WiegandConfig& config);
+	int getWiegandMultiConfig(BS2_DEVICE_ID id, BS2WiegandMultiConfig& config);
+	int setWiegandMultiConfig(BS2_DEVICE_ID id, const BS2WiegandMultiConfig& config);
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -101,6 +107,12 @@ public:
 	static void print(const BS2WlanConfig& config);
 	static void print(const std::vector<BS2AuthOperatorLevel>& list);
 	static void print(const BS2AuthOperatorLevel& opr);
+	static void printCard(const BS2MifareCard& card);
+	static void printCard(const BS2IClassCard& card);
+	static void printCard(const BS2DesFireCard& card);
+	static void print(const BS2CardConfig& config);
+	static void print(const BS2WiegandConfig& config);
+	static void printWiegandFormat(const BS2WiegandFormat& format);
 
 
 private:

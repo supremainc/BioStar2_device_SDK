@@ -62,7 +62,13 @@ class Utility
 public:
 	template <typename T>
 	static T getInput(std::string msgFormat, ...);
+	template <typename T>
+	static T getInputHexaChar(std::string msgFormat, ...);
 	static std::string getLine(std::string msg);
+	template <typename T>
+	static bool getLineWiegandBits(std::string msg, T* data, uint32_t size);
+	template <typename T>
+	static std::vector<T> getLineNumbers(std::string msg, const char delimiter = ',');
 
 	static std::string getLocalTime(bool milliSec = true);
 	static std::string getIPAddress(uint32_t ip);
@@ -78,6 +84,8 @@ public:
 	static std::vector<std::string> tokenizeString(const std::string& data, const char delimiter = ' ');
 	template <typename T>
 	static std::vector<T> tokenizeInteger(const std::string& data, const char delimiter = ' ');
+	template <typename T>
+	static std::vector<T> tokenizeHexaString(const std::string& data, const char delimiter = ' ');
 	template <typename T>
 	static T convAString2Int(const std::string& data);
 
@@ -115,6 +123,62 @@ inline T Utility::getInput(std::string msgFormat, ...)
 	std::cin >> value;
 
 	return value;
+}
+
+template <typename T>
+inline T Utility::getInputHexaChar(std::string msgFormat, ...)
+{
+	va_list ap;
+	va_start(ap, msgFormat);
+	char buf[MAX_BUFFER_SIZE] = { 0, };
+	vsprintf(buf, msgFormat.c_str(), ap);
+	va_end(ap);
+
+	std::cout << "==> " << buf << " ";
+	std::string value;
+	std::cin >> value;
+	std::stringstream conv;
+	uint32_t intVal;
+	conv << std::hex << value;
+	conv >> intVal;
+
+	return static_cast<T>(intVal);
+}
+
+template <typename T>
+inline bool Utility::getLineWiegandBits(std::string msg, T* data, uint32_t size)
+{
+	auto result = Utility::tokenizeHexaString<T>(Utility::getLine(msg));
+	uint32_t startIdx = size - result.size();
+	for (uint32_t idx = startIdx, dataIdx = 0; idx < size; idx++, dataIdx++)
+		data[idx] = result[dataIdx];
+
+	return true;
+}
+
+template <typename T>
+inline std::vector<T> Utility::getLineNumbers(std::string msg, const char delimiter)
+{
+	std::string inputStr = Utility::getLine(msg);
+	return Utility::tokenizeInteger<T>(inputStr, delimiter);
+}
+
+template <typename T>
+inline std::vector<T> Utility::tokenizeHexaString(const std::string& data, const char delimiter)
+{
+	std::vector<T> result;
+	std::string tokenized;
+	std::stringstream ss(data);
+	uint32_t tempValue;
+	while (std::getline(ss, tokenized, delimiter))
+	{
+		std::stringstream tss;
+		tss << std::hex << tokenized;
+		tss >> tempValue;
+		result.push_back(static_cast<T>(tempValue));
+	}
+
+	return result;
 }
 
 template <typename T>
