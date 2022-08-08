@@ -7,6 +7,7 @@
 #include <mutex>
 #include "BS_API.h"
 
+typedef std::pair<BS2_DEVICE_ID, BS2_DEVICE_TYPE>	BS2_DEVICE_ID_TYPE;
 
 class DeviceInfo
 {
@@ -19,7 +20,7 @@ public:
 	BS2_PORT port_;
 	int32_t timezone_;
 	bool connected_;
-	std::vector<BS2_DEVICE_ID> slaveDevices_;
+	std::vector<BS2_DEVICE_ID_TYPE> slaveDevices_;
 	std::vector<BS2_DEVICE_ID> wiegandDevices_;
 };
 
@@ -39,7 +40,7 @@ public:
 	std::shared_ptr<DeviceInfo>& getDevice(BS2_DEVICE_ID id);
 	void clearDevices();
 
-	bool appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID);
+	bool appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, BS2_DEVICE_TYPE slaveType);
 	bool appendWiegand(BS2_DEVICE_ID hostID, BS2_DEVICE_ID wiegandID);
 
 	const std::map<BS2_DEVICE_ID, std::shared_ptr<DeviceInfo>>& getAllDevices() const { return devList_; }

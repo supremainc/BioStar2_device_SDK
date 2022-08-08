@@ -87,7 +87,6 @@ int runAPIs(void* context, const DeviceList& deviceList);
 int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
 int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
-void displayConnectedDevices(const DeviceList& devices, bool includeSlave = false, bool includeWiegand = false);
 int getDoors(void* context, const DeviceList& devices, DoorList& doors);
 int makeFAZDoors(void* context, const DeviceList& devices, DoorList& doors);
 void setDoor(BS2_DEVICE_ID id, std::vector<BS2Door>& vecDoors);

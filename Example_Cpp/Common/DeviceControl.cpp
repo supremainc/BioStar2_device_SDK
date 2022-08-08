@@ -27,17 +27,6 @@ DeviceControl::~DeviceControl()
 {
 }
 
-int DeviceControl::getDeviceInfo(BS2_DEVICE_ID id)
-{
-	BS2SimpleDeviceInfo info = { 0, };
-
-	int sdkResult = getDeviceInfo(id, info);
-	if (BS_SDK_SUCCESS == sdkResult)
-		print(info);
-
-	return sdkResult;
-}
-
 int DeviceControl::getDeviceInfo(BS2_DEVICE_ID id, BS2SimpleDeviceInfo& info)
 {
 	int sdkResult = BS2_GetDeviceInfo(context_, id, &info);
@@ -47,19 +36,11 @@ int DeviceControl::getDeviceInfo(BS2_DEVICE_ID id, BS2SimpleDeviceInfo& info)
 	return sdkResult;
 }
 
-int DeviceControl::getDeviceInfoEx(BS2_DEVICE_ID id)
+int DeviceControl::getDeviceInfoEx(BS2_DEVICE_ID id, BS2SimpleDeviceInfo& info, BS2SimpleDeviceInfoEx& infoEx)
 {
-	BS2SimpleDeviceInfo info = { 0, };
-	BS2SimpleDeviceInfoEx infoEx = { 0, };
-
 	int sdkResult = BS2_GetDeviceInfoEx(context_, id, &info, &infoEx);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
-	else
-	{
-		print(info);
-		print(infoEx);
-	}
 
 	return sdkResult;
 }
@@ -267,7 +248,7 @@ int DeviceControl::upgradeFirmware(const vector<BS2_DEVICE_ID>& devices)
 
 void DeviceControl::onUpgrade(BS2_DEVICE_ID id, uint32_t percent)
 {
-	TRACE("%u%% upgraded (id:%u)", percent, id);
+	printf("\r%u%% upgraded (id:%u)", percent, id);
 }
 
 int DeviceControl::updateResource(BS2_DEVICE_ID id)
@@ -440,6 +421,15 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	}
 
 	TRACE("intelligentPDSupported : %u", info.intelligentPDSupported);
+	TRACE("updateUserSupported : %u", info.updateUserSupported);
+	TRACE("simulatedUnlockSupported : %u", info.simulatedUnlockSupported);
+	TRACE("smartCardByteOrderSupported : %u", info.smartCardByteOrderSupported);
+	TRACE("treatAsCSNSupported : %u", info.treatAsCSNSupported);
+	TRACE("rtspSupported : %u", info.rtspSupported);
+	TRACE("lfdSupported : %u", info.lfdSupported);
+	TRACE("visualQRSupported : %u", info.visualQRSupported);
+
+	TRACE("maxVoipExtensionNumbers : %u", info.maxVoipExtensionNumbers);
 }
 
 #if 0

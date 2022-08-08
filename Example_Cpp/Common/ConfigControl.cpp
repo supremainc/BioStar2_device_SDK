@@ -805,6 +805,16 @@ void ConfigControl::print(const BS2FaceConfig& config)
 	TRACE("quickEnrollment:%u", config.quickEnrollment);
 	TRACE("previewOption:%u", config.previewOption);
 	TRACE("checkDuplicate:%u", config.checkDuplicate);
+
+	// FSF2 supported
+	TRACE("operationMode:%u", config.operationMode);
+	TRACE("maxRotation:%u", config.maxRotation);
+	TRACE("faceWidth.min:%u, faceWidth.max:%u", config.faceWidth.min, config.faceWidth.max);
+	TRACE("searchRange.x:%u, searchRange.width:%u", config.searchRange.x, config.searchRange.width);
+
+	// BS3 supported
+	TRACE("detectDistance.min:%u, detectDistance.max:%u", config.detectDistance.min, config.detectDistance.max);
+	TRACE("wideSearch:%u", config.wideSearch);
 }
 
 void ConfigControl::print(const BS2DesFireCardConfigEx& config)
@@ -1349,7 +1359,8 @@ void ConfigControl::print(const BS2VoipConfigExt& config)
 	TRACE("+--registrationDuration : %u", config.registrationDuration);
 	TRACE("+--address : %s", config.address);
 	TRACE("+--port : %u", config.port);
-	TRACE("+--volume : %u", config.volume);
+	TRACE("+--speaker : %u", config.volume.speaker);
+	TRACE("+--mic : %u", config.volume.mic);
 	TRACE("+--id : %s", config.id);
 	TRACE("+--password : %s", config.password);
 	TRACE("+--authorizationCode : %s", config.authorizationCode);

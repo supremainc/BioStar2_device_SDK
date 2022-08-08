@@ -222,7 +222,7 @@ uint32_t getSelectedIndex()
 	return Utility::getInput<uint32_t>("Select number:");
 }
 
-int searchSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID)
+int searchSlave(void* context, vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID)
 {
 	CommControl cm(context);
 	vector<BS2Rs485SlaveDevice> slaveList;
@@ -231,6 +231,9 @@ int searchSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID&
 		return sdkResult;
 
 	displaySlaveList(slaveList);
+
+	if (0 == slaveList.size())
+		return BS_SDK_SUCCESS;
 
 	bool connectAll = false;
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
@@ -257,15 +260,16 @@ int searchSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID&
 		if (slaveDevice.enableOSDP)
 		{
 			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			cout << "Added slave " << id << endl;
-			deviceList.push_back(id);
+			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
+			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
+			deviceList.push_back(make_pair(id, type));
 		}
 	}
 
 	return sdkResult;
 }
 
-int searchCSTSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID)
+int searchCSTSlave(void* context, vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID)
 {
 	stringstream msg;
 	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
@@ -316,8 +320,9 @@ int searchCSTSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_
 		if (slaveDevice.enableOSDP)
 		{
 			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			cout << "Added slave " << id << endl;
-			deviceList.push_back(id);
+			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
+			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
+			deviceList.push_back(make_pair(id, type));
 		}
 	}
 
@@ -362,7 +367,7 @@ int runAPIs(void* context, const DeviceInfo& device)
 
 	cout << endl << endl << "== DeviceAPI Test ==" << endl;
 
-	while (BS_SDK_SUCCESS == sdkResult && MENU_DEV_BREAK != (selectedTop = showMenu(menuInfoDeviceAPI)))
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_DEV_BREAK != (selectedTop = showMenu(menuInfoDeviceAPI)))
 	{
 		if (!device.connected_)
 		{
@@ -376,47 +381,45 @@ int runAPIs(void* context, const DeviceInfo& device)
 			return BS_SDK_SUCCESS;
 
 		case MENU_DEV_GET_DEVINF:
-			sdkResult = dc.getDeviceInfo(getSelectedDeviceID(device));
-			if (BS_SDK_SUCCESS == sdkResult)
+			sdkResult = getDeviceInfo(context, device);
 			break;
 		case MENU_DEV_GET_DEVINFEX:
-			sdkResult = dc.getDeviceInfoEx(getSelectedDeviceID(device));
-			if (BS_SDK_SUCCESS == sdkResult)
+			sdkResult = getDeviceInfoEx(context, device);
 			break;
 		case MENU_DEV_GET_DEVTIME:
-			sdkResult = dc.getDeviceTime(getSelectedDeviceID(device));
+			sdkResult = dc.getDeviceTime(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_SET_DEVTIME:
-			sdkResult = dc.setDeviceTime(getSelectedDeviceID(device));
+			sdkResult = dc.setDeviceTime(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_CLR_DATABASE:
-			sdkResult = dc.clearDatabase(getSelectedDeviceID(device));
+			sdkResult = dc.clearDatabase(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_FACTORY_RESET:
-			sdkResult = dc.factoryReset(getSelectedDeviceID(device));
+			sdkResult = dc.factoryReset(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_REBOOT_DEV:
-			sdkResult = dc.rebootDevice(getSelectedDeviceID(device));
+			sdkResult = dc.rebootDevice(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_LOCK_DEV:
-			sdkResult = dc.lockDevice(getSelectedDeviceID(device));
+			sdkResult = dc.lockDevice(Utility::getSelectedDeviceID(device));
 			// try a fingerprint verification test.
 			break;
 		case MENU_DEV_UNLOCK_DEV:
-			sdkResult = dc.unlockDevice(getSelectedDeviceID(device));
+			sdkResult = dc.unlockDevice(Utility::getSelectedDeviceID(device));
 			// try a fingerprint verification test.
 			break;
 		case MENU_DEV_UPG_FIRMWARE:
-			sdkResult = dc.upgradeFirmware(getSelectedDeviceID(device));
+			sdkResult = dc.upgradeFirmware(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_UPD_RESOURCE:
-			sdkResult = dc.updateResource(getSelectedDeviceID(device));
+			sdkResult = dc.updateResource(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_GET_SPCDEVINFO:
-			sdkResult = dc.getSpecifiedDeviceInfo(getSelectedDeviceID(device));
+			sdkResult = dc.getSpecifiedDeviceInfo(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_RST_CONFIG_EXCEPT_NETINFO:
-			sdkResult = cc.resetConfigExceptNetInfo(getSelectedDeviceID(device));
+			sdkResult = cc.resetConfigExceptNetInfo(Utility::getSelectedDeviceID(device));
 			break;
 		case MENU_DEV_GET_DEVICECAPABILITIES:
 			sdkResult = getDeviceCapabilities(context, device);
@@ -700,13 +703,57 @@ int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* 
 	return sdkResult;
 }
 
-BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info)
+bool getSelectedDeviceID(const DeviceInfo& info, BS2_DEVICE_ID& id, BS2_DEVICE_TYPE& type)
 {
-	printf("%u - (M)\n", info.id_);
-	for (uint32_t index = 0; index < info.slaveDevices_.size(); index++)
-		printf("%u - (S)\n", info.slaveDevices_[index]);
+	BS2_DEVICE_ID selected = Utility::getSelectedDeviceID(info);
+	if (selected == info.id_)
+	{
+		id = info.id_;
+		type = info.type_;
+		return true;
+	}
+	
+	for (const auto& item : info.slaveDevices_)
+	{
+		if (selected == item.first)
+		{
+			id = item.first;
+			type = item.second;
+			return true;
+		}
+	}
 
-	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
+	return false;
+}
+
+int getDeviceInfo(void* context, const DeviceInfo& device)
+{
+	DeviceControl dc(context);
+	BS2SimpleDeviceInfo info = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = dc.getDeviceInfo(id, info);
+	if (BS_SDK_SUCCESS == sdkResult)
+		DeviceControl::print(info);
+
+	return sdkResult;
+}
+
+int getDeviceInfoEx(void* context, const DeviceInfo& device)
+{
+	DeviceControl dc(context);
+	BS2SimpleDeviceInfo info = { 0, };
+	BS2SimpleDeviceInfoEx infoEx = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = dc.getDeviceInfoEx(id, info, infoEx);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		DeviceControl::print(info);
+		DeviceControl::print(infoEx);
+	}
+
+	return sdkResult;
 }
 
 int getFingerprintConfig(void* context, const DeviceInfo& device)
@@ -714,7 +761,7 @@ int getFingerprintConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2FingerprintConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getFingerprintConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -728,7 +775,7 @@ int setFingerprintConfig(void* context, const DeviceInfo& device)
 	UserControl uc(context);
 	BS2FingerprintConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getFingerprintConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -786,7 +833,7 @@ int getFaceConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2FaceConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getFaceConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -799,12 +846,118 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2FaceConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id(0);
+	BS2_DEVICE_TYPE type(0);
+	if (!getSelectedDeviceID(device, id, type))
+		return BS_SDK_SUCCESS;
+
 	int sdkResult = cc.getFaceConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
-		string msg = "Do you want to turn on the checkDuplicate option?";
+		string msg = "Insert securityLevel. (0: Basic, 1: Highly secure, 2: Most highly secure)";
+		config.securityLevel = (BS2_FACE_SECURITY_LEVEL)Utility::getInput<uint32_t>(msg);
+
+		msg = "Insert lightCondition. (0: Normal, 1: High, 3: Not used)";
+		config.lightCondition = (BS2_FACE_LIGHT_CONDITON)Utility::getInput<uint32_t>(msg);
+
+		msg = "Insert enrollThreshold. (0: Most strict - 9: Least strict, 4: Default)";
+		config.enrollThreshold = (BS2_FACE_ENROLL_THRESHOLD)Utility::getInput<uint32_t>(msg);
+
+		msg = "Insert detectSensitivity. (0: Off, 1: Low, 2: Basic, 3: High)";
+		config.detectSensitivity = (BS2_FACE_DETECT_SENSITIVITY)Utility::getInput<uint32_t>(msg);
+
+		int defaultEnrollTimeout(0), defaultLFD(0);
+		bool needInput = false;
+		switch (type)
+		{
+		case BS2_DEVICE_TYPE_FACESTATION_2:
+		case BS2_DEVICE_TYPE_FACELITE:
+			defaultEnrollTimeout = 60;
+			defaultLFD = 0;
+			needInput = true;
+			break;
+		case BS2_DEVICE_TYPE_FACESTATION_F2_FP:
+		case BS2_DEVICE_TYPE_FACESTATION_F2:
+		case BS2_DEVICE_TYPE_BIOSTATION_3:
+			defaultEnrollTimeout = 20;
+			defaultLFD = 1;
+			needInput = true;
+			break;
+		default:
+			break;
+		}
+
+		if (needInput)
+		{
+			ostringstream strm;
+			strm << "Insert enrollTimeout. (default: " << defaultEnrollTimeout << "s)";
+			config.enrollTimeout = (uint16_t)Utility::getInput<uint32_t>(strm.str());
+
+			strm.str("");
+			strm << "Insert lfdLevel. (0: Not use, 1: Strict, 2: More Strict, 3: Most Strict... (default: " << defaultLFD << "))";
+			config.lfdLevel = (BS2_FACE_LFD_LEVEL)Utility::getInput<uint32_t>(strm.str());
+		}
+		else
+		{
+			config.enrollTimeout = 0;
+			config.lfdLevel = 0;
+		}
+
+		msg = "Do you want to turn on the quickEnrollment? (Y: 1-step enrollment(Quick), N: 3-step enrollment(High quality))";
+		config.quickEnrollment = Utility::isYes(msg);
+
+		msg = "Insert previewOption. (0: Not used, 1: 1/2 stage, 2: All stages)";
+		config.previewOption = (BS2_FACE_PREVIEW_OPTION)Utility::getInput<uint32_t>(msg);
+
+		msg = "Do you want to turn on the checkDuplicate?";
 		config.checkDuplicate = Utility::isYes(msg);
+
+		msg = "Insert operationMode. (0: Fusion, 1: Visual, 2: Visual (+IR detect))";
+		config.operationMode = (BS2_FACE_OPERATION_MODE)Utility::getInput<uint32_t>(msg);
+
+		msg = "Insert maxRotation. (default: 15)";
+		config.maxRotation = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		char buf[128] = { 0, };
+		switch (type)
+		{
+		case BS2_DEVICE_TYPE_FACESTATION_F2_FP:
+		case BS2_DEVICE_TYPE_FACESTATION_F2:
+			sprintf(buf, "Insert min value of faceWidth. (default: %d)", BS2_FACE_WIDTH_MIN_DEFAULT);
+			config.faceWidth.min = (uint16_t)Utility::getInput<uint32_t>(buf);
+
+			sprintf(buf, "Insert max value of faceWidth. (default: %d)", BS2_FACE_WIDTH_MAX_DEFAULT);
+			config.faceWidth.max = (uint16_t)Utility::getInput<uint32_t>(buf);
+
+			sprintf(buf, "Insert x value of searchRange. (default: %d)", BS2_FACE_SEARCH_RANGE_X_DEFAULT);
+			config.searchRange.x = (uint16_t)Utility::getInput<uint32_t>(buf);
+
+			sprintf(buf, "Insert width value of searchRange. (default: %d)", BS2_FACE_SEARCH_RANGE_WIDTH_DEFAULT);
+			config.searchRange.width = (uint16_t)Utility::getInput<uint32_t>(buf);
+			break;
+
+		case BS2_DEVICE_TYPE_BIOSTATION_3:
+			sprintf(buf, "Insert min value of detectDistance. (%d~%d, default: %d)",
+				BS2_FACE_DETECT_DISTANCE_MIN_MIN,
+				BS2_FACE_DETECT_DISTANCE_MIN_MAX,
+				BS2_FACE_DETECT_DISTANCE_MIN_DEFAULT);
+			config.detectDistance.min = (uint8_t)Utility::getInput<uint32_t>(buf);
+
+			sprintf(buf, "Insert max value of detectDistance. (%d~%d, default: %d, infinite: %d)",
+				BS2_FACE_DETECT_DISTANCE_MAX_MIN,
+				BS2_FACE_DETECT_DISTANCE_MAX_MAX,
+				BS2_FACE_DETECT_DISTANCE_MAX_DEFAULT,
+				BS2_FACE_DETECT_DISTANCE_MAX_INF);
+			config.detectDistance.max = (uint8_t)Utility::getInput<uint32_t>(buf);
+
+			msg = "Do you want to turn on the wideSearch?";
+			config.wideSearch = Utility::isYes(msg);
+			break;
+
+		default:
+			break;
+		}
+
 		sdkResult = cc.setFaceConfig(id, config);
 	}
 
@@ -816,7 +969,7 @@ int getSystemConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2SystemConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getSystemConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -829,23 +982,27 @@ int setSystemConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2SystemConfig config = {0,};
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getSystemConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
-		string msg = "Please enter the card combination you wish to set.\r\n";
-		msg += "    DEFAULT : 0xFFFFFFFF\r\n";
-		msg += "    BLE : 0x00000200\r\n";
-		msg += "    NFC : 0x00000100\r\n";
-		msg += "    SEOS : 0x00000080\r\n";
-		msg += "    SR_SE : 0x00000040\r\n";
-		msg += "    DESFIRE_EV1 : 0x00000020\r\n";
-		msg += "    CLASSIC_PLUS : 0x00000010\r\n";
-		msg += "    ICLASS : 0x00000008\r\n";
-		msg += "    MIFARE_FELICA : 0x00000004\r\n";
-		msg += "    HIDPROX : 0x00000002\r\n";
-		msg += "    EM : 0x00000001\r\n";
-		uint32_t cardTypes = Utility::getInput<uint32_t>(msg);
+		ostringstream strm;
+		strm << "Please enter the card combination you wish to set." << endl;
+		strm << "    0xFFFFFFFF : DEFAULT" << endl;
+		strm << "    0x00000000 : NONE" << endl;
+		strm << "    0x00000001 : (LowFrequency)  EM" << endl;
+		strm << "    0x00000002 : (LowFrequency)  PROX" << endl;
+		strm << "    0x00000004 : (HighFrequency) CSN_MIFARE" << endl;
+		strm << "    0x00000008 : (HighFrequency) CSN_ICLASS" << endl;
+		strm << "    0x00000010 : (HighFrequency) SMART_MIFARE" << endl;
+		strm << "    0x00000020 : (HighFrequency) SMART_MIFARE_DESFIRE" << endl;
+		strm << "    0x00000040 : (HighFrequency) SMART_ICLASS" << endl;
+		strm << "    0x00000080 : (HighFrequency) SMART_ICLASS_SEOS" << endl;
+		strm << "    0x00000100 : (Mobile)        NFC" << endl;
+		strm << "    0x00000200 : (Mobile)        BLE" << endl;
+		strm << "    0x00000400 : (HighFrequency) CSN_OTHERS" << endl;
+
+		uint32_t cardTypes = Utility::getInput<uint32_t>(strm.str());
 		cardTypes |= CARD_OPERATION_USE;		// Card operation apply
 		config.useCardOperationMask = cardTypes;
 
@@ -862,7 +1019,7 @@ int getDesFireCardConfigEx(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2DesFireCardConfigEx config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getDesFireCardConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -875,7 +1032,7 @@ int setDesFireCardConfigEx(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2DesFireCardConfigEx config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getDesFireCardConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
@@ -899,7 +1056,7 @@ int getAuthConfigEx(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2AuthConfigExt config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
 	int sdkResult = cc.getAuthConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
@@ -915,7 +1072,7 @@ int setAuthConfigEx(void* context, const DeviceInfo& device)
 	const int EXIT_MENU = 999;
 	uint32_t mode(0);
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
 	int sdkResult = cc.getAuthConfigEx(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -1105,7 +1262,7 @@ int getFaceConfigEx(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2FaceConfigExt config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getFaceConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1120,7 +1277,7 @@ int setFaceConfigEx(void* context, const DeviceInfo& device)
 	string msg;
 	stringstream strmsg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
 	msg = "Insert thermal check mode. (0: Not use, 1: Hard, 2: Soft)";
 	config.thermalCheckMode = (BS2_FACE_CHECK_MODE)Utility::getInput<uint32_t>(msg);
@@ -1169,7 +1326,7 @@ int getThermalCameraConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2ThermalCameraConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getThermalCameraConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1183,7 +1340,7 @@ int setThermalCameraConfig(void* context, const DeviceInfo& device)
 	BS2ThermalCameraConfig config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
 	msg = "Insert camera distance from user. (cm. Recommend: 70)";
 	config.distance = (uint8_t)Utility::getInput<uint32_t>(msg);
@@ -1215,7 +1372,7 @@ int getEventConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2EventConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getEventConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1229,7 +1386,7 @@ int setEventConfig(void* context, const DeviceInfo& device)
 	BS2EventConfig config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	//msg = "Insert camera distance from user. (cm. Recommend: 70)";
 	//config.distance = (uint8_t)Utility::getInput<uint32_t>(msg);
 
@@ -1257,7 +1414,7 @@ int setEventConfig(void* context, const DeviceInfo& device)
 
 int getInputConfig(void* context, const DeviceInfo& device)
 {
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
 	DeviceControl dc(context);
 	BS2SimpleDeviceInfo info = { 0, };
@@ -1289,7 +1446,7 @@ int getTriggerActionConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2TriggerActionConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getTriggerActionConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1303,7 +1460,7 @@ int setTriggerActionConfig(void* context, const DeviceInfo& device)
 	BS2TriggerActionConfig config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
 	msg = "How many trigger-action do you want to register?";
 	config.numItems = (uint8_t)Utility::getInput<uint32_t>(msg);
@@ -1369,7 +1526,7 @@ int removeTriggerActionConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2TriggerActionConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	return cc.setTriggerActionConfig(id, config);
 }
 
@@ -1378,7 +1535,7 @@ int updateDeviceVolume(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2DisplayConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getDisplayConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -1395,7 +1552,7 @@ int getBarcodeConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2BarcodeConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getBarcodeConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1414,7 +1571,7 @@ int setBarcodeConfig(void* context, const DeviceInfo& device)
 	BS2BarcodeConfig config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getBarcodeConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -1446,7 +1603,7 @@ int turnOffQRBypass(void* context, const DeviceInfo& device)
 	BS2BarcodeConfig config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getBarcodeConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -1469,7 +1626,7 @@ int turnOnQRBypass(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2BarcodeConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	sdkResult = cc.getBarcodeConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -1484,7 +1641,7 @@ int getRS485Config(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2Rs485Config config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getRS485Config(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1499,7 +1656,7 @@ int setRS485Config(void* context, const DeviceInfo& device)
 	BS2Rs485Config config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
 	BS2SimpleDeviceInfo info = {0,};
 	int sdkResult = dc.getDeviceInfo(id, info);
@@ -1580,7 +1737,7 @@ int getDeviceCapabilities(void* context, const DeviceInfo& device)
 	DeviceControl dc(context);
 	BS2DeviceCapabilities cap = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = dc.getDeviceCapabilities(id, cap);
 	if (BS_SDK_SUCCESS == sdkResult)
 		DeviceControl::print(cap);
@@ -1594,7 +1751,7 @@ int getInputConfigEx(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2InputConfigEx config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getInputConfigEx(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1609,7 +1766,7 @@ int setInputConfigEx(void* context, const DeviceInfo& device)
 	BS2InputConfigEx config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	const int STOP_N_SET = -1;
 
 	int sdkResult = cc.getInputConfigEx(id, config);
@@ -1652,7 +1809,7 @@ int getRelayActionConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2RelayActionConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getRelayActionConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1667,7 +1824,7 @@ int setRelayActionConfig(void* context, const DeviceInfo& device)
 	BS2RelayActionConfig config = { 0, };
 	string msg;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	const int STOP_N_SET = -1;
 
 	int sdkResult = cc.getRelayActionConfig(id, config);
@@ -1713,7 +1870,7 @@ int getWLANConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2WlanConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getWLANConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1726,7 +1883,7 @@ int setWLANConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2WlanConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getWLANConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -1791,7 +1948,7 @@ int getWiegandConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2WiegandConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getWiegandConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -1804,7 +1961,7 @@ int setWiegandConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2WiegandConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getWiegandConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -2117,7 +2274,7 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 	config.formats[4].format.parityFields[2][30] = 0xFF;
 	config.formats[4].format.parityFields[2][31] = 0xFF;
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	return cc.setWiegandMultiConfig(id, config);
 }
 
@@ -2126,7 +2283,7 @@ int getVoipConfigExt(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2VoipConfigExt config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getVoipConfigExt(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -2139,7 +2296,7 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2VoipConfigExt config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getVoipConfigExt(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -2160,11 +2317,14 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 		memset(config.address, 0x0, BS2_URL_SIZE);
 		memcpy(config.address, ipAddr.c_str(), ipAddr.size());
 
-		msg = "Enter the port of the SIP server. (default: 5061)";
+		msg = "Enter the port of the SIP server. (default: 5060)";
 		config.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
 
-		msg = "Enter the call volume of the intercom from 0 to 100. (default: 50)";
-		config.volume = (uint8_t)Utility::getInput<uint32_t>(msg);
+		msg = "Enter the intercom speaker volume between 0 and 100. (default: 50)";
+		config.volume.speaker = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Enter the intercom speaker microphone between 0 and 100. (default: 50)";
+		config.volume.mic = (uint8_t)Utility::getInput<uint32_t>(msg);
 
 		msg = "Enter the ID to connect to the SIP server.";
 		string sipID = Utility::getInput<string>(msg);
@@ -2231,7 +2391,7 @@ int getRtspConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2RtspConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getRtspConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
 		ConfigControl::print(config);
@@ -2244,7 +2404,7 @@ int setRtspConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2RtspConfig config = { 0, };
 
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	int sdkResult = cc.getRtspConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;

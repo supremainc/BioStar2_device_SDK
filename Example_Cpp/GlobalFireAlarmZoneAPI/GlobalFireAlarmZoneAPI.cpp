@@ -212,7 +212,7 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 			sdkResult = connectViaIP(context, deviceList);
 			break;
 		case MENU_TOP_VIEW_DEVICE:
-			displayConnectedDevices(deviceList, true, true);
+			Utility::displayConnectedDevices(deviceList, true, true);
 			break;
 
 		default:
@@ -319,7 +319,7 @@ uint32_t getSelectedIndex()
 
 BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave, bool includeWiegand)
 {
-	displayConnectedDevices(deviceList, includeSlave, includeWiegand);
+	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
 	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 }
 
@@ -428,34 +428,6 @@ void displayWiegandList(const vector<BS2_DEVICE_ID>& devices)
 	for (const auto& device : devices)
 	{
 		printf("%2u - Device:%u\n", ++index, device);
-	}
-}
-
-void displayConnectedDevices(const DeviceList& devices, bool includeSlave, bool includeWiegand)
-{
-	const auto& mapDevices = devices.getAllDevices();
-	for (auto it = mapDevices.begin(); it != mapDevices.end(); it++)
-	{
-		printf("[%c] Device:%10u, IP:%-15s, Port:%u, Type:%-10s (M)\n",
-			it->second->connected_ ? '+' : '-',
-			it->second->id_,
-			Utility::getIPAddress(it->second->ip_).c_str(),
-			it->second->port_,
-			Utility::getStringOfDeviceType(it->second->type_).c_str());
-
-		if (includeSlave)
-			for (auto id : it->second->slaveDevices_)
-				printf("[%c] Master:%10u, Device:%10u (S)\n",
-					it->second->connected_ ? '+' : '-',
-					it->second->id_,
-					id);
-
-		if (includeWiegand)
-			for (auto id : it->second->wiegandDevices_)
-				printf("[%c] Master:%10u, Device:%10u (W)\n",
-					it->second->connected_ ? '+' : '-',
-					it->second->id_,
-					id);
 	}
 }
 

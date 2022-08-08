@@ -218,13 +218,13 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 			sdkResult = connectViaIP(context, deviceList);
 			break;
 		case MENU_TOP_SEARCH_SLAVE:
-			slaveMenu(context, deviceList);
-			return;
+			sdkResult = slaveMenu(context, deviceList);
+			break;
 		case MENU_TOP_SEARCH_WIEGAND:
 			sdkResult = connectWiegand(context, deviceList);
 			break;
 		case MENU_TOP_VIEW_DEVICE:
-			displayConnectedDevices(deviceList, true, true);
+			Utility::displayConnectedDevices(deviceList, true, true);
 			break;
 		case MENU_TOP_CONNECT_USB:
 			runUSBAPIs();
@@ -325,7 +325,7 @@ int connectViaIP(void* context, DeviceList& deviceList)
 	return sdkResult;
 }
 
-void slaveMenu(void* context, DeviceList& deviceList)
+int slaveMenu(void* context, DeviceList& deviceList)
 {
 	DeviceControl dc(context);
 	BS2_DEVICE_ID masterID(0);
@@ -385,6 +385,8 @@ void slaveMenu(void* context, DeviceList& deviceList)
 			break;
 		}
 	}
+
+	return sdkResult;
 }
 
 int searchAndAddSlave(void* context, DeviceList& deviceList)
@@ -392,7 +394,7 @@ int searchAndAddSlave(void* context, DeviceList& deviceList)
 	int sdkResult = BS_SDK_SUCCESS;
 	if (Utility::isYes("Do you want to find slave devices?"))
 	{
-		displayConnectedDevices(deviceList);
+		Utility::displayConnectedDevices(deviceList);
 		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 
 		if (!deviceList.findDevice(masterID))
@@ -431,7 +433,7 @@ int connectWiegand(void* context, DeviceList& deviceList)
 	int sdkResult = BS_SDK_SUCCESS;
 	if (Utility::isYes("Do you want to find wiegand devices?"))
 	{
-		displayConnectedDevices(deviceList, true);
+		Utility::displayConnectedDevices(deviceList, true);
 		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 
 		if (!deviceList.findDevice(masterID) && !deviceList.findSlave(masterID))
@@ -464,6 +466,9 @@ int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
 
 	displaySlaveList(slaveList);
 
+	if (0 == slaveList.size())
+		return BS_SDK_SUCCESS;
+
 	bool connectAll = false;
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
 		connectAll = true;
@@ -489,8 +494,9 @@ int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
 		if (slaveDevice.enableOSDP)
 		{
 			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			cout << "Added slave " << id << endl;
-			deviceList.appendSlave(masterID, id);
+			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
+			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
+			deviceList.appendSlave(masterID, id, type);
 		}
 	}
 
@@ -548,8 +554,9 @@ int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterI
 		if (slaveDevice.enableOSDP)
 		{
 			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			cout << "Added slave " << id << endl;
-			deviceList.appendSlave(masterID, id);
+			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
+			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
+			deviceList.appendSlave(masterID, id, type);
 		}
 	}
 
@@ -586,7 +593,7 @@ int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegand
 
 BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave, bool includeWiegand)
 {
-	displayConnectedDevices(deviceList, includeSlave, includeWiegand);
+	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
 	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 }
 
@@ -594,7 +601,7 @@ void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std:
 {
 	cout << "==> Select upgrade order." << endl;
 	selectedDevices.clear();
-	displayConnectedDevices(deviceList, includeSlave, includeWiegand);
+	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
 	while (true)
 	{
 		BS2_DEVICE_ID id = Utility::getInput<BS2_DEVICE_ID>("Please enter the slave device ID by order (0: Stop) :");
@@ -617,7 +624,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
 
-	while (BS_SDK_SUCCESS == sdkResult && MENU_COMM_BREAK != (selectedTop = showMenu(menuInfoCommAPI)))
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_COMM_BREAK != (selectedTop = showMenu(menuInfoCommAPI)))
 	{
 		switch (selectedTop)
 		{
@@ -779,34 +786,6 @@ void displayWiegandList(const vector<BS2_DEVICE_ID>& devices)
 	}
 }
 
-void displayConnectedDevices(const DeviceList& devices, bool includeSlave, bool includeWiegand)
-{
-	const auto& mapDevices = devices.getAllDevices();
-	for (auto it = mapDevices.begin(); it != mapDevices.end(); it++)
-	{
-		printf("[%c] Device:%10u, IP:%-15s, Port:%u, Type:%-10s (M)\n",
-			it->second->connected_ ? '+' : '-',
-			it->second->id_,
-			Utility::getIPAddress(it->second->ip_).c_str(),
-			it->second->port_,
-			Utility::getStringOfDeviceType(it->second->type_).c_str());
-
-		if (includeSlave)
-			for (auto id : it->second->slaveDevices_)
-				printf("[%c] Master:%10u, Device:%10u (S)\n",
-					it->second->connected_ ? '+' : '-',
-					it->second->id_,
-					id);
-
-		if (includeWiegand)
-			for (auto id : it->second->wiegandDevices_)
-				printf("[%c] Master:%10u, Device:%10u (W)\n",
-					it->second->connected_ ? '+' : '-',
-					it->second->id_,
-					id);
-	}
-}
-
 int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone)
 {
 	int logIndex = 0;
@@ -906,7 +885,7 @@ int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList)
 	bool isWrite = Utility::isYes("Do you want to write face template to file?");
 	if (isWrite)
 	{
-		displayConnectedDevices(deviceList, true);
+		Utility::displayConnectedDevices(deviceList, true);
 		BS2_DEVICE_ID scanDeviceID = Utility::getInput<BS2_DEVICE_ID>("Please enter the DEVICE ID for the scan face:");
 		sdkResult = uc.scanFace(scanDeviceID, &faceTemp, numOfScanFace);
 		if (BS_SDK_SUCCESS != sdkResult)
@@ -940,7 +919,7 @@ int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList)
 		return BS_SDK_ERROR_INTERNAL;
 	}
 
-	displayConnectedDevices(deviceList, true);
+	Utility::displayConnectedDevices(deviceList, true);
 	BS2_DEVICE_ID enrollDeviceID = Utility::getInput<BS2_DEVICE_ID>("Please enter the DEVICE ID for the enroll:");
 
 	sdkResult = uc.enrollUserFaceEx(enrollDeviceID, NULL, NULL, &face, NULL);

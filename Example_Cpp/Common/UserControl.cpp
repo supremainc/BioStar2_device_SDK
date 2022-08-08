@@ -255,162 +255,32 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		return sdkResult;
 	}
 
-	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
-	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
-	bool qrSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR;
-
 	BS2UserBlob userBlob = { 0, };
 	BS2User& user = userBlob.user;
 	BS2UserSetting& setting = userBlob.setting;
 	BS2UserPhoto& photo = userBlob.user_photo;
 	stringstream msg;
 
-	string uid = Utility::getInput<string>("Please enter a user ID:");
-	if (BS2_USER_ID_SIZE < uid.size())
-	{
-		TRACE("User ID is too big.");
-		return BS_SDK_ERROR_INVALID_PARAM;
-	}
-	strcpy(user.userID, uid.c_str());
-
-	if (deviceInfo.userNameSupported)
-	{
-		string name = Utility::getInput<string>("Enter your name:");
-		if (BS2_USER_NAME_SIZE < name.size())
-		{
-			TRACE("User name is too long.");
-			return BS_SDK_ERROR_INVALID_PARAM;
-		}
-		strcpy(reinterpret_cast<char*>(userBlob.user_name), name.c_str());
-	}
-
-	{
-		string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
-		BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
-		setting.startTime = startTime;
-
-		inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
-		BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
-		setting.endTime = endTime;
-	}
-
-	if (deviceInfo.pinSupported)
-	{
-		string pinString = Utility::getInput<string>("Enter the PIN code:");
-		if (BS2_USER_PIN_SIZE < pinString.size())
-		{
-			TRACE("PIN code is too long");
-			return BS_SDK_ERROR_INVALID_PARAM;
-		}
-
-		sdkResult = BS2_MakePinCode(context_, const_cast<char*>(pinString.c_str()), userBlob.pin);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_MakePinCode call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	}
-
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
-
-	if (fingerScanSupported || faceScanSupported)
-	{
-		msg.str("");
-		msg << "Enter the biometric authentication mode\n";
-		msg << "[1: Biometric only, 2: Biometric+PIN]";
-		int fingerAuthMode = Utility::getInput<int>(msg.str());
-		switch (fingerAuthMode)
-		{
-		case 1:
-			setting.fingerAuthMode = BS2_AUTH_MODE_BIOMETRIC_ONLY;
-			break;
-		case 2:
-			setting.fingerAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_BIOMETRIC_PIN : BS2_AUTH_MODE_BIOMETRIC_ONLY;
-			break;
-		default:
-			setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
-			break;
-		}
-	}
-
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
-
-	if (deviceInfo.cardSupported)
-	{
-		msg.str("");
-		msg << "Enter the card authentication mode\n";
-		msg << "[1: Card only, 2: Card+Biometric, 3: Card+PIN, 4: Card+(Biometric/PIN), 5: Card+Biometric+PIN]";
-		int cardAuthMode = Utility::getInput<int>(msg.str());
-		switch (cardAuthMode)
-		{
-		case 1:
-			setting.cardAuthMode = BS2_AUTH_MODE_CARD_ONLY;
-			break;
-		case 2:
-			setting.cardAuthMode = (fingerScanSupported || faceScanSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC : BS2_AUTH_MODE_CARD_ONLY;
-			break;
-		case 3:
-			setting.cardAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_CARD_PIN : BS2_AUTH_MODE_CARD_ONLY;
-			break;
-		case 4:
-			setting.cardAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC_OR_PIN : BS2_AUTH_MODE_CARD_ONLY;
-			break;
-		case 5:
-			setting.cardAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC_PIN : BS2_AUTH_MODE_CARD_ONLY;
-			break;
-		default:
-			setting.cardAuthMode = BS2_AUTH_MODE_NONE;
-			break;
-		}
-	}
-
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
 
-	{
-		msg.str("");
-		msg << "Enter the ID authentication mode\n";
-		msg << "[1: ID+Biometric, 2: ID+PIN, 3: ID+(Biometric/PIN), 4: ID+Biometric+PIN]";
-		int idAuthMode = Utility::getInput<int>(msg.str());
-		switch (idAuthMode)
-		{
-		case 1:
-			setting.idAuthMode = (fingerScanSupported || faceScanSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC : BS2_AUTH_MODE_NONE;
-			break;
-		case 2:
-			setting.idAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_ID_PIN : BS2_AUTH_MODE_NONE;
-			break;
-		case 3:
-			setting.idAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC_OR_PIN : BS2_AUTH_MODE_NONE;
-			break;
-		case 4:
-			setting.idAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC_PIN : BS2_AUTH_MODE_NONE;
-			break;
-		default:
-			setting.idAuthMode = BS2_AUTH_MODE_NONE;
-			break;
-		}
-	}
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
+		return sdkResult;
 
-	{
-		msg.str("");
-		msg << "Enter the security level for this user\n";
-		msg << "[0: Default, 1: Lower, 2: Low, 3: Normal, 4: High, 5, Higher]";
-		int securityLevel = Utility::getInput<int>(msg.str());
-		switch (securityLevel)
-		{
-		case BS2_USER_SECURITY_LEVEL_DEFAULT:
-		case BS2_USER_SECURITY_LEVEL_LOWER:
-		case BS2_USER_SECURITY_LEVEL_LOW:
-		case BS2_USER_SECURITY_LEVEL_NORMAL:
-		case BS2_USER_SECURITY_LEVEL_HIGH:
-		case BS2_USER_SECURITY_LEVEL_HIGHER:
-			setting.securityLevel = securityLevel;
-			break;
-		default:
-			setting.securityLevel = BS2_USER_SECURITY_LEVEL_DEFAULT;
-			break;
-		}
-	}
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob.user_name, deviceInfo)))
+		return sdkResult;
+
+	getUserBlobExpiryDate(setting);
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob.pin, deviceInfo)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobSecurityLevel(setting)))
+		return sdkResult;
 
 	if (deviceInfo.userPhotoSupported)
 	{
@@ -437,157 +307,27 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		}
 	}
 
-	if (Utility::isYes("Do you want to register access group ID?"))
-	{
-		msg.str("");
-		msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
-		string inStrAGID = Utility::getLine(msg.str());
-		if (0 == inStrAGID.size())
-			return BS_SDK_ERROR_CANNOT_FIND_ACCESS_GROUP;
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob.accessGroupId)))
+		return sdkResult;
 
-		vector<string> listID = Utility::tokenizeString(inStrAGID);
-		if (listID.size() < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER)
-		{
-			uint32_t index(0);
-			for (auto groupID : listID)
-			{
-				BS2_ACCESS_GROUP_ID gid = atoi(groupID.c_str());
-				userBlob.accessGroupId[index++] = gid;
-			}
-		}
-	}
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
+		return sdkResult;
 
-	{
-		msg.str("");
-		msg << "Please enter a authentication group ID.\n";
-		msg << "This is used for face authentication. [0: Not using]";
-		uint32_t authGroupID = Utility::getInput<uint32_t>(msg.str());
-		user.authGroupID = authGroupID;
-	}
-
-	user.flag = Utility::isYes("Do you want to overwrite the user if it exist?") ? BS2_USER_FLAG_CREATED | BS2_USER_FLAG_UPDATED : BS2_USER_FLAG_CREATED;
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserUpdate(user)))
+		return sdkResult;
 
 	user.numFingers = 0;
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (deviceInfo.cardSupported)
-	{
-		if (Utility::isYes("Do you want to scan card?"))
-		{
-			uint32_t numCard = Utility::getInput<uint32_t>("How many cards would you like to register?");
-			BS2CSNCard* ptrCard = new BS2CSNCard[numCard];
-			if (ptrCard)
-			{
-				userBlob.cardObjs = ptrCard;
-				for (uint32_t index = 0; index < numCard;)
-				{
-					BS2Card card = { 0, };
-					sdkResult = BS2_ScanCard(context_, id, &card, onReadyToScanCard);
-					if (BS_SDK_SUCCESS != sdkResult)
-						TRACE("BS2_ScanCard call failed: %d", sdkResult);
-					else
-					{
-						if (card.isSmartCard)
-						{
-							TRACE("CSN card only supported.");
-							continue;
-						}
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(&userBlob.cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
+		return sdkResult;
 
-						memcpy(&ptrCard[index], &card.card, sizeof(BS2CSNCard));
-						user.numCards++;
-						index++;
-					}
-				}
-			}
-		}
-	}
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(&userBlob.fingerObjs, user.numFingers, id, deviceInfoEx)))
+		return sdkResult;
 
-	// +V2.8 XS2 QR support
-	if (qrSupported)
-	{
-		if (Utility::isYes("Would you like to register the QR code string to be used for authentication?"))
-		{
-			msg.str("");
-			msg << "Enter the ASCII QR code." << endl;
-			msg << "  [ASCII code consisting of values between 32 and 126].";
-			string qrCode = Utility::getInput<string>(msg.str());
-
-			BS2CSNCard qrCard = { 0, };
-			sdkResult = BS2_WriteQRCode(qrCode.c_str(), &qrCard);
-			if (BS_SDK_SUCCESS != sdkResult)
-			{
-				TRACE("BS2_WriteQRCode call failed: %d", sdkResult);
-			}
-			else
-			{
-				size_t numOfRealloc = user.numCards + 1;
-				BS2CSNCard* ptrNewCard = new BS2CSNCard[numOfRealloc];
-				memset(ptrNewCard, 0x0, sizeof(BS2CSNCard) * numOfRealloc);
-
-				if (0 < user.numCards && userBlob.cardObjs)
-				{
-					memcpy(ptrNewCard, userBlob.cardObjs, sizeof(BS2CSNCard) * user.numCards);
-					delete[] userBlob.cardObjs;
-					userBlob.cardObjs = NULL;
-				}
-
-				memcpy(ptrNewCard + user.numCards, &qrCard, sizeof(BS2CSNCard));
-				userBlob.cardObjs = ptrNewCard;
-				user.numCards++;
-			}
-		}
-	}
-	// +V2.8 XS2 QR support
-
-	if (fingerScanSupported)
-	{
-		if (Utility::isYes("Do you want to scan fingerprint?"))
-		{
-			uint32_t numFinger = Utility::getInput<uint32_t>("How many fingers would you like to register?");
-			BS2Fingerprint* ptrFinger = new BS2Fingerprint[numFinger];
-			if (ptrFinger)
-			{
-				userBlob.fingerObjs = ptrFinger;
-				for (uint32_t index = 0; index < numFinger; index++)
-				{
-					for (uint32_t templateIndex = 0; templateIndex < BS2_TEMPLATE_PER_FINGER;)
-					{
-						sdkResult = BS2_ScanFingerprint(context_, id, &ptrFinger[index], templateIndex, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScanFinger);
-						if (BS_SDK_SUCCESS != sdkResult)
-							TRACE("BS2_ScanFingerprint call failed: %d", sdkResult);
-						else
-							templateIndex++;
-					}
-					user.numFingers++;
-				}
-			}
-		}
-	}
-
-	if (faceScanSupported)
-	{
-		if (Utility::isYes("Do you want to scan face?"))
-		{
-			uint32_t numFace = Utility::getInput<uint32_t>("How many face would you like to register?");
-			BS2Face* ptrFace = new BS2Face[numFace];
-			if (ptrFace)
-			{
-				userBlob.faceObjs = ptrFace;
-				for (uint32_t index = 0; index < numFace;)
-				{
-					sdkResult = BS2_ScanFace(context_, id, &ptrFace[index], BS2_FACE_ENROLL_THRESHOLD_DEFAULT, onReadyToScanFace);
-					if (BS_SDK_SUCCESS != sdkResult)
-						TRACE("BS2_ScanFace call failed: %d", sdkResult);
-					else
-					{
-						user.numFaces++;
-						index++;
-					}
-				}
-			}
-		}
-	}
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob.faceObjs, user.numFaces, id, deviceInfoEx)))
+		return sdkResult;
 
 	sdkResult = BS2_EnrolUser(context_, id, &userBlob, 1, 1);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -617,29 +357,27 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 		return sdkResult;
 	}
 
-	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
-	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
-
 	BS2UserSmallBlob userBlob = { 0, };
 	BS2User& user = userBlob.user;
 	BS2UserSetting& setting = userBlob.setting;
 	BS2UserPhoto& photo = *userBlob.user_photo_obj;
 	stringstream msg;
 
+	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
+	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
+	setting.idAuthMode = BS2_AUTH_MODE_NONE;
+
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob, deviceInfo)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob.user_name, deviceInfo)))
 		return sdkResult;
 
 	getUserBlobExpiryDate(setting);
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob, deviceInfo)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob.pin, deviceInfo)))
 		return sdkResult;
 
-	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
-	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
-	setting.idAuthMode = BS2_AUTH_MODE_NONE;
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
@@ -649,7 +387,7 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobProfileImage(userBlob, deviceInfo)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob.accessGroupId)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
@@ -662,13 +400,13 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(&userBlob.cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(userBlob, id, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(&userBlob.fingerObjs, user.numFingers, id, deviceInfoEx)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(userBlob, id, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob.faceObjs, user.numFaces, id, deviceInfoEx)))
 		return sdkResult;
 
 	sdkResult = BS2_EnrollUserSmall(context_, id, &userBlob, 1, 1);
@@ -799,7 +537,6 @@ int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 		return sdkResult;
 	}
 
-	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
 	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 
@@ -809,27 +546,29 @@ int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 	userBlob->user_photo_obj = NULL;
 	stringstream msg;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
-		return sdkResult;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(*userBlob, deviceInfo)))
-		return sdkResult;
-
-	getUserBlobExpiryDate(setting);
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(*userBlob, deviceInfo)))
-		return sdkResult;
-
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
-		return sdkResult;
 
 	settingEx.faceAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.fingerprintAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.cardAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob->user_name, deviceInfo)))
+		return sdkResult;
+
+	getUserBlobExpiryDate(setting);
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob->pin, deviceInfo)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
+		return sdkResult;
+
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthModeEx(settingEx, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
@@ -839,7 +578,7 @@ int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobProfileImage(*userBlob, deviceInfo)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(*userBlob)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob->accessGroupId)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
@@ -852,14 +591,22 @@ int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(*userBlob, id, deviceInfo, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(&userBlob->cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(*userBlob, id, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(&userBlob->fingerObjs, user.numFingers, id, deviceInfoEx)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(*userBlob, id, deviceInfoEx)))
-		return sdkResult;
+	if (faceScanSupported)
+	{
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob->faceObjs, user.numFaces, id, deviceInfoEx)))
+			return sdkResult;
+	}
+	else if (faceExScanSupported)
+	{
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob->faceExObjs, user.numFaces, id, deviceInfoEx)))
+			return sdkResult;
+	}
 
 	return sdkResult;
 }
@@ -886,27 +633,29 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 	userBlob->user_photo_obj = NULL;
 	stringstream msg;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
-		return sdkResult;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(*userBlob, deviceInfo)))
-		return sdkResult;
-
-	getUserBlobExpiryDate(setting);
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(*userBlob, deviceInfo)))
-		return sdkResult;
-
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
-		return sdkResult;
 
 	settingEx.faceAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.fingerprintAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.cardAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob->user_name, deviceInfo)))
+		return sdkResult;
+
+	getUserBlobExpiryDate(setting);
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob->pin, deviceInfo)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
+		return sdkResult;
+
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthModeEx(settingEx, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
@@ -916,7 +665,7 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobProfileImage(*userBlob, deviceInfo)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(*userBlob)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob->accessGroupId)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
@@ -928,10 +677,10 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 	user.numFingers = 0;
 	user.numCards = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(*userBlob, id, deviceInfo, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(&userBlob->cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(*userBlob, id, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(&userBlob->fingerObjs, user.numFingers, id, deviceInfoEx)))
 		return sdkResult;
 
 	user.numFaces = 1;
@@ -970,27 +719,29 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 	userBlob.user_photo_obj = NULL;
 	stringstream msg;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
-		return sdkResult;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob, deviceInfo)))
-		return sdkResult;
-
-	getUserBlobExpiryDate(setting);
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob, deviceInfo)))
-		return sdkResult;
-
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
-		return sdkResult;
 
 	settingEx.faceAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.fingerprintAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.cardAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob.user_name, deviceInfo)))
+		return sdkResult;
+
+	getUserBlobExpiryDate(setting);
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob.pin, deviceInfo)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
+		return sdkResult;
+
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthModeEx(settingEx, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
@@ -1000,7 +751,7 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobProfileImage(userBlob, deviceInfo)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob.accessGroupId)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
@@ -1021,7 +772,7 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 	}
 	else
 	{
-		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo, deviceInfoEx)))
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(&userBlob.cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
 			return sdkResult;
 	}
 
@@ -1033,7 +784,7 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 	}
 	else
 	{
-		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(userBlob, id, deviceInfoEx)))
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(&userBlob.fingerObjs, user.numFingers, id, deviceInfoEx)))
 			return sdkResult;
 	}
 
@@ -1051,8 +802,16 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 	}
 	else
 	{
-		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(userBlob, id, deviceInfoEx)))
-			return sdkResult;
+		if (faceScanSupported)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob.faceObjs, user.numFaces, id, deviceInfoEx)))
+				return sdkResult;
+		}
+		else if (faceExScanSupported)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
+				return sdkResult;
+		}
 	}
 
 	sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
@@ -1092,10 +851,6 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 		return sdkResult;
 	}
 
-	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
-	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
-	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
-
 	BS2UserFaceExBlob userBlob = { 0, };
 	BS2User& user = userBlob.user;
 	BS2UserSetting& setting = userBlob.setting;
@@ -1103,27 +858,29 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	userBlob.user_photo_obj = NULL;
 	stringstream msg;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
-		return sdkResult;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob, deviceInfo)))
-		return sdkResult;
-
-	getUserBlobExpiryDate(setting);
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob, deviceInfo)))
-		return sdkResult;
-
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
-		return sdkResult;
 
 	settingEx.faceAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.fingerprintAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.cardAuthMode = BS2_AUTH_MODE_NONE;
 	settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserID(user)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(userBlob.user_name, deviceInfo)))
+		return sdkResult;
+
+	getUserBlobExpiryDate(setting);
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob.pin, deviceInfo)))
+		return sdkResult;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
+		return sdkResult;
+
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPrivateAuthModeEx(settingEx, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
@@ -1133,7 +890,7 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobProfileImage(userBlob, deviceInfo)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobAccessGroupID(userBlob.accessGroupId)))
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
@@ -1146,13 +903,13 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(userBlob, id, deviceInfo, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(&userBlob.cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(userBlob, id, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(&userBlob.fingerObjs, user.numFingers, id, deviceInfoEx)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfoEx(userBlob, id, deviceInfoEx)))
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfoEx(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
 		return sdkResult;
 
 	sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
@@ -1262,6 +1019,75 @@ int UserControl::getUserDatas(BS2_DEVICE_ID id, vector<string>& uidList, BS2_USE
 	return sdkResult;
 }
 
+int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserBlob>& userList)
+{
+	uint32_t userCount = userList.size();
+
+	int sdkResult = BS2_PartialUpdateUser(context_, id, mask, (BS2UserBlob*)(userList.data()), userCount);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_PartialUpdateUser call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	return sdkResult;
+}
+
+int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserBlobEx>& userList)
+{
+	uint32_t userCount = userList.size();
+
+	int sdkResult = BS2_PartialUpdateUserEx(context_, id, mask, (BS2UserBlobEx*)(userList.data()), userCount);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_PartialUpdateUserEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	return sdkResult;
+}
+
+int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserSmallBlob>& userList)
+{
+	uint32_t userCount = userList.size();
+
+	int sdkResult = BS2_PartialUpdateUserSmall(context_, id, mask, (BS2UserSmallBlob*)(userList.data()), userCount);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_PartialUpdateUserSmall call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	return sdkResult;
+}
+
+int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserSmallBlobEx>& userList)
+{
+	uint32_t userCount = userList.size();
+
+	int sdkResult = BS2_PartialUpdateUserSmallEx(context_, id, mask, (BS2UserSmallBlobEx*)(userList.data()), userCount);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_PartialUpdateUserSmallEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	return sdkResult;
+}
+
+int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserFaceExBlob>& userList)
+{
+	uint32_t userCount = userList.size();
+
+	int sdkResult = BS2_PartialUpdateUserFaceEx(context_, id, mask, (BS2UserFaceExBlob*)(userList.data()), userCount);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_PartialUpdateUserFaceEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	return sdkResult;
+}
 
 int UserControl::getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, uint32_t* width, uint32_t* height)
 {
@@ -1414,32 +1240,7 @@ int UserControl::getUserBlobUserID(BS2User& user)
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobUserName(BS2UserBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return getUserName(userBlob.user_name, deviceInfo);
-}
-
-int UserControl::getUserBlobUserName(BS2UserBlobEx& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return getUserName(userBlob.user_name, deviceInfo);
-}
-
-int UserControl::getUserBlobUserName(BS2UserSmallBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return getUserName(userBlob.user_name, deviceInfo);
-}
-
-int UserControl::getUserBlobUserName(BS2UserSmallBlobEx& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return getUserName(userBlob.user_name, deviceInfo);
-}
-
-int UserControl::getUserBlobUserName(BS2UserFaceExBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return getUserName(userBlob.user_name, deviceInfo);
-}
-
-int UserControl::getUserName(BS2_USER_NAME userName, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getUserBlobUserName(BS2_USER_NAME userName, const BS2SimpleDeviceInfo& deviceInfo)
 {
 	if (deviceInfo.userNameSupported)
 	{
@@ -1468,32 +1269,7 @@ int UserControl::getUserBlobExpiryDate(BS2UserSetting& setting)
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobPINCode(BS2UserBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return makePinCode(userBlob.pin, deviceInfo);
-}
-
-int UserControl::getUserBlobPINCode(BS2UserBlobEx& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return makePinCode(userBlob.pin, deviceInfo);
-}
-
-int UserControl::getUserBlobPINCode(BS2UserSmallBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return makePinCode(userBlob.pin, deviceInfo);
-}
-
-int UserControl::getUserBlobPINCode(BS2UserSmallBlobEx& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return makePinCode(userBlob.pin, deviceInfo);
-}
-
-int UserControl::getUserBlobPINCode(BS2UserFaceExBlob& userBlob, const BS2SimpleDeviceInfo& deviceInfo)
-{
-	return makePinCode(userBlob.pin, deviceInfo);
-}
-
-int UserControl::makePinCode(BS2_USER_PIN chiperText, const BS2SimpleDeviceInfo& deviceInfo)
+int UserControl::getUserBlobPINCode(BS2_USER_PIN cipherText, const BS2SimpleDeviceInfo& deviceInfo)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 
@@ -1506,7 +1282,7 @@ int UserControl::makePinCode(BS2_USER_PIN chiperText, const BS2SimpleDeviceInfo&
 			return BS_SDK_ERROR_INVALID_PARAM;
 		}
 
-		sdkResult = BS2_MakePinCode(context_, const_cast<char*>(pinString.c_str()), chiperText);
+		sdkResult = BS2_MakePinCode(context_, const_cast<char*>(pinString.c_str()), cipherText);
 		if (BS_SDK_SUCCESS != sdkResult)
 		{
 			TRACE("BS2_MakePinCode call failed: %d", sdkResult);
@@ -1917,32 +1693,7 @@ int UserControl::getProfileImage(BS2UserPhoto** photo, const BS2SimpleDeviceInfo
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobAccessGroupID(BS2UserBlob& userBlob)
-{
-	return getAccessGroupID(userBlob.accessGroupId);
-}
-
-int UserControl::getUserBlobAccessGroupID(BS2UserBlobEx& userBlob)
-{
-	return getAccessGroupID(userBlob.accessGroupId);
-}
-
-int UserControl::getUserBlobAccessGroupID(BS2UserSmallBlob& userBlob)
-{
-	return getAccessGroupID(userBlob.accessGroupId);
-}
-
-int UserControl::getUserBlobAccessGroupID(BS2UserSmallBlobEx& userBlob)
-{
-	return getAccessGroupID(userBlob.accessGroupId);
-}
-
-int UserControl::getUserBlobAccessGroupID(BS2UserFaceExBlob& userBlob)
-{
-	return getAccessGroupID(userBlob.accessGroupId);
-}
-
-int UserControl::getAccessGroupID(BS2_ACCESS_GROUP_ID* accessGroupId)
+int UserControl::getUserBlobAccessGroupID(BS2_ACCESS_GROUP_ID* accessGroupId)
 {
 	if (Utility::isYes("Do you want to register access group ID?"))
 	{
@@ -1986,32 +1737,50 @@ int UserControl::getUserBlobUserUpdate(BS2User& user)
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+int UserControl::getUserBlobJobCode(BS2Job& job)
 {
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
+	uint32_t code;
+	const uint32_t STOP_N_EXIT = 0;
+	uint8_t idx(0);
+
+	cout << "Please enter job codes. [0: Stop]" << endl;
+	for (idx = 0; idx < BS2_MAX_JOB_SIZE; idx++)
+	{
+		ostringstream msg;
+		msg << idx << ") Code:";
+		code = Utility::getInput<uint32_t>(msg.str());
+		if (STOP_N_EXIT == code)
+			break;
+
+		job.jobs[idx].code = code;
+
+		msg.str("");
+		msg << idx << ") Label:";
+		strcpy((char*)job.jobs[idx].label, Utility::getInput<string>(msg.str()).c_str());
+	}
+
+	job.numJobs = idx;
+
+	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+int UserControl::getUserBlobPhrase(BS2_USER_PHRASE phrase, const BS2SimpleDeviceInfo& deviceInfo)
 {
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
+	if (deviceInfo.phraseSupported)
+	{
+		string temp = Utility::getInput<string>("Enter user phrase:");
+		if (BS2_USER_PHRASE_SIZE < temp.size())
+		{
+			TRACE("User phrase is too long.");
+			return BS_SDK_ERROR_INVALID_PARAM;
+		}
+		strcpy(reinterpret_cast<char*>(phrase), temp.c_str());
+	}
+
+	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobCardInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
-}
-
-int UserControl::getUserBlobCardInfo(BS2UserSmallBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
-}
-
-int UserControl::getUserBlobCardInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getCardInfo(&userBlob.cardObjs, userBlob.user.numCards, id, deviceInfo, deviceInfoEx);
-}
-
-int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+int UserControl::getUserBlobCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	bool qrSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_QR;
@@ -2088,32 +1857,7 @@ int UserControl::getCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEV
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobFingerprintInfo(BS2UserBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getFingerprintInfo(&userBlob.fingerObjs, userBlob.user.numFingers, id, deviceInfoEx);
-}
-
-int UserControl::getUserBlobFingerprintInfo(BS2UserBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getFingerprintInfo(&userBlob.fingerObjs, userBlob.user.numFingers, id, deviceInfoEx);
-}
-
-int UserControl::getUserBlobFingerprintInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getFingerprintInfo(&userBlob.fingerObjs, userBlob.user.numFingers, id, deviceInfoEx);
-}
-
-int UserControl::getUserBlobFingerprintInfo(BS2UserSmallBlobEx& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getFingerprintInfo(&userBlob.fingerObjs, userBlob.user.numFingers, id, deviceInfoEx);
-}
-
-int UserControl::getUserBlobFingerprintInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
-{
-	return getFingerprintInfo(&userBlob.fingerObjs, userBlob.user.numFingers, id, deviceInfoEx);
-}
-
-int UserControl::getFingerprintInfo(BS2Fingerprint** fingerObjs, uint8_t& numOfFingers, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+int UserControl::getUserBlobFingerprintInfo(BS2Fingerprint** fingerObjs, uint8_t& numOfFingers, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
 	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
 	int sdkResult = BS_SDK_SUCCESS;
@@ -2146,11 +1890,9 @@ int UserControl::getFingerprintInfo(BS2Fingerprint** fingerObjs, uint8_t& numOfF
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobFaceInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+int UserControl::getUserBlobFaceInfo(BS2Face** faceObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	BS2User& user = userBlob.user;
 	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
-	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 	int sdkResult = BS_SDK_SUCCESS;
 
 	if (faceScanSupported)
@@ -2161,10 +1903,10 @@ int UserControl::getUserBlobFaceInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID i
 			BS2Face* ptrFace = new BS2Face[numFace];
 			if (ptrFace)
 			{
-				userBlob.faceObjs = ptrFace;
+				*faceObjs = ptrFace;
 				for (uint32_t index = 0; index < numFace; index++)
 				{
-					sdkResult = scanFace(id, &ptrFace[index], user.numFaces);
+					sdkResult = scanFace(id, &ptrFace[index], numOfFaces);
 					if (BS_SDK_SUCCESS != sdkResult)
 						return sdkResult;
 				}
@@ -2175,32 +1917,12 @@ int UserControl::getUserBlobFaceInfo(BS2UserSmallBlob& userBlob, BS2_DEVICE_ID i
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobFaceInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+int UserControl::getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	BS2User& user = userBlob.user;
-	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 	int sdkResult = BS_SDK_SUCCESS;
 
-	if (faceScanSupported)
-	{
-		if (Utility::isYes("Do you want to scan face from device?"))
-		{
-			uint32_t numFace = Utility::getInput<uint32_t>("How many face would you like to register?");
-			BS2Face* ptrFace = new BS2Face[numFace];
-			if (ptrFace)
-			{
-				userBlob.faceObjs = ptrFace;
-				for (uint32_t index = 0; index < numFace; index++)
-				{
-					sdkResult = scanFace(id, &ptrFace[index], user.numFaces);
-					if (BS_SDK_SUCCESS != sdkResult)
-						return sdkResult;
-				}
-			}
-		}
-	}
-	else if (faceExScanSupported)
+	if (faceExScanSupported)
 	{
 		if (Utility::isYes("Do you want to scan faceEx from device?"))
 		{
@@ -2208,10 +1930,10 @@ int UserControl::getUserBlobFaceInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID 
 			BS2FaceEx* ptrFace = new BS2FaceEx[numFace];
 			if (ptrFace)
 			{
-				userBlob.faceExObjs = ptrFace;
+				*faceExObjs = ptrFace;
 				for (uint32_t index = 0; index < numFace; index++)
 				{
-					sdkResult = scanFaceEx(id, &ptrFace[index], user.numFaces);
+					sdkResult = scanFaceEx(id, &ptrFace[index], numOfFaces);
 					if (BS_SDK_SUCCESS != sdkResult)
 						return sdkResult;
 				}
@@ -2231,12 +1953,12 @@ int UserControl::getUserBlobFaceInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID 
 				{
 					uint8_t* ptrFace = new uint8_t[faceSize];
 					memset(ptrFace, 0x0, faceSize);
-					userBlob.faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrFace);
-					userBlob.faceExObjs->flag = 0;
-					userBlob.faceExObjs->imageLen = size;
+					*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrFace);
+					(*faceExObjs)->flag = 0;
+					(*faceExObjs)->imageLen = size;
 					memcpy(ptrFace + dataOffset, buffer.get(), size);
 
-					user.numFaces = 1;
+					numOfFaces = 1;
 				}
 			}
 		}
@@ -2245,9 +1967,8 @@ int UserControl::getUserBlobFaceInfo(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID 
 	return BS_SDK_SUCCESS;
 }
 
-int UserControl::getUserBlobFaceInfoEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+int UserControl::getUserBlobFaceInfoEx(BS2FaceEx** faceExObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
-	BS2User& user = userBlob.user;
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 	int sdkResult = BS_SDK_SUCCESS;
 	uint32_t numOfScan(0), numOfImage(0);
@@ -2261,15 +1982,14 @@ int UserControl::getUserBlobFaceInfoEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_I
 			numOfImage = Utility::getInput<uint32_t>("How many image files would you like to register?");
 
 		if (0 < numOfScan || 0 < numOfImage)
-			sdkResult = scanAndLoadFaceEx(userBlob, id, numOfScan, numOfImage);
+			sdkResult = scanAndLoadFaceEx(faceExObjs, numOfFaces, id, numOfScan, numOfImage);
 	}
 
 	return sdkResult;
 }
 
-int UserControl::scanAndLoadFaceEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id, uint32_t numOfScan, uint32_t numOfImage)
+int UserControl::scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, BS2_DEVICE_ID id, uint32_t numOfScan, uint32_t numOfImage)
 {
-	BS2User& user = userBlob.user;
 	int sdkResult = BS_SDK_SUCCESS;
 
 	uint32_t sizeTotal = numOfScan * sizeof(BS2FaceEx);
@@ -2292,12 +2012,12 @@ int UserControl::scanAndLoadFaceEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id
 
 	uint8_t* ptrBuff = new uint8_t[sizeTotal];
 	memset(ptrBuff, 0x0, sizeTotal);
-	userBlob.faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrBuff);
-	BS2FaceEx* ptrFace = userBlob.faceExObjs;
+	*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrBuff);
+	BS2FaceEx* ptrFace = *faceExObjs;
 
 	for (uint32_t idx = 0; idx < numOfScan; idx++, ptrFace++)
 	{
-		sdkResult = scanFaceEx(id, ptrFace, user.numFaces);
+		sdkResult = scanFaceEx(id, ptrFace, numOfFace);
 		if (BS_SDK_SUCCESS != sdkResult)
 			return sdkResult;
 	}
@@ -2311,7 +2031,7 @@ int UserControl::scanAndLoadFaceEx(BS2UserFaceExBlob& userBlob, BS2_DEVICE_ID id
 			ptrFace->flag = BS2_FACE_EX_FLAG_NONE;
 			ptrFace->imageLen = imageInfo.size;
 			memcpy(&ptrFace->rawImageData, buffer.get(), imageInfo.size);
-			user.numFaces++;
+			numOfFace++;
 
 			ptrBuff = reinterpret_cast<uint8_t*>(ptrFace);
 			ptrBuff += sizeFaceEx;

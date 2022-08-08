@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <sstream>
+#include <utility>
 //#include <gtest/gtest.h>
 #include "UserAPI.h"
 #include "../Common/Utility.h"
@@ -211,7 +212,7 @@ uint32_t getSelectedIndex()
 	return Utility::getInput<uint32_t>("Select number:");
 }
 
-int searchSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID)
+int searchSlave(void* context, vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID)
 {
 	CommControl cm(context);
 	vector<BS2Rs485SlaveDevice> slaveList;
@@ -220,6 +221,9 @@ int searchSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID&
 		return sdkResult;
 
 	displaySlaveList(slaveList);
+
+	if (0 == slaveList.size())
+		return BS_SDK_SUCCESS;
 
 	bool connectAll = false;
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
@@ -246,15 +250,16 @@ int searchSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID&
 		if (slaveDevice.enableOSDP)
 		{
 			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			cout << "Added slave " << id << endl;
-			deviceList.push_back(id);
+			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
+			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
+			deviceList.push_back(make_pair(id, type));
 		}
 	}
 
 	return sdkResult;
 }
 
-int searchCSTSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID)
+int searchCSTSlave(void* context, vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID)
 {
 	stringstream msg;
 	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
@@ -305,8 +310,9 @@ int searchCSTSlave(void* context, vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_
 		if (slaveDevice.enableOSDP)
 		{
 			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			cout << "Added slave " << id << endl;
-			deviceList.push_back(id);
+			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
+			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
+			deviceList.push_back(make_pair(id, type));
 		}
 	}
 
@@ -349,9 +355,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 	UserControl uc(context);
 
 	cout << endl << endl << "== UserAPI Test ==" << endl;
-	BS2_DEVICE_ID id = getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 
-	while (BS_SDK_SUCCESS == sdkResult && MENU_USR_BREAK != (selectedTop = showMenu(menuInfoDeviceAPI)))
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_USR_BREAK != (selectedTop = showMenu(menuInfoDeviceAPI)))
 	{
 		if (!device.connected_)
 		{
@@ -404,6 +410,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 		case MENU_USR_REM_ALLUSR:
 			sdkResult = uc.removeAllUser(id);
+			break;
+		case MENU_USR_UPD_USR:
+			sdkResult = updateUser(context, id);
 			break;
 
 		case MENU_USR_GET_OPERATOR:
@@ -581,15 +590,6 @@ int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* 
 	}
 
 	return sdkResult;
-}
-
-BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info)
-{
-	printf("%u - (M)\n", info.id_);
-	for (uint32_t index = 0; index < info.slaveDevices_.size(); index++)
-		printf("%u - (S)\n", info.slaveDevices_[index]);
-
-	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
 }
 
 int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id)
@@ -919,4 +919,288 @@ int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id)
 	}
 
 	return sdkResult;
+}
+
+int updateUser(void* context, BS2_DEVICE_ID id)
+{
+	DeviceControl dc(context);
+	UserControl uc(context);
+
+	BS2SimpleDeviceInfo deviceInfo = { 0, };
+	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	int sdkResult = dc.getDeviceInfoEx(id, deviceInfo, deviceInfoEx);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	ostringstream msg;
+	BS2_USER_MASK mask = getMaskForUpdateUser();
+	vector<BS2UserFaceExBlob> userList;
+
+	do {
+		BS2UserFaceExBlob userBlob = { 0, };
+		BS2User& user = userBlob.user;
+		BS2UserSetting& setting = userBlob.setting;
+		BS2UserSettingEx& settingEx = userBlob.settingEx;
+
+		setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
+		setting.cardAuthMode = BS2_AUTH_MODE_NONE;
+		setting.idAuthMode = BS2_AUTH_MODE_NONE;
+
+		settingEx.faceAuthMode = BS2_AUTH_MODE_NONE;
+		settingEx.fingerprintAuthMode = BS2_AUTH_MODE_NONE;
+		settingEx.cardAuthMode = BS2_AUTH_MODE_NONE;
+		settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+
+		if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobUserID(user)))
+			return sdkResult;
+
+		if ((mask & BS2_USER_MASK_SETTING) == BS2_USER_MASK_SETTING)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobExpiryDate(setting)))
+				return sdkResult;
+
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPrivateAuthMode(setting, deviceInfo, deviceInfoEx)))
+				return sdkResult;
+
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobSecurityLevel(setting)))
+				return sdkResult;
+		}
+
+		if ((mask & BS2_USER_MASK_SETTING_EX) == BS2_USER_MASK_SETTING_EX)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPrivateAuthModeEx(settingEx, deviceInfo, deviceInfoEx)))
+				return sdkResult;
+		}
+
+		if ((mask & BS2_USER_MASK_NAME) == BS2_USER_MASK_NAME)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobUserName(userBlob.user_name, deviceInfo)))
+				return sdkResult;
+
+			user.infoMask |= BS2_USER_INFO_MASK_NAME;
+		}
+
+		if ((mask & BS2_USER_MASK_PHOTO) == BS2_USER_MASK_PHOTO)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobProfileImage(userBlob, deviceInfo)))
+				return sdkResult;
+
+			user.infoMask |= BS2_USER_INFO_MASK_PHOTO;
+		}
+
+		if ((mask & BS2_USER_MASK_PIN) == BS2_USER_MASK_PIN)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPINCode(userBlob.pin, deviceInfo)))
+				return sdkResult;
+
+			user.infoMask |= BS2_USER_INFO_MASK_PIN;
+		}
+
+		if ((mask & BS2_USER_MASK_JOB) == BS2_USER_MASK_JOB)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobJobCode(userBlob.job)))
+				return sdkResult;
+
+			user.infoMask |= BS2_USER_INFO_MASK_JOB_CODE;
+		}
+
+		if ((mask & BS2_USER_MASK_ACCESS_GROUP) == BS2_USER_MASK_ACCESS_GROUP)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobAccessGroupID(userBlob.accessGroupId)))
+				return sdkResult;
+		}
+
+		if ((mask & BS2_USER_MASK_PHRASE) == BS2_USER_MASK_PHRASE)
+		{
+			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPhrase(userBlob.phrase, deviceInfo)))
+				return sdkResult;
+
+			user.infoMask |= BS2_USER_INFO_MASK_PHRASE;
+		}
+
+		user.numCards = 0;
+		if ((mask & BS2_USER_MASK_CARD) == BS2_USER_MASK_CARD)
+		{
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " cards? (0:Keep, 1:Change, 2:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+			default:
+				user.infoMask |= BS2_USER_INFO_MASK_CARD;
+				break;
+
+			case 1:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobCardInfo(&userBlob.cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_CARD;
+				break;
+
+			case 2:
+				// unmasking and numCards = 0;
+				break;
+			}
+		}
+		else
+		{
+			// Keep
+			user.infoMask |= BS2_USER_INFO_MASK_CARD;
+		}
+
+		user.numFingers = 0;
+		if ((mask & BS2_USER_MASK_FINGER) == BS2_USER_MASK_FINGER)
+		{
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " fingerprints? (0:Keep, 1:Change, 2:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+			default:
+				user.infoMask |= BS2_USER_INFO_MASK_FINGER;
+				break;
+
+			case 1:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobFingerprintInfo(&userBlob.fingerObjs, user.numFingers, id, deviceInfoEx)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_FINGER;
+				break;
+
+			case 2:
+				// unmasking and numFingers = 0;
+				break;
+			}
+		}
+		else
+		{
+			// Keep
+			user.infoMask |= BS2_USER_INFO_MASK_FINGER;
+		}
+
+		user.numFaces = 0;
+		if ((mask & BS2_USER_MASK_FACE) == BS2_USER_MASK_FACE)
+		{
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " face? (0:Keep, 1:Change, 2:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+			default:
+				user.infoMask |= BS2_USER_INFO_MASK_FACE;
+				break;
+
+			case 1:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobFaceInfo(&userBlob.faceObjs, user.numFaces, id, deviceInfoEx)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_FACE;
+				break;
+
+			case 2:
+				// unmasking and numFace = 0;
+				break;
+			}
+		}
+		else
+		{
+			if ((mask & BS2_USER_MASK_FACE_EX) == BS2_USER_MASK_FACE_EX)
+			{
+				msg.str("");
+				msg << "Do you want to change/delete #" << user.userID << " visual face? (0:Keep, 1:Change, 2:Delete)";
+				uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+				switch (selected)
+				{
+				case 0:
+				default:
+					user.infoMask |= BS2_USER_INFO_MASK_FACE;
+					break;
+
+				case 1:
+					if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobFaceInfo(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
+						return sdkResult;
+					user.infoMask |= BS2_USER_INFO_MASK_FACE;
+					break;
+
+				case 2:
+					// unmasking and numFace = 0;
+					break;
+				}
+			}
+			else
+			{
+				// Keep
+				user.infoMask |= BS2_USER_INFO_MASK_FACE;
+			}
+		}
+		
+		userList.push_back(userBlob);
+
+		msg.str("");
+		msg << "Do you want other users to update too?";
+	} while (Utility::isYes(msg.str()));
+
+	sdkResult = uc.updateUser(id, mask, userList);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("User update failed: %d", sdkResult);
+
+	for (auto item : userList)
+	{
+		if (item.cardObjs)
+			delete[] item.cardObjs;
+
+		if (item.fingerObjs)
+			delete[] item.fingerObjs;
+
+		if (item.faceObjs)
+			delete[] item.faceObjs;
+
+		if (item.faceExObjs)
+			delete[] item.faceExObjs;
+	}
+
+	return sdkResult;
+}
+
+BS2_USER_MASK getMaskForUpdateUser()
+{
+	const vector<uint32_t> userUpdateItems = {
+		BS2_USER_MASK_SETTING,
+		BS2_USER_MASK_SETTING_EX,
+		BS2_USER_MASK_NAME,
+		BS2_USER_MASK_PHOTO,
+		BS2_USER_MASK_PIN,
+		BS2_USER_MASK_ACCESS_GROUP,
+		BS2_USER_MASK_JOB,
+		BS2_USER_MASK_PHRASE,
+		BS2_USER_MASK_CARD,
+		BS2_USER_MASK_FINGER,
+		BS2_USER_MASK_FACE,
+		BS2_USER_MASK_FACE_EX,
+	};
+
+	ostringstream msg;
+	msg << "Select all of your items to update.  Ex)0, 1, 2, ..." << endl;
+	msg << "  0: Setting" << endl;
+	msg << "  1: SettingEx" << endl;
+	msg << "  2: Name" << endl;
+	msg << "  3: Photo" << endl;
+	msg << "  4: PIN" << endl;
+	msg << "  5: Access group" << endl;
+	msg << "  6: Job" << endl;
+	msg << "  7: Phrase" << endl;
+	msg << "  8: Card" << endl;
+	msg << "  9: Finger" << endl;
+	msg << " 10: Face" << endl;
+	msg << " 11: FaceEx" << endl;
+	auto selectedNums = Utility::getLineNumbers<uint32_t>(msg.str());
+
+	BS2_USER_MASK mask(0);
+	for (auto item : selectedNums)
+	{
+		mask |= userUpdateItems[item];
+	}
+
+	TRACE("Selected mask: %u", mask);
+	return mask;
 }

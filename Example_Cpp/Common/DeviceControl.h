@@ -13,9 +13,8 @@ public:
 
 
 public:
-	int getDeviceInfo(BS2_DEVICE_ID id);
 	int getDeviceInfo(BS2_DEVICE_ID id, BS2SimpleDeviceInfo& info);
-	int getDeviceInfoEx(BS2_DEVICE_ID id);
+	int getDeviceInfoEx(BS2_DEVICE_ID id, BS2SimpleDeviceInfo& info, BS2SimpleDeviceInfoEx& infoEx);
 	int getSpecifiedDeviceInfo(BS2_DEVICE_ID id);
 	int getDeviceTime(BS2_DEVICE_ID id);
 	int setDeviceTime(BS2_DEVICE_ID id);

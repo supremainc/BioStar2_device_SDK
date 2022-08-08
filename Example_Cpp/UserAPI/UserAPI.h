@@ -44,6 +44,7 @@ enum EN_MENU_DEV
 	MENU_USR_REM_USR,
 	MENU_USR_REM_ALLUSR,
 	MENU_USR_ACT_USR,
+	MENU_USR_UPD_USR,
 
 	MENU_USR_GET_OPERATOR,
 	MENU_USR_SET_OPERATOR,
@@ -71,6 +72,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_REM_USR,						"Remove a user " },
 	{MENU_USR_REM_ALLUSR,					"Remove all users" },
 	{MENU_USR_ACT_USR,						"Enable/Disable user"},
+	{MENU_USR_UPD_USR,						"Update user"},
 
 	{MENU_USR_GET_OPERATOR,					"Get operators from device"},
 	{MENU_USR_SET_OPERATOR,					"Set operators to device"},
@@ -88,8 +90,8 @@ uint32_t getSelectedIndex();
 int connectViaIP(void* context, DeviceInfo& device);
 int connectSlave(void* context, DeviceInfo& device);
 int connectWiegand(void* context, DeviceInfo& device);
-int searchSlave(void* context, std::vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID);
-int searchCSTSlave(void* context, std::vector<BS2_DEVICE_ID>& deviceList, BS2_DEVICE_ID& masterID);
+int searchSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
+int searchCSTSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
 int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID);
 void displayDeviceList(const std::vector<BS2SimpleDeviceInfo>& devices);
 void displaySlaveList(const std::vector<BS2Rs485SlaveDevice>& devices);
@@ -99,7 +101,6 @@ int runAPIs(void* context, const DeviceInfo& device);
 int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
 int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
-BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
 int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id);
 int scanCard(UserControl& uc, BS2_DEVICE_ID id);
 int writeCard(UserControl& uc, BS2_DEVICE_ID id);
@@ -109,3 +110,5 @@ int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id);
 int getOperators(void* context, BS2_DEVICE_ID id);
 int setOperators(void* context, BS2_DEVICE_ID id);
 int removeOperators(void* context, BS2_DEVICE_ID id);
+int updateUser(void* context, BS2_DEVICE_ID id);
+BS2_USER_MASK getMaskForUpdateUser();

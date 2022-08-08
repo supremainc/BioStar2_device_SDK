@@ -5,7 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <stdarg.h>
-#include "BS_API.h"
+#include "DeviceList.h"
 
 
 #define VER_272_OR_HIGHER			1
@@ -69,6 +69,8 @@ public:
 	static bool getLineWiegandBits(std::string msg, T* data, uint32_t size);
 	template <typename T>
 	static std::vector<T> getLineNumbers(std::string msg, const char delimiter = ',');
+	static BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
+	static void displayConnectedDevices(const DeviceList& devices, bool includeSlave = false, bool includeWiegand = false);
 
 	static std::string getLocalTime(bool milliSec = true);
 	static std::string getIPAddress(uint32_t ip);

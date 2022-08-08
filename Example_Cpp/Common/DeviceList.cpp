@@ -59,7 +59,7 @@ bool DeviceList::findSlave(BS2_DEVICE_ID slaveID) /*const*/
 	{
 		for (auto id : item.second->slaveDevices_)
 		{
-			if (slaveID == id)
+			if (slaveID == id.first)
 				return true;
 		}
 	}
@@ -81,7 +81,7 @@ void DeviceList::clearDevices()
 	devList_.clear();
 }
 
-bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID)
+bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, BS2_DEVICE_TYPE slaveType)
 {
 	lock_guard<mutex> lock(deviceListLock_);
 
@@ -90,9 +90,13 @@ bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID)
 		return false;
 
 	auto& vec = devList_[hostID]->slaveDevices_;
-	auto its = find(vec.begin(), vec.end(), slaveID);
-	if (its == vec.end())
-		vec.push_back(slaveID);
+	for (auto slave : vec)
+	{
+		if (slaveID == slave.first)
+			return true;
+	}
+
+	vec.push_back(make_pair(slaveID, slaveType));
 
 	return true;
 }
