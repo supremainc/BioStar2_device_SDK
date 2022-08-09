@@ -2186,6 +2186,15 @@ int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer
 	return sdkResult;
 }
 
+int UserControl::getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic)
+{
+	int sdkResult = BS2_GetUserStatistic(context_, id, &statistic);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetUserStatistic call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 void UserControl::dumpHexa(const uint8_t* data, uint32_t size)
 {
 	if (NULL == data || size == 0)
@@ -2483,6 +2492,18 @@ void UserControl::print(const BS2TemplateEx& templateEx)
 {
 	TRACE("  ==[BS2TemplateEx]==");
 	TRACE("  isIR:%u, data[0]:%x, data[551]:%x", templateEx.isIR, templateEx.data[0], templateEx.data[551]);
+}
+
+void UserControl::print(const BS2UserStatistic& statistic)
+{
+	TRACE("==[BS2UserStatistic]==");
+	TRACE("numUsers:%u", statistic.numUsers);
+	TRACE("numCards:%u", statistic.numCards);
+	TRACE("numFingerprints:%u", statistic.numFingerprints);
+	TRACE("numFaces:%u", statistic.numFaces);
+	TRACE("numNames:%u", statistic.numNames);
+	TRACE("numImages :%u", statistic.numImages);
+	TRACE("numPhrases:%u", statistic.numPhrases);
 }
 
 #if TEST_CODE

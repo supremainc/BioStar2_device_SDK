@@ -45,6 +45,7 @@ enum EN_MENU_DEV
 	MENU_USR_REM_ALLUSR,
 	MENU_USR_ACT_USR,
 	MENU_USR_UPD_USR,
+	MENU_USR_GET_STATISTIC,
 
 	MENU_USR_GET_OPERATOR,
 	MENU_USR_SET_OPERATOR,
@@ -73,6 +74,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_REM_ALLUSR,					"Remove all users" },
 	{MENU_USR_ACT_USR,						"Enable/Disable user"},
 	{MENU_USR_UPD_USR,						"Update user"},
+	{MENU_USR_GET_STATISTIC,				"Get user statistic"},
 
 	{MENU_USR_GET_OPERATOR,					"Get operators from device"},
 	{MENU_USR_SET_OPERATOR,					"Set operators to device"},
@@ -111,4 +113,5 @@ int getOperators(void* context, BS2_DEVICE_ID id);
 int setOperators(void* context, BS2_DEVICE_ID id);
 int removeOperators(void* context, BS2_DEVICE_ID id);
 int updateUser(void* context, BS2_DEVICE_ID id);
+int getUserStatistic(void* context, BS2_DEVICE_ID id);
 BS2_USER_MASK getMaskForUpdateUser();

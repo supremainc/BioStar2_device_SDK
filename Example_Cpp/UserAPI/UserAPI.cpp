@@ -414,6 +414,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_USR_UPD_USR:
 			sdkResult = updateUser(context, id);
 			break;
+		case MENU_USR_GET_STATISTIC:
+			sdkResult = getUserStatistic(context, id);
+			break;
 
 		case MENU_USR_GET_OPERATOR:
 			sdkResult = getOperators(context, id);
@@ -1203,4 +1206,16 @@ BS2_USER_MASK getMaskForUpdateUser()
 
 	TRACE("Selected mask: %u", mask);
 	return mask;
+}
+
+int getUserStatistic(void* context, BS2_DEVICE_ID id)
+{
+	UserControl uc(context);
+
+	BS2UserStatistic statistic = { 0, };
+	int sdkResult = uc.getUserStatistic(id, statistic);
+	if (BS_SDK_SUCCESS == sdkResult)
+		UserControl::print(statistic);
+
+	return sdkResult;
 }

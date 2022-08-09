@@ -120,6 +120,8 @@ public:
 	int extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx);
 	int getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer, uint32_t& bufferSize);
 
+	int getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic);
+
 #if TEST_CODE	
 	int enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx);
 	int enrollUserFaceEx_WithImage_1User(BS2_DEVICE_ID id);
@@ -149,6 +151,7 @@ public:
 	static void printCardAOC(const BS2AccessOnCardData& aoc);
 	static void printCardSmart(const BS2SmartCardData& card);
 	static void printCardCSN(const BS2CSNCard& card);
+	static void print(const BS2UserStatistic& statistic);
 
 
 private:
