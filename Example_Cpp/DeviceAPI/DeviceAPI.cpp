@@ -74,7 +74,7 @@ void onDeviceDisconnected(BS2_DEVICE_ID id)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::setDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".");
+	BS2Context::setDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".", 100);
 
 	TRACE("Version: %s", BS2_Version());
 
@@ -858,7 +858,7 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 		config.securityLevel = (BS2_FACE_SECURITY_LEVEL)Utility::getInput<uint32_t>(msg);
 
 		msg = "Insert lightCondition. (0: Normal, 1: High, 3: Not used)";
-		config.lightCondition = (BS2_FACE_LIGHT_CONDITON)Utility::getInput<uint32_t>(msg);
+		config.lightCondition = (BS2_FACE_LIGHT_CONDITION)Utility::getInput<uint32_t>(msg);
 
 		msg = "Insert enrollThreshold. (0: Most strict - 9: Least strict, 4: Default)";
 		config.enrollThreshold = (BS2_FACE_ENROLL_THRESHOLD)Utility::getInput<uint32_t>(msg);

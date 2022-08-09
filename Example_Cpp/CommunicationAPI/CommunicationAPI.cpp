@@ -111,7 +111,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".", 100);
 	//BS2Context::setDebugCallbackLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL);
 
 	TRACE("Version: %s", BS2_Version());

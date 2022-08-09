@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	//return RUN_ALL_TESTS();
 
 	// Set debugging SDK log (to current working directory)
-	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".");
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".", 100);
 
 	TRACE("Version: %s", BS2_Version());
 

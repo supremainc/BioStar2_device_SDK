@@ -219,9 +219,12 @@ void BS2Context::setDebugCallbackLog(uint32_t level, uint32_t module, bool write
 	BS2_SetDebugExCallback(&BS2Context::onDebugMessage, level, module);
 }
 
-void BS2Context::setDebugFileLog(uint32_t level, uint32_t module, const char* path)
+void BS2Context::setDebugFileLog(uint32_t level, uint32_t module, const char* path, int maxFileSize)
 {
-	BS2_SetDebugFileLog(level, module, path);
+	if (0 == maxFileSize)
+		BS2_SetDebugFileLog(level, module, path);
+	else
+		BS2_SetDebugFileLogEx(level, module, path, maxFileSize);
 }
 
 

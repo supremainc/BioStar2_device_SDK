@@ -26,7 +26,7 @@ public:
 	void releaseInstance();
 
 	static void setDebugCallbackLog(uint32_t level, uint32_t module, bool writeToFile = false);
-	static void setDebugFileLog(uint32_t level, uint32_t module, const char* path);
+	static void setDebugFileLog(uint32_t level, uint32_t module, const char* path, int maxFileSize = 0);
 
 	static void onDebugMessage(uint32_t level, uint32_t module, const char* msg);
 	int initSDK(BS2_PORT port = BS2_TCP_SERVER_PORT_DEFAULT);
