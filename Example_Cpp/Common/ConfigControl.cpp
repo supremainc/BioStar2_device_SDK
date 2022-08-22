@@ -1367,7 +1367,7 @@ void ConfigControl::print(const BS2VoipConfigExt& config)
 	TRACE("+--outboundProxy");
 	TRACE("   +--address : %s", config.outboundProxy.address);
 	TRACE("   +--port : %u", config.outboundProxy.port);
-	TRACE("+--exitButton : %u", config.exitButton);
+	TRACE("+--exitButton : %c", config.exitButton);
 	TRACE("+--numPhoneBook : %u", config.numPhoneBook);
 	TRACE("+--showExtensionNumber : %u", config.showExtensionNumber);
 	//if (config.showExtensionNumber)
