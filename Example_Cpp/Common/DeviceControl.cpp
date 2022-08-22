@@ -394,7 +394,7 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 
 	TRACE("[Card Supported]");
 	TRACE("mask : 0x%04x", info.cardSupported.mask);
-	TRACE("MifareFelica : %u", info.cardSupported.HIDProx);
+	TRACE("MifareFelica : %u", info.cardSupported.MifareFelica);
 	TRACE("BLE : %u", info.cardSupported.BLE);
 
 	TRACE("[ExtendedMode] : %u", info.authSupported.extendedMode);
@@ -417,7 +417,6 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 		TRACE("fingerprintAuth.mask : 0x%04x", info.authSupported.extended.fingerprintAuth.mask);
 		TRACE("cardAuth.mask : 0x%04x", info.authSupported.extended.cardAuth.mask);
 		TRACE("idAuth.mask : 0x%04x", info.authSupported.extended.idAuth.mask);
-		TRACE("faceAuth : 0x%04x", info.authSupported.extended.faceAuth.mask);
 	}
 
 	TRACE("intelligentPDSupported : %u", info.intelligentPDSupported);
