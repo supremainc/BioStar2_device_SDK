@@ -2003,7 +2003,8 @@ int setWiegandConfig(void* context, const DeviceInfo& device)
 	iss << "If you type 01 FE 00 00, " << endl;
 	iss << "then I will help insert to '0000................000001FE0000'";
 
-	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_FIELDS; idx++)
+	uint32_t numOfField = Utility::getInput<uint32_t>("How many ID fields would you like to register?");
+	for (uint32_t idx = 0; idx < numOfField; idx++)
 	{
 		memset(config.format.idFields[idx], 0x0, BS2_WIEGAND_FIELD_SIZE);
 		ostringstream oss;
@@ -2017,19 +2018,17 @@ int setWiegandConfig(void* context, const DeviceInfo& device)
 	pss << "If you type 01 FF E0 00, " << endl;
 	pss << "then I will help insert to '0000................000001FFE000'";
 
-	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_PARITIES; idx++)
+	numOfField = Utility::getInput<uint32_t>("How many parity fields would you like to register?");
+	for (uint32_t idx = 0; idx < numOfField; idx++)
 	{
 		memset(config.format.parityFields[idx], 0x0, BS2_WIEGAND_FIELD_SIZE);
 		ostringstream oss;
 		oss << pss.str() << endl;
 		oss << "[" << idx << "] ";
 		Utility::getLineWiegandBits<uint8_t>(oss.str(), config.format.parityFields[idx], BS2_WIEGAND_FIELD_SIZE);
-	}
 
-	for (uint32_t idx = 0; idx < BS2_WIEGAND_MAX_PARITIES; idx++)
-	{
 		msg = "Select the PARITY TYPE. (0: No check, 1: Check odd parity, 2: Check even parity)";
-		ostringstream oss;
+		oss.str("");
 		oss << "[" << idx << "] " << msg;
 		config.format.parityType[idx] = (BS2_WIEGAND_PARITY)Utility::getInput<uint32_t>(oss.str());
 
@@ -2349,14 +2348,8 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 		msg = "Enter the port of the Outbound proxy server.";
 		config.outboundProxy.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
 
-		ostringstream msgStrm;
-		msgStrm << "Select the button symbol to be used as the exit button." << endl;
-		msgStrm << " - *: 0" << endl;
-		msgStrm << " - #: 1" << endl;
-		msgStrm << " - 0: 2" << endl;
-		msgStrm << " - ...." << endl;
-		msgStrm << " - 9: 11" << endl;
-		config.exitButton = (uint8_t)Utility::getInput<uint32_t>(msgStrm.str());
+		msg = "Select the button symbol to be used as the exit button. (*, #, 0 ~ 9)";
+		config.exitButton = (uint8_t)Utility::getInput<char>(msg);
 
 		msg = "Do you want to show the extension phone book?";
 		config.showExtensionNumber = (BS2_BOOL)Utility::isYes(msg);
@@ -2367,7 +2360,7 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 		memset(config.phonebook, 0x0, sizeof(config.phonebook));
 		for (uint8_t idx = 0; idx < config.numPhoneBook; idx++)
 		{
-			msgStrm.str("");
+			ostringstream msgStrm;
 			msgStrm << "Enter the extension phone number #" << idx;
 			string phoneNum = Utility::getInput<string>(msgStrm.str());
 			memcpy(config.phonebook[idx].phoneNumber, phoneNum.c_str(), phoneNum.size());
