@@ -53,6 +53,7 @@ namespace Suprema
             {BS2DeviceTypeEnum.XSTATION_2,      "X-Station 2"},
             {BS2DeviceTypeEnum.IM_120,         "Input Module 120"},
             {BS2DeviceTypeEnum.XSTATION_2_FP,   "X-Station 2 FP"},
+            {BS2DeviceTypeEnum.BIOSTATION_3,    "BioStation 3"},
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -509,6 +510,18 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetDesFireCardConfigEx(IntPtr context, UInt32 deviceId, ref BS2DesFireCardConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetVoipConfigExt(IntPtr context, UInt32 deviceId, out BS2VoipConfigExt config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetVoipConfigExt(IntPtr context, UInt32 deviceId, ref BS2VoipConfigExt config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetRtspConfig(IntPtr context, UInt32 deviceId, out BS2RtspConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetRtspConfig(IntPtr context, UInt32 deviceId, ref BS2RtspConfig config);
 
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Door API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -1193,6 +1206,9 @@ namespace Suprema
         //extern public static int BS2_SetDebugFileLog(UInt32 level, UInt32 module, string logPath);
         extern public static int BS2_SetDebugFileLog(UInt32 level, UInt32 module, IntPtr logPath);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetDebugFileLogEx(UInt32 level, UInt32 module, IntPtr logPath, int fileMaxSizeMB);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< InterlockZone API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetInterlockZone(IntPtr context, UInt32 deviceId, [In, Out] BS2InterlockZoneBlob[] zoneBlob, out UInt32 numZone);
@@ -1381,5 +1397,23 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         //extern public static int BS2_GetUserSmallDatasExFromDir(IntPtr context, string szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserSmallBlobEx[] userBlob, BS2_USER_MASK userMask);
         extern public static int BS2_GetUserDatasFaceExFromDir(IntPtr context, IntPtr szDir, IntPtr uids, UInt32 uidCount, [In, Out] BS2UserFaceExBlob[] userBlob, BS2_USER_MASK userMask);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_PartialUpdateUser(IntPtr context, UInt32 deviceId, BS2_USER_MASK mask, [In, Out] BS2UserBlob[] userBlob, UInt32 userCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_PartialUpdateUserEx(IntPtr context, UInt32 deviceId, BS2_USER_MASK mask, [In, Out] BS2UserBlobEx[] userBlob, UInt32 userCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_PartialUpdateUserSmall(IntPtr context, UInt32 deviceId, BS2_USER_MASK mask, [In, Out] BS2UserSmallBlob[] userBlob, UInt32 userCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_PartialUpdateUserSmallEx(IntPtr context, UInt32 deviceId, BS2_USER_MASK mask, [In, Out] BS2UserSmallBlobEx[] userBlob, UInt32 userCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_PartialUpdateUserFaceEx(IntPtr context, UInt32 deviceId, BS2_USER_MASK mask, [In, Out] BS2UserFaceExBlob[] userBlob, UInt32 userCount);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetUserStatistic(IntPtr context, UInt32 deviceId, out BS2UserStatistic statistic);
     }
 }

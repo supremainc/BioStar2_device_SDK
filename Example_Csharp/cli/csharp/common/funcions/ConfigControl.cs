@@ -81,6 +81,10 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get BarcodeConfig", getBarcodeConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set BarcodeConfig", setBarcodeConfig));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get VoipConfigExt", getVoipConfigExt));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set VoipConfigExt", setVoipConfigExt));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RtspConfig", getRtspConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RtspConfig", setRtspConfig));
             return functionList;
         }
 
@@ -584,13 +588,13 @@ namespace Suprema
         {
             BS2FaceConfig config = Util.AllocateStructure<BS2FaceConfig>();
 
-            const UInt32 faceExMask = (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX;
+            //const UInt32 faceExMask = (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX;
 
             Console.WriteLine("Insert securityLevel. (0: Basic, 1: Highly secure, 2: Most highly secure)");
             Console.Write(">> ");
             config.securityLevel = Util.GetInput((byte)0);
 
-            Console.WriteLine("Insert lightCondition. (0: Normal, 1: High, 3: Not used");
+            Console.WriteLine("Insert lightCondition. (0: Normal, 1: High, 3: Not used)");
             Console.Write(">> ");
             config.lightCondition = Util.GetInput((byte)0);
 
@@ -602,28 +606,46 @@ namespace Suprema
             Console.Write(">> ");
             config.detectSensitivity = Util.GetInput((byte)2);
 
-            if ((deviceInfoEx.supported & faceExMask) == faceExMask)
+            ushort defaultEnrollTimeout = 20;
+            byte defaultLFD = 0;
+            bool needInput = true;
+            switch ((BS2DeviceTypeEnum)deviceInfo.type)
             {
-                Console.WriteLine("Insert enrollTimeout. (FSF2 default: 20s)");
-                Console.Write(">> ");
-                config.enrollTimeout = Util.GetInput((UInt16)20);
+            case BS2DeviceTypeEnum.FACESTATION_2:
+            case BS2DeviceTypeEnum.FACELITE:
+                defaultEnrollTimeout = 60;
+                defaultLFD = 0;
+                needInput = true;
+                break;
+            case BS2DeviceTypeEnum.FACESTATION_F2_FP:
+            case BS2DeviceTypeEnum.FACESTATION_F2:
+            case BS2DeviceTypeEnum.BIOSTATION_3:
+                defaultEnrollTimeout = 20;
+                defaultLFD = 1;
+                needInput = true;
+                break;
+            default:
+                needInput = false;
+                break;
+            }
 
-                Console.WriteLine("Insert lfdLevel. (0: Not use, 1: Strict, 2: More Strict, 3: Most Strict... FSF2 default: 1)");
+            if (needInput)
+            {
+                Console.WriteLine("Insert enrollTimeout. (default: {0}s)", defaultEnrollTimeout);
                 Console.Write(">> ");
-                config.lfdLevel = Util.GetInput((byte)1);
+                config.enrollTimeout = Util.GetInput(defaultEnrollTimeout);
+
+                Console.WriteLine("Insert lfdLevel. (0: Not use, 1: Strict, 2: More Strict, 3: Most Strict... (default: {0}))", defaultLFD);
+                Console.Write(">> ");
+                config.lfdLevel = Util.GetInput(defaultLFD);
             }
             else
             {
-                Console.WriteLine("Insert enrollTimeout. (FS2,FL default: 60s)");
-                Console.Write(">> ");
-                config.enrollTimeout = Util.GetInput((UInt16)60);
-
-                Console.WriteLine("Insert lfdLevel. (0: Not use, 1: Strict, 2: More Strict, 3: Most Strict... FS2,FL default: 0)");
-                Console.Write(">> ");
-                config.lfdLevel = Util.GetInput((byte)0);
+                config.enrollTimeout = 0;
+                config.lfdLevel = 0;
             }
 
-            Console.WriteLine("Insert quickEnrollment. (0: 3-step enrollment(High quality), 1: 1-step enrollment(Quick)");
+            Console.WriteLine("Insert quickEnrollment. (0: 3-step enrollment(High quality), 1: 1-step enrollment(Quick))");
             Console.Write(">> ");
             config.quickEnrollment = Util.GetInput((byte)1);
 
@@ -631,36 +653,57 @@ namespace Suprema
             Console.Write(">> ");
             config.previewOption = Util.GetInput((byte)1);
 
-            Console.WriteLine("insert checkDuplicate. (0 or 1)");
+            Console.WriteLine("Insert checkDuplicate. (0 or 1)");
             Console.Write(">> ");
             config.checkDuplicate = Util.GetInput((byte)0);
 
-            if ((deviceInfoEx.supported & faceExMask) == faceExMask)
+            Console.WriteLine("Insert operationMode. (0: Fusion, 1: Visual, 2: Visual (+IR detect))");
+            Console.Write(">> ");
+            config.operationMode = Util.GetInput((byte)0);
+
+            Console.WriteLine("Insert maxRotation. (default: 15)");
+            Console.Write(">> ");
+            config.maxRotation = Util.GetInput((byte)15);
+
+            if ((BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.FACESTATION_F2_FP ||
+                (BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.FACESTATION_F2)
             {
-                // Check F2
-                Console.WriteLine("Insert operationMode. (0: Fusion, 1: Visual, 2: Visual (+IR detect)");
+                Console.WriteLine("Insert min value of faceWidth. (default: {0})", BS2Environment.BS2_FACE_WIDTH_MIN_DEFAULT);
                 Console.Write(">> ");
-                config.operationMode = Util.GetInput((byte)0);
+                config.faceWidth.min = Util.GetInput(BS2Environment.BS2_FACE_WIDTH_MIN_DEFAULT);
 
-                Console.WriteLine("Insert maxRotation. (default: 15)");
+                Console.WriteLine("Insert max value of faceWidth. (default: {0})", BS2Environment.BS2_FACE_WIDTH_MAX_DEFAULT);
                 Console.Write(">> ");
-                config.maxRotation = Util.GetInput((byte)15);
+                config.faceWidth.max = Util.GetInput(BS2Environment.BS2_FACE_WIDTH_MAX_DEFAULT);
 
-                Console.WriteLine("Insert min value of faceWidth. (default: 66)");
+                Console.WriteLine("Insert x value of searchRange. (default: {0})", BS2Environment.BS2_FACE_SEARCH_RANGE_X_DEFAULT);
                 Console.Write(">> ");
-                config.faceWidth.min = Util.GetInput((UInt16)66);
+                config.searchRange.x = Util.GetInput(BS2Environment.BS2_FACE_SEARCH_RANGE_X_DEFAULT);
 
-                Console.WriteLine("Insert max value of faceWidth. (default: 185)");
+                Console.WriteLine("Insert width value of searchRange. (default: {0})", BS2Environment.BS2_FACE_SEARCH_RANGE_WIDTH_DEFAULT);
                 Console.Write(">> ");
-                config.faceWidth.max = Util.GetInput((UInt16)185);
+                config.searchRange.width = Util.GetInput(BS2Environment.BS2_FACE_SEARCH_RANGE_WIDTH_DEFAULT);
+            }
+            else if ((BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.BIOSTATION_3)
+            {
+                Console.WriteLine("Insert min value of detectDistance. ({0}~{1}, default: {2})",
+                    BS2Environment.BS2_FACE_DETECT_DISTANCE_MIN_MIN,
+                    BS2Environment.BS2_FACE_DETECT_DISTANCE_MIN_MAX,
+                    BS2Environment.BS2_FACE_DETECT_DISTANCE_MIN_DEFAULT);
+                Console.Write(">> ");
+                config.detectDistance.min = Util.GetInput(BS2Environment.BS2_FACE_DETECT_DISTANCE_MIN_DEFAULT);
 
-                Console.WriteLine("Insert x value of searchRange. (default: 144)");
+                Console.WriteLine("Insert max value of detectDistance. ({0}~{1}, default: {2}, infinite: {3})",
+                    BS2Environment.BS2_FACE_DETECT_DISTANCE_MAX_MIN,
+                    BS2Environment.BS2_FACE_DETECT_DISTANCE_MAX_MAX,
+                    BS2Environment.BS2_FACE_DETECT_DISTANCE_MAX_DEFAULT,
+                    BS2Environment.BS2_FACE_DETECT_DISTANCE_MAX_INF);
                 Console.Write(">> ");
-                config.searchRange.x = Util.GetInput((UInt16)144);
+                config.detectDistance.max = Util.GetInput(BS2Environment.BS2_FACE_DETECT_DISTANCE_MAX_DEFAULT);
 
-                Console.WriteLine("Insert width value of searchRange. (default: 432)");
+                Console.WriteLine("Do you want to turn on the wideSearch? [y/N]");
                 Console.Write(">> ");
-                config.searchRange.width = Util.GetInput((UInt16)432);
+                config.wideSearch = Convert.ToByte(!Util.IsNo());
             }
 
             Console.WriteLine("Trying to set FaceConfig configuration.");
@@ -1318,17 +1361,19 @@ namespace Suprema
             if (Util.IsYes())
             {
                 Console.WriteLine("Enter the card combination you wish to set.");
-                Console.WriteLine("    DEFAULT : 0xFFFFFFFF");
-                Console.WriteLine("    BLE : 0x00000200");
-                Console.WriteLine("    NFC : 0x00000100");
-                Console.WriteLine("    SEOS : 0x00000080");
-                Console.WriteLine("    SR_SE : 0x00000040");
-                Console.WriteLine("    DESFIRE_EV1 : 0x00000020");
-                Console.WriteLine("    CLASSIC_PLUS : 0x00000010");
-                Console.WriteLine("    ICLASS : 0x00000008");
-                Console.WriteLine("    MIFARE_FELICA : 0x00000004");
-                Console.WriteLine("    HIDPROX : 0x00000002");
-                Console.WriteLine("    EM : 0x00000001");
+                Console.WriteLine("    0xFFFFFFFF : DEFAULT");
+                Console.WriteLine("    0x00000000 : NONE");
+                Console.WriteLine("    0x00000001 : (LowFrequency)  EM");
+                Console.WriteLine("    0x00000002 : (LowFrequency)  PROX");
+                Console.WriteLine("    0x00000004 : (HighFrequency) CSN_MIFARE");
+                Console.WriteLine("    0x00000008 : (HighFrequency) CSN_ICLASS");
+                Console.WriteLine("    0x00000010 : (HighFrequency) SMART_MIFARE");
+                Console.WriteLine("    0x00000020 : (HighFrequency) SMART_MIFARE_DESFIRE");
+                Console.WriteLine("    0x00000040 : (HighFrequency) SMART_ICLASS");
+                Console.WriteLine("    0x00000080 : (HighFrequency) SMART_ICLASS_SEOS");
+                Console.WriteLine("    0x00000100 : (Mobile)        NFC");
+                Console.WriteLine("    0x00000200 : (Mobile)        BLE");
+                Console.WriteLine("    0x00000400 : (HighFrequency) CSN_OTHERS");
                 Console.Write(">>>> ");
 
                 UInt32 defaultMask = 0xFFFFFFFF;
@@ -2020,6 +2065,211 @@ namespace Suprema
             Console.WriteLine("Device: {0}, Scanned: {1}", deviceId, barcode);
 	    }
 
+        void getVoipConfigExt(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2VoipConfigExt config;
+            Console.WriteLine("Trying to get VoipConfigExt");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetVoipConfigExt(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(sdkContext, config);
+            }
+        }
+
+        public void setVoipConfigExt(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2VoipConfigExt config;
+            Console.WriteLine("Trying to get VoipConfigExt");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetVoipConfigExt(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Do you want to use the VoIP Extension? [Y/n]");
+            Console.Write(">> ");
+            bool useVOIPExt = Util.IsYes();
+            if (useVOIPExt)
+            {
+                config.enabled = Convert.ToByte(1);
+
+                Console.WriteLine("Do you want to use Outbound proxy? [Y/n]");
+                Console.Write(">> ");
+                config.useOutboundProxy = Convert.ToByte(Util.IsYes());
+
+                Console.WriteLine("Enter the interval in seconds to update the information on the SIP server. (60~600)");
+                Console.Write(">> ");
+                config.registrationDuration = Util.GetInput((ushort)300);
+
+                Console.WriteLine("Enter the IP address of the SIP server.");
+                Console.Write(">> ");
+                string strIpAddr = Console.ReadLine();
+                byte[] arrIpAddr = Encoding.UTF8.GetBytes(strIpAddr);
+                Array.Clear(config.address, 0, BS2Environment.BS2_URL_SIZE);
+                Array.Copy(arrIpAddr, 0, config.address, 0, arrIpAddr.Length);
+
+                Console.WriteLine("Enter the port of the SIP server. (default: 5060)");
+                Console.Write(">> ");
+                config.port = Util.GetInput((ushort)5060);
+
+                Console.WriteLine("Enter the intercom speaker volume between 0 and 100. (default: 50)");
+                Console.Write(">> ");
+                config.volume.speaker = Util.GetInput((byte)50);
+
+                Console.WriteLine("Enter the intercom microphone volume between 0 and 100. (default: 50)");
+                Console.Write(">> ");
+                config.volume.mic = Util.GetInput((byte)50);
+
+                Console.WriteLine("Enter the ID to connect to the SIP server.");
+                Console.Write(">> ");
+                string strSIPID = Console.ReadLine();
+                byte[] arrSIPID = Encoding.UTF8.GetBytes(strSIPID);
+                Array.Clear(config.id, 0, BS2Environment.BS2_USER_ID_SIZE);
+                Array.Copy(arrSIPID, 0, config.id, 0, arrSIPID.Length);
+
+                Console.WriteLine("Enter the password to connect to the SIP server.");
+                Console.Write(">> ");
+                string strSIPPW = Console.ReadLine();
+                byte[] arrSIPPW = Encoding.UTF8.GetBytes(strSIPPW);
+                Array.Clear(config.password, 0, BS2Environment.BS2_USER_ID_SIZE);
+                Array.Copy(arrSIPPW, 0, config.password, 0, arrSIPPW.Length);
+
+                Console.WriteLine("Enter the authorization code to connect to the SIP server.");
+                Console.Write(">> ");
+                string strAuthCode = Console.ReadLine();
+                byte[] arrAuthCode = Encoding.UTF8.GetBytes(strAuthCode);
+                Array.Clear(config.authorizationCode, 0, BS2Environment.BS2_USER_ID_SIZE);
+                Array.Copy(arrAuthCode, 0, config.authorizationCode, 0, arrAuthCode.Length);
+
+                Console.WriteLine("Enter the address of the Outbound proxy server.");
+                Console.Write(">> ");
+                string strProxyAddr = Console.ReadLine();
+                byte[] arrProxyAddr = Encoding.UTF8.GetBytes(strProxyAddr);
+                Array.Clear(config.outboundProxy.address, 0, BS2Environment.BS2_URL_SIZE);
+                Array.Copy(arrProxyAddr, 0, config.outboundProxy.address, 0, arrProxyAddr.Length);
+
+                Console.WriteLine("Enter the port of the Outbound proxy server.");
+                Console.Write(">> ");
+                config.outboundProxy.port = Util.GetInput((ushort)0);
+
+                Console.WriteLine("Select the button symbol to be used as the exit button. (*, #, 0 ~ 9)");
+                Console.Write(">> ");
+                config.exitButton = (byte)Util.GetInput((char)'0');
+
+                Console.WriteLine("Do you want to show the extension phone book? [Y/n]");
+                Console.Write(">> ");
+                config.showExtensionNumber = Convert.ToByte(Util.IsYes());
+
+                Console.WriteLine("How many extension numbers would you like to register? (MAX: 128)");
+                Console.Write(">> ");
+                config.numPhoneBook = Util.GetInput((byte)0);
+
+                for (byte idx = 0; idx < config.numPhoneBook; idx++)
+                {
+                    Console.WriteLine(" - Enter the extension phone number #{0}", idx);
+                    Console.Write(">>>> ");
+                    string strPhoneNum = Console.ReadLine();
+                    byte[] arrPhoneNum = Encoding.UTF8.GetBytes(strPhoneNum);
+                    Array.Clear(config.phonebook[idx].phoneNumber, 0, BS2Environment.BS2_USER_ID_SIZE);
+                    Array.Copy(arrPhoneNum, 0, config.phonebook[idx].phoneNumber, 0, arrPhoneNum.Length);
+
+                    Console.WriteLine(" - Enter the extension phone number #{0} description", idx);
+                    Console.Write(">>>> ");
+                    string strPhoneDesc = Console.ReadLine();
+                    byte[] arrPhoneDesc = Encoding.UTF8.GetBytes(strPhoneDesc);
+                    Array.Clear(config.phonebook[idx].description, 0, BS2Environment.BS2_VOIP_MAX_DESCRIPTION_LEN_EXT);
+                    Array.Copy(arrPhoneDesc, 0, config.phonebook[idx].description, 0, arrPhoneDesc.Length);
+                }
+            }
+            else
+            {
+                config.enabled = Convert.ToByte(0);
+            }
+
+            Console.WriteLine("Trying to set VoipConfigExt");
+            result = (BS2ErrorCode)API.BS2_SetVoipConfigExt(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
+        void getRtspConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2RtspConfig config;
+            Console.WriteLine("Trying to get RtspConfig");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRtspConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(sdkContext, config);
+            }
+        }
+
+        public void setRtspConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2RtspConfig config;
+            Console.WriteLine("Trying to get RtspConfig");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRtspConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Do you want to use the RTSP server? [Y/n]");
+            Console.Write(">> ");
+            bool useRTSP = Util.IsYes();
+            if (useRTSP)
+            {
+                config.enabled = Convert.ToByte(1);
+
+                Console.WriteLine("Enter the account for the RTSP server.");
+                Console.Write(">> ");
+                string strRTSPID = Console.ReadLine();
+                byte[] arrRTSPID = Encoding.UTF8.GetBytes(strRTSPID);
+                Array.Clear(config.id, 0, BS2Environment.BS2_USER_ID_SIZE);
+                Array.Copy(arrRTSPID, 0, config.id, 0, arrRTSPID.Length);
+
+                Console.WriteLine("Enter the password for the RTSP server.");
+                Console.Write(">> ");
+                string strRTSPPW = Console.ReadLine();
+                byte[] arrRTSPPW = Encoding.UTF8.GetBytes(strRTSPPW);
+                Array.Clear(config.password, 0, BS2Environment.BS2_USER_ID_SIZE);
+                Array.Copy(arrRTSPPW, 0, config.password, 0, arrRTSPPW.Length);
+
+                Console.WriteLine("Enter the address of the RTSP server.");
+                Console.Write(">> ");
+                string strIpAddr = Console.ReadLine();
+                byte[] arrIpAddr = Encoding.UTF8.GetBytes(strIpAddr);
+                Array.Clear(config.address, 0, BS2Environment.BS2_URL_SIZE);
+                Array.Copy(arrIpAddr, 0, config.address, 0, arrIpAddr.Length);
+
+                Console.WriteLine("Enter the port of the RTSP server. (default: 554)");
+                Console.Write(">> ");
+                config.port = Util.GetInput((ushort)554);
+            }
+            else
+            {
+                config.enabled = Convert.ToByte(0);
+            }
+
+            Console.WriteLine("Trying to set RtspConfig");
+            result = (BS2ErrorCode)API.BS2_SetRtspConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+        }
+
         void print(IntPtr sdkContext, BS2DstConfig config)
         {
             Console.WriteLine(">>>> Daylight saving time configuration ");
@@ -2161,11 +2411,15 @@ namespace Suprema
             Console.WriteLine("     |--checkDuplicate : {0}", config.checkDuplicate);
             Console.WriteLine("     |--previewOption : {0}", config.previewOption);
 
-            // FSF2 support
+            // FSF2 supported
             Console.WriteLine("     |--operationMode : {0}", config.operationMode);
             Console.WriteLine("     |--maxRotation : {0}", config.maxRotation);
             Console.WriteLine("     |--faceWidth.min : {0}, faceWidth.max : {1}", config.faceWidth.min, config.faceWidth.max);
             Console.WriteLine("     |--searchRange.x : {0}, searchRange.width : {1}", config.searchRange.x, config.searchRange.width);
+
+            // BS3 supported
+            Console.WriteLine("     |--detectDistance.min : {0}, detectDistance.max : {1}", config.detectDistance.min, config.detectDistance.max);
+            Console.WriteLine("     |--wideSearch : {0}", config.wideSearch);
 
             Console.WriteLine("<<<< ");
         }
@@ -2404,6 +2658,45 @@ namespace Suprema
             Console.WriteLine("     |  |--exceptionCode : {0}", Util.ConvertHexByte2String(info.exceptionCode));
             Console.WriteLine("     |  |--outputFormat : {0}", info.outputFormat);
             Console.WriteLine("     +--+--osdpID : {0}", info.osdpID);
+        }
+
+        void print(IntPtr sdkContext, BS2VoipConfigExt config)
+        {
+            Console.WriteLine(">>>> VoipExt configuration ");
+            Console.WriteLine("     |--enabled : {0}", config.enabled);
+            Console.WriteLine("     |--useOutboundProxy : {0}", config.useOutboundProxy);
+            Console.WriteLine("     |--registrationDuration : {0}", config.registrationDuration);
+            Console.WriteLine("     |--address : {0}", Encoding.UTF8.GetString(config.address).TrimEnd('\0'));
+            Console.WriteLine("     |--port : {0}", config.port);
+            Console.WriteLine("     |--speaker : {0}", config.volume.speaker);
+            Console.WriteLine("     |--mic : {0}", config.volume.mic);
+            Console.WriteLine("     |--id : {0}", Encoding.UTF8.GetString(config.id).TrimEnd('\0'));
+            Console.WriteLine("     |--password : {0}", Encoding.UTF8.GetString(config.password).TrimEnd('\0'));
+            Console.WriteLine("     |--authorizationCode : {0}", Encoding.UTF8.GetString(config.authorizationCode).TrimEnd('\0'));
+            Console.WriteLine("     +--outboundProxy");
+            Console.WriteLine("        |--address : {0}", Encoding.UTF8.GetString(config.outboundProxy.address).TrimEnd('\0'));
+            Console.WriteLine("        +--port : {0}", config.outboundProxy.port);
+            Console.WriteLine("     |--exitButton : {0}", config.exitButton);
+            Console.WriteLine("     |--numPhoneBook : {0}", config.numPhoneBook);
+            Console.WriteLine("     |--showExtensionNumber : {0}", config.showExtensionNumber);
+            Console.WriteLine("     +--phonebook : {0}", config.numPhoneBook);
+            for (int idx = 0; idx < config.numPhoneBook; ++idx)
+            {
+                Console.WriteLine("         |--phoneNumber[{0}] : {1}", idx, Encoding.UTF8.GetString(config.phonebook[idx].phoneNumber).TrimEnd('\0'));
+                Console.WriteLine("         |--description[{0}] : {1}", idx, Encoding.UTF8.GetString(config.phonebook[idx].description).TrimEnd('\0'));
+            }
+
+            Console.WriteLine("<<<< ");
+        }
+
+        void print(IntPtr sdkContext, BS2RtspConfig config)
+        {
+            Console.WriteLine(">>>> Rtsp configuration");
+            Console.WriteLine("     |--id : {0}", Encoding.UTF8.GetString(config.id).TrimEnd('\0'));
+            Console.WriteLine("     |--password : {0}", Encoding.UTF8.GetString(config.password).TrimEnd('\0'));
+            Console.WriteLine("     |--address : {0}", Encoding.UTF8.GetString(config.address).TrimEnd('\0'));
+            Console.WriteLine("     |--port : {0}", config.port);
+            Console.WriteLine("     |--enabled : {0}", config.enabled);
         }
     }
 }

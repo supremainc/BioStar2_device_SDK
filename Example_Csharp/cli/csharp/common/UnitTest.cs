@@ -339,8 +339,9 @@ namespace Suprema
                 //}
 
                 const string CURRENT_DIR = ".";
+                const int MAX_SIZE_LOG_FILE = 100;  // 100MB
                 IntPtr ptrDir = Marshal.StringToHGlobalAnsi(CURRENT_DIR);
-                result = (BS2ErrorCode)API.BS2_SetDebugFileLog(Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL, ptrDir);
+                result = (BS2ErrorCode)API.BS2_SetDebugFileLogEx(Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL, ptrDir, MAX_SIZE_LOG_FILE);
                 Marshal.FreeHGlobal(ptrDir);
                 if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                 {

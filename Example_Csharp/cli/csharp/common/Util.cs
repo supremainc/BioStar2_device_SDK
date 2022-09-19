@@ -294,7 +294,18 @@ namespace Suprema
                     return Convert.ToInt32(inputStr);
                 }
             } while (true);
-        }        
+        }
+
+        public static char GetInput(char defaultValue)
+        {
+            string inputStr = Console.ReadLine();
+            if (inputStr.Length > 0)
+            {
+                return Convert.ToChar(inputStr);
+            }
+
+            return defaultValue;
+        }
 
         public static byte GetInput(byte defaultValue)
         {

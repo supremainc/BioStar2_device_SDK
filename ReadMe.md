@@ -45,6 +45,71 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
+### V2.8.3.0 Beta released 09/01/2022:
+
+**New Features**
+
+**1.** BioStation 3 Added connection support, related extended VoIP settings, and RTSP settings.
+* Refer to structure BS2VoipConfigExt
+* API BS2_GetVoipConfigExt has been added
+* API BS2_SetVoipConfigExt has been added
+* Add Structure BS2RtspConfig
+* API BS2_GetRtspConfig has been added
+* API BS2_SetRtspConfig has been added
+
+**2.** Added function to partially update user information.
+* API BS2_PartialUpdateUser has been added
+* API BS2_PartialUpdateUserEx has been added
+* API BS2_PartialUpdateUserSmall has been added
+* API BS2_PartialUpdateUserSmallEx has been added
+* API BS2_PartialUpdateUserFaceEx has been added
+
+**3.** Added function to get user statistics held by the device.
+* Refer to structure BS2UserStatistic
+* API BS2_GetUserStatistic has been added
+
+**4.** A log function for debugging that divides and saves files has been added.
+* API BS2_SetDebugFileLogEx has been added
+
+**Modified Features**
+
+**1.** When outputting log files for debugging, the displayed time information has been modified to be displayed up to milliseconds.
+* Refer to API BS2_SetDebugFileLog
+
+**2.** The face setting method changes.
+In the face detection stage, face width, which represents the width of the face image, search range, which represents the search range, are entered in pixels.
+This was a rather difficult input unit for the user to set up.
+The detection distance, wide search provided afterward is changed to a more sensible setting unit by entering the distance to the detected face in cm.
+As of the time SDK V2.8.3 is distributed, only 'BioStation 3' can be distance-based, and then extended to 'FaceStation F2' is planned.
+* Refer to API BS2FaceConfig
+
+**3.** Added additional support information to BS2DeviceCapabilities. (Simulated unlock, RTSP, Visual QR, etc.)
+* Refer to API BS2DeviceCapabilities
+
+**4.** In the user structure, an infoMask has been added to indicate what credential information the user has.
+Also, by modifying the mask value of the infoMask and enroll to the device, it is possible to change/delete the information that the user has partially.
+* Refer to API BS2User
+
+**5.** The problem of not applying conditions such as start index and request quantity when obtaining the log of USB has been corrected.
+* Refer to API BS2_GetLogFromDir
+* Refer to API BS2_GetLogBlobFromDir
+* Refer to API BS2_GetLogSmallBlobFromDir
+* Refer to API BS2_GetLogSmallBlobExFromDir
+* Refer to API BS2_GetLogFromDirWithKey
+* Refer to API BS2_GetLogBlobFromDirWithKey
+* Refer to API BS2_GetLogSmallBlobFromDirWithKey
+* Refer to API BS2_GetLogSmallBlobExFromDirWithKey
+
+**6.** When using the filtered log of USB, the problem of date search not being successful has been corrected.
+* Refer to API BS2_GetFilteredLogFromDir
+* Refer to API BS2_GetFilteredLogFromDirWithKey
+
+**7.** A simple bug in the C# example has been fixed.
+
+**8.** Supported for slow networks and environments using SSL. 
+
+<br>
+
 ### V2.8.2.12 Beta released 06/07/2022:
 
 **Modified Features**

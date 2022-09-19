@@ -103,7 +103,20 @@ namespace Suprema
         public const int BS2_MAX_BYPASS_GROUPS_IN_SCHEDULED_LOCK_UNLOCK_ZONE = 16;
         public const int BS2_MAX_UNLOCK_GROUPS_IN_SCHEDULED_LOCK_UNLOCK_ZONE = 16;
         public const int BS2_VOIP_MAX_PHONEBOOK = 32;
+        public const int BS2_VOIP_MAX_PHONEBOOK_EXT = 128;
         public const int BS2_MAX_DESCRIPTION_NAME_LEN = 144;
+        public const int BS2_VOIP_MAX_DESCRIPTION_LEN_EXT = 48 * 3;
+        public const int BS2_FACE_WIDTH_MIN_DEFAULT = 66;               // F2
+        public const int BS2_FACE_WIDTH_MAX_DEFAULT = 250;              // F2
+        public const int BS2_FACE_SEARCH_RANGE_X_DEFAULT = 144;         // F2
+        public const int BS2_FACE_SEARCH_RANGE_WIDTH_DEFAULT = 432;     // F2
+        public const int BS2_FACE_DETECT_DISTANCE_MIN_MIN = 30;         // BS3
+        public const int BS2_FACE_DETECT_DISTANCE_MIN_MAX = 100;        // BS3
+        public const int BS2_FACE_DETECT_DISTANCE_MIN_DEFAULT = 60;     // BS3
+        public const int BS2_FACE_DETECT_DISTANCE_MAX_MIN = 40;         // BS3
+        public const int BS2_FACE_DETECT_DISTANCE_MAX_MAX = 100;        // BS3
+        public const int BS2_FACE_DETECT_DISTANCE_MAX_INF = 255;        // BS3
+        public const int BS2_FACE_DETECT_DISTANCE_MAX_DEFAULT = 100;    // BS3
         public const int BS2_FACE_IMAGE_SIZE = 16 * 1024;
         public const int BS2_CAPTURE_IMAGE_MAXSIZE = 1280 * 720 * 3;
 		public const int BS2_MAX_AUTH_GROUP_NAME_LEN = 144;
@@ -1159,6 +1172,13 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2DetectDistance
+    {
+        public byte min;
+        public byte max;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2FaceConfig
     {
         public byte securityLevel;
@@ -1167,16 +1187,20 @@ namespace Suprema
         public byte detectSensitivity;
         public UInt16 enrollTimeout;
         public byte lfdLevel;
-        public byte	quickEnrollment;			// [+ 2.6.4]
-        public byte previewOption;			    // [+ 2.6.4]
+        public byte	quickEnrollment;			    // [+ 2.6.4]
+        public byte previewOption;			        // [+ 2.6.4]
 
-        public byte checkDuplicate;             // [+ 2.6.4]
-        public byte operationMode;              // [+ 2.7.1]        FSF2 support
-        public byte maxRotation;                // [+ 2.7.1]        FSF2 support
-        public BS2FaceWidth faceWidth;          // [+ 2.7.1]        FSF2 support
-        public BS2SearchRange searchRange;      // [+ 2.7.1]        FSF2 support
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
-        public byte[] reserved2;
+        public byte checkDuplicate;                 // [+ 2.6.4]
+        public byte operationMode;                  // [+ 2.7.1]        FSF2 support
+        public byte maxRotation;                    // [+ 2.7.1]        FSF2 support
+        public BS2FaceWidth faceWidth;              // [+ 2.7.1]        FSF2 support
+        public BS2SearchRange searchRange;          // [+ 2.7.1]        FSF2 support
+        public BS2DetectDistance detectDistance;	// [+ 2.8.3]        BS3 support
+        public byte wideSearch;                 	// [+ 2.8.3]        BS3 support
+
+        public byte unused;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 14)]
+        public byte[] reserved;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -2921,5 +2945,82 @@ namespace Suprema
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 431)]
 	    public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2VoipConfigExtOutboundProxy
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_URL_SIZE)]
+        public byte[] address;
+        public UInt16 port;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2ExtensionNumber
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] phoneNumber;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_DESCRIPTION_NAME_LEN)]
+        public byte[] description;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2VoipConfigExtVolume
+    {
+        public byte speaker;
+        public byte mic;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2VoipConfigExt
+    {
+        public byte enabled;
+        public byte useOutboundProxy;
+        public UInt16 registrationDuration;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_URL_SIZE)]
+        public byte[] address;
+        public UInt16 port;
+        public BS2VoipConfigExtVolume volume;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] id;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] password;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] authorizationCode;
+
+        public BS2VoipConfigExtOutboundProxy outboundProxy;
+
+        public byte exitButton;
+        public byte reserved1;
+        public byte numPhoneBook;
+        public byte showExtensionNumber;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_VOIP_MAX_PHONEBOOK_EXT)]
+        public BS2ExtensionNumber[] phonebook;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved2;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2RtspConfig
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] id;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] password;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_URL_SIZE)]
+        public byte[] address;
+        public UInt16 port;
+
+        public byte enabled;
+        public byte reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved2;
     }
 }

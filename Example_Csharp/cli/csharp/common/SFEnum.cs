@@ -701,8 +701,9 @@ namespace Suprema
         XSTATION_2      = 0x20,     // [+2.8]
         IM_120          = 0x21,     // [+2.8.1]
         XSTATION_2_FP   = 0x22,     // [+2.8.1]
+        BIOSTATION_3    = 0x23,     // [+2.8.3]
 
-        TYPE_MAX        = XSTATION_2_FP,
+        TYPE_MAX        = BIOSTATION_3,
         //UNKNOWN         = 0xFF,
     }
 
@@ -1832,6 +1833,8 @@ namespace Suprema
         FUNCTION_SUPPORT_SMARTCARDBYTEORDER = 0x08,
         FUNCTION_SUPPORT_TREATASCSN         = 0x10,
         FUNCTION_SUPPORT_RTSP               = 0x20,     // [V2.8.3]
+		FUNCTION_SUPPORT_LFD                = 0x40,     // [V2.8.3]
+		FUNCTION_SUPPORT_VISUALQR           = 0x80,     // [V2.8.3]
     }
 
     [Flags]
