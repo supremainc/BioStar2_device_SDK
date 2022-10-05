@@ -977,33 +977,101 @@ int updateUser(void* context, BS2_DEVICE_ID id)
 
 		if ((mask & BS2_USER_MASK_NAME) == BS2_USER_MASK_NAME)
 		{
-			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobUserName(userBlob.user_name, deviceInfo)))
-				return sdkResult;
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " name? (0:Change, 1:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobUserName(userBlob.user_name, deviceInfo)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_NAME;
+				break;
 
+			case 1:
+			default:
+				mask &= ~BS2_USER_MASK_NAME;
+				break;
+			}
+		}
+		else
+		{
+			// Keep
 			user.infoMask |= BS2_USER_INFO_MASK_NAME;
 		}
 
 		if ((mask & BS2_USER_MASK_PHOTO) == BS2_USER_MASK_PHOTO)
 		{
-			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobProfileImage(userBlob, deviceInfo)))
-				return sdkResult;
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " profile image? (0:Change, 1:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobProfileImage(userBlob, deviceInfo)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_PHOTO;
+				break;
 
+			case 1:
+			default:
+				mask &= ~BS2_USER_MASK_PHOTO;
+				break;
+			}
+		}
+		else
+		{
+			// Keep
 			user.infoMask |= BS2_USER_INFO_MASK_PHOTO;
 		}
 
 		if ((mask & BS2_USER_MASK_PIN) == BS2_USER_MASK_PIN)
 		{
-			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPINCode(userBlob.pin, deviceInfo)))
-				return sdkResult;
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " PIN? (0:Change, 1:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPINCode(userBlob.pin, deviceInfo)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_PIN;
+				break;
 
+			case 1:
+			default:
+				mask &= ~BS2_USER_MASK_PIN;
+				break;
+			}
+		}
+		else
+		{
+			// Keep
 			user.infoMask |= BS2_USER_INFO_MASK_PIN;
 		}
 
 		if ((mask & BS2_USER_MASK_JOB) == BS2_USER_MASK_JOB)
 		{
-			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobJobCode(userBlob.job)))
-				return sdkResult;
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " jobs? (0:Change, 1:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobJobCode(userBlob.job)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_JOB_CODE;
+				break;
 
+			case 1:
+			default:
+				mask &= ~BS2_USER_MASK_JOB;
+				break;
+			}
+		}
+		else
+		{
+			// Keep
 			user.infoMask |= BS2_USER_INFO_MASK_JOB_CODE;
 		}
 
@@ -1015,9 +1083,26 @@ int updateUser(void* context, BS2_DEVICE_ID id)
 
 		if ((mask & BS2_USER_MASK_PHRASE) == BS2_USER_MASK_PHRASE)
 		{
-			if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPhrase(userBlob.phrase, deviceInfo)))
-				return sdkResult;
+			msg.str("");
+			msg << "Do you want to change/delete #" << user.userID << " private message? (0:Change, 1:Delete)";
+			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
+			switch (selected)
+			{
+			case 0:
+				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobPhrase(userBlob.phrase, deviceInfo)))
+					return sdkResult;
+				user.infoMask |= BS2_USER_INFO_MASK_PHRASE;
+				break;
 
+			case 1:
+			default:
+				mask &= ~BS2_USER_MASK_PHRASE;
+				break;
+			}
+		}
+		else
+		{
+			// Keep
 			user.infoMask |= BS2_USER_INFO_MASK_PHRASE;
 		}
 
@@ -1025,23 +1110,20 @@ int updateUser(void* context, BS2_DEVICE_ID id)
 		if ((mask & BS2_USER_MASK_CARD) == BS2_USER_MASK_CARD)
 		{
 			msg.str("");
-			msg << "Do you want to change/delete #" << user.userID << " cards? (0:Keep, 1:Change, 2:Delete)";
+			msg << "Do you want to change/delete #" << user.userID << " cards? (0:Change, 1:Delete)";
 			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
 			switch (selected)
 			{
 			case 0:
-			default:
-				user.infoMask |= BS2_USER_INFO_MASK_CARD;
-				break;
-
-			case 1:
 				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobCardInfo(&userBlob.cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
 					return sdkResult;
 				user.infoMask |= BS2_USER_INFO_MASK_CARD;
 				break;
 
-			case 2:
+			case 1:
+			default:
 				// unmasking and numCards = 0;
+				mask &= ~BS2_USER_MASK_CARD;
 				break;
 			}
 		}
@@ -1055,23 +1137,20 @@ int updateUser(void* context, BS2_DEVICE_ID id)
 		if ((mask & BS2_USER_MASK_FINGER) == BS2_USER_MASK_FINGER)
 		{
 			msg.str("");
-			msg << "Do you want to change/delete #" << user.userID << " fingerprints? (0:Keep, 1:Change, 2:Delete)";
+			msg << "Do you want to change/delete #" << user.userID << " fingerprints? (0:Change, 1:Delete)";
 			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
 			switch (selected)
 			{
 			case 0:
-			default:
-				user.infoMask |= BS2_USER_INFO_MASK_FINGER;
-				break;
-
-			case 1:
 				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobFingerprintInfo(&userBlob.fingerObjs, user.numFingers, id, deviceInfoEx)))
 					return sdkResult;
 				user.infoMask |= BS2_USER_INFO_MASK_FINGER;
 				break;
 
-			case 2:
+			case 1:
+			default:
 				// unmasking and numFingers = 0;
+				mask &= ~BS2_USER_MASK_FINGER;
 				break;
 			}
 		}
@@ -1085,23 +1164,20 @@ int updateUser(void* context, BS2_DEVICE_ID id)
 		if ((mask & BS2_USER_MASK_FACE) == BS2_USER_MASK_FACE)
 		{
 			msg.str("");
-			msg << "Do you want to change/delete #" << user.userID << " face? (0:Keep, 1:Change, 2:Delete)";
+			msg << "Do you want to change/delete #" << user.userID << " face? (0:Change, 1:Delete)";
 			uint32_t selected = Utility::getInput<uint32_t>(msg.str());
 			switch (selected)
 			{
 			case 0:
-			default:
-				user.infoMask |= BS2_USER_INFO_MASK_FACE;
-				break;
-
-			case 1:
 				if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobFaceInfo(&userBlob.faceObjs, user.numFaces, id, deviceInfoEx)))
 					return sdkResult;
 				user.infoMask |= BS2_USER_INFO_MASK_FACE;
 				break;
 
-			case 2:
+			case 1:
+			default:
 				// unmasking and numFace = 0;
+				mask &= ~BS2_USER_MASK_FACE;
 				break;
 			}
 		}
@@ -1110,23 +1186,20 @@ int updateUser(void* context, BS2_DEVICE_ID id)
 			if ((mask & BS2_USER_MASK_FACE_EX) == BS2_USER_MASK_FACE_EX)
 			{
 				msg.str("");
-				msg << "Do you want to change/delete #" << user.userID << " visual face? (0:Keep, 1:Change, 2:Delete)";
+				msg << "Do you want to change/delete #" << user.userID << " visual face? (0:Change, 1:Delete)";
 				uint32_t selected = Utility::getInput<uint32_t>(msg.str());
 				switch (selected)
 				{
 				case 0:
-				default:
-					user.infoMask |= BS2_USER_INFO_MASK_FACE;
-					break;
-
-				case 1:
 					if (BS_SDK_SUCCESS != (sdkResult = uc.getUserBlobFaceInfo(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
 						return sdkResult;
 					user.infoMask |= BS2_USER_INFO_MASK_FACE;
 					break;
 
-				case 2:
+				case 1:
+				default:
 					// unmasking and numFace = 0;
+					mask &= ~BS2_USER_MASK_FACE_EX;
 					break;
 				}
 			}
