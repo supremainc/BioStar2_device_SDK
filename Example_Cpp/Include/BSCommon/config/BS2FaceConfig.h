@@ -70,11 +70,14 @@ enum {
 };
 
 typedef uint8_t BS2_FACE_LIGHT_CONDITON;
+typedef uint8_t BS2_FACE_LIGHT_CONDITION;
 
 // Deprecated in V2.8
 #define BS2_FACE_LIGHT_CONDITION_INDOOR		(DEPRECATED_ENUM)BS2_FACE_LIGHT_CONDITION_INDOOR
 #define BS2_FACE_LIGHT_CONDITION_OUTDOOR	(DEPRECATED_ENUM)BS2_FACE_LIGHT_CONDITION_OUTDOOR
 #define BS2_FACE_LIGHT_CONDITION_AUTO		(DEPRECATED_ENUM)BS2_FACE_LIGHT_CONDITION_AUTO
+// Deprecated in V2.8.3
+#define BS2_FACE_LIGHT_CONDITON				(DEPRECATED_ENUM)BS2_FACE_LIGHT_CONDITON
 
 /**
  *	Auto-On Sensitivity
@@ -97,7 +100,7 @@ enum {
 	BS2_FACE_LFD_LEVEL_HIGH,
 
 	BS2_FACE_LFD_LEVEL_DEFAULT = BS2_FACE_LFD_LEVEL_OFF,		// FS2, FL
-	BS2_FACE_EX_LFD_LEVEL_DEFAULT = BS2_FACE_LFD_LEVEL_LOW,		// F2
+	BS2_FACE_EX_LFD_LEVEL_DEFAULT = BS2_FACE_LFD_LEVEL_LOW,		// F2, BS3
 };
 
 typedef uint8_t BS2_FACE_LFD_LEVEL;
@@ -122,9 +125,20 @@ enum {
 
 typedef uint8_t BS2_FACE_OPERATION_MODE;
 
+enum {
+	BS2_FACE_DETECT_DISTANCE_MIN_MIN = 30,
+	BS2_FACE_DETECT_DISTANCE_MIN_MAX = 100,
+	BS2_FACE_DETECT_DISTANCE_MIN_DEFAULT = 60,
+
+	BS2_FACE_DETECT_DISTANCE_MAX_MIN = 40,
+	BS2_FACE_DETECT_DISTANCE_MAX_MAX = 100,
+	BS2_FACE_DETECT_DISTANCE_MAX_INF = 255,
+	BS2_FACE_DETECT_DISTANCE_MAX_DEFAULT = 100,
+};
+
 typedef struct {
 	BS2_FACE_SECURITY_LEVEL securityLevel;	///< 1 byte
-	BS2_FACE_LIGHT_CONDITON lightCondition;			///< 1 byte
+	BS2_FACE_LIGHT_CONDITION lightCondition;			///< 1 byte
 	BS2_FACE_ENROLL_THRESHOLD enrollThreshold;			///< 1 byte
 	BS2_FACE_DETECT_SENSITIVITY detectSensitivity;	///< 1 byte
 
@@ -137,17 +151,27 @@ typedef struct {
 	BS2_FACE_OPERATION_MODE operationMode;			///< 1 byte
 	uint8_t maxRotation;						///< 1 byte
 
+	// Deprecated
 	struct {
 		uint16_t min;
 		uint16_t max;
 	} faceWidth;		///< 4 bytes
 
+	// Deprecated
 	struct {
 		uint16_t x;
 		uint16_t width;
 	} searchRange;		///< 4 bytes
 
-	uint8_t unused[18];						///< 18 bytes (reserved)
+	struct {
+		uint8_t min;		// 30 ~ 100
+		uint8_t max;		// 40 ~ 100, 255
+	} detectDistance;	////< 2 bytes
+
+	BS2_BOOL wideSearch;		///< 1 byte
+	uint8_t unused;
+
+	uint8_t reserved[14];						///< 14 bytes (reserved)
 } BS2FaceConfig;
 
 #endif	// __BS2_FACE_CONFIG_H__

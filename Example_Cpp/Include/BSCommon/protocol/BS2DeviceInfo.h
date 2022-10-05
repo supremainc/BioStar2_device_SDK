@@ -405,7 +405,15 @@ typedef struct {
 	 */
 	uint8_t rtspSupported: 1;		// BDP-568
 
-	uint8_t unused2: 2;		///< 1 byte
+	/*
+	 * If true, LFD is supported.
+	 */
+	uint8_t lfdSupported: 1;		// BDP-588
+
+	/*
+	 * If true, visual QR is supported.
+	 */
+	uint8_t visualQRSupported: 1;		///< 1 byte
 
 	/*
 	 * Maximum number of VOIP extension numbers that can be stored on the device

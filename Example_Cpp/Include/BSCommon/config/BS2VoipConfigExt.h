@@ -15,8 +15,10 @@ enum {
 	BS2_EXT_VOIP_MAX_DESCRIPTION_LEN = 48 * 3,
 
 	BS2_EXT_VOIP_REGISTRATION_DURATION_DEFAULT = 300,
-	BS2_EXT_VOIP_PORT_DEFAULT = 5061,
+	BS2_EXT_VOIP_PORT_DEFAULT = 5060,
 
+	BS2_EXT_VOIP_VOLUME_MIN = 0,
+	BS2_EXT_VOIP_VOLUME_MAX = 100,
 	BS2_EXT_VOIP_VOLUME_DEFAULT = 50,
 };
 
@@ -34,9 +36,11 @@ typedef struct {
 
 	BS2_URL address;		// CAUTION: might not be NULL-terminated
 
-	BS2_PORT port;
-	uint8_t volume;		// 0 ~ 100
-	uint8_t reserved;		///< 1 byte (packing)
+	BS2_PORT port;		///< 2 bytes
+	struct {
+		uint8_t speaker;		// 0 ~ 100
+		uint8_t mic;			// 0 ~ 100
+	} volume;			///< 2 bytes
 
 	BS2_USER_ID id;				// CAUTION: might not be NULL-terminated
 	BS2_USER_ID password;		// CAUTION: might not be NULL-terminated
@@ -50,7 +54,7 @@ typedef struct {
 	} outboundProxy;
 
 	uint8_t exitButton;		/// *, #, 0~9
-	uint8_t dtmfMode;		/// DTMF Mode
+	uint8_t reserved1;
 	uint8_t numPhoneBook;
 	BS2_BOOL showExtensionNumber;
 

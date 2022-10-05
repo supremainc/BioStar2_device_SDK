@@ -585,6 +585,7 @@ extern "C"
 //Debug
 // - Replaced
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDebugFileLog(uint32_t level, uint32_t module, const char* logPath);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDebugFileLogEx(uint32_t level, uint32_t module, const char* logPath, int fileMaxSizeMB);
 // - Deprecated
 DEPRECATED_FUNC BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDebugLevel(CBDebugPrint ptrCBDebugPrint, uint32_t debugLevel);
 DEPRECATED_FUNC BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDebugExCallback(CBDebugExPrint ptrCBDebugExPrint, uint32_t level, uint32_t module);
@@ -1085,6 +1086,13 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceEx(void* context, BS
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceEx(void* context, BS2_DEVICE_ID deviceId, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserInfosFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatasFaceExFromDir(void* context, const char* szDir, char* uids, uint32_t uidCount, BS2UserFaceExBlob* userBlob, BS2_USER_MASK userMask);
+
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_PartialUpdateUser(void* context, BS2_DEVICE_ID deviceId, BS2_USER_MASK mask, BS2UserBlob* userBlob, uint32_t userCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_PartialUpdateUserEx(void* context, BS2_DEVICE_ID deviceId, BS2_USER_MASK mask, BS2UserBlobEx* userBlob, uint32_t userCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_PartialUpdateUserSmall(void* context, BS2_DEVICE_ID deviceId, BS2_USER_MASK mask, BS2UserSmallBlob* userBlob, uint32_t userCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_PartialUpdateUserSmallEx(void* context, BS2_DEVICE_ID deviceId, BS2_USER_MASK mask, BS2UserSmallBlobEx* userBlob, uint32_t userCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_PartialUpdateUserFaceEx(void* context, BS2_DEVICE_ID deviceId, BS2_USER_MASK mask, BS2UserFaceExBlob* userBlob, uint32_t userCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserStatistic(void* context, BS2_DEVICE_ID deviceId, BS2UserStatistic* userStatistic);
 
 //USB Exported (+V2.8.2.4)
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserDatabaseInfoFromDirWithKey(void* context, const char* szDir, uint32_t* numUsers, uint32_t* numCards, uint32_t* numFingers, uint32_t* numFaces, IsAcceptableUserID ptrIsAcceptableUserID, const BS2EncryptKey* key);
