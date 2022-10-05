@@ -1087,30 +1087,33 @@ namespace Suprema
 
             if (userBlob.user.numFaces > 0)
             {
-                int structSize = Marshal.SizeOf(typeof(BS2Face));
-                Type type = typeof(BS2Face);
-                IntPtr curObjs = userBlob.faceObjs;
-                cmd.CommandText = "INSERT INTO BS2Face (userID, faceIndex, numOfTemplate, flag, imageLen, imageData, templateData) VALUES (@userIDParam, @faceIndexParam, @numOfTemplateParam, @flagParam, @imageLenParam, @imageDataParam, @templatedataParam)";
-
-                for (byte idx = 0; idx < userBlob.user.numFaces; ++idx)
+                if (userBlob.faceObjs != IntPtr.Zero)
                 {
-                    BS2Face face = (BS2Face)Marshal.PtrToStructure(curObjs, type);
-                    cmd.Parameters.Clear();
-                    cmd.Parameters.AddWithValue("@userIDParam", userBlob.user.userID);
-                    cmd.Parameters.AddWithValue("@faceIndexParam", face.faceIndex);
-                    cmd.Parameters.AddWithValue("@numOfTemplateParam", face.numOfTemplate);
-                    cmd.Parameters.AddWithValue("@flagParam", face.flag);
-                    cmd.Parameters.AddWithValue("@imageLenParam", face.imageLen);
-                    cmd.Parameters.AddWithValue("@imageDataParam", face.imageData);
-                    cmd.Parameters.AddWithValue("@templatedataParam", face.templateData);
+                    int structSize = Marshal.SizeOf(typeof(BS2Face));
+                    Type type = typeof(BS2Face);
+                    IntPtr curObjs = userBlob.faceObjs;
+                    cmd.CommandText = "INSERT INTO BS2Face (userID, faceIndex, numOfTemplate, flag, imageLen, imageData, templateData) VALUES (@userIDParam, @faceIndexParam, @numOfTemplateParam, @flagParam, @imageLenParam, @imageDataParam, @templatedataParam)";
 
-                    if (cmd.ExecuteNonQuery() < 1)
+                    for (byte idx = 0; idx < userBlob.user.numFaces; ++idx)
                     {
-                        transaction.Rollback();
-                        return false;
-                    }
+                        BS2Face face = (BS2Face)Marshal.PtrToStructure(curObjs, type);
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@userIDParam", userBlob.user.userID);
+                        cmd.Parameters.AddWithValue("@faceIndexParam", face.faceIndex);
+                        cmd.Parameters.AddWithValue("@numOfTemplateParam", face.numOfTemplate);
+                        cmd.Parameters.AddWithValue("@flagParam", face.flag);
+                        cmd.Parameters.AddWithValue("@imageLenParam", face.imageLen);
+                        cmd.Parameters.AddWithValue("@imageDataParam", face.imageData);
+                        cmd.Parameters.AddWithValue("@templatedataParam", face.templateData);
 
-                    curObjs += structSize;
+                        if (cmd.ExecuteNonQuery() < 1)
+                        {
+                            transaction.Rollback();
+                            return false;
+                        }
+
+                        curObjs += structSize;
+                    }
                 }
             }
 
@@ -5229,34 +5232,106 @@ namespace Suprema
                 //Array.Clear(userBlob[idx].name, 0, BS2Environment.BS2_USER_NAME_LEN);
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.NAME) == (BS2_USER_MASK)BS2UserMaskEnum.NAME)
                 {
-                    if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(ref userBlob[idx].name)))
-                        return;
+                    Console.WriteLine("Do you want to change/delete #{0} name? (0:Change, 1:Delete)", userID);
+                    Console.Write(">> ");
+                    int selected = Util.GetInput(0);
+                    switch (selected)
+                    {
+                        case 0:     // Change name
+                            if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobUserName(ref userBlob[idx].name)))
+                                return;
 
+                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.NAME;
+                            break;
+
+                        case 1:     // Delete
+                        default:
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.NAME;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Keep
                     userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.NAME;
                 }
 
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.PHOTO) == (BS2_USER_MASK)BS2UserMaskEnum.PHOTO)
                 {
-                    if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobProfileImage(ref userBlob[idx])))
-                        return;
+                    Console.WriteLine("Do you want to change/delete #{0} profile image? (0:Change, 1:Delete)", userID);
+                    Console.Write(">> ");
+                    int selected = Util.GetInput(0);
+                    switch (selected)
+                    {
+                        case 0:     // Change image
+                            if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobProfileImage(ref userBlob[idx])))
+                                return;
 
+                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.PHOTO;
+                            break;
+
+                        case 1:     // Delete
+                        default:
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.PHOTO;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Keep
                     userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.PHOTO;
                 }
 
                 //Array.Clear(userBlob[idx].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.PIN) == (BS2_USER_MASK)BS2UserMaskEnum.PIN)
                 {
-                    if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(sdkContext, ref userBlob[idx].pin)))
-                        return;
+                    Console.WriteLine("Do you want to change/delete #{0} PIN? (0:Change, 1:Delete)", userID);
+                    Console.Write(">> ");
+                    int selected = Util.GetInput(0);
+                    switch (selected)
+                    {
+                        case 0:     // Change PIN
+                            if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(sdkContext, ref userBlob[idx].pin)))
+                                return;
 
+                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.PIN;
+                            break;
+
+                        case 1:     // Delete
+                        default:
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.PIN;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Keep
                     userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.PIN;
                 }
 
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.JOB) == (BS2_USER_MASK)BS2UserMaskEnum.JOB)
                 {
-                    if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobJobCode(ref userBlob[idx].job)))
-                        return;
+                    Console.WriteLine("Do you want to change/delete #{0} jobs? (0:Change, 1:Delete)", userID);
+                    Console.Write(">> ");
+                    int selected = Util.GetInput(0);
+                    switch (selected)
+                    {
+                        case 0:     // Change jobs
+                            if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobJobCode(ref userBlob[idx].job)))
+                                return;
 
+                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.JOB_CODE;
+                            break;
+
+                        case 1:     // Delete
+                        default:
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.JOB;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Keep
                     userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.JOB_CODE;
                 }
 
@@ -5269,93 +5344,104 @@ namespace Suprema
 
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.PHRASE) == (BS2_USER_MASK)BS2UserMaskEnum.PHRASE)
                 {
-                    if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobPhrase(ref userBlob[idx].phrase)))
-                        return;
-                    
+                    Console.WriteLine("Do you want to change/delete #{0} private message? (0:Change, 1:Delete)", userID);
+                    Console.Write(">> ");
+                    int selected = Util.GetInput(0);
+                    switch (selected)
+                    {
+                        case 0:     // Change message
+                            if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobPhrase(ref userBlob[idx].phrase)))
+                                return;
+
+                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.PHRASE;
+                            break;
+
+                        case 1:     // Delete
+                        default:
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.PHRASE;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Keep
                     userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.PHRASE;
                 }
 
                 userBlob[idx].user.numCards = 0;
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.CARD) == (BS2_USER_MASK)BS2UserMaskEnum.CARD)
                 {
-                    Console.WriteLine("Do you want to change/delete #{0} cards? (0:Keep, 1:Change, 2:Delete)", userID);
+                    Console.WriteLine("Do you want to change/delete #{0} cards? (0:Change, 1:Delete)", userID);
                     Console.Write(">> ");
                     int selected = Util.GetInput(0);
                     switch (selected)
                     {
-                        case 0:     // Keep cards on the device
-                        default:
-                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.CARD;
-                            break;
-
-                        case 1:     // Change cards
+                        case 0:     // Change cards
                             if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(sdkContext, deviceID, ref userBlob[idx].cardObjs, ref userBlob[idx].user.numCards)))
                                 return;
 
                             userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.CARD;
                             break;
 
-                        case 2:     // Delete cards on the device
+                        case 1:     // Delete cards on the device
+                        default:
                             // unmasking and numCards = 0;
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.CARD;
                             break;
                     }
                 }
                 else
                 {
+                    // Keep
                     userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.CARD;
                 }
 
                 userBlob[idx].user.numFingers = 0;
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.FINGER) == (BS2_USER_MASK)BS2UserMaskEnum.FINGER)
                 {
-                    Console.WriteLine("Do you want to change/delete #{0} fingerprints? (0:Keep, 1:Change, 2:Delete)", userID);
+                    Console.WriteLine("Do you want to change/delete #{0} fingerprints? (0:Change, 1:Delete)", userID);
                     Console.Write(">> ");
                     int selected = Util.GetInput(0);
                     switch (selected)
                     {
-                        case 0:     // Keep fingerprints on the device
-                        default:
-                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FINGER;
-                            break;
-
-                        case 1:     // Change fingerprints
+                        case 0:     // Change fingerprints
                             if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(sdkContext, deviceID, ref userBlob[idx].fingerObjs, ref userBlob[idx].user.numFingers)))
                                 return;
 
                             userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FINGER;
                             break;
 
-                        case 2:     // Delete fingerprints on the device
+                        case 1:     // Delete fingerprints on the device
+                        default:
                             // unmasking and numFingers = 0;
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.FINGER;
                             break;
                     }
                 }
                 else
                 {
+                    // Keep
                     userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FINGER;
                 }
 
                 userBlob[idx].user.numFaces = 0;
                 if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.FACE) == (BS2_USER_MASK)BS2UserMaskEnum.FACE)
                 {
-                    Console.WriteLine("Do you want to change/delete #{0} faces? (0:Keep, 1:Change, 2:Delete)", userID);
+                    Console.WriteLine("Do you want to change/delete #{0} faces? (0:Change, 1:Delete)", userID);
                     Console.Write(">> ");
                     int selected = Util.GetInput(0);
                     switch (selected)
                     {
-                        case 0:     // Keep faces on the device
-                        default:
-                            userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FACE;
-                            break;
-
-                        case 1:     // Change faces
+                        case 0:     // Change faces
                             if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(sdkContext, deviceID, ref userBlob[idx].faceObjs, ref userBlob[idx].user.numFaces)))
                                 return;
 
                             userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FACE;
                             break;
 
-                        case 2:     // Delete faces on the device
+                        case 1:     // Delete faces on the device
+                        default:
+                            mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.FACE;
                             break;
                     }
                 }
@@ -5363,27 +5449,27 @@ namespace Suprema
                 {
                     if ((mask & (BS2_USER_MASK)BS2UserMaskEnum.FACE_EX) == (BS2_USER_MASK)BS2UserMaskEnum.FACE_EX)
                     {
-                        Console.WriteLine("Do you want to change/delete #{0} faceExs? (0:Keep, 1:Change, 2:Delete)");
+                        Console.WriteLine("Do you want to change/delete #{0} faceExs? (0:Change, 1:Delete)", userID);
                         Console.Write(">> ");
                         int selected = Util.GetInput(0);
                         switch (selected)
                         {
-                            case 0:     // Keep faceExs on the device
-                            default:
-                                userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FACE;
-                                break;
-
-                            case 1:     // Change faceExs
+                            case 0:     // Change faceExs
                                 if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceExInfo(sdkContext, deviceID, ref userBlob[idx].faceExObjs, ref userBlob[idx].user.numFaces)))
+                                    return;
+
                                 userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FACE;
                                 break;
 
-                            case 2:     // Delete faceExs on the device
+                            case 1:     // Delete faceExs on the device
+                            default:
+                                mask &= ~(BS2_USER_MASK)BS2UserMaskEnum.FACE_EX;
                                 break;
                         }
                     }
                     else
                     {
+                        // Keep
                         userBlob[idx].user.infoMask |= (byte)BS2UserInfoMaskEnum.FACE;
                     }
                 }
@@ -5634,8 +5720,28 @@ namespace Suprema
 
         public void deactivateUserPhrase(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            BS2DisplayConfig config;
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetDisplayConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+
+            config.useUserPhrase = Convert.ToByte(false);
+            config.queryUserPhrase = Convert.ToByte(false);
+
+            result = (BS2ErrorCode)API.BS2_SetDisplayConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
             cbOnUserPhrase = null;
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetUserPhraseHandler(sdkContext, cbOnUserPhrase);
+            result = (BS2ErrorCode)API.BS2_SetUserPhraseHandler(sdkContext, cbOnUserPhrase);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("Got error({0}).", result);

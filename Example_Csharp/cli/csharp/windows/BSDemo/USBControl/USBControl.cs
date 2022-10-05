@@ -369,6 +369,7 @@ namespace Suprema
             {
                 outEventLogObjs = IntPtr.Zero;
                 IntPtr ptrDir = Marshal.StringToHGlobalAnsi(strDir);
+                Console.WriteLine("lastEventId:{0}, amount:{1}", lastEventId, amount);
                 BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetLogBlobFromDir(sdkContext, ptrDir, (ushort)BS2EventMaskEnum.ALL, lastEventId, amount, out outEventLogObjs, out outNumEventLogs);
                 Marshal.FreeHGlobal(ptrDir);
                 if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -401,6 +402,7 @@ namespace Suprema
 
                         curEventLogObjs += structSize;
                         lastEventId = eventLog.id;
+                        lastEventId++;
                     }
 
                     API.BS2_ReleaseObject(outEventLogObjs);
@@ -911,12 +913,13 @@ namespace Suprema
             Array.Clear(userID, 0, BS2Environment.BS2_USER_ID_SIZE);
             Array.Copy(eventLog.objectID, userID, userID.Length);
 
-            Console.WriteLine("Got log(idx[{0}], timestamp[{1}], event id[{2}], userID[{3}], jobcode[{4}]).",
+            Console.WriteLine("Got log(idx[{0}], timestamp[{1}], event id[{2}], userID[{3}], jobcode[{4}], temperature[{5}]).",
                                         idx,
                                         eventTime.ToString("yyyy-MM-dd HH:mm:ss"),
                                         eventLog.id,
                                         System.Text.Encoding.ASCII.GetString(userID).TrimEnd('\0'),
-                                        eventLog.jobCode);
+                                        eventLog.jobCode,
+                                        eventLog.temperature);
         }
 
         [DllImport("kernel32.dll")]

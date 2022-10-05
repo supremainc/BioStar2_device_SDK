@@ -10,6 +10,8 @@ namespace Suprema
 {
     public class ZoneControl : FunctionModule
     {
+        private API.OnReadyToScan cbCardOnReadyToScan = null;
+
         delegate int ClearZoneStatusDelegate(IntPtr context, UInt32 deviceId, UInt32 zoneID, IntPtr uids, UInt32 uidCount);
         delegate int ClearAllZoneStatusDelegate(IntPtr context, UInt32 deviceId, UInt32 zoneID);
         delegate int GetZoneDelegate(IntPtr context, UInt32 deviceId, IntPtr zoneIds, UInt32 zoneIdCount, out IntPtr zoneObj, out UInt32 numZone);
@@ -1007,33 +1009,107 @@ namespace Suprema
         {
             BS2IntrusionAlarmZoneBlob[] zoneBlob = Util.AllocateStructureArray<BS2IntrusionAlarmZoneBlob>(1);
 
-            zoneBlob[0].IntrusionAlarmZone.zoneID = 100;
+            Util.HighlightLine("Enter the ID of the new intrusion alarm zone", "ID");
+            Console.Write(">> ");
+            zoneBlob[0].IntrusionAlarmZone.zoneID = Util.GetInput((UInt32)100);
 
-            string name = "Test Zone";
+            Util.HighlightLine("Enter the zone name", "name");
+            Console.Write(">> ");
+            //string name = "Test Zone";
+            string name = Console.ReadLine();
             Array.Clear(zoneBlob[0].IntrusionAlarmZone.name, 0, BS2Environment.BS2_MAX_ZONE_NAME_LEN);
             byte[] zoneName = Encoding.UTF8.GetBytes(name);
             Array.Copy(zoneName, 0, zoneBlob[0].IntrusionAlarmZone.name, 0, zoneName.Length);
 
-            zoneBlob[0].IntrusionAlarmZone.alarmDelay = 15;
-            zoneBlob[0].IntrusionAlarmZone.armDelay = 10;
-            zoneBlob[0].IntrusionAlarmZone.disabled = 0;
+            Util.HighlightLine("Enter the arm delay time", "arm delay", ConsoleColor.Red);
+            Console.Write(">> ");
+            zoneBlob[0].IntrusionAlarmZone.armDelay = Util.GetInput((byte)10);
+            Util.HighlightLine("Enter the alarm delay time", "alarm delay");
+            Console.Write(">> ");
+            zoneBlob[0].IntrusionAlarmZone.alarmDelay = Util.GetInput((byte)10);
+            Util.HighlightLine("Do you want to activate the intrusion alarm zone? [Y/n]", "activate");
+            Console.Write(">> ");
+            bool zoneActivate = Util.IsYes();
+            zoneBlob[0].IntrusionAlarmZone.disabled = Convert.ToByte(!zoneActivate);
 
-            zoneBlob[0].IntrusionAlarmZone.numReaders = 1;
+            Util.HighlightLine("How many devices do you want to configure the member with?", "How many devices");
+            Console.Write(">> ");
+            int numOfReaders = Util.GetInput(1);
+            zoneBlob[0].IntrusionAlarmZone.numReaders = Convert.ToByte(numOfReaders);
             zoneBlob[0].memberObjs = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BS2AlarmZoneMember)) * zoneBlob[0].IntrusionAlarmZone.numReaders);
             IntPtr curmemberObjs = zoneBlob[0].memberObjs;
 
-            Console.WriteLine("  Enter the device ID which you want to run Alarm Zone Member");
-            Console.Write("  >>>> ");
-            UInt32 deviceId = (UInt32)Util.GetInput();
-            Marshal.WriteInt32(curmemberObjs, (Int32)deviceId);           
-            curmemberObjs += 4;
-                       
-            byte inputType = 255;
-            byte operationType = 1;
-            Marshal.WriteByte(curmemberObjs, inputType);
-            curmemberObjs += 1;
-            Marshal.WriteByte(curmemberObjs, operationType);
-            curmemberObjs += 3;            
+            for (int idx = 0; idx < numOfReaders; idx++)
+            {
+                BS2AlarmZoneMember member = Util.AllocateStructure<BS2AlarmZoneMember>();
+                Util.HighlightLine("  Enter the device ID which you want to run Alarm Zone Member", "device ID");
+                Console.Write("  >>>> ");
+                member.deviceID = (UInt32)Util.GetInput();
+
+                Util.HighlightLine("  Enter the input type. [0: None, 1: Card, 2: Key, 255: All]", "input type");
+                Console.Write("  >>>> ");
+                member.inputType = Convert.ToByte(Util.GetInput((byte)255));
+
+                Util.HighlightLine("  Enter the operation type. [0: None, 1: Arm, 2: Disarm, 3: Toggle, 4: Alarm, 8: Alarm clear]", "operation type");
+                Console.Write("  >>>> ");
+                member.operationType = Convert.ToByte(Util.GetInput((byte)3));
+
+                Marshal.StructureToPtr(member, curmemberObjs, false);
+                curmemberObjs += Marshal.SizeOf(typeof(BS2AlarmZoneMember));
+            }
+
+            Util.HighlightLine("How many cards do you want to register?", "How many cards");
+            Console.Write(">> ");
+            int numOfCards = Util.GetInput(0);
+            zoneBlob[0].IntrusionAlarmZone.numCards = Convert.ToByte(numOfCards);
+            zoneBlob[0].cardObjs = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BS2CSNCard)) * numOfCards);
+            IntPtr curCardObj = zoneBlob[0].cardObjs;
+
+            Util.HighlightLine("Enter the device ID from which to read the card", "device ID");
+            Console.Write(">> ");
+            UInt32 cardReadDevice = (UInt32)Util.GetInput();
+            cbCardOnReadyToScan = new API.OnReadyToScan(ReadyToScanForCard);
+            int structSize = Marshal.SizeOf(typeof(BS2CSNCard));
+
+            for (int idx = 0; idx < numOfCards; idx++)
+            {
+                BS2Card card = Util.AllocateStructure<BS2Card>();
+                Console.WriteLine("  Trying to scan card.");
+                BS2ErrorCode res = (BS2ErrorCode)API.BS2_ScanCard(sdkContext, cardReadDevice, out card, cbCardOnReadyToScan);
+                if (res != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", res);
+                    return;
+                }
+                else if (Convert.ToBoolean(card.isSmartCard))
+                {
+                    Console.WriteLine("CSN card is only available. Try again");
+                }
+                else
+                {
+                    Marshal.Copy(card.cardUnion, 0, curCardObj, structSize);
+                    curCardObj += structSize;
+                }
+            }
+
+            cbCardOnReadyToScan = null;
+
+            Util.HighlightLine("How many access groups do you want to register?", "access groups");
+            Console.Write(">> ");
+            int numOfGroups = Util.GetInput(0);
+            zoneBlob[0].IntrusionAlarmZone.numGroups =Convert.ToByte(numOfGroups);
+            zoneBlob[0].groupIDs = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(UInt32)) * numOfGroups);
+            IntPtr curGroup = zoneBlob[0].groupIDs;
+
+            for (int idx = 0; idx < numOfGroups; idx++)
+            {
+                Util.HighlightLine("  Enter the access group ID", "access group ID");
+                Console.Write("  >>>> ");
+                int gID = Util.GetInput();
+
+                Marshal.WriteInt32(curGroup, gID);
+                curGroup += Marshal.SizeOf(typeof(UInt32));
+            }
 
             Console.WriteLine("Trying to IntrusionAlarm zone.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetIntrusionAlarmZone(sdkContext, deviceID, zoneBlob, 1);
@@ -1514,6 +1590,11 @@ namespace Suprema
             {
                 Console.WriteLine("Invalid parameter");
             }
+        }
+
+        void ReadyToScanForCard(UInt32 deviceID, UInt32 sequence)
+        {
+            Console.WriteLine("Place your card on the device.");
         }
 
         void getInterlockZone(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)

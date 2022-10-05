@@ -792,6 +792,19 @@ namespace Suprema
                                 eventDetail.relayActionRelayPort);
         }
 
+        public static void HighlightLine(string fullStr, string highlightStr, ConsoleColor highlightColor = ConsoleColor.Green)
+        {
+            int first = fullStr.IndexOf(highlightStr);
+            int len = highlightStr.Length;
+            int second = first + len;
+            var oldColor = Console.ForegroundColor;
+
+            Console.Write(fullStr.Substring(0, first));
+            Console.ForegroundColor = highlightColor;
+            Console.Write(fullStr.Substring(first, len));
+            Console.ForegroundColor = oldColor;
+            Console.WriteLine(fullStr.Substring(second));
+        }
 
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
         public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);

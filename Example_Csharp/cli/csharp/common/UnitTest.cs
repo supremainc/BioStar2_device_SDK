@@ -462,6 +462,22 @@ namespace Suprema
 
             Console.WriteLine("SDK version : " + Marshal.PtrToStringAnsi(versionPtr));
 
+            Console.WriteLine("Do you want output debug message to file? [y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                const string CURRENT_DIR = ".";
+                const int MAX_SIZE_LOG_FILE = 100;  // 100MB
+                IntPtr ptrDir = Marshal.StringToHGlobalAnsi(CURRENT_DIR);
+                BS2ErrorCode res = (BS2ErrorCode)API.BS2_SetDebugFileLogEx(Constants.DEBUG_LOG_ALL, Constants.DEBUG_MODULE_ALL, ptrDir, MAX_SIZE_LOG_FILE);
+                Marshal.FreeHGlobal(ptrDir);
+                if (res != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", res);
+                    return;
+                }
+            }
+
             sdkContext = API.BS2_AllocateContext();
             if (sdkContext == IntPtr.Zero)
             {
