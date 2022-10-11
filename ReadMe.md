@@ -45,7 +45,7 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
-### V2.8.3.0 Beta released 09/01/2022:
+### V2.8.3.2 released 10/05/2022:
 
 **New Features**
 
@@ -106,7 +106,11 @@ Also, by modifying the mask value of the infoMask and enroll to the device, it i
 
 **7.** A simple bug in the C# example has been fixed.
 
-**8.** Supported for slow networks and environments using SSL. 
+**8.** Supported for slow networks and environments using SSL.
+
+**9.** Fixed the bug that crashed if the access group existed during a USB import.
+
+**10.** Edited to stabilize code internally in SDK.
 
 <br>
 
