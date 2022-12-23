@@ -59,7 +59,7 @@ bool DeviceList::findSlave(BS2_DEVICE_ID slaveID) /*const*/
 	{
 		for (auto id : item.second->slaveDevices_)
 		{
-			if (slaveID == id.first)
+			if (slaveID == id.id)
 				return true;
 		}
 	}
@@ -92,11 +92,14 @@ bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, BS2_DE
 	auto& vec = devList_[hostID]->slaveDevices_;
 	for (auto slave : vec)
 	{
-		if (slaveID == slave.first)
+		if (slaveID == slave.id)
 			return true;
 	}
 
-	vec.push_back(make_pair(slaveID, slaveType));
+	BS2_DEVICE_ID_TYPE item;
+	item.id = slaveID;
+	item.type = slaveType;
+	vec.push_back(item);
 
 	return true;
 }

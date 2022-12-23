@@ -17,14 +17,6 @@
 #include "../Common/CommControl.h"
 #include "../Common/DeviceList.h"
 
-#define MENU_BREAK				0
-
-
-typedef struct
-{
-	int			index;
-	std::string disc;
-} MENU_ITEM;
 
 enum EN_MENU_TOP
 {
@@ -40,11 +32,15 @@ enum EN_MENU_TOP
 std::vector<MENU_ITEM> menuInfoTop =
 {
 	{MENU_TOP_BREAK,			"Exit and API test"},
+	{MENU_SEPARATOR,			""},
 	{MENU_TOP_SEARCH_N_CONN,	"Connection (Discover and connect)"},
 	{MENU_TOP_DIRECT_IPADDR,	"Connection (Direct connect with IP/Port)"},
+	{MENU_SEPARATOR,			""},
 	{MENU_TOP_SEARCH_SLAVE,		"Slave (Discover and add)"},
 	{MENU_TOP_SEARCH_WIEGAND,	"Wiegand (Discover and add)" },
+	{MENU_SEPARATOR,			""},
 	{MENU_TOP_VIEW_DEVICE,		"View (Connected devices)"},
+	{MENU_SEPARATOR,			""},
 	{MENU_TOP_CONNECT_USB,		"Connection (USB)"},
 };
 
@@ -62,9 +58,13 @@ enum EN_MENU_SLAVE
 std::vector<MENU_ITEM> menuInfoSlave =
 {
 	{MENU_SLV_BREAK,				"Exit"},
+	{MENU_SEPARATOR,				""},
 	{MENU_SLV_GET_CONFIG_RS485EX,	"Connected status (of slave devices)"},
+	{MENU_SEPARATOR,				""},
 	{MENU_SLV_SEARCH_DEVICE,		"Discover and add (slave devices)"},
+	{MENU_SEPARATOR,				""},
 	{MENU_SLV_UPG_FIRMWARE,			"Upgrade firmware"},
+	{MENU_SEPARATOR,				""},
 	{MENU_SLV_GET_CONFIG_FACTORY,	"Get config (Factory)"},
 	{MENU_SLV_GET_CONFIG_STATUS,	"Get config (Status)"},
 	{MENU_SLV_SET_CONFIG_STATUS,	"Set config (Status)"},
@@ -100,6 +100,11 @@ enum EN_MENU_COMM
 	MENU_COMM_GET_DEF_RES_TIMEOUT,
 	MENU_COMM_SET_DEF_RES_TIMEOUT,
 
+	MENU_COMM_GET_SOCKET_RETRY_COUNT,
+	MENU_COMM_SET_SOCKET_RETRY_COUNT,
+	MENU_COMM_GET_SOCKETSSL_RETRY_COUNT,
+	MENU_COMM_SET_SOCKETSSL_RETRY_COUNT,
+
 	MENU_CONF_GET_FACCONFIG,
 
 	MENU_ELOG_GET_EVENTSMALLBLOB,
@@ -111,6 +116,10 @@ enum EN_MENU_COMM
 
 	MENU_CONF_UPD_DEVICE_2_SERVER,
 	MENU_CONF_UPD_SERVER_2_DEVICE,
+
+	MENU_COMM_SET_DEVICE_LICENSE,
+	MENU_COMM_DEL_DEVICE_LICENSE,
+	MENU_COMM_GET_DEVICE_LICENSE,
 };
 
 enum EN_MENU_USB
@@ -139,6 +148,8 @@ enum EN_MENU_USB
 std::vector<MENU_ITEM> menuInfoCommAPI =
 {
 	{MENU_COMM_BREAK,						"Exit"},
+	{MENU_SEPARATOR,						""},
+
 	{MENU_COMM_SET_KEEP_ALIVE,				"BS2_SetKeepAliveTimeout"},
 
 	{MENU_COMM_GET_SERVER_PORT,				"BS2_GetServerPort"},
@@ -151,6 +162,7 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 
 	{MENU_COMM_IS_AUTO_CONNECT,				"BS2_IsAutoConnection"},
 	{MENU_COMM_SET_AUTO_CONNECT,			"BS2_SetAutoConnection"},
+	{MENU_SEPARATOR,						""},
 
 	{MENU_COMM_GET_ENABLEIPV4,				"BS2_GetEnableIPV4"},
 	{MENU_COMM_SET_ENABLEIPV4,				"BS2_SetEnableIPV4"},
@@ -163,26 +175,43 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 
 	{MENU_COMM_GET_SERVERSSLPORTV6,			"BS2_GetSSLServerPortIPV6"},
 	{MENU_COMM_SET_SERVERSSLPORTV6,			"BS2_SetSSLServerPortIPV6"},
+	{MENU_SEPARATOR,						""},
 
 	{MENU_COMM_GET_DEF_RES_TIMEOUT,			"BS2_GetDefaultResponseTimeout"},
 	{MENU_COMM_SET_DEF_RES_TIMEOUT,			"BS2_SetDefaultResponseTimeout"},
 
+	{MENU_COMM_GET_SOCKET_RETRY_COUNT,		"BS2_GetSocketRetryCount"},
+	{MENU_COMM_SET_SOCKET_RETRY_COUNT,		"BS2_SetSocketRetryCount"},
+	{MENU_COMM_GET_SOCKETSSL_RETRY_COUNT,	"BS2_GetSocketSSLRetryCount"},
+	{MENU_COMM_SET_SOCKETSSL_RETRY_COUNT,	"BS2_SetSocketSSLRetryCount"},
+	{MENU_SEPARATOR,						""},
+
 	{MENU_CONF_GET_FACCONFIG,				"BS2_GetFactoryConfig" },
+	{MENU_SEPARATOR,						""},
 
 	{MENU_ELOG_GET_EVENTSMALLBLOB,			"BS2_GetEventSmallBlob"},
 	{MENU_ELOG_GET_EVENTSMALLBLOBEX,		"BS2_GetEventSmallBlobEx"},
+	{MENU_SEPARATOR,						""},
 
 	{MENU_USER_ENROLL_FACE,					"BS2_EnrolUser"},
 	{MENU_USER_ENROLL_FACEEX,				"BS2_EnrollUserFaceEx to CS40"},
 	{MENU_USER_ENROLL_MULTIPLE,				"Enroll multiple users"},
+	{MENU_SEPARATOR,						""},
 
 	{MENU_CONF_UPD_DEVICE_2_SERVER,			"Update device to server connection"},
 	{MENU_CONF_UPD_SERVER_2_DEVICE,			"Update server to device connection"},
+	{MENU_SEPARATOR,						""},
+
+	{MENU_COMM_SET_DEVICE_LICENSE,			"BS2_EnableDeviceLicense"},
+	{MENU_COMM_DEL_DEVICE_LICENSE,			"BS2_DisableDeviceLicense"},
+	{MENU_COMM_GET_DEVICE_LICENSE,			"BS2_QueryDeviceLicense"},
 };
 
 std::vector<MENU_ITEM> menuInfoUSBAPI =
 {
 	{MENU_COMM_BREAK,						"Exit"},
+	{MENU_SEPARATOR,						""},
+
 	{MENU_USB_GET_USR_DBINFO_FROMDIR,		"BS2_GetUserDatabaseInfoFromDir"},
 	{MENU_USB_GET_USR_LIST_FROMDIR,			"BS2_GetUserListFromDir"},
 	{MENU_USB_GET_USR_INFO_FROMDIR,			"BS2_GetUserInfosFromDir"},
@@ -195,6 +224,7 @@ std::vector<MENU_ITEM> menuInfoUSBAPI =
 	{MENU_USB_GET_USRSMALL_DATAEX_FROMDIR,	"BS2_GetUserSmallDatasExFromDir"},
 	{MENU_USB_GET_USRFACEEX_INFO_FROMDIR,	"BS2_GetUserFaceExInfosFromDir"},
 	{MENU_USB_GET_USRFACEEX_DATA_FROMDIR,	"BS2_GetUserFaceExDatasFromDir"},
+	{MENU_SEPARATOR,						""},
 
 	{MENU_USB_GET_FILTEREDLOG_FROMDIR,		"BS2_GetFilteredLogFromDir"},
 	{MENU_USB_GET_LOG_FROMDIR,				"BS2_GetLogFromDir"},
@@ -207,32 +237,17 @@ std::vector<MENU_ITEM> menuInfoUSBAPI =
 int setSSLHandler();
 bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone);
 void connectTestDevice(void* context, DeviceList& deviceList);
-uint32_t showMenu(std::vector<MENU_ITEM>& info);
-uint32_t getSelectedIndex();
-int searchAndConnect(void* context, DeviceList& deviceList);
-int connectViaIP(void* context, DeviceList& deviceList);
 int slaveMenu(void* context, DeviceList& deviceList);
-int searchAndAddSlave(void* context, DeviceList& deviceList);
-int connectWiegand(void* context, DeviceList& deviceList);
-int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
-int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
-int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID);
-void displayDeviceList(const std::vector<BS2SimpleDeviceInfo>& devices);
-void displaySlaveList(const std::vector<BS2Rs485SlaveDevice>& devices);
-void displayCSTSlaveList(const std::vector<BS2Rs485SlaveDeviceEX>& devices);
-void displayWiegandList(const std::vector<BS2_DEVICE_ID>& devices);
-BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave = false, bool includeWiegand = false);
-void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand);
 int runAPIs(void* context, const DeviceList& deviceList);
-int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
-int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
-int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
 int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList);
 int updateConnectModeDevice2Server(void* context, BS2_DEVICE_ID id);
 int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id);
+int getSocketRetryCount(void* context);
+int setSocketRetryCount(void* context);
+int getSocketSSLRetryCount(void* context);
+int setSocketSSLRetryCount(void* context);
 int getFactoryConfig(void* context, BS2_DEVICE_ID id);
 int getFactoryConfigMulti(void* context, const std::vector<BS2_DEVICE_ID>& devices);
-int getSlaveConnectionStatus(void* context, BS2_DEVICE_ID id);
 int getStatusConfig(void* context, BS2_DEVICE_ID id);
 int getStatusConfigMulti(void* context, const std::vector<BS2_DEVICE_ID>& devices);
 int setStatusConfig(void* context, BS2_DEVICE_ID id);
@@ -258,3 +273,6 @@ int getLogFromDir();
 int getLogBlobFromDir();
 int getLogSmallBlobFromDir();
 int getLogSmallBlobExFromDir();
+int setDeviceLicense(void* context, BS2_DEVICE_ID id);
+int deleteDeviceLicense(void* context, BS2_DEVICE_ID id);
+int getDeviceLicense(void* context, BS2_DEVICE_ID id);

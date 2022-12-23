@@ -7,7 +7,12 @@
 #include <mutex>
 #include "BS_API.h"
 
-typedef std::pair<BS2_DEVICE_ID, BS2_DEVICE_TYPE>	BS2_DEVICE_ID_TYPE;
+
+typedef struct  
+{
+	BS2_DEVICE_ID		id;
+	BS2_DEVICE_TYPE		type;
+} BS2_DEVICE_ID_TYPE;
 
 class DeviceInfo
 {

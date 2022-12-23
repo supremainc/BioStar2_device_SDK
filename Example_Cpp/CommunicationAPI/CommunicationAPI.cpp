@@ -97,7 +97,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 	else
 		cc.getTimezone(id, timezone);
 
-	int sdkResult = sdkResult = getAllLogsFromDevice(sdkContext, id, timezone);
+	int sdkResult = sdkResult = Utility::getAllLogsFromDevice(sdkContext, id, timezone);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("An error occurred while receiving bulk logs from device: %d", sdkResult);
@@ -205,23 +205,23 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 	bool menuBreak = false;
 	while (!menuBreak)
 	{
-		uint32_t selected = showMenu(menuInfoTop);
+		uint32_t selected = Utility::showMenu(menuInfoTop);
 		switch (selected)
 		{
 		case MENU_TOP_BREAK:
 			menuBreak = true;
 			break;
 		case MENU_TOP_SEARCH_N_CONN:
-			sdkResult = searchAndConnect(context, deviceList);
+			sdkResult = Utility::searchAndConnect(context, deviceList);
 			break;
 		case MENU_TOP_DIRECT_IPADDR:
-			sdkResult = connectViaIP(context, deviceList);
+			sdkResult = Utility::connectViaIP(context, deviceList);
 			break;
 		case MENU_TOP_SEARCH_SLAVE:
 			sdkResult = slaveMenu(context, deviceList);
 			break;
 		case MENU_TOP_SEARCH_WIEGAND:
-			sdkResult = connectWiegand(context, deviceList);
+			sdkResult = Utility::connectWiegand(context, deviceList);
 			break;
 		case MENU_TOP_VIEW_DEVICE:
 			Utility::displayConnectedDevices(deviceList, true, true);
@@ -241,94 +241,11 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 	runAPIs(context, deviceList);
 }
 
-uint32_t showMenu(vector<MENU_ITEM>& info)
-{
-	for (const auto& item : info)
-	{
-		cout << item.index << ") " << item.disc << endl;
-	}
-
-	return getSelectedIndex();
-}
-
-int searchAndConnect(void* context, DeviceList& deviceList)
-{
-	vector<BS2SimpleDeviceInfo> searchedList;
-	CommControl cm(context);
-	int sdkResult = cm.searchDevices(searchedList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	displayDeviceList(searchedList);
-
-	uint32_t selected(0);
-	if (MENU_TOP_BREAK != (selected = getSelectedIndex()) && selected <= searchedList.size())
-	{
-		uint32_t ip = searchedList[selected - 1].ipv4Address;
-		string ipAddr = Utility::getIPAddress(ip);
-		BS2_PORT port = searchedList[selected - 1].port;
-		BS2_DEVICE_ID id = searchedList[selected - 1].id;
-		BS2_DEVICE_TYPE type = searchedList[selected - 1].type;
-
-		TRACE("Now connect to device (ID:%u, IP:%s, Port:%u)", id, ipAddr.c_str(), port);
-
-		sdkResult = cm.connectDevice(id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		int timezone(0);
-		ConfigControl cc(context);
-		if (BS_SDK_SUCCESS != (sdkResult = cc.getTimezone(id, timezone)))
-		{
-			cm.disconnectDevice(id);
-			return sdkResult;
-		}
-
-		deviceList.appendDevice(id, type, ip, port, timezone);
-	}
-
-	return sdkResult;
-}
-
-int connectViaIP(void* context, DeviceList& deviceList)
-{
-	DeviceControl dc(context);
-	ConfigControl cc(context);
-	CommControl cm(context);
-	string ip = Utility::getInput<string>("Device IP:");
-	BS2_PORT port = Utility::getInput<BS2_PORT>("Port:");
-	BS2_DEVICE_ID id = 0;
-
-	TRACE("Now connect to device (IP:%s, Port:%u)", ip.c_str(), port);
-
-	int sdkResult = cm.connectDevice(id, ip, port);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	int timezone(0);
-	if (BS_SDK_SUCCESS != (sdkResult = cc.getTimezone(id, timezone)))
-	{
-		cm.disconnectDevice(id);
-		return sdkResult;
-	}
-
-	BS2SimpleDeviceInfo info = {0,};
-	if (BS_SDK_SUCCESS != (sdkResult = dc.getDeviceInfo(id, info)))
-	{
-		cm.disconnectDevice(id);
-		return sdkResult;
-	}
-
-	BS2_DEVICE_TYPE type = info.type;
-	deviceList.appendDevice(id, type, info.ipv4Address, info.port, timezone);
-
-	return sdkResult;
-}
-
 int slaveMenu(void* context, DeviceList& deviceList)
 {
 	DeviceControl dc(context);
 	BS2_DEVICE_ID masterID(0);
+	BS2_DEVICE_TYPE masterType(0);
 	int sdkResult = BS_SDK_SUCCESS;
 	vector<BS2_DEVICE_ID> selectedIDs;
 	bool selectedOrder = false;
@@ -336,23 +253,25 @@ int slaveMenu(void* context, DeviceList& deviceList)
 	bool menuBreak = false;
 	while (!menuBreak)
 	{
-		uint32_t selected = showMenu(menuInfoSlave);
+		uint32_t selected = Utility::showMenu(menuInfoSlave);
 		switch (selected)
 		{
 		case MENU_SLV_BREAK:
 			menuBreak = true;
 			break;
 		case MENU_SLV_GET_CONFIG_RS485EX:
-			masterID = selectDeviceID(deviceList, false, false);
-			sdkResult = getSlaveConnectionStatus(context, masterID);
+			if (Utility::selectDeviceIDAndType(deviceList, false, masterID, masterType))
+			{
+				sdkResult = Utility::getSlaveConnectionStatus(context, masterID, masterType);
+			}
 			break;
 		case MENU_SLV_SEARCH_DEVICE:
-			sdkResult = searchAndAddSlave(context, deviceList);
+			sdkResult = Utility::searchAndAddSlave(context, deviceList);
 			break;
 		case MENU_SLV_UPG_FIRMWARE:
 			if (!selectedOrder)
 			{
-				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				Utility::selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
 				selectedOrder = true;
 			}
 			sdkResult = dc.upgradeFirmware(selectedIDs);
@@ -360,7 +279,7 @@ int slaveMenu(void* context, DeviceList& deviceList)
 		case MENU_SLV_GET_CONFIG_FACTORY:
 			if (!selectedOrder)
 			{
-				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				Utility::selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
 				selectedOrder = true;
 			}
 			sdkResult = getFactoryConfigMulti(context, selectedIDs);
@@ -368,7 +287,7 @@ int slaveMenu(void* context, DeviceList& deviceList)
 		case MENU_SLV_GET_CONFIG_STATUS:
 			if (!selectedOrder)
 			{
-				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				Utility::selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
 				selectedOrder = true;
 			}
 			sdkResult = getStatusConfigMulti(context, selectedIDs);
@@ -376,7 +295,7 @@ int slaveMenu(void* context, DeviceList& deviceList)
 		case MENU_SLV_SET_CONFIG_STATUS:
 			if (!selectedOrder)
 			{
-				selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
+				Utility::selectDeviceIDs(deviceList, masterID, selectedIDs, true, false);
 				selectedOrder = true;
 			}
 			sdkResult = setStatusConfigMulti(context, selectedIDs);
@@ -387,229 +306,6 @@ int slaveMenu(void* context, DeviceList& deviceList)
 	}
 
 	return sdkResult;
-}
-
-int searchAndAddSlave(void* context, DeviceList& deviceList)
-{
-	int sdkResult = BS_SDK_SUCCESS;
-	if (Utility::isYes("Do you want to find slave devices?"))
-	{
-		Utility::displayConnectedDevices(deviceList);
-		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
-
-		if (!deviceList.findDevice(masterID))
-		{
-			cout << "Abort slave device discovery" << endl;
-			return BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-		}
-
-		auto device = deviceList.getDevice(masterID);
-		BS2_DEVICE_TYPE type = device->type_;
-		BS2_DEVICE_ID slaveID = 0;
-		ConfigControl cc(context);
-
-		switch (type)
-		{
-		case BS2_DEVICE_TYPE_CORESTATION_40:
-			sdkResult = searchCSTSlave(context, deviceList, masterID);
-			break;
-
-		default:
-			sdkResult = cc.updateRS485OperationMode(masterID, BS2_RS485_MODE_MASTER);
-			if (BS_SDK_SUCCESS == sdkResult)
-				sdkResult = searchSlave(context, deviceList, masterID);
-			break;
-		}
-
-		//if (BS_SDK_SUCCESS == sdkResult && 0 < slaveID)
-		//	deviceList.appendSlave(masterID, slaveID);
-	}
-
-	return sdkResult;
-}
-
-int connectWiegand(void* context, DeviceList& deviceList)
-{
-	int sdkResult = BS_SDK_SUCCESS;
-	if (Utility::isYes("Do you want to find wiegand devices?"))
-	{
-		Utility::displayConnectedDevices(deviceList, true);
-		BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
-
-		if (!deviceList.findDevice(masterID) && !deviceList.findSlave(masterID))
-		{
-			cout << "Abort wiegand device discovery" << endl;
-			return BS_SDK_ERROR_CANNOT_FIND_DEVICE;
-		}
-
-		BS2_DEVICE_ID wiegandID = 0;
-		sdkResult = searchWiegand(context, masterID, wiegandID);
-		if (BS_SDK_SUCCESS == sdkResult)
-			deviceList.appendWiegand(masterID, wiegandID);
-	}
-
-	return sdkResult;
-}
-
-uint32_t getSelectedIndex()
-{
-	return Utility::getInput<uint32_t>("Select number:");
-}
-
-int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
-{
-	CommControl cm(context);
-	vector<BS2Rs485SlaveDevice> slaveList;
-	int sdkResult = cm.searchSlaveDevice(masterID, slaveList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	displaySlaveList(slaveList);
-
-	if (0 == slaveList.size())
-		return BS_SDK_SUCCESS;
-
-	bool connectAll = false;
-	if (Utility::isYes("Do you want to add all discovered slave devices?"))
-		connectAll = true;
-
-	for (auto& slaveDevice : slaveList)
-	{
-		if (connectAll)
-		{
-			slaveDevice.enableOSDP = true;
-		}
-		else
-		{
-			ostringstream oss;
-			oss << "Do you want to add slave device " << slaveDevice.deviceID << " ?";
-			slaveDevice.enableOSDP = Utility::isYes(oss.str());
-		}
-	}
-	
-	sdkResult = cm.addSlaveDevice(masterID, slaveList);
-	
-	for (const auto& slaveDevice : slaveList)
-	{
-		if (slaveDevice.enableOSDP)
-		{
-			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
-			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
-			deviceList.appendSlave(masterID, id, type);
-		}
-	}
-
-	return sdkResult;
-}
-
-int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID)
-{
-	stringstream msg;
-	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
-	uint32_t chSelected = Utility::getInput<uint32_t>(msg.str());
-	switch (chSelected)
-	{
-	case RS485_HOST_CH_0:
-	case RS485_HOST_CH_1:
-	case RS485_HOST_CH_2:
-	case RS485_HOST_CH_3:
-		break;
-	case 4:
-	default:
-		chSelected = RS485_HOST_CH_ALL;
-		break;
-	}
-
-	CommControl cm(context);
-	vector<BS2Rs485SlaveDeviceEX> slaveList;
-	int sdkResult = cm.searchCSTSlaveDevice(masterID, chSelected, slaveList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	displayCSTSlaveList(slaveList);
-
-	bool connectAll = false;
-	if (Utility::isYes("Do you want to add all discovered slave devices?"))
-		connectAll = true;
-
-	for (auto& slaveDevice : slaveList)
-	{
-		if (connectAll)
-		{
-			slaveDevice.enableOSDP = true;
-		}
-		else
-		{
-			ostringstream oss;
-			oss << "Do you want to add slave device " << slaveDevice.deviceID << "?";
-			slaveDevice.enableOSDP = Utility::isYes(oss.str());
-		}
-	}
-
-	sdkResult = cm.addCSTSlaveDevice(masterID, chSelected, slaveList);
-
-	for (const auto& slaveDevice : slaveList)
-	{
-		if (slaveDevice.enableOSDP)
-		{
-			BS2_DEVICE_ID id = slaveDevice.deviceID;
-			BS2_DEVICE_TYPE type = slaveDevice.deviceType;
-			cout << "Added slave:" << id << ", type:" << (uint32_t)type << endl;
-			deviceList.appendSlave(masterID, id, type);
-		}
-	}
-
-	return sdkResult;
-}
-
-int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID)
-{
-	CommControl cm(context);
-	vector<BS2_DEVICE_ID> wiegandList;
-	int sdkResult = cm.searchWiegandDevice(masterID, wiegandList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
-
-	displayWiegandList(wiegandList);
-
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = getSelectedIndex()) && selected <= wiegandList.size())
-	{
-		BS2_DEVICE_ID id = wiegandList[selected - 1];
-
-		TRACE("Now connect to wiegand device (Host:%u, Slave:%u)", masterID, id);
-
-		sdkResult = cm.addWiegandDevice(masterID, id);
-		if (BS_SDK_SUCCESS == sdkResult)
-		{
-			wiegandID = id;
-			cout << "Added wiegand slave " << wiegandID << endl;
-		}
-	}
-
-	return sdkResult;
-}
-
-BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave, bool includeWiegand)
-{
-	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
-	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
-}
-
-void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand)
-{
-	cout << "==> Select upgrade order." << endl;
-	selectedDevices.clear();
-	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
-	while (true)
-	{
-		BS2_DEVICE_ID id = Utility::getInput<BS2_DEVICE_ID>("Please enter the slave device ID by order (0: Stop) :");
-		if (0 == id)
-			break;
-		selectedDevices.push_back(id);
-	}
-	masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the master device ID :");
 }
 
 int runAPIs(void* context, const DeviceList& deviceList)
@@ -624,7 +320,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
 
-	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_COMM_BREAK != (selectedTop = showMenu(menuInfoCommAPI)))
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_COMM_BREAK != (selectedTop = Utility::showMenu(menuInfoCommAPI)))
 	{
 		switch (selectedTop)
 		{
@@ -646,7 +342,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			sdkResult = cm.setSSLServerPort();
 			break;
 		case MENU_COMM_IS_CONNECTED:
-			id = selectDeviceID(deviceList);
+			id = Utility::selectDeviceID(deviceList);
 			sdkResult = cm.isConnected(id);
 			break;
 		case MENU_COMM_IS_AUTO_CONNECT:
@@ -685,189 +381,63 @@ int runAPIs(void* context, const DeviceList& deviceList)
 		case MENU_COMM_SET_DEF_RES_TIMEOUT:
 			sdkResult = cm.setDefaultResponseTimeout();
 			break;
+		case MENU_COMM_GET_SOCKET_RETRY_COUNT:
+			sdkResult = getSocketRetryCount(context);
+			break;
+		case MENU_COMM_SET_SOCKET_RETRY_COUNT:
+			sdkResult = setSocketRetryCount(context);
+			break;
+		case MENU_COMM_GET_SOCKETSSL_RETRY_COUNT:
+			sdkResult = getSocketSSLRetryCount(context);
+			break;
+		case MENU_COMM_SET_SOCKETSSL_RETRY_COUNT:
+			sdkResult = setSocketSSLRetryCount(context);
+			break;
 		case MENU_CONF_GET_FACCONFIG:
-			id = selectDeviceID(deviceList, true, false);
+			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = getFactoryConfig(context, id);
 			break;
 		case MENU_ELOG_GET_EVENTSMALLBLOB:
-			id = selectDeviceID(deviceList, true, false);
+			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = lc.getLogSmallBlob(id);
 			break;
 		case MENU_ELOG_GET_EVENTSMALLBLOBEX:
-			id = selectDeviceID(deviceList, true, false);
+			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = lc.getLogSmallBlobEx(id);
 			break;
 		case MENU_USER_ENROLL_FACE:
-			id = selectDeviceID(deviceList, true, false);
+			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = uc.enrollUser(id);
 			break;
 		case MENU_USER_ENROLL_FACEEX:
 			sdkResult = enrollUserFaceEx_2_CS40(context, deviceList);
 			break;
 		case MENU_CONF_UPD_DEVICE_2_SERVER:
-			id = selectDeviceID(deviceList, false, false);
+			id = Utility::selectDeviceID(deviceList, false, false);
 			sdkResult = updateConnectModeDevice2Server(context, id);
 			break;
 		case MENU_CONF_UPD_SERVER_2_DEVICE:
-			id = selectDeviceID(deviceList, false, false);
+			id = Utility::selectDeviceID(deviceList, false, false);
 			sdkResult = updateConnectModeServer2Device(context, id);
 			break;
 		case MENU_USER_ENROLL_MULTIPLE:
 			sdkResult = enrollMultipleUsers(context, deviceList);
 			break;
+		case MENU_COMM_SET_DEVICE_LICENSE:
+			id = Utility::selectDeviceID(deviceList, true, false);
+			sdkResult = setDeviceLicense(context, id);
+			break;
+		case MENU_COMM_DEL_DEVICE_LICENSE:
+			id = Utility::selectDeviceID(deviceList, true, false);
+			sdkResult = deleteDeviceLicense(context, id);
+			break;
+		case MENU_COMM_GET_DEVICE_LICENSE:
+			id = Utility::selectDeviceID(deviceList, true, false);
+			sdkResult = getDeviceLicense(context, id);
+			break;
 		default:
 			break;
 		}
-	}
-
-	return sdkResult;
-}
-
-
-void displayDeviceList(const vector<BS2SimpleDeviceInfo>& devices)
-{
-	int index = 0;
-	printf("%2u - Exit\n", index);
-	for (const auto& device : devices)
-	{
-		const BS2SimpleDeviceInfo& info = device;
-		printf("%2u - Device:%10u, IP:%-15s, Port:%u, Connected:%-15s, Mode:%s, Type:%-10s, DualID:%u\n",
-			++index,
-			info.id,
-			Utility::getIPAddress(info.ipv4Address).c_str(),
-			info.port,
-			(info.connectedIP == 0xFFFFFFFF) ? "" : Utility::getIPAddress(info.connectedIP).c_str(),
-			Utility::getStringOfConnectMode(info.connectionMode).c_str(),
-			Utility::getStringOfDeviceType(info.type).c_str(),
-			info.dualIDSupported);
-	}
-}
-
-void displaySlaveList(const vector<BS2Rs485SlaveDevice>& devices)
-{
-	int index = 0;
-	printf("%2u - Skip\n", index);
-	for (const auto& device : devices)
-	{
-		const BS2Rs485SlaveDevice& info = device;
-		printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d\n",
-			++index,
-			info.deviceID,
-			Utility::getStringOfDeviceType(info.deviceType).c_str(),
-			info.enableOSDP,
-			info.connected);
-	}
-}
-
-void displayCSTSlaveList(const vector<BS2Rs485SlaveDeviceEX>& devices)
-{
-	int index = 0;
-	printf("%2u - Skip\n", index);
-	for (const auto& device : devices)
-	{
-		const BS2Rs485SlaveDeviceEX& info = device;
-		printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d, Channel:%u\n",
-			++index,
-			info.deviceID,
-			Utility::getStringOfDeviceType(info.deviceType).c_str(),
-			info.enableOSDP,
-			info.connected,
-			info.channelInfo);
-	}
-}
-
-void displayWiegandList(const vector<BS2_DEVICE_ID>& devices)
-{
-	int index = 0;
-	printf("%2u - Skip\n", index);
-	for (const auto& device : devices)
-	{
-		printf("%2u - Device:%u\n", ++index, device);
-	}
-}
-
-int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone)
-{
-	int logIndex = 0;
-	int sdkResult = BS_SDK_SUCCESS;
-
-	// 1. Get the last log index from the database.
-	// logIndex = ????
-
-	// 2. Retrieve all bulk logs when disconnected
-	if (BS_SDK_SUCCESS == (sdkResult = getLogsFromDevice(context, id, logIndex, timezone)))
-	{
-		// 3. Retrieve logs that may have occurred during bulk log reception
-		sdkResult = getLogsFromDevice(context, id, logIndex, timezone);
-	}
-
-	return sdkResult;
-}
-
-int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone)
-{
-	int sdkResult = BS_SDK_SUCCESS;
-	BS2Event* logObj = NULL;
-	uint32_t numOfLog = 0;
-
-	do
-	{
-		numOfLog = 0;
-		sdkResult = BS2_GetLog(context, id, latestIndex, MAX_RECV_LOG_AMOUNT, &logObj, &numOfLog);
-		if (BS_SDK_SUCCESS == sdkResult)
-		{
-			for (uint32_t index = 0; index < numOfLog; ++index)
-			{
-				BS2Event& event = logObj[index];
-				latestIndex = event.id;
-				cout << LogControl::getEventString(id, event, timezone) << endl;
-
-				if (event.image & 0x01)
-				{
-					uint32_t imageSize(0);
-					uint8_t* imageBuf = new uint8_t[MAX_SIZE_IMAGE_LOG];
-					memset(imageBuf, 0x0, sizeof(uint8_t) * MAX_SIZE_IMAGE_LOG);
-					if (BS_SDK_SUCCESS == getImageLog(context, id, event.id, imageBuf, imageSize))
-					{
-						// Your job.
-						cout << "Image log received from " << id << " dateTime:" << event.dateTime + timezone
-							<< " Event:" << event.id << endl;
-					}
-
-					delete[] imageBuf;
-				}
-			}
-
-			if (logObj)
-			{
-				BS2_ReleaseObject(logObj);
-				logObj = NULL;
-			}
-		}
-		else
-		{
-			TRACE("BS2_GetLog call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	} while (MAX_RECV_LOG_AMOUNT <= numOfLog);
-
-	return sdkResult;
-}
-
-int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize)
-{
-	if (!imageBuf)
-		return BS_SDK_ERROR_NULL_POINTER;
-
-	uint8_t* imageObj = NULL;
-	uint32_t size(0);
-	int sdkResult = BS2_GetImageLog(context, id, eventID, &imageObj, &size);
-	if (BS_SDK_SUCCESS == sdkResult)
-	{
-		memcpy(imageBuf, imageObj, size);
-		imageSize = size;
-		if (imageObj)
-			BS2_ReleaseObject(imageObj);
 	}
 
 	return sdkResult;
@@ -950,6 +520,46 @@ int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id)
 	return cc.updateConnectModeServer2Device(id);
 }
 
+int getSocketRetryCount(void* context)
+{
+	CommControl cc(context);
+
+	uint32_t count(0);
+	int sdkResult = cc.getSocketRetryCount(count);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cout << "Socket retry count:" << count << endl;
+
+	return sdkResult;
+}
+
+int setSocketRetryCount(void* context)
+{
+	CommControl cc(context);
+
+	uint32_t count = Utility::getInput<uint32_t>("Enter the number of retries.");
+	return cc.setSocketRetryCount(count);
+}
+
+int getSocketSSLRetryCount(void* context)
+{
+	CommControl cc(context);
+
+	uint32_t count(0);
+	int sdkResult = cc.getSocketSSLRetryCount(count);
+	if (BS_SDK_SUCCESS == sdkResult)
+		cout << "SocketSSL retry count:" << count << endl;
+
+	return sdkResult;
+}
+
+int setSocketSSLRetryCount(void* context)
+{
+	CommControl cc(context);
+
+	uint32_t count = Utility::getInput<uint32_t>("Enter the number of retries.");
+	return cc.setSocketSSLRetryCount(count);
+}
+
 int getFactoryConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
@@ -974,18 +584,6 @@ int getFactoryConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
 	return sdkResult;
 }
 
-int getSlaveConnectionStatus(void* context, BS2_DEVICE_ID id)
-{
-	ConfigControl cc(context);
-	int sdkResult = BS_SDK_SUCCESS;
-
-	BS2Rs485ConfigEX config = { 0, };
-	sdkResult = cc.getRS485ConfigEx(id, config);
-	if (BS_SDK_SUCCESS == sdkResult)
-		ConfigControl::printRS485Status(config);
-
-	return sdkResult;
-}
 // int getRS485ExConfig(void* context, const vector<BS2_DEVICE_ID>& devices)
 // {
 // 	ConfigControl cc(context);
@@ -1379,7 +977,7 @@ int runUSBAPIs()
 
 	cout << endl << endl << "== USB Test ==" << endl;
 
-	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_USB_BREAK != (selectedTop = showMenu(menuInfoUSBAPI)))
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_USB_BREAK != (selectedTop = Utility::showMenu(menuInfoUSBAPI)))
 	{
 		switch (selectedTop)
 		{
@@ -1886,6 +1484,87 @@ int getLogSmallBlobExFromDir()
 		if (0 < item.imageSize && item.imageObj)
 			BS2_ReleaseObject(item.imageObj);
 	}
+
+	return sdkResult;
+}
+
+int setDeviceLicense(void* context, BS2_DEVICE_ID id)
+{
+	BS2LicenseBlob licenseBlob = { 0, };
+	vector<BS2_DEVICE_ID> deviceIDs;
+	DeviceControl dc(context);
+	vector<BS2LicenseResult> licenseResult;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	licenseBlob.licenseType = (BS2_LICENSE_TYPE)Utility::getInput<uint32_t>("Enter the license type. (0: None, 1: Visual QR)");
+	licenseBlob.numOfDevices = (uint16_t)Utility::getInput<uint32_t>("How many devices do you want to register?");
+	if (0 < licenseBlob.numOfDevices)
+	{
+		// Device ID
+		for (uint16_t idx = 0; idx < licenseBlob.numOfDevices; idx++)
+		{
+			BS2_DEVICE_ID deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>("Enter a device ID:");
+			deviceIDs.push_back(deviceID);
+		}
+
+		licenseBlob.deviceIDObjs = deviceIDs.data();
+
+		string pathName = Utility::getLine("Enter the path and name of license.");
+		licenseBlob.licenseLen = Utility::getResourceSize(pathName);
+		shared_ptr<uint8_t> buffer(new uint8_t[licenseBlob.licenseLen], ArrayDeleter<uint8_t>());
+		if (0 < licenseBlob.licenseLen && Utility::getResourceFromFile(pathName, buffer, licenseBlob.licenseLen))
+		{
+			licenseBlob.licenseObj = buffer.get();
+
+			sdkResult = dc.enableDeviceLicense(id, &licenseBlob, licenseResult);
+			if (BS_SDK_SUCCESS == sdkResult)
+				dc.print(licenseResult);
+		}
+	}
+
+	return sdkResult;
+}
+
+int deleteDeviceLicense(void* context, BS2_DEVICE_ID id)
+{
+	BS2LicenseBlob licenseBlob = { 0, };
+	vector<BS2_DEVICE_ID> deviceIDs;
+	DeviceControl dc(context);
+	vector<BS2LicenseResult> licenseResult;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	licenseBlob.licenseType = (BS2_LICENSE_TYPE)Utility::getInput<uint32_t>("Enter the license type. (0: None, 1: Visual QR)");
+	licenseBlob.numOfDevices = (uint16_t)Utility::getInput<uint32_t>("How many devices do you want to register?");
+	if (0 < licenseBlob.numOfDevices)
+	{
+		// Device ID
+		for (uint16_t idx = 0; idx < licenseBlob.numOfDevices; idx++)
+		{
+			BS2_DEVICE_ID deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>("Enter a device ID:");
+			deviceIDs.push_back(deviceID);
+		}
+
+		licenseBlob.deviceIDObjs = deviceIDs.data();
+
+		sdkResult = dc.disableDeviceLicense(id, &licenseBlob, licenseResult);
+		if (BS_SDK_SUCCESS == sdkResult)
+			dc.print(licenseResult);
+	}
+
+	return sdkResult;
+}
+
+int getDeviceLicense(void* context, BS2_DEVICE_ID id)
+{
+	BS2LicenseBlob licenseBlob = { 0, };
+	DeviceControl dc(context);
+	vector<BS2LicenseResult> licenseResult;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	BS2_LICENSE_TYPE licenseType = (BS2_LICENSE_TYPE)Utility::getInput<uint32_t>("Enter the license type. (0: None, 1: Visual QR)");
+	sdkResult = dc.queryDeviceLicense(id, licenseType, licenseResult);
+	if (BS_SDK_SUCCESS == sdkResult)
+		dc.print(licenseResult);
 
 	return sdkResult;
 }

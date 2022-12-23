@@ -45,6 +45,37 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
+### V2.8.4.0 Beta released 12/22/2022:
+
+**New Features**
+
+**1.** Added device license activation feature support.
+* Add Structure BS2License
+* Add Structure BS2LicenseConfig
+* Add Structure BS2LicenseBlob
+* Add Structure BS2LicenseResult
+* API BS2_GetLicenseConfig has been added
+* API BS2_EnableDeviceLicense has been added
+* API BS2_DisableDeviceLicense has been added
+* API BS2_QueryDeviceLicense has been added
+
+**2.** A function to support recognition and authentication of QR codes through the camera has been added.
+* Refer to structure BS2BarcodeConfig
+
+**3.** If an error occurs while reading and writing packets from the socket in the communication section, the SDK automatically retries a certain number of times, and APIs to set the number of retries have been added.
+* API BS2_GetSocketRetryCount has been added
+* API BS2_SetSocketRetryCount has been added
+* API BS2_GetSocketSSLRetryCount has been added
+* API BS2_SetSocketSSLRetryCount has been added
+
+**Modified Features**
+
+**1.** Fixed a problem that could crash while dumping user information to log when enroll users.
+
+**2.** Fixed an issue where keep-alive connection attempts could lead to memory leaks. (not a real device connection) 
+
+<br>
+
 ### V2.8.3.2 released 10/05/2022:
 
 **New Features**

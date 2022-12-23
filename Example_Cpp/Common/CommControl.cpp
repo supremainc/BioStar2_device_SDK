@@ -478,3 +478,40 @@ int CommControl::setDefaultResponseTimeout()
 
 	return sdkResult;
 }
+
+int CommControl::getSocketRetryCount(uint32_t& count)
+{
+	int sdkResult = BS2_GetSocketRetryCount(context_, &count);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetSocketRetryCount call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int CommControl::setSocketRetryCount(uint32_t count)
+{
+	int sdkResult = BS2_SetSocketRetryCount(context_, count);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetSocketRetryCount call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+
+int CommControl::getSocketSSLRetryCount(uint32_t& count)
+{
+	int sdkResult = BS2_GetSocketSSLRetryCount(context_, &count);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetSocketSSLRetryCount call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int CommControl::setSocketSSLRetryCount(uint32_t count)
+{
+	int sdkResult = BS2_SetSocketSSLRetryCount(context_, count);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetSocketSSLRetryCount call failed: %d", sdkResult);
+
+	return sdkResult;
+}

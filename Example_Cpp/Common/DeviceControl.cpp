@@ -299,6 +299,66 @@ int DeviceControl::getDeviceCapabilities(BS2_DEVICE_ID id, BS2DeviceCapabilities
 	return sdkResult;
 }
 
+int DeviceControl::enableDeviceLicense(BS2_DEVICE_ID id, const BS2LicenseBlob* licenseBlob, vector<BS2LicenseResult>& licenseResult)
+{
+	BS2LicenseResult* result = NULL;
+	uint32_t numOfResult = 0;
+	int sdkResult = BS2_EnableDeviceLicense(context_, id, licenseBlob, &result, &numOfResult);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_EnableDeviceLicense call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	licenseResult.clear();
+	for (uint32_t idx = 0; idx < numOfResult; idx++)
+	{
+		licenseResult.push_back(result[idx]);
+	}
+
+	return sdkResult;
+}
+
+int DeviceControl::disableDeviceLicense(BS2_DEVICE_ID id, const BS2LicenseBlob* licenseBlob, vector<BS2LicenseResult>& licenseResult)
+{
+	BS2LicenseResult* result = NULL;
+	uint32_t numOfResult = 0;
+	int sdkResult = BS2_DisableDeviceLicense(context_, id, licenseBlob, &result, &numOfResult);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_DisableDeviceLicense call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	licenseResult.clear();
+	for (uint32_t idx = 0; idx < numOfResult; idx++)
+	{
+		licenseResult.push_back(result[idx]);
+	}
+
+	return sdkResult;
+}
+
+int DeviceControl::queryDeviceLicense(BS2_DEVICE_ID id, BS2_LICENSE_TYPE licenseType, vector<BS2LicenseResult>& licenseResult)
+{
+	BS2LicenseResult* result = NULL;
+	uint32_t numOfResult = 0;
+	int sdkResult = BS2_QueryDeviceLicense(context_, id, licenseType, &result, &numOfResult);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_QueryDeviceLicense call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	licenseResult.clear();
+	for (uint32_t idx = 0; idx < numOfResult; idx++)
+	{
+		licenseResult.push_back(result[idx]);
+	}
+
+	return sdkResult;
+}
+
 void DeviceControl::print(const BS2SimpleDeviceInfo& info)
 {
 	TRACE("==[BS2SimpleDeviceInfo]==");
@@ -438,3 +498,15 @@ void DeviceControl::print(const BS2AuthOperatorLevel& opr)
 	TRACE(" : %u", opr.);
 }
 #endif
+
+void DeviceControl::print(const vector<BS2LicenseResult>& result)
+{
+	uint32_t count = 0;
+	TRACE("==[BS2LicenseResult]==");
+	for (auto item : result)
+	{
+		TRACE("[%u]", count++);
+		TRACE("  |--deviceID : %u", item.deviceID);
+		TRACE("  +--status   : %u", item.status);
+	}
+}

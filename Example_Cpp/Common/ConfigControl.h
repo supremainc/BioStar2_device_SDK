@@ -66,6 +66,7 @@ public:
 	int setVoipConfigExt(BS2_DEVICE_ID id, const BS2VoipConfigExt& config) const;
 	int getRtspConfig(BS2_DEVICE_ID id, BS2RtspConfig& config) const;
 	int setRtspConfig(BS2_DEVICE_ID id, const BS2RtspConfig& config) const;
+	int getLicenseConfig(BS2_DEVICE_ID id, BS2LicenseConfig& config) const;
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -103,6 +104,7 @@ public:
 	static void print(const BS2Action& action);
 	static void print(const BS2BarcodeConfig& config);
 	static void print(const BS2Rs485Config& config);
+	static void printRS485Status(const BS2Rs485Config& config);
 	static void printRS485Status(const BS2Rs485ConfigEX& config);
 	static void print(const BS2Rs485Channel& channel);
 	static void print(const BS2Rs485SlaveDevice& device);
@@ -120,6 +122,8 @@ public:
 	static void printExtPhoneNumber(const BS2ExtensionNumber& extNumber);
 	static void print(const BS2VoipConfigExt& config);
 	static void print(const BS2RtspConfig& config);
+	static void print(const BS2License& license);
+	static void print(const BS2LicenseConfig& config);
 
 
 private:

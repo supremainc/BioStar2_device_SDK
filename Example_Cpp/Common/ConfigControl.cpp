@@ -476,6 +476,15 @@ int ConfigControl::setRtspConfig(BS2_DEVICE_ID id, const BS2RtspConfig& config) 
 	return sdkResult;
 }
 
+int ConfigControl::getLicenseConfig(BS2_DEVICE_ID id, BS2LicenseConfig& config) const
+{
+	int sdkResult = BS2_GetLicenseConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetLicenseConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -1122,6 +1131,9 @@ void ConfigControl::print(const BS2BarcodeConfig& config)
 	TRACE("+--scanTimeout : %u", config.scanTimeout);
 	TRACE("+--bypassData : %u", config.bypassData);
 	TRACE("+--treatAsCSN : %u", config.treatAsCSN);
+	TRACE("+--useVisualBarcode : %u", config.useVisualBarcode);
+	TRACE("+--motionSensitivity : %u", config.motionSensitivity);
+	TRACE("+--visualCameraScanTimeout : %u", config.visualCameraScanTimeout);
 }
 
 
@@ -1166,7 +1178,7 @@ void ConfigControl::print(const BS2Rs485SlaveDevice& device)
 	TRACE("|  |  |--connected : %u", device.connected);
 }
 
-void ConfigControl::printRS485Status(const BS2Rs485ConfigEX& config)
+void ConfigControl::printRS485Status(const BS2Rs485Config& config)
 {
 	for (uint32_t cidx = 0; cidx < config.numOfChannels; cidx++)
 	{
@@ -1174,8 +1186,26 @@ void ConfigControl::printRS485Status(const BS2Rs485ConfigEX& config)
 		{
 			TRACE("-- Channel: %u, Mode: %u, Baudrate: %u, Device: %u, Connected: %u, Enable: %u",
 				cidx,
+				config.mode,
+				config.channels[cidx].baudRate,
+				config.channels[cidx].slaveDevices[didx].deviceID,
+				config.channels[cidx].slaveDevices[didx].connected,
+				config.channels[cidx].slaveDevices[didx].enableOSDP);
+		}
+	}
+}
+
+void ConfigControl::printRS485Status(const BS2Rs485ConfigEX& config)
+{
+	for (uint32_t cidx = 0; cidx < config.numOfChannels; cidx++)
+	{
+		for (uint32_t didx = 0; didx < config.channels[cidx].numOfDevices; didx++)
+		{
+			TRACE("-- Channel: %u, Mode: %u, Baudrate: %u, ChannelType: %u, Device: %u, Connected: %u, Enable: %u",
+				cidx,
 				config.mode[cidx],
 				config.channels[cidx].baudRate,
+				config.channels[cidx].channelType,
 				config.channels[cidx].slaveDevices[didx].deviceID,
 				config.channels[cidx].slaveDevices[didx].connected,
 				config.channels[cidx].slaveDevices[didx].enableOSDP);
@@ -1388,4 +1418,30 @@ void ConfigControl::print(const BS2RtspConfig& config)
 	TRACE("+--address : %s", config.address);
 	TRACE("+--port : %u", config.port);
 	TRACE("+--enabled : %u", config.enabled);
+}
+
+void ConfigControl::print(const BS2License& license)
+{
+
+	TRACE("  +--index : %u",         license.index);
+	TRACE("  +--hasCapability : %u", license.hasCapability);
+	TRACE("  +--enable : %u",        license.enable);
+	TRACE("  +--licenseType : %u",   license.licenseType);
+	TRACE("  +--licenseSubType : %u",license.licenseSubType);
+	TRACE("  +--enableTime : %u",    license.enableTime);
+	TRACE("  +--expiredTime : %u",   license.expiredTime);
+	TRACE("  +--issueNumber : %u",   license.issueNumber);
+	TRACE("  +--name : %s",          license.name);
+}
+
+void ConfigControl::print(const BS2LicenseConfig& config)
+{
+	TRACE("==[BS2LicenseConfig]==");
+	TRACE("+--version : %u",		config.version);
+	TRACE("+--numOfLicense : %u",	config.numOfLicense);
+	for (uint32_t idx = 0; idx <	config.numOfLicense; idx++)
+	{
+		TRACE("+--license[%u]",		idx);
+		print(config.license[idx]);
+    }
 }

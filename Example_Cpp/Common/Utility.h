@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdarg.h>
 #include "DeviceList.h"
+#include "../Include/BS_API.h"
 
 
 #define VER_272_OR_HIGHER			1
@@ -19,6 +20,14 @@
 #define DELIMITER_COMMA				','
 #define DELIMITER_COLON				':'
 
+#define MENU_BREAK				0
+#define MENU_SEPARATOR			-1
+
+typedef struct
+{
+	int			index;
+	std::string disc;
+} MENU_ITEM;
 
 typedef struct __BITMAPINFOHEADER
 {
@@ -69,7 +78,6 @@ public:
 	static bool getLineWiegandBits(std::string msg, T* data, uint32_t size);
 	template <typename T>
 	static std::vector<T> getLineNumbers(std::string msg, const char delimiter = ',');
-	static BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
 	static void displayConnectedDevices(const DeviceList& devices, bool includeSlave = false, bool includeWiegand = false);
 
 	static std::string getLocalTime(bool milliSec = true);
@@ -106,6 +114,36 @@ public:
 
 	template <typename T>
 	static std::string convertArrayToString(const T* data, int numOfData, char delimiter);
+
+	// Solution common functions
+	static uint32_t showMenu(std::vector<MENU_ITEM>& info);
+	static uint32_t getSelectedIndex();
+	static BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
+	static bool getSelectedDeviceID(const DeviceInfo& info, BS2_DEVICE_ID& id, BS2_DEVICE_TYPE& type);
+	static BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave = false, bool includeWiegand = false);
+	static bool selectDeviceIDAndType(const DeviceList& deviceList, bool includeSlave, BS2_DEVICE_ID& selectedID, BS2_DEVICE_TYPE& selectedType);
+	static void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand);
+	static int searchAndConnect(void* context, DeviceList& deviceList);
+	static int connectViaIP(void* context, DeviceInfo& device);
+	static int connectViaIP(void* context, DeviceList& deviceList);
+	static int connectSlave(void* context, DeviceInfo& device);
+	static int connectWiegand(void* context, DeviceInfo& device);
+	static int connectWiegand(void* context, DeviceList& deviceList);
+	static int searchAndAddSlave(void* context, DeviceList& deviceList);
+	static int searchSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
+	static int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
+	static int searchCSTSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
+	static int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
+	static int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID);
+	static int getSlaveConnectionStatus(void* context, BS2_DEVICE_ID id, BS2_DEVICE_TYPE type);
+	static void displayDeviceList(const std::vector<BS2SimpleDeviceInfo>& devices);
+	static void displaySlaveList(const std::vector<BS2Rs485SlaveDevice>& devices);
+	static void displayCSTSlaveList(const std::vector<BS2Rs485SlaveDeviceEX>& devices);
+	static void displayWiegandList(const std::vector<BS2_DEVICE_ID>& devices);
+	static int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
+	static int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
+	static int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
+
 
 private:
 	static void writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits);

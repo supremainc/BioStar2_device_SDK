@@ -2,8 +2,6 @@
 
 #define RETRIVE_BULK_LOGS			0
 #define REALTIME_LOG_TEMPERATURE	1
-#define MAX_RECV_LOG_AMOUNT			32768
-#define MAX_SIZE_IMAGE_LOG			50 * 1024
 
 
 enum

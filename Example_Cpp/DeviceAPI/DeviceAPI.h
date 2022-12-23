@@ -13,14 +13,6 @@
 #include "../Common/CommControl.h"
 #include "../Common/DeviceList.h"
 
-#define MENU_BREAK				0
-
-
-typedef struct
-{
-	int			index;
-	std::string disc;
-} MENU_ITEM;
 
 enum EN_MENU_DEV
 {
@@ -101,6 +93,8 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_RTSPCONFIG,
 	MENU_DEV_SET_RTSPCONFIG,
+
+	MENU_DEV_GET_LICENSECONFIG,
 
 	MENU_DEV_UPD_DEVICE_VOLUME,
 
@@ -188,6 +182,8 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_RTSPCONFIG,			"BS2_GetRtspConfig"},
 	{MENU_DEV_SET_RTSPCONFIG,			"BS2_SetRtspConfig"},
 
+	{MENU_DEV_GET_LICENSECONFIG,		"BS2_GetLicenseConfig"},
+
 	{MENU_DEV_UPD_DEVICE_VOLUME,		"Update device volume"},
 
 	{MENU_DEV_TURNON_QRBYPASS,			"Turn On QR Bypass"},
@@ -196,23 +192,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 
 void connectTestDevice(void* context);
-uint32_t showMenu(std::vector<MENU_ITEM>& info);
-uint32_t getSelectedIndex();
-int connectViaIP(void* context, DeviceInfo& device);
-int connectSlave(void* context, DeviceInfo& device);
-int connectWiegand(void* context, DeviceInfo& device);
-int searchSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
-int searchCSTSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
-int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID);
-void displayDeviceList(const std::vector<BS2SimpleDeviceInfo>& devices);
-void displaySlaveList(const std::vector<BS2Rs485SlaveDevice>& devices);
-void displayCSTSlaveList(const std::vector<BS2Rs485SlaveDeviceEX>& devices);
-void displayWiegandList(const std::vector<BS2_DEVICE_ID>& devices);
 int runAPIs(void* context, const DeviceInfo& device);
-int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
-int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
-int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
-bool getSelectedDeviceID(const DeviceInfo& info, BS2_DEVICE_ID& id, BS2_DEVICE_TYPE& type);
 int getDeviceInfo(void* context, const DeviceInfo& device);
 int getDeviceInfoEx(void* context, const DeviceInfo& device);
 int getFingerprintConfig(void* context, const DeviceInfo& device);
@@ -257,3 +237,4 @@ int getVoipConfigExt(void* context, const DeviceInfo& device);
 int setVoipConfigExt(void* context, const DeviceInfo& device);
 int getRtspConfig(void* context, const DeviceInfo& device);
 int setRtspConfig(void* context, const DeviceInfo& device);
+int getLicenseConfig(void* context, const DeviceInfo& device);
