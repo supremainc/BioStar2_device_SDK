@@ -420,7 +420,17 @@ typedef struct {
 	 */
 	uint8_t maxVoipExtensionNumbers;		///< 1 byte
 
-	uint8_t reserved[430];		///< 430 bytes
+	/*
+	 * OSDP Standard Central supported.
+	 */
+	uint8_t osdpStandardCentralSupported : 1;		///< 1 byte
+
+	/*
+	 * License Enable function supported.
+	 */
+	uint8_t enableLicenseFuncSupported : 1;   ///< 1 byte
+
+	uint8_t reserved[428];		///< 428 bytes
 } BS2DeviceCapabilities;
 
 #endif	// __BS2_DEVICE_INFO_H__

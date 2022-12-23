@@ -80,6 +80,7 @@
 #include "BSCommon/config/BS2RelayActionConfig.h"
 #include "BSCommon/config/BS2VoipConfigExt.h"
 #include "BSCommon/config/BS2RtspConfig.h"
+#include "BSCommon/config/BS2LicenseConfig.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -603,6 +604,10 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSSLHandshakeTimeout(void* context
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSSLHandshakeTimeout(void* context, uint32_t second);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetMaxThreadCount(void* context, uint32_t maxThreadCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetMaxConnectThreadCount(void* context, uint32_t maxThreadCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSocketRetryCount(void* context, uint32_t* count);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSocketRetryCount(void* context, uint32_t count);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSocketSSLRetryCount(void* context, uint32_t* count);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSocketSSLRetryCount(void* context, uint32_t count);
 
 //Communication API
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_IsAutoConnection(void* context, int* enable);
@@ -748,6 +753,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetVoipConfigExt(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetVoipConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2VoipConfigExt* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetRtspConfig(void* context, BS2_DEVICE_ID deviceId, BS2RtspConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRtspConfig(void* context, BS2_DEVICE_ID deviceId, const BS2RtspConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLicenseConfig(void* const, BS2_DEVICE_ID deviceId, BS2LicenseConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
@@ -948,6 +954,12 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSlaveExDevice(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSlaveExDevice(void* context, BS2_DEVICE_ID deviceId, uint32_t channelPort, BS2Rs485SlaveDeviceEX* slaveDevices, uint32_t slaveDeviceCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchDevicesCoreStation(void* context);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDevicesCoreStation(void* context, BS2_DEVICE_ID** deviceListObj, uint32_t* numDevice);
+
+
+// Device license
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnableDeviceLicense(void* context, BS2_DEVICE_ID deviceId, const BS2LicenseBlob* licenseBlob, BS2LicenseResult** outResult, uint32_t* outNumOfResult);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_DisableDeviceLicense(void* context, BS2_DEVICE_ID deviceId, const BS2LicenseBlob* licenseBlob, BS2LicenseResult** outResult, uint32_t* outNumOfResult);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_QueryDeviceLicense(void* context, BS2_DEVICE_ID deviceId, BS2_LICENSE_TYPE licenseType, BS2LicenseResult** outResult, uint32_t* outNumOfResult);
 
 //IntrusionAlarmZone
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetIntrusionAlarmZone(void* context, BS2_DEVICE_ID deviceId, BS2IntrusionAlarmZoneBlob* zoneBlob, uint32_t* numZone);

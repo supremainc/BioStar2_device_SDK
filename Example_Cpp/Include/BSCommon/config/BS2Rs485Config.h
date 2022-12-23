@@ -85,6 +85,5 @@ typedef struct {
 	BS2Rs485ChannelEX channels[BS2_RS485_MAX_CHANNELS_EX]; 	///< 72 * 8 bytes
 } BS2Rs485ConfigEX;
 
-
 #endif	// __BS2_RS485_CONFIG_H__
 

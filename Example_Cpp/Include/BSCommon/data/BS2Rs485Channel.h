@@ -29,6 +29,18 @@ enum {
 };
 
 /**
+ *	BS2_OSDP_CHANNEL_TYPE
+ */
+enum {
+	BS2_OSDP_CHANNEL_TYPE_NORMAL,
+	BS2_OSDP_CHANNEL_TYPE_SUPREMA,
+	BS2_OSDP_CHANNEL_TYPE_OSDP_STANDARD,
+	BS2_OSDP_CHANNEL_TYPE_OSDP_STANDARD_FULL
+};
+
+typedef uint8_t 	BS2_OSDP_CHANNEL_TYPE;
+
+/**
  *	BS2Rs485SlaveDeviceEX
  */
 typedef struct {
@@ -37,19 +49,21 @@ typedef struct {
 	BS2_BOOL		enableOSDP;		///< 1 byte
 	BS2_BOOL		connected;		///< 1 bytes (packing)
 	uint8_t			channelInfo;	///< 1byte
-	uint8_t			reserved[3];		///< 3 bytes (packing)
-} BS2Rs485SlaveDeviceEX;				///< 12 bytes
+	uint8_t			osdpID;			///< 1 byte
+	uint8_t			reserved;		///< 1 byte (packing)
+	uint8_t			useSecureSession; ///< 1 byte
+} BS2Rs485SlaveDeviceEX;			///< 12 bytes
 
 /**
  *	BS2Rs485ChannelEX
  */
 typedef struct {
-	uint32_t		baudRate;			///< 4 bytes
-	uint8_t		channelIndex;		///< 1 byte
-	uint8_t		useRegistance;		///< 1 byte
-	uint8_t		numOfDevices;		///< 1 byte
-	uint8_t		reserved[1];		///< 1 bytes (packing)
-	BS2Rs485SlaveDeviceEX slaveDevices[BS2_RS485_MAX_SLAVES_PER_CHANNEL];	///< 8 * 12 = 96 bytes
+	uint32_t				baudRate;			///< 4 bytes
+	uint8_t					channelIndex;		///< 1 byte
+	uint8_t					useRegistance;		///< 1 byte
+	uint8_t					numOfDevices;		///< 1 byte
+	BS2_OSDP_CHANNEL_TYPE	channelType;		///< 1 byte
+	BS2Rs485SlaveDeviceEX 	slaveDevices[BS2_RS485_MAX_SLAVES_PER_CHANNEL];	///< 8 * 12 = 96 bytes
 } BS2Rs485ChannelEX;
 
 /**
