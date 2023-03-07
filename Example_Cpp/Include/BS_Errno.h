@@ -346,6 +346,28 @@
 // Mobile access
 #define BS_SDK_ERROR_MOBILE_PORTAL                          -3100
 
+// OSDP
+#define BS_SDK_ERROR_NOT_OSDP_STANDARD_CHANNEL              -4001
+#define BS_SDK_ERROR_ALREADY_FULL_SLAVES                    -4002
+#define BS_SDK_ERROR_DUPLICATE_OSDP_ID                      -4003
+#define BS_SDK_ERROR_FAIL_ADD_OSDP_DEVICE                   -4004
+#define BS_SDK_ERROR_FAIL_UPDATE_OSDP_DEVICE                -4005
+#define BS_SDK_ERROR_INVALID_OSDP_DEVICE_ID                 -4006
+#define BS_SDK_ERROR_FAIL_MASTER_SET_KEY                    -4007
+#define BS_SDK_ERROR_FAIL_SLAVE_SET_KEY                     -4008
+#define BS_SDK_ERROR_DISCONNECT_SLAVE_DEVICE                -4009
+
+// license
+#define BS_SDK_ERROR_NO_LICENSE                             -4010
+#define BS_SDK_ERROR_LICENSE_CRC                            -4011
+#define BS_SDK_ERROR_LICENSE_FILE_NOT_VALID                 -4012
+#define BS_SDK_ERROR_LICENSE_PAYLOAD_LENGTH                 -4013
+#define BS_SDK_ERROR_LICENSE_PARRING_JSON                   -4014
+#define BS_SDK_ERROR_LICENSE_JSON_FORMAT                    -4015
+#define BS_SDK_ERROR_LICENSE_ENABLE_PARTIAL                 -4016
+#define BS_SDK_ERROR_LICENSE_NO_MATCH_DEVICE                -4017
+
+
 #define BS_SDK_ERROR_NULL_POINTER                           -10000
 #define BS_SDK_ERROR_UNINITIALIZED                          -10001
 #define BS_SDK_ERROR_CANNOT_RUN_SERVICE                     -10002

@@ -67,6 +67,9 @@ public:
 	int getRtspConfig(BS2_DEVICE_ID id, BS2RtspConfig& config) const;
 	int setRtspConfig(BS2_DEVICE_ID id, const BS2RtspConfig& config) const;
 	int getLicenseConfig(BS2_DEVICE_ID id, BS2LicenseConfig& config) const;
+	int getOsdpStandardConfig(BS2_DEVICE_ID id, BS2OsdpStandardConfig& config) const;
+	int getOsdpStandardActionConfig(BS2_DEVICE_ID id, BS2OsdpStandardActionConfig& config) const;
+	int setOsdpStandardActionConfig(BS2_DEVICE_ID id, const BS2OsdpStandardActionConfig& config) const;
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -124,6 +127,10 @@ public:
 	static void print(const BS2RtspConfig& config);
 	static void print(const BS2License& license);
 	static void print(const BS2LicenseConfig& config);
+	static void print(const BS2OsdpStandardConfig& config);
+	static void print(const BS2OsdpStandardActionConfig& config);
+	static uint32_t printOSDPDeviceID(const BS2OsdpStandardConfig& config);
+	static bool getOsdpID(const BS2OsdpStandardConfig& config, uint32_t osdpDeviceID, uint8_t& osdpID);
 
 
 private:

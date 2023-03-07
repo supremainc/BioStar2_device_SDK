@@ -308,6 +308,15 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_GET_LICENSECONFIG:
 			sdkResult = getLicenseConfig(context, device);
 			break;
+		case MENU_DEV_GET_OSDPSTANDARDCONFIG:
+			sdkResult = getOsdpStandardConfig(context, device);
+			break;
+		case MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG:
+			sdkResult = getOsdpStandardActionConfig(context, device);
+			break;
+		case MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG:
+			sdkResult = setOsdpStandardActionConfig(context, device);
+			break;
 		case MENU_DEV_UPD_DEVICE_VOLUME:
 			sdkResult = updateDeviceVolume(context, device);
 			break;
@@ -2070,4 +2079,122 @@ int getLicenseConfig(void* context, const DeviceInfo& device)
 		ConfigControl::print(config);
 
 	return sdkResult;
+}
+
+int getOsdpStandardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2OsdpStandardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getOsdpStandardConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int getOsdpStandardActionConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2OsdpStandardActionConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getOsdpStandardActionConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setOsdpStandardActionConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2OsdpStandardActionConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getOsdpStandardActionConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	bool activate = false;
+	for (int idx = 0; idx < BS2_OSDP_STANDARD_ACTION_TYPE_COUNT; idx++)
+	{
+		string msg;
+		switch (config.actions[idx].actionType)
+		{
+		case BS2_OSDP_STANDARD_ACTION_TYPE_SUCCESS:
+			msg = "SUCCESS";
+			break;
+		case BS2_OSDP_STANDARD_ACTION_TYPE_FAIL:
+			msg = "FAIL";
+			break;
+		case BS2_OSDP_STANDARD_ACTION_TYPE_WAIT_INPUT:
+			msg = "WAIT_INPUT";
+			break;
+		case BS2_OSDP_STANDARD_ACTION_TYPE_NONE:
+		default:
+			msg = "NONE";
+			break;
+		}
+		if (Utility::isYes("Do you want to modify the %s action type?", msg.c_str()))
+		{
+			for (int ledidx = 0; ledidx < BS2_OSDP_STANDARD_ACTION_MAX_LED; ledidx++)
+			{
+				string msg;
+				activate = Utility::isYes("Do you want to activate for LED#%d action?", ledidx);
+				config.actions[idx].led[ledidx].use = activate;
+
+				if (activate)
+				{
+					msg = "  Please enter your reader number. Default(0).";
+					config.actions[idx].led[ledidx].readerNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter a led number of the reader. Default(0).";
+					config.actions[idx].led[ledidx].ledNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+					msg = "  Please enter a temporary command (0: NOP, 1: Cancel, 2: Set)";
+					config.actions[idx].led[ledidx].tempCommand = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command on time in 100 ms.";
+					config.actions[idx].led[ledidx].tempOnTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command off time in 100 ms.";
+					config.actions[idx].led[ledidx].tempOffTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command on color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].tempOnColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command off color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].tempOffColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary run time in 100 ms.";
+					config.actions[idx].led[ledidx].tempRunTime = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+					msg = "  Please enter a permanent command (0: NOP, 1: Cancel, 2: Set)";
+					config.actions[idx].led[ledidx].permCommand = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent on time in 100 ms.";
+					config.actions[idx].led[ledidx].permOnTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent off time in 100 ms.";
+					config.actions[idx].led[ledidx].permOffTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent on color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].permOnColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent off color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].permOffColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+				}
+			}
+
+			activate = Utility::isYes("Do you want to activate for buzzer action?");
+			config.actions[idx].buzzer.use = activate;
+			if (activate)
+			{
+				msg = "  Please enter your reader number. Default(0).";
+				config.actions[idx].buzzer.readerNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter a tone type (0: None, 1: Off, 2: On)";
+				config.actions[idx].buzzer.tone = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter the buzzer turn-on time in 100 ms.";
+				config.actions[idx].buzzer.onTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter the buzzer turn-off time in 100 ms.";
+				config.actions[idx].buzzer.offTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter the number of cycle the buzzer on and off.";
+				config.actions[idx].buzzer.numOfCycle = (uint8_t)Utility::getInput<uint32_t>(msg);
+			}
+		}
+	}
+
+	return cc.setOsdpStandardActionConfig(id, config);
 }

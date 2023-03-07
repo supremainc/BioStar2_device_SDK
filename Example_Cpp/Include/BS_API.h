@@ -80,6 +80,8 @@
 #include "BSCommon/config/BS2RelayActionConfig.h"
 #include "BSCommon/config/BS2VoipConfigExt.h"
 #include "BSCommon/config/BS2RtspConfig.h"
+#include "BSCommon/config/BS2OsdpStandardActionConfig.h"
+#include "BSCommon/config/BS2OsdpStandardConfig.h"
 #include "BSCommon/config/BS2LicenseConfig.h"
 #include "BS_Deprecated.h"
 
@@ -531,6 +533,7 @@ typedef void (*OnCheckGlobalAPBViolation)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ
 typedef void (*OnCheckGlobalAPBViolationByDoorOpen)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID_1, const char* userID_2, bool isDualAuth);
 typedef void (*OnUpdateGlobalAPBViolationByDoorOpen)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID_1, const char* userID_2, bool isDualAuth);
 typedef void (*OnUserPhrase)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID);
+typedef void (*OnOsdpStandardDeviceStatusChanged)(BS2_DEVICE_ID deviceId, const BS2OsdpStandardDeviceNotify* notifyData);
 
 typedef uint32_t (*PreferMethod)(BS2_DEVICE_ID deviceID);
 typedef const char* (*GetRootCaFilePath)(BS2_DEVICE_ID deviceID);
@@ -575,6 +578,7 @@ typedef void (*CBDebugPrint)(char* msg);
 #define DEBUG_LOG_TRACE					(0x1 << 8)		// Modified bit mask value (V2.6.3.12)
 #define DEBUG_LOG_SYSTEM				(0x0000000F)	// DEBUG_LOG_FATAL | DEBUG_LOG_ERROR | DEBUG_LOG_WARN | DEBUG_LOG_API
 #define DEBUG_LOG_OPERATION_ALL			(0x000000FF)	// Output support except trace logs (V2.6.3.12)
+#define DEBUG_LOG_ALL_WITHOUT_RELEASE	(0x0FFFFFFF)
 #define DEBUG_LOG_ALL					(0xFFFFFFFF)
 typedef void (*CBDebugExPrint)(uint32_t level, uint32_t module, const char* msg);
 
@@ -753,6 +757,9 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetVoipConfigExt(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetVoipConfigExt(void* context, BS2_DEVICE_ID deviceId, const BS2VoipConfigExt* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetRtspConfig(void* context, BS2_DEVICE_ID deviceId, BS2RtspConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRtspConfig(void* context, BS2_DEVICE_ID deviceId, const BS2RtspConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetOsdpStandardConfig(void* const, BS2_DEVICE_ID deviceId, BS2OsdpStandardConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetOsdpStandardActionConfig(void* const, BS2_DEVICE_ID deviceId, BS2OsdpStandardActionConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardActionConfig(void* const, BS2_DEVICE_ID deviceId, const BS2OsdpStandardActionConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLicenseConfig(void* const, BS2_DEVICE_ID deviceId, BS2LicenseConfig* config);
 
 // Door api
@@ -955,11 +962,20 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSlaveExDevice(void* context, BS2_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchDevicesCoreStation(void* context);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDevicesCoreStation(void* context, BS2_DEVICE_ID** deviceListObj, uint32_t* numDevice);
 
+// OSDP
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_AddOsdpStandardDevice(void* context, BS2_DEVICE_ID deviceId, uint32_t channelIndex, const BS2OsdpStandardDeviceAdd* osdpDevice, uint32_t* outChannelIndex);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetOsdpStandardDevice(void* context, BS2_DEVICE_ID osdpDeviceId, BS2OsdpStandardDevice* osdpDevice);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAvailableOsdpStandardDevice(void* context, BS2_DEVICE_ID deviceId, BS2OsdpStandardDeviceAvailable* osdpDevices);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_UpdateOsdpStandardDevice(void* context, BS2_DEVICE_ID deviceId, const BS2OsdpStandardDeviceUpdate* osdpDevices, uint32_t numOfDevice, BS2OsdpStandardDeviceResult** outResultObj, uint32_t* outNumOfResult);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveOsdpStandardDevice(void* context, BS2_DEVICE_ID deviceId, const BS2_DEVICE_ID* osdpDeviceIds, uint32_t numOfDevice, BS2OsdpStandardDeviceResult** outResultObj, uint32_t* outNumOfResult);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetOsdpStandardDeviceCapability(void* context, BS2_DEVICE_ID osdpDeviceId, BS2OsdpStandardDeviceCapability* capability);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardDeviceSecurityKey(void* context, BS2_DEVICE_ID masterOrSlaveId, const BS2OsdpStandardDeviceSecurityKey* key);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardDeviceStatusListener(void* context, OnOsdpStandardDeviceStatusChanged ptrOsdpStandardDeviceStatus);
 
 // Device license
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnableDeviceLicense(void* context, BS2_DEVICE_ID deviceId, const BS2LicenseBlob* licenseBlob, BS2LicenseResult** outResult, uint32_t* outNumOfResult);
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_DisableDeviceLicense(void* context, BS2_DEVICE_ID deviceId, const BS2LicenseBlob* licenseBlob, BS2LicenseResult** outResult, uint32_t* outNumOfResult);
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_QueryDeviceLicense(void* context, BS2_DEVICE_ID deviceId, BS2_LICENSE_TYPE licenseType, BS2LicenseResult** outResult, uint32_t* outNumOfResult);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnableDeviceLicense(void* context, BS2_DEVICE_ID deviceId, const BS2LicenseBlob* licenseBlob, BS2LicenseResult** outResultObj, uint32_t* outNumOfResult);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_DisableDeviceLicense(void* context, BS2_DEVICE_ID deviceId, const BS2LicenseBlob* licenseBlob, BS2LicenseResult** outResultObj, uint32_t* outNumOfResult);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_QueryDeviceLicense(void* context, BS2_DEVICE_ID deviceId, BS2_LICENSE_TYPE licenseType, BS2LicenseResult** outResultObj, uint32_t* outNumOfResult);
 
 //IntrusionAlarmZone
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetIntrusionAlarmZone(void* context, BS2_DEVICE_ID deviceId, BS2IntrusionAlarmZoneBlob* zoneBlob, uint32_t* numZone);

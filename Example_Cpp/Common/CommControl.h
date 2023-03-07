@@ -38,6 +38,16 @@ public:
 	int searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, std::vector<BS2Rs485SlaveDeviceEX>& slaveList);
 	int addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, const std::vector<BS2Rs485SlaveDeviceEX>& slaveList);
 
+	// OSDP
+	int getAvailableOsdpStandardDevice(BS2_DEVICE_ID id, BS2OsdpStandardDeviceAvailable& osdpDevice);
+	int addOsdpStandardDevice(BS2_DEVICE_ID id, uint32_t channelIndex, const BS2OsdpStandardDeviceAdd& osdpDevice, uint32_t& outChannelIndex);
+	int getOsdpStandardDevice(BS2_DEVICE_ID id, BS2OsdpStandardDevice& osdpDevice);
+	int updateOsdpStandardDevice(BS2_DEVICE_ID id, const std::vector<BS2OsdpStandardDeviceUpdate>& osdpDevices, std::vector<BS2OsdpStandardDeviceResult>& result);
+	int removeOsdpStandardDevice(BS2_DEVICE_ID id, const std::vector<BS2_DEVICE_ID>& osdpDeviceIDs, std::vector<BS2OsdpStandardDeviceResult>& result);
+	int getOsdpStandardDeviceCapability(BS2_DEVICE_ID id, BS2OsdpStandardDeviceCapability& capability);
+	int setOsdpStandardDeviceSecurityKey(BS2_DEVICE_ID id, const BS2OsdpStandardDeviceSecurityKey* key);
+	int setOsdpStandardDeviceStatusListener(OnOsdpStandardDeviceStatusChanged fpOsdpStandardDeviceStatusChanged);
+
 	// Wiegand
 	int searchWiegandDevice(BS2_DEVICE_ID id, std::vector<BS2_DEVICE_ID>& wiegandList);
 	int addWiegandDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID wiegandID);
@@ -67,6 +77,11 @@ public:
 	int getSocketSSLRetryCount(uint32_t& count);
 	int setSocketSSLRetryCount(uint32_t count);
 
+	static void print(const BS2OsdpStandardDeviceAvailable& devices);
+	static void print(const BS2OsdpStandardDevice& device);
+	static void print(const std::vector<BS2OsdpStandardDeviceResult>& result);
+	static void print(const BS2OsdpStandardDeviceCapability& capability);
+	static void print(const BS2OsdpStandardDeviceNotify& device);
 
 
 private:

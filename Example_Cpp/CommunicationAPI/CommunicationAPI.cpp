@@ -220,6 +220,9 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 		case MENU_TOP_SEARCH_SLAVE:
 			sdkResult = slaveMenu(context, deviceList);
 			break;
+		case MENU_TOP_OSDP_STANDARD:
+			sdkResult = osdpMenu(context, deviceList);
+			break;
 		case MENU_TOP_SEARCH_WIEGAND:
 			sdkResult = Utility::connectWiegand(context, deviceList);
 			break;
@@ -299,6 +302,63 @@ int slaveMenu(void* context, DeviceList& deviceList)
 				selectedOrder = true;
 			}
 			sdkResult = setStatusConfigMulti(context, selectedIDs);
+			break;
+		default:
+			break;
+		}
+	}
+
+	return sdkResult;
+}
+
+int osdpMenu(void* context, DeviceList& deviceList)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+
+	bool menuBreak = false;
+	while (!menuBreak)
+	{
+		uint32_t selected = Utility::showMenu(menuInfoOsdp);
+		switch (selected)
+		{
+		case MENU_OSDP_BREAK:
+			menuBreak = true;
+			break;
+		case MENU_OSDP_GET_OSDPSTANDARDCONFIG:
+			sdkResult = getOsdpStandardConfig(context, deviceList);
+			break;
+		case MENU_OSDP_GET_OSDPSTANDARDACTIONCONFIG:
+			sdkResult = getOsdpStandardActionConfig(context, deviceList);
+			break;
+		case MENU_OSDP_SET_OSDPSTANDARDACTIONCONFIG:
+			sdkResult = setOsdpStandardActionConfig(context, deviceList);
+			break;
+		case MENU_OSDP_GET_AVAILABLE_DEVICE:
+			sdkResult = getAvailableOsdpStandardDevice(context, deviceList);
+			break;
+		case MENU_OSDP_GET_DEVICE:
+			sdkResult = getOsdpStandardDevice(context, deviceList);
+			break;
+		case MENU_OSDP_ADD_DEVICE:
+			sdkResult = addOsdpStandardDevice(context, deviceList);
+			break;
+		case MENU_OSDP_UPD_DEVICE:
+			sdkResult = updateOsdpStandardDevice(context, deviceList);
+			break;
+		case MENU_OSDP_REM_DEVICE:
+			sdkResult = removeOsdpStandardDevice(context, deviceList);
+			break;
+		case MENU_OSDP_GET_CAPABILITY:
+			sdkResult = getOsdpStandardDeviceCapability(context, deviceList);
+			break;
+		case MENU_OSDP_SET_SECURITYKEY:
+			sdkResult = setOsdpStandardDeviceSecurityKey(context, deviceList);
+			break;
+		case MENU_OSDP_START_STATUS_MONITOR:
+			sdkResult = startMonitorOsdpStandardDeviceStatus(context);
+			break;
+		case  MENU_OSDP_STOP_STATUS_MONITOR:
+			sdkResult = stopMonitorOsdpStandardDeviceStatus(context);
 			break;
 		default:
 			break;
@@ -1490,9 +1550,9 @@ int getLogSmallBlobExFromDir()
 
 int setDeviceLicense(void* context, BS2_DEVICE_ID id)
 {
+	DeviceControl dc(context);
 	BS2LicenseBlob licenseBlob = { 0, };
 	vector<BS2_DEVICE_ID> deviceIDs;
-	DeviceControl dc(context);
 	vector<BS2LicenseResult> licenseResult;
 	int sdkResult = BS_SDK_SUCCESS;
 
@@ -1518,7 +1578,7 @@ int setDeviceLicense(void* context, BS2_DEVICE_ID id)
 
 			sdkResult = dc.enableDeviceLicense(id, &licenseBlob, licenseResult);
 			if (BS_SDK_SUCCESS == sdkResult)
-				dc.print(licenseResult);
+				DeviceControl::print(licenseResult);
 		}
 	}
 
@@ -1527,9 +1587,9 @@ int setDeviceLicense(void* context, BS2_DEVICE_ID id)
 
 int deleteDeviceLicense(void* context, BS2_DEVICE_ID id)
 {
+	DeviceControl dc(context);
 	BS2LicenseBlob licenseBlob = { 0, };
 	vector<BS2_DEVICE_ID> deviceIDs;
-	DeviceControl dc(context);
 	vector<BS2LicenseResult> licenseResult;
 	int sdkResult = BS_SDK_SUCCESS;
 
@@ -1548,7 +1608,7 @@ int deleteDeviceLicense(void* context, BS2_DEVICE_ID id)
 
 		sdkResult = dc.disableDeviceLicense(id, &licenseBlob, licenseResult);
 		if (BS_SDK_SUCCESS == sdkResult)
-			dc.print(licenseResult);
+			DeviceControl::print(licenseResult);
 	}
 
 	return sdkResult;
@@ -1556,15 +1616,364 @@ int deleteDeviceLicense(void* context, BS2_DEVICE_ID id)
 
 int getDeviceLicense(void* context, BS2_DEVICE_ID id)
 {
-	BS2LicenseBlob licenseBlob = { 0, };
 	DeviceControl dc(context);
+	BS2LicenseBlob licenseBlob = { 0, };
 	vector<BS2LicenseResult> licenseResult;
 	int sdkResult = BS_SDK_SUCCESS;
 
 	BS2_LICENSE_TYPE licenseType = (BS2_LICENSE_TYPE)Utility::getInput<uint32_t>("Enter the license type. (0: None, 1: Visual QR)");
 	sdkResult = dc.queryDeviceLicense(id, licenseType, licenseResult);
 	if (BS_SDK_SUCCESS == sdkResult)
-		dc.print(licenseResult);
+		DeviceControl::print(licenseResult);
 
 	return sdkResult;
+}
+
+int getOsdpStandardConfig(void* context, const DeviceList& deviceList)
+{
+	ConfigControl cc(context);
+	BS2OsdpStandardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+	int sdkResult = cc.getOsdpStandardConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int getOsdpStandardActionConfig(void* context, const DeviceList& deviceList)
+{
+	ConfigControl cc(context);
+	BS2OsdpStandardActionConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+	int sdkResult = cc.getOsdpStandardActionConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setOsdpStandardActionConfig(void* context, const DeviceList& deviceList)
+{
+	ConfigControl cc(context);
+	BS2OsdpStandardActionConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+	int sdkResult = cc.getOsdpStandardActionConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	bool activate = false;
+	for (int idx = 0; idx < BS2_OSDP_STANDARD_ACTION_TYPE_COUNT; idx++)
+	{
+		string msg;
+		switch (config.actions[idx].actionType)
+		{
+		case BS2_OSDP_STANDARD_ACTION_TYPE_SUCCESS:
+			msg = "SUCCESS";
+			break;
+		case BS2_OSDP_STANDARD_ACTION_TYPE_FAIL:
+			msg = "FAIL";
+			break;
+		case BS2_OSDP_STANDARD_ACTION_TYPE_WAIT_INPUT:
+			msg = "WAIT_INPUT";
+			break;
+		case BS2_OSDP_STANDARD_ACTION_TYPE_NONE:
+		default:
+			msg = "NONE";
+			break;
+		}
+		if (Utility::isYes("Do you want to modify the %s action type?", msg.c_str()))
+		{
+			for (int ledidx = 0; ledidx < BS2_OSDP_STANDARD_ACTION_MAX_LED; ledidx++)
+			{
+				string msg;
+				activate = Utility::isYes("Do you want to activate for LED#%d action?", ledidx);
+				config.actions[idx].led[ledidx].use = activate;
+
+				if (activate)
+				{
+					msg = "  Please enter your reader number. Default(0).";
+					config.actions[idx].led[ledidx].readerNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter a led number of the reader. Default(0).";
+					config.actions[idx].led[ledidx].ledNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+					msg = "  Please enter a temporary command (0: NOP, 1: Cancel, 2: Set)";
+					config.actions[idx].led[ledidx].tempCommand = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command on time in 100 ms.";
+					config.actions[idx].led[ledidx].tempOnTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command off time in 100 ms.";
+					config.actions[idx].led[ledidx].tempOffTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command on color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].tempOnColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary command off color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].tempOffColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the temporary run time in 100 ms.";
+					config.actions[idx].led[ledidx].tempRunTime = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+					msg = "  Please enter a permanent command (0: NOP, 1: Cancel, 2: Set)";
+					config.actions[idx].led[ledidx].permCommand = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent on time in 100 ms.";
+					config.actions[idx].led[ledidx].permOnTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent off time in 100 ms.";
+					config.actions[idx].led[ledidx].permOffTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent on color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].permOnColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+					msg = "  Please enter the permanent off color. (0: Black, 1: Red, 2: Green, 3: Amber, 4: Blue, 5: Magenta, 6: Cyan, 7: White)";
+					config.actions[idx].led[ledidx].permOffColor = (uint8_t)Utility::getInput<uint32_t>(msg);
+				}
+			}
+
+			activate = Utility::isYes("Do you want to activate for buzzer action?");
+			config.actions[idx].buzzer.use = activate;
+			if (activate)
+			{
+				msg = "  Please enter your reader number. Default(0).";
+				config.actions[idx].buzzer.readerNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter a tone type (0: None, 1: Off, 2: On)";
+				config.actions[idx].buzzer.tone = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter the buzzer turn-on time in 100 ms.";
+				config.actions[idx].buzzer.onTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter the buzzer turn-off time in 100 ms.";
+				config.actions[idx].buzzer.offTime = (uint8_t)Utility::getInput<uint32_t>(msg);
+				msg = "  Please enter the number of cycle the buzzer on and off.";
+				config.actions[idx].buzzer.numOfCycle = (uint8_t)Utility::getInput<uint32_t>(msg);
+			}
+		}
+	}
+
+	return cc.setOsdpStandardActionConfig(id, config);
+}
+
+int getAvailableOsdpStandardDevice(void* context, DeviceList& deviceList)
+{
+	CommControl cc(context);
+	BS2OsdpStandardDeviceAvailable availDevice = { 0, };
+	int sdkResult = BS_SDK_SUCCESS;
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+
+	sdkResult = cc.getAvailableOsdpStandardDevice(id, availDevice);
+	if (BS_SDK_SUCCESS == sdkResult)
+		CommControl::print(availDevice);
+
+	return sdkResult;
+}
+
+int getOsdpStandardDevice(void* context, DeviceList& deviceList)
+{
+	ConfigControl cc(context);
+	CommControl mc(context);
+	BS2OsdpStandardConfig config = { 0, };
+	BS2OsdpStandardDevice osdpDevice = { 0, };
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+	int sdkResult = cc.getOsdpStandardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	uint32_t numOfActivated = cc.printOSDPDeviceID(config);
+	if (0 < numOfActivated)
+	{
+		BS2_DEVICE_ID osdpID = Utility::selectSlaveID();
+
+		sdkResult = mc.getOsdpStandardDevice(osdpID, osdpDevice);
+		if (BS_SDK_SUCCESS == sdkResult)
+			CommControl::print(osdpDevice);
+	}
+
+	return sdkResult;
+}
+
+int addOsdpStandardDevice(void* context, DeviceList& deviceList)
+{
+	CommControl mc(context);
+	BS2OsdpStandardDeviceAvailable availDevice = { 0, };
+	BS2OsdpStandardDeviceAdd addDevice = { 0, };
+	int sdkResult = BS_SDK_SUCCESS;
+
+	BS2_DEVICE_ID masterID = Utility::selectDeviceID(deviceList, false, false);
+	if (mc.getAvailableOsdpStandardDevice(masterID, availDevice))
+		CommControl::print(availDevice);
+
+	cout << "Now add a OSDP device." << endl;
+	addDevice.deviceID = Utility::selectSlaveID();
+
+	uint32_t channelIndex = 0;
+	for (int idx = 0; idx < availDevice.numOfChannel; idx++)
+	{
+		for (int didx = 0; didx < availDevice.channels[idx].numOsdpAvailableDevice; didx++)
+		{
+			if (availDevice.channels[idx].deviceIDs[didx] == addDevice.deviceID)
+				channelIndex = availDevice.channels[idx].channelIndex;
+		}
+	}
+
+	addDevice.osdpID = (uint8_t)Utility::getInput<uint32_t>("Please enter the OSDP ID. [0 ~ 126]");
+	addDevice.useSecureSession = Utility::isYes("Does the OSDP device use secure communication?");
+	addDevice.deviceType = BS2_DEVICE_TYPE_3RD_OSDP_DEVICE;
+	addDevice.activate = 1;
+
+	uint32_t outChannelIndex(0);
+	sdkResult = mc.addOsdpStandardDevice(masterID, channelIndex, addDevice, outChannelIndex);
+	if (sdkResult == BS_SDK_SUCCESS)
+	{
+		cout << "Successfully added OSDP device to channel " << outChannelIndex << "." << endl;
+	}
+
+	return sdkResult;
+}
+
+int updateOsdpStandardDevice(void* context, DeviceList& deviceList)
+{
+	ConfigControl cc(context);
+	CommControl mc(context);
+	BS2OsdpStandardConfig config = { 0, };
+	vector<BS2OsdpStandardDeviceUpdate> updateData;
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+	int sdkResult = cc.getOsdpStandardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	uint32_t numOfActivated = cc.printOSDPDeviceID(config);
+	uint32_t numOfDevice = Utility::getInput<uint32_t>("How many devices do you want to update? (0~%u)", numOfActivated);
+	if (0 < numOfDevice)
+	{
+		for (uint32_t idx = 0; idx < numOfDevice; idx++)
+		{
+			BS2OsdpStandardDeviceUpdate item = { 0, };
+			item.deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>("[%u] Please enter the slave ID to be updated.", idx + 1);
+
+			if (!ConfigControl::getOsdpID(config, item.deviceID, item.osdpID))
+			{
+				cout << "The OSDP ID could not be found." << endl;
+				return BS_SDK_ERROR_INTERNAL;
+			}
+
+			if (Utility::isYes("Do you want to change the OSDP ID? (CurrentID: %u)", item.osdpID))
+			{
+				item.osdpID = (uint8_t)Utility::getInput<uint32_t>("Please enter the OSDP ID. [0 ~ 126]");
+			}
+
+			item.activate = Utility::isYes("Do you like to enable the OSDP device?");
+			item.useSecureSession = Utility::isYes("Does the OSDP device use secure communication?");
+			item.deviceType = BS2_DEVICE_TYPE_3RD_OSDP_DEVICE;
+
+			updateData.push_back(item);
+		}
+
+		vector<BS2OsdpStandardDeviceResult> listResult;
+		if (BS_SDK_SUCCESS == (sdkResult = mc.updateOsdpStandardDevice(id, updateData, listResult)))
+		{
+			CommControl::print(listResult);
+		}
+	}
+
+	return sdkResult;
+}
+
+int removeOsdpStandardDevice(void* context, DeviceList& deviceList)
+{
+	ConfigControl cc(context);
+	CommControl mc(context);
+	BS2OsdpStandardConfig config = { 0, };
+	vector<BS2_DEVICE_ID> removeData;
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+	int sdkResult = cc.getOsdpStandardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	uint32_t numOfActivated = cc.printOSDPDeviceID(config);
+	uint32_t numOfDevice = Utility::getInput<uint32_t>("How many devices do you want to remove? (0~%u)", numOfActivated);
+	if (0 < numOfDevice)
+	{
+		for (uint32_t idx = 0; idx < numOfDevice; idx++)
+		{
+			BS2_DEVICE_ID slaveID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>("[%u] Please enter the slave ID to be removed.", idx + 1);
+			removeData.push_back(slaveID);
+		}
+
+		vector<BS2OsdpStandardDeviceResult> listResult;
+		if (BS_SDK_SUCCESS == (sdkResult = mc.removeOsdpStandardDevice(id, removeData, listResult)))
+		{
+			CommControl::print(listResult);
+		}
+	}
+
+	return sdkResult;
+}
+
+int getOsdpStandardDeviceCapability(void* context, DeviceList& deviceList)
+{
+	ConfigControl cc(context);
+	CommControl mc(context);
+	BS2OsdpStandardConfig config = { 0, };
+	BS2OsdpStandardDeviceCapability capability = { 0, };
+
+	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
+	int sdkResult = cc.getOsdpStandardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	uint32_t numOfActivated = cc.printOSDPDeviceID(config);
+	if (0 < numOfActivated)
+	{
+		BS2_DEVICE_ID id = Utility::selectSlaveID();
+
+		int sdkResult = mc.getOsdpStandardDeviceCapability(id, capability);
+		if (BS_SDK_SUCCESS == sdkResult)
+			CommControl::print(capability);
+	}
+
+	return sdkResult;
+}
+
+int setOsdpStandardDeviceSecurityKey(void* context, DeviceList& deviceList)
+{
+	CommControl mc(context);
+	int sdkResult = BS_SDK_SUCCESS;
+
+	bool useMaster = true;
+	BS2_DEVICE_ID id = (BS2_DEVICE_ID)Utility::selectMasterOrSlaveID(deviceList, useMaster);
+	if (useMaster)
+	{
+		BS2OsdpStandardDeviceSecurityKey key = { 0, };
+		string keyInfo = Utility::getInput<string>("Please enter the OSDP security key.");
+		memcpy(key.key, keyInfo.c_str(), min(keyInfo.size(), BS2_OSDP_STANDARD_KEY_SIZE));
+
+		sdkResult = mc.setOsdpStandardDeviceSecurityKey(id, &key);
+	}
+	else
+	{
+		sdkResult = mc.setOsdpStandardDeviceSecurityKey(id, NULL);
+	}
+
+	if (BS_SDK_SUCCESS == sdkResult)
+		cout << "Set success" << endl;
+
+	return sdkResult;
+}
+
+void onOsdpStandardDeviceStatusChanged(BS2_DEVICE_ID deviceId, const BS2OsdpStandardDeviceNotify* notifyData)
+{
+	if (notifyData)
+		CommControl::print(*notifyData);
+}
+
+int startMonitorOsdpStandardDeviceStatus(void* context)
+{
+	CommControl mc(context);
+
+	return mc.setOsdpStandardDeviceStatusListener(onOsdpStandardDeviceStatusChanged);
+}
+
+int stopMonitorOsdpStandardDeviceStatus(void* context)
+{
+	CommControl mc(context);
+
+	return mc.setOsdpStandardDeviceStatusListener(NULL);
 }

@@ -24,7 +24,8 @@ using namespace std;
 
 string Utility::getLine(string msg)
 {
-	cout << "==> " << msg << " ";
+	cout << msg << endl;
+	cout << "==> ";
 	string line;
 	getline(cin >> ws, line);
 
@@ -286,17 +287,31 @@ int Utility::saveBMP(FILE* fp, unsigned char* data, int width, int height)
 	return 1;
 }
 
-BS2_BOOL Utility::isYes(string msg)
+BS2_BOOL Utility::isYes(string msgFormat, ...)
 {
-	msg += " [y/n]";
-	char selected = Utility::getInput<char>(msg);
+	va_list ap;
+	va_start(ap, msgFormat);
+	char buf[MAX_BUFFER_SIZE] = { 0, };
+	vsprintf(buf, msgFormat.c_str(), ap);
+	va_end(ap);
+
+	ostringstream msg;
+	msg << buf << " [y/n]";
+	char selected = Utility::getInput<char>(msg.str());
 	return (selected == 'y' || selected == 'Y');
 }
 
-BS2_BOOL Utility::isNo(string msg)
+BS2_BOOL Utility::isNo(string msgFormat, ...)
 {
-	msg += " [y/n]";
-	char selected = Utility::getInput<char>(msg);
+	va_list ap;
+	va_start(ap, msgFormat);
+	char buf[MAX_BUFFER_SIZE] = { 0, };
+	vsprintf(buf, msgFormat.c_str(), ap);
+	va_end(ap);
+
+	ostringstream msg;
+	msg << buf << " [y/n]";
+	char selected = Utility::getInput<char>(msg.str());
 	return (selected == 'n' || selected == 'N');
 }
 
@@ -527,6 +542,24 @@ BS2_DEVICE_ID Utility::selectDeviceID(const DeviceList& deviceList, bool include
 {
 	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
 	return Utility::getInput<BS2_DEVICE_ID>("Please enter the device ID:");
+}
+
+BS2_DEVICE_ID Utility::selectMasterOrSlaveID(const DeviceList& deviceList, bool& useMaster)
+{
+	if (Utility::isYes("Do you want to process it with master ID?"))
+	{
+		Utility::displayConnectedDevices(deviceList, false, false);
+		useMaster = true;
+		return (BS2_DEVICE_ID)Utility::getInput<uint32_t>("Please enter the master ID:");
+	}
+
+	useMaster = false;
+	return (BS2_DEVICE_ID)Utility::getInput<uint32_t>("Please enter the slave ID:");
+}
+
+BS2_DEVICE_ID Utility::selectSlaveID()
+{
+	return (BS2_DEVICE_ID)Utility::getInput<uint32_t>("Select the slave ID:");
 }
 
 bool Utility::selectDeviceIDAndType(const DeviceList& deviceList, bool includeSlave, BS2_DEVICE_ID& selectedID, BS2_DEVICE_TYPE& selectedType)

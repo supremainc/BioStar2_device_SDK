@@ -117,6 +117,7 @@ typedef struct {
 	BS2_LIFT_ALARM_FLAG alarmFlags;			///< 1 byte
 	BS2_BOOL tamperOn;			///< 1 byte
 	BS2FloorStatus floors[BS2_MAX_FLOORS_ON_LIFT];		///< 3 * 255 bytes
+	uint8_t reserved[3];			///< 3 bytes padding
 } BS2LiftStatus;
 
 /**

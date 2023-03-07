@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <sstream>
+#include <ostream>
 #include <stdarg.h>
 #include "DeviceList.h"
 #include "../Include/BS_API.h"
@@ -102,8 +103,8 @@ public:
 	static std::string getHexaString(const uint8_t* data, uint32_t size);
 	static int saveBMP(FILE* fp, unsigned char* data, int width, int height);
 
-	static BS2_BOOL isYes(std::string msg);
-	static BS2_BOOL isNo(std::string msg);
+	static BS2_BOOL isYes(std::string msgFormat, ...);
+	static BS2_BOOL isNo(std::string msgFormat, ...);
 
 	static std::string getStringOfDeviceType(BS2_DEVICE_TYPE type);
 	static std::string getStringOfConnectMode(BS2_CONNECTION_MODE mode);
@@ -121,6 +122,8 @@ public:
 	static BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
 	static bool getSelectedDeviceID(const DeviceInfo& info, BS2_DEVICE_ID& id, BS2_DEVICE_TYPE& type);
 	static BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave = false, bool includeWiegand = false);
+	static BS2_DEVICE_ID selectMasterOrSlaveID(const DeviceList& deviceList, bool& useMaster);
+	static BS2_DEVICE_ID selectSlaveID();
 	static bool selectDeviceIDAndType(const DeviceList& deviceList, bool includeSlave, BS2_DEVICE_ID& selectedID, BS2_DEVICE_TYPE& selectedType);
 	static void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand);
 	static int searchAndConnect(void* context, DeviceList& deviceList);
@@ -158,7 +161,8 @@ inline T Utility::getInput(std::string msgFormat, ...)
 	vsprintf(buf, msgFormat.c_str(), ap);
 	va_end(ap);
 
-	std::cout << "==> " << buf << " ";
+	std::cout << buf << endl;
+	std::cout << "==> ";
 	T value;
 	std::cin >> value;
 
@@ -174,7 +178,8 @@ inline T Utility::getInputHexaChar(std::string msgFormat, ...)
 	vsprintf(buf, msgFormat.c_str(), ap);
 	va_end(ap);
 
-	std::cout << "==> " << buf << " ";
+	std::cout << buf << endl;
+	std::cout << "==> ";
 	std::string value;
 	std::cin >> value;
 	std::stringstream conv;

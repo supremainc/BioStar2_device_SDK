@@ -96,6 +96,10 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_LICENSECONFIG,
 
+	MENU_DEV_GET_OSDPSTANDARDCONFIG,
+	MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,
+	MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,
+
 	MENU_DEV_UPD_DEVICE_VOLUME,
 
 	MENU_DEV_TURNON_QRBYPASS,
@@ -184,6 +188,10 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_LICENSECONFIG,		"BS2_GetLicenseConfig"},
 
+	{MENU_DEV_GET_OSDPSTANDARDCONFIG,		"BS2_GetOsdpStandardConfig"},
+	{MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,	"BS2_GetOsdpStandardActionConfig"},
+	{MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,	"BS2_SetOsdpStandardActionConfig"},
+
 	{MENU_DEV_UPD_DEVICE_VOLUME,		"Update device volume"},
 
 	{MENU_DEV_TURNON_QRBYPASS,			"Turn On QR Bypass"},
@@ -238,3 +246,6 @@ int setVoipConfigExt(void* context, const DeviceInfo& device);
 int getRtspConfig(void* context, const DeviceInfo& device);
 int setRtspConfig(void* context, const DeviceInfo& device);
 int getLicenseConfig(void* context, const DeviceInfo& device);
+int getOsdpStandardConfig(void* context, const DeviceInfo& device);
+int getOsdpStandardActionConfig(void* context, const DeviceInfo& device);
+int setOsdpStandardActionConfig(void* context, const DeviceInfo& device);

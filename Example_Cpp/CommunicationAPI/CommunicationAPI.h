@@ -22,11 +22,12 @@ enum EN_MENU_TOP
 {
 	MENU_TOP_BREAK = MENU_BREAK,
 	MENU_TOP_SEARCH_N_CONN = 1,
-	MENU_TOP_DIRECT_IPADDR = 2,
-	MENU_TOP_SEARCH_SLAVE = 3,
-	MENU_TOP_SEARCH_WIEGAND = 4,
-	MENU_TOP_VIEW_DEVICE = 5,
-	MENU_TOP_CONNECT_USB = 6,
+	MENU_TOP_DIRECT_IPADDR,
+	MENU_TOP_SEARCH_SLAVE,
+	MENU_TOP_OSDP_STANDARD,
+	MENU_TOP_SEARCH_WIEGAND,
+	MENU_TOP_VIEW_DEVICE,
+	MENU_TOP_CONNECT_USB,
 };
 
 std::vector<MENU_ITEM> menuInfoTop =
@@ -37,6 +38,7 @@ std::vector<MENU_ITEM> menuInfoTop =
 	{MENU_TOP_DIRECT_IPADDR,	"Connection (Direct connect with IP/Port)"},
 	{MENU_SEPARATOR,			""},
 	{MENU_TOP_SEARCH_SLAVE,		"Slave (Discover and add)"},
+	{MENU_TOP_OSDP_STANDARD,	"OSDP device control"},
 	{MENU_TOP_SEARCH_WIEGAND,	"Wiegand (Discover and add)" },
 	{MENU_SEPARATOR,			""},
 	{MENU_TOP_VIEW_DEVICE,		"View (Connected devices)"},
@@ -68,6 +70,43 @@ std::vector<MENU_ITEM> menuInfoSlave =
 	{MENU_SLV_GET_CONFIG_FACTORY,	"Get config (Factory)"},
 	{MENU_SLV_GET_CONFIG_STATUS,	"Get config (Status)"},
 	{MENU_SLV_SET_CONFIG_STATUS,	"Set config (Status)"},
+};
+
+enum EN_MENU_OSDP
+{
+	MENU_OSDP_BREAK = MENU_BREAK,
+	MENU_OSDP_GET_OSDPSTANDARDCONFIG,
+	MENU_OSDP_GET_OSDPSTANDARDACTIONCONFIG,
+	MENU_OSDP_SET_OSDPSTANDARDACTIONCONFIG,
+	MENU_OSDP_GET_AVAILABLE_DEVICE,
+	MENU_OSDP_GET_DEVICE,
+	MENU_OSDP_ADD_DEVICE,
+	MENU_OSDP_UPD_DEVICE,
+	MENU_OSDP_REM_DEVICE,
+	MENU_OSDP_GET_CAPABILITY,
+	MENU_OSDP_SET_SECURITYKEY,
+	MENU_OSDP_START_STATUS_MONITOR,
+	MENU_OSDP_STOP_STATUS_MONITOR,
+};
+
+std::vector<MENU_ITEM> menuInfoOsdp =
+{
+	{MENU_SLV_BREAK,							"Exit" },
+	{MENU_SEPARATOR,							"" },
+	{MENU_OSDP_GET_OSDPSTANDARDCONFIG,			"Get OsdpStandardConfig"},
+	{MENU_OSDP_GET_OSDPSTANDARDACTIONCONFIG,	"Get OsdpStandardActionConfig"},
+	{MENU_OSDP_SET_OSDPSTANDARDACTIONCONFIG,	"Set OsdpStandardActionConfig"},
+	{MENU_SEPARATOR,							"" },
+	{MENU_OSDP_GET_AVAILABLE_DEVICE,			"Get available device"},
+	{MENU_OSDP_GET_DEVICE,						"Get device"},
+	{MENU_OSDP_ADD_DEVICE,						"Add device"},
+	{MENU_OSDP_UPD_DEVICE,						"Update devices"},
+	{MENU_OSDP_REM_DEVICE,						"Remove devices"},
+	{MENU_OSDP_GET_CAPABILITY,					"Get capability"},
+	{MENU_OSDP_SET_SECURITYKEY,					"Set security key"},
+	{MENU_SEPARATOR,							""},
+	{MENU_OSDP_START_STATUS_MONITOR,			"Start status monitor"},
+	{MENU_OSDP_STOP_STATUS_MONITOR,				"Stop status monitor"},
 };
 
 enum EN_MENU_COMM
@@ -238,6 +277,7 @@ int setSSLHandler();
 bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone);
 void connectTestDevice(void* context, DeviceList& deviceList);
 int slaveMenu(void* context, DeviceList& deviceList);
+int osdpMenu(void* context, DeviceList& deviceList);
 int runAPIs(void* context, const DeviceList& deviceList);
 int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList);
 int updateConnectModeDevice2Server(void* context, BS2_DEVICE_ID id);
@@ -276,3 +316,16 @@ int getLogSmallBlobExFromDir();
 int setDeviceLicense(void* context, BS2_DEVICE_ID id);
 int deleteDeviceLicense(void* context, BS2_DEVICE_ID id);
 int getDeviceLicense(void* context, BS2_DEVICE_ID id);
+int getAvailableOsdpStandardDevice(void* context, DeviceList& deviceList);
+int getOsdpStandardConfig(void* context, const DeviceList& deviceList);
+int getOsdpStandardActionConfig(void* context, const DeviceList& deviceList);
+int setOsdpStandardActionConfig(void* context, const DeviceList& deviceList);
+int getOsdpStandardDevice(void* context, DeviceList& deviceList);
+int addOsdpStandardDevice(void* context, DeviceList& deviceList);
+int updateOsdpStandardDevice(void* context, DeviceList& deviceList);
+int removeOsdpStandardDevice(void* context, DeviceList& deviceList);
+int getOsdpStandardDeviceCapability(void* context, DeviceList& deviceList);
+int setOsdpStandardDeviceSecurityKey(void* context, DeviceList& deviceList);
+void onOsdpStandardDeviceStatusChanged(BS2_DEVICE_ID deviceId, const BS2OsdpStandardDeviceNotify* notifyData);
+int startMonitorOsdpStandardDeviceStatus(void* context);
+int stopMonitorOsdpStandardDeviceStatus(void* context);

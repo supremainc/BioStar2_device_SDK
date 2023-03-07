@@ -174,13 +174,16 @@ int CommControl::searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, ve
 		return sdkResult;
 	}
 
-	for (uint32_t index = 0; index < slaveDeviceCount; index++)
-	{
-		slaveList.push_back(slaveDeviceObj[index]);
-	}
-
 	if (slaveDeviceObj)
+	{
+		slaveList.clear();
+		for (uint32_t index = 0; index < slaveDeviceCount; index++)
+		{
+			slaveList.push_back(slaveDeviceObj[index]);
+		}
+
 		BS2_ReleaseObject(slaveDeviceObj);
+	}
 
 	return sdkResult;
 }
@@ -191,6 +194,120 @@ int CommControl::addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, const
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_SetSlaveExDevice call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::addOsdpStandardDevice(BS2_DEVICE_ID id, uint32_t channelIndex, const BS2OsdpStandardDeviceAdd& osdpDevice, uint32_t& outChannelIndex)
+{
+	int sdkResult = BS2_AddOsdpStandardDevice(context_, id, channelIndex, &osdpDevice, &outChannelIndex);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_AddOsdpStandardDevice call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::getOsdpStandardDevice(BS2_DEVICE_ID id, BS2OsdpStandardDevice& osdpDevice)
+{
+	int sdkResult = BS2_GetOsdpStandardDevice(context_, id, &osdpDevice);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetOsdpStandardDevice call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::getAvailableOsdpStandardDevice(BS2_DEVICE_ID id, BS2OsdpStandardDeviceAvailable& osdpDevice)
+{
+	int sdkResult = BS2_GetAvailableOsdpStandardDevice(context_, id, &osdpDevice);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetAvailableOsdpStandardDevice call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::updateOsdpStandardDevice(BS2_DEVICE_ID id, const vector<BS2OsdpStandardDeviceUpdate>& osdpDevices, vector<BS2OsdpStandardDeviceResult>& result)
+{
+	BS2OsdpStandardDeviceResult* outResultObj = NULL;
+	uint32_t outNumOfResult(0);
+	int sdkResult = BS2_UpdateOsdpStandardDevice(context_, id, const_cast<BS2OsdpStandardDeviceUpdate*>(osdpDevices.data()), osdpDevices.size(), &outResultObj, &outNumOfResult);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_UpdateOsdpStandardDevice call failed: %d", sdkResult);
+	}
+
+	if (outResultObj)
+	{
+		result.clear();
+		for (uint32_t idx = 0; idx < outNumOfResult; idx++)
+		{
+			result.push_back(outResultObj[idx]);
+		}
+
+		BS2_ReleaseObject(outResultObj);
+	}
+	
+	return sdkResult;
+}
+
+int CommControl::removeOsdpStandardDevice(BS2_DEVICE_ID id, const vector<BS2_DEVICE_ID>& osdpDeviceIDs, vector<BS2OsdpStandardDeviceResult>& result)
+{
+	BS2OsdpStandardDeviceResult* outResultObj = NULL;
+	uint32_t outNumOfResult(0);
+	int sdkResult = BS2_RemoveOsdpStandardDevice(context_, id, const_cast<BS2_DEVICE_ID*>(osdpDeviceIDs.data()), osdpDeviceIDs.size(), &outResultObj, &outNumOfResult);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_RemoveOsdpStandardDevice call failed: %d", sdkResult);
+	}
+
+	if (outResultObj)
+	{
+		result.clear();
+		for (uint32_t idx = 0; idx < outNumOfResult; idx++)
+		{
+			result.push_back(outResultObj[idx]);
+		}
+
+		BS2_ReleaseObject(outResultObj);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::getOsdpStandardDeviceCapability(BS2_DEVICE_ID id, BS2OsdpStandardDeviceCapability& capability)
+{
+	int sdkResult = BS2_GetOsdpStandardDeviceCapability(context_, id, &capability);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetOsdpStandardDeviceCapability call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::setOsdpStandardDeviceSecurityKey(BS2_DEVICE_ID id, const BS2OsdpStandardDeviceSecurityKey* key)
+{
+	int sdkResult = BS2_SetOsdpStandardDeviceSecurityKey(context_, id, key);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetOsdpStandardDeviceSecurityKey call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int CommControl::setOsdpStandardDeviceStatusListener(OnOsdpStandardDeviceStatusChanged fpOsdpStandardDeviceStatusChanged)
+{
+	int sdkResult = BS2_SetOsdpStandardDeviceStatusListener(context_, fpOsdpStandardDeviceStatusChanged);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetOsdpStandardDeviceStatusListener call failed: %d", sdkResult);
 	}
 
 	return sdkResult;
@@ -514,4 +631,107 @@ int CommControl::setSocketSSLRetryCount(uint32_t count)
 		TRACE("BS2_SetSocketSSLRetryCount call failed: %d", sdkResult);
 
 	return sdkResult;
+}
+
+void CommControl::print(const BS2OsdpStandardDeviceAvailable& devices)
+{
+	TRACE("==[BS2OsdpStandardDeviceAvailable]==");
+	TRACE("+--numOfChannel : %u", devices.numOfChannel);
+
+	for (int idx = 0; idx < devices.numOfChannel; idx++)
+	{
+		TRACE("+--channel[%d]", idx);
+		TRACE("   |--channelType : %u", devices.channels[idx].channelType);
+		TRACE("   |--channelIndex : %u", devices.channels[idx].channelIndex);
+		TRACE("   |--maxOsdpDevice : %u", devices.channels[idx].maxOsdpDevice);
+		TRACE("   |--numOsdpAvailableDevice : %u", devices.channels[idx].numOsdpAvailableDevice);
+
+		for (int didx = 0; didx < devices.channels[idx].numOsdpAvailableDevice; didx++)
+		{
+			TRACE("  |--deviceIDs[%d] : %u", didx, devices.channels[idx].deviceIDs[didx]);
+		}
+	}
+}
+
+void CommControl::print(const BS2OsdpStandardDevice& device)
+{
+	TRACE("==[BS2OsdpStandardDevice]==");
+	TRACE("+--deviceID : %u", device.deviceID);
+	TRACE("|--deviceType : %u", device.deviceType);
+	TRACE("|--enableOSDP : %u", device.enableOSDP);
+	TRACE("|--connected : %u", device.connected);
+	TRACE("|--channelInfo : %u", device.channelInfo);
+	TRACE("|--osdpID : %u", device.osdpID);
+	TRACE("|--supremaSearch : %u", device.supremaSearch);
+	TRACE("|--activate : %u", device.activate);
+	TRACE("|--useSecure : %u", device.useSecure);
+	TRACE("|--vendorCode : %u", Utility::getHexaString(device.vendorCode, sizeof(device.vendorCode)));
+	TRACE("|--fwVersion : %u", device.fwVersion);
+	TRACE("|--modelNumber : %u", device.modelNumber);
+	TRACE("|--modelVersion : %u", device.modelVersion);
+	TRACE("|--readInfo : %u", device.readInfo);
+}
+
+void CommControl::print(const BS2OsdpStandardDeviceNotify& device)
+{
+	TRACE("==[BS2OsdpStandardDeviceNotify]==");
+	TRACE("+--deviceID : %u", device.deviceID);
+	TRACE("|--deviceType : %u", device.deviceType);
+	TRACE("|--enableOSDP : %u", device.enableOSDP);
+	TRACE("|--connected : %u", device.connected);
+	TRACE("|--channelInfo : %u", device.channelInfo);
+	TRACE("|--osdpID : %u", device.osdpID);
+	TRACE("|--supremaSearch : %u", device.supremaSearch);
+	TRACE("|--activate : %u", device.activate);
+	TRACE("|--useSecure : %u", device.useSecure);
+	TRACE("|--vendorCode : %u", Utility::getHexaString(device.vendorCode, sizeof(device.vendorCode)));
+	TRACE("|--fwVersion : %u", device.fwVersion);
+	TRACE("|--modelNumber : %u", device.modelNumber);
+	TRACE("|--modelVersion : %u", device.modelVersion);
+	TRACE("|--readInfo : %u", device.readInfo);
+}
+
+void CommControl::print(const vector<BS2OsdpStandardDeviceResult>& result)
+{
+	uint32_t idx(0);
+	TRACE("==[BS2OsdpStandardDeviceResult]==");
+	for (auto item : result)
+	{
+		TRACE("+--[%u]", idx++);
+		TRACE("    |--deviceID : %u", item.deviceID);
+		TRACE("    |--result : %u", item.result);
+	}
+}
+
+void CommControl::print(const BS2OsdpStandardDeviceCapability& capability)
+{
+	TRACE("==[BS2OsdpStandardDeviceCapability]==");
+	TRACE("+--input");
+	TRACE("    |--compliance : %u", capability.input.compliance);
+	TRACE("    |--count : %u", capability.input.count);
+	TRACE("+--output");
+	TRACE("    |--compliance : %u", capability.output.compliance);
+	TRACE("    |--count : %u", capability.output.count);
+	TRACE("+--led");
+	TRACE("    |--compliance : %u", capability.led.compliance);
+	TRACE("    |--count : %u", capability.led.count);
+	TRACE("+--audio");
+	TRACE("    |--compliance : %u", capability.audio.compliance);
+	TRACE("    |--count : %u", capability.audio.count);
+	TRACE("+--textOutput");
+	TRACE("    |--compliance : %u", capability.textOutput.compliance);
+	TRACE("    |--count : %u", capability.textOutput.count);
+	TRACE("+--reader");
+	TRACE("    |--compliance : %u", capability.reader.compliance);
+	TRACE("    |--count : %u", capability.reader.count);
+	TRACE("+--recvBufferSize : %u", capability.recvBufferSize);
+	TRACE("+--largeMsgSize : %u", capability.largeMsgSize);
+	TRACE("+--osdpVersion : %u", capability.osdpVersion);
+	TRACE("+--cardFormat : %u", capability.cardFormat);
+	TRACE("+--timeKeeping : %u", capability.timeKeeping);
+	TRACE("+--canCommSecure : %u", capability.canCommSecure);
+	TRACE("+--crcSupport : %u", capability.crcSupport);
+	TRACE("+--smartCardSupport : %u", capability.smartCardSupport);
+	TRACE("+--biometricSupport : %u", capability.biometricSupport);
+	TRACE("+--securePinEntrySupport : %u", capability.securePinEntrySupport);
 }

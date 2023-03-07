@@ -485,6 +485,33 @@ int ConfigControl::getLicenseConfig(BS2_DEVICE_ID id, BS2LicenseConfig& config) 
 	return sdkResult;
 }
 
+int ConfigControl::getOsdpStandardConfig(BS2_DEVICE_ID id, BS2OsdpStandardConfig& config) const
+{
+	int sdkResult = BS2_GetOsdpStandardConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetOsdpStandardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getOsdpStandardActionConfig(BS2_DEVICE_ID id, BS2OsdpStandardActionConfig& config) const
+{
+	int sdkResult = BS2_GetOsdpStandardActionConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetOsdpStandardActionConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setOsdpStandardActionConfig(BS2_DEVICE_ID id, const BS2OsdpStandardActionConfig& config) const
+{
+	int sdkResult = BS2_SetOsdpStandardActionConfig(context_, id, const_cast<BS2OsdpStandardActionConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetOsdpStandardActionConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config = { 0, };
@@ -1444,4 +1471,111 @@ void ConfigControl::print(const BS2LicenseConfig& config)
 		TRACE("+--license[%u]",		idx);
 		print(config.license[idx]);
     }
+}
+
+void ConfigControl::print(const BS2OsdpStandardConfig& config)
+{
+	TRACE("==[BS2OsdpStandardConfig]==");
+	TRACE("+--numOfChannels : %u", config.numOfChannels);
+
+	for (int idx = 0; idx < config.numOfChannels; idx++)
+	{
+		TRACE("+--channel[%d] - mode : %u", idx, config.mode[idx]);
+		TRACE("   |--baudRate : %u", config.channels[idx].baudRate);
+		TRACE("   |--channelIndex : %u", config.channels[idx].channelIndex);
+		TRACE("   |--useRegistance : %u", config.channels[idx].useRegistance);
+		TRACE("   |--numOfDevices : %u", config.channels[idx].numOfDevices);
+		TRACE("   |--channelType : %u", config.channels[idx].channelType);
+
+		for (int sidx = 0; sidx < config.channels[idx].numOfDevices; sidx++)
+		{
+			TRACE("  +--slaveDevice[%d]", sidx);
+			TRACE("     |--deviceID : %u", config.channels[idx].slaveDevices[sidx].deviceID);
+			TRACE("     |--deviceType : %u", config.channels[idx].slaveDevices[sidx].deviceType);
+			TRACE("     |--enableOSDP : %u", config.channels[idx].slaveDevices[sidx].enableOSDP);
+			TRACE("     |--connected : %u", config.channels[idx].slaveDevices[sidx].connected);
+			TRACE("     |--channelInfo : %u", config.channels[idx].slaveDevices[sidx].channelInfo);
+			TRACE("     |--osdpID : %u", config.channels[idx].slaveDevices[sidx].osdpID);
+			TRACE("     |--supremaSearch : %u", config.channels[idx].slaveDevices[sidx].supremaSearch);
+			TRACE("     |--activate : %u", config.channels[idx].slaveDevices[sidx].activate);
+			TRACE("     |--useSecure : %u", config.channels[idx].slaveDevices[sidx].useSecure);
+			TRACE("     |--vendorCode : %u", Utility::getHexaString(config.channels[idx].slaveDevices[sidx].vendorCode, sizeof(config.channels[idx].slaveDevices[sidx].vendorCode)));
+			TRACE("     |--fwVersion : %u", config.channels[idx].slaveDevices[sidx].fwVersion);
+			TRACE("     |--modelNumber : %u", config.channels[idx].slaveDevices[sidx].modelNumber);
+			TRACE("     |--modelVersion : %u", config.channels[idx].slaveDevices[sidx].modelVersion);
+			TRACE("     |--readInfo : %u", config.channels[idx].slaveDevices[sidx].readInfo);
+		}
+	}
+}
+
+void ConfigControl::print(const BS2OsdpStandardActionConfig& config)
+{
+	TRACE("==[BS2OsdpStandardActionConfig]==");
+	TRACE("+--version : %u", config.version);
+
+	for (int idx = 0; idx < BS2_OSDP_STANDARD_ACTION_TYPE_COUNT; idx++)
+	{
+		TRACE("+--actions[%u]", idx);
+		TRACE("    |--type : %u", config.actions[idx].actionType);
+		for (int ledidx = 0; ledidx < BS2_OSDP_STANDARD_ACTION_MAX_LED; ledidx++)
+		{
+			TRACE("    +--led[%u]", ledidx);
+			TRACE("        |--use : %u", config.actions[idx].led[ledidx].use);
+			TRACE("        |--readerNumber : %u", config.actions[idx].led[ledidx].readerNumber);
+			TRACE("        |--ledNumber : %u", config.actions[idx].led[ledidx].ledNumber);
+
+			TRACE("        |--tempCommand : %u", config.actions[idx].led[ledidx].tempCommand);
+			TRACE("        |--tempOnTime (*100): %u", config.actions[idx].led[ledidx].tempOnTime);
+			TRACE("        |--tempOffTime (*100): %u", config.actions[idx].led[ledidx].tempOffTime);
+			TRACE("        |--tempOnColor : %u", config.actions[idx].led[ledidx].tempOnColor);
+			TRACE("        |--tempOffColor : %u", config.actions[idx].led[ledidx].tempOffColor);
+			TRACE("        |--tempRunTime (*100): %u", config.actions[idx].led[ledidx].tempRunTime);
+
+			TRACE("        |--permCommand : %u", config.actions[idx].led[ledidx].permCommand);
+			TRACE("        |--permOnTime (*100): %u", config.actions[idx].led[ledidx].permOnTime);
+			TRACE("        |--permOffTime (*100): %u", config.actions[idx].led[ledidx].permOffTime);
+			TRACE("        |--permOnColor : %u", config.actions[idx].led[ledidx].permOnColor);
+			TRACE("        |--permOffColor : %u", config.actions[idx].led[ledidx].permOffColor);
+		}
+
+		TRACE("    +--buzzer");
+		TRACE("        |--use : %u", config.actions[idx].buzzer.use);
+		TRACE("        |--readerNumber : %u", config.actions[idx].buzzer.readerNumber);
+		TRACE("        |--tone : %u", config.actions[idx].buzzer.tone);
+		TRACE("        |--onTime (*100): %u", config.actions[idx].buzzer.onTime);
+		TRACE("        |--offTime (*100): %u", config.actions[idx].buzzer.offTime);
+		TRACE("        |--numOfCycle : %u", config.actions[idx].buzzer.numOfCycle);
+	}
+}
+
+uint32_t ConfigControl::printOSDPDeviceID(const BS2OsdpStandardConfig& config)
+{
+	uint32_t numOfActivated(0);
+	for (int idx = 0; idx < config.numOfChannels; idx++)
+	{
+		for (int sidx = 0; sidx < config.channels[idx].numOfDevices; sidx++)
+		{
+			TRACE("[%d-%d] %u", idx, sidx, config.channels[idx].slaveDevices[sidx].deviceID);
+			numOfActivated++;
+		}
+	}
+
+	return numOfActivated;
+}
+
+bool ConfigControl::getOsdpID(const BS2OsdpStandardConfig& config, uint32_t osdpDeviceID, uint8_t& osdpID)
+{
+	for (uint32_t idx = 0; idx < config.numOfChannels; idx++)
+	{
+		for (uint32_t sidx = 0; sidx < config.channels[idx].numOfDevices; sidx++)
+		{
+			if (osdpDeviceID == config.channels[idx].slaveDevices[sidx].deviceID)
+			{
+				osdpID = config.channels[idx].slaveDevices[sidx].osdpID;
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

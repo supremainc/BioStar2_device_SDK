@@ -430,7 +430,9 @@ typedef struct {
 	 */
 	uint8_t enableLicenseFuncSupported : 1;   ///< 1 byte
 
-	uint8_t reserved[428];		///< 428 bytes
+	uint8_t unused2: 6;		///< 1 byte
+
+	uint8_t reserved[429];		///< 429 bytes
 } BS2DeviceCapabilities;
 
 #endif	// __BS2_DEVICE_INFO_H__

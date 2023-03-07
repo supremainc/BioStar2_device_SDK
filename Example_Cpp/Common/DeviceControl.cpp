@@ -489,6 +489,9 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("visualQRSupported : %u", info.visualQRSupported);
 
 	TRACE("maxVoipExtensionNumbers : %u", info.maxVoipExtensionNumbers);
+
+	TRACE("osdpStandardCentralSupported : %u", info.osdpStandardCentralSupported);
+	TRACE("enableLicenseFuncSupported : %u", info.enableLicenseFuncSupported);
 }
 
 #if 0
