@@ -38,7 +38,7 @@ namespace Suprema
             Console.Write(">>>> ");
             if (Util.IsYes())
             {
-                Console.WriteLine("Trying to get all access gruops from device.");
+                Console.WriteLine("Trying to get all access groups from device.");
                 result = (BS2ErrorCode)API.BS2_GetAllAccessGroup(sdkContext, deviceID, out accessGroupObj, out numAccessGroup);
             }
             else
@@ -71,7 +71,7 @@ namespace Suprema
                         curAccessGroupIDObj = (IntPtr)((long)curAccessGroupIDObj + 4);
                     }
 
-                    Console.WriteLine("Trying to get access gruops from device.");
+                    Console.WriteLine("Trying to get access groups from device.");
                     result = (BS2ErrorCode)API.BS2_GetAccessGroup(sdkContext, deviceID, accessGroupIDObj, (UInt32)accessGroupIDList.Count, out accessGroupObj, out numAccessGroup);
 
                     Marshal.FreeHGlobal(accessGroupIDObj);
@@ -114,7 +114,7 @@ namespace Suprema
             Console.Write(">>>> ");
             if (Util.IsYes())
             {
-                Console.WriteLine("Trying to remove all access gruops from device.");
+                Console.WriteLine("Trying to remove all access groups from device.");
                 result = (BS2ErrorCode)API.BS2_RemoveAllAccessGroup(sdkContext, deviceID);
             }
             else
@@ -147,7 +147,7 @@ namespace Suprema
                         curAccessGroupIDObj = (IntPtr)((long)curAccessGroupIDObj + 4);
                     }
 
-                    Console.WriteLine("Trying to remove access gruops from device.");
+                    Console.WriteLine("Trying to remove access groups from device.");
                     result = (BS2ErrorCode)API.BS2_RemoveAccessGroup(sdkContext, deviceID, accessGroupIDObj, (UInt32)accessGroupIDList.Count);
 
                     Marshal.FreeHGlobal(accessGroupIDObj);

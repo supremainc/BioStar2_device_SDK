@@ -331,30 +331,51 @@ namespace Suprema
         BS_SDK_ERROR_UPGRADE_NOT_SUPPORTED                  = -2007,
 
         //SSL
-        BS_SDK_ERROR_SSL_INIT                                = -3000,
-        BS_SDK_ERROR_SSL_NOT_SUPPORTED                       = -3001,
-        BS_SDK_ERROR_SSL_CANNOT_CONNECT                      = -3002,
-        BS_SDK_ERROR_SSL_ALREADY_CONNECTED                   = -3003,
-        BS_SDK_ERROR_SSL_INVALID_CERT                        = -3004,
-        BS_SDK_ERROR_SSL_VERIFY_CERT                         = -3005,
-        BS_SDK_ERROR_SSL_INVALID_KEY                         = -3006,
-        BS_SDK_ERROR_SSL_VERIFY_KEY                          = -3007,
+        BS_SDK_ERROR_SSL_INIT                               = -3000,
+        BS_SDK_ERROR_SSL_NOT_SUPPORTED                      = -3001,
+        BS_SDK_ERROR_SSL_CANNOT_CONNECT                     = -3002,
+        BS_SDK_ERROR_SSL_ALREADY_CONNECTED                  = -3003,
+        BS_SDK_ERROR_SSL_INVALID_CERT                       = -3004,
+        BS_SDK_ERROR_SSL_VERIFY_CERT                        = -3005,
+        BS_SDK_ERROR_SSL_INVALID_KEY                        = -3006,
+        BS_SDK_ERROR_SSL_VERIFY_KEY                         = -3007,
 
         // Mobile access
-        BS_SDK_ERROR_MOBILE_PORTAL                           = -3100,
+        BS_SDK_ERROR_MOBILE_PORTAL                          = -3100,
 
-        BS_SDK_ERROR_NULL_POINTER                            = -10000,
-        BS_SDK_ERROR_UNINITIALIZED                           = -10001,
-        BS_SDK_ERROR_CANNOT_RUN_SERVICE                      = -10002,
-        BS_SDK_ERROR_CANCELED                                = -10003,
-        BS_SDK_ERROR_EXIST                                   = -10004,
-        BS_SDK_ERROR_ENCRYPT                                 = -10005,
-        BS_SDK_ERROR_DECRYPT                                 = -10006,
-        BS_SDK_ERROR_DEVICE_BUSY							 = -10007,
-        BS_SDK_ERROR_INTERNAL                                = -10008,
-        BS_SDK_ERROR_INVALID_FILE_FORMAT                     = -10009,
-        BS_SDK_ERROR_INVALID_SCHEDULE_ID                     = -10010,
-        BS_SDK_ERROR_UNKNOWN_FINGER_TEMPLATE                 = -10011,
+        // OSDP
+        BS_SDK_ERROR_NOT_OSDP_STANDARD_CHANNEL              = -4001,
+        BS_SDK_ERROR_ALREADY_FULL_SLAVES                    = -4002,
+        BS_SDK_ERROR_DUPLICATE_OSDP_ID                      = -4003,
+        BS_SDK_ERROR_FAIL_ADD_OSDP_DEVICE                   = -4004,
+        BS_SDK_ERROR_FAIL_UPDATE_OSDP_DEVICE                = -4005,
+        BS_SDK_ERROR_INVALID_OSDP_DEVICE_ID                 = -4006,
+        BS_SDK_ERROR_FAIL_MASTER_SET_KEY                    = -4007,
+        BS_SDK_ERROR_FAIL_SLAVE_SET_KEY                     = -4008,
+        BS_SDK_ERROR_DISCONNECT_SLAVE_DEVICE                = -4009,
+
+        // license
+        BS_SDK_ERROR_NO_LICENSE                             = -4010,
+        BS_SDK_ERROR_LICENSE_CRC                            = -4011,
+        BS_SDK_ERROR_LICENSE_FILE_NOT_VALID                 = -4012,
+        BS_SDK_ERROR_LICENSE_PAYLOAD_LENGTH                 = -4013,
+        BS_SDK_ERROR_LICENSE_PARRING_JSON                   = -4014,
+        BS_SDK_ERROR_LICENSE_JSON_FORMAT                    = -4015,
+        BS_SDK_ERROR_LICENSE_ENABLE_PARTIAL                 = -4016,
+        BS_SDK_ERROR_LICENSE_NO_MATCH_DEVICE                = -4017,
+
+        BS_SDK_ERROR_NULL_POINTER                           = -10000,
+        BS_SDK_ERROR_UNINITIALIZED                          = -10001,
+        BS_SDK_ERROR_CANNOT_RUN_SERVICE                     = -10002,
+        BS_SDK_ERROR_CANCELED                               = -10003,
+        BS_SDK_ERROR_EXIST                                  = -10004,
+        BS_SDK_ERROR_ENCRYPT                                = -10005,
+        BS_SDK_ERROR_DECRYPT                                = -10006,
+        BS_SDK_ERROR_DEVICE_BUSY							= -10007,
+        BS_SDK_ERROR_INTERNAL                               = -10008,
+        BS_SDK_ERROR_INVALID_FILE_FORMAT                    = -10009,
+        BS_SDK_ERROR_INVALID_SCHEDULE_ID                    = -10010,
+        BS_SDK_ERROR_UNKNOWN_FINGER_TEMPLATE                = -10011,
     }
 
     [Flags]
@@ -702,6 +723,7 @@ namespace Suprema
         IM_120          = 0x21,     // [+2.8.1]
         XSTATION_2_FP   = 0x22,     // [+2.8.1]
         BIOSTATION_3    = 0x23,     // [+2.8.3]
+        THIRD_OSDP_DEVICE = 0x24,   // [+2.9.1]
 
         TYPE_MAX        = BIOSTATION_3,
         //UNKNOWN         = 0xFF,
@@ -1838,6 +1860,13 @@ namespace Suprema
     }
 
     [Flags]
+    public enum BS2CapabilityFunctionExSupport
+    {
+        FUNCTIONEX_SUPPORT_OSDPSTANDARDCENTRAL = 0x01,  // [V2.9.1]
+        FUNCTIONEX_SUPPORT_ENABLELICENSE = 0x02,        // [V2.9.1]
+    }
+
+    [Flags]
     public enum BS2SupervisedResistor
     {
         SUPERVISED_RESISTOR_1K      = 0,
@@ -1863,5 +1892,77 @@ namespace Suprema
 	    RELAY_ACTION_INPUT_MASK_NONE	= 0x00,
 	    RELAY_ACTION_INPUT_MASK_ALARM	= 0x01,
 	    RELAY_ACTION_INPUT_MASK_FAULT	= 0x02,
+    }
+
+    [Flags]
+    public enum BS2MotionSensitivity                // + 2.9.1
+    {
+        LOW = 0,
+        NORMAL = 1,
+        HIGH = 2,
+    }
+
+    [Flags]
+    public enum BS2LicenseStatus                    // + 2.9.1
+    {
+        NOT_SUPPORTED   = 0,
+        DISABLE         = 1,
+        ENABLE          = 2,
+        EXPIRED         = 3,
+    }
+
+    [Flags]
+    public enum BS2LicenseType                      // + 2.9.1
+    {
+        NONE           = 0x0000,
+        VISUAL_QR_MASK = 0x0001,
+        MAX_MASK       = VISUAL_QR_MASK,
+    }
+
+    [Flags]
+    public enum BS2LicenseSubType                   // + 2.9.1
+    {
+        NONE                    = 0,
+        VISUAL_QR_CODE_CORP     = 1,
+    }
+
+    [Flags]
+    public enum BS2OsdpStandardActionType           // + 2.9.1
+    {
+        COUNT       = 3,
+
+        NONE        = 0,
+        SUCCESS     = 1,
+        FAIL        = 2,
+        WAIT_INPUT  = 3,
+    }
+
+    [Flags]
+    public enum BS2OsdpStandardLEDCommand           // + 2.9.1
+    {
+        NOP     = 0,
+        CANCEL  = 1,
+        SET     = 2,
+    }
+
+    [Flags]
+    public enum BS2OsdpStandardColor                // + 2.9.1
+    {
+        BLACK = 0,
+        RED,
+        GREEN,
+        AMBER,
+        BLUE,
+        MAGENTA,
+        CYAN,
+        WHITE
+    }
+
+    [Flags]
+    public enum BS2OsdpStandardTone                 // + 2.9.1
+    {
+        NONE = 0,
+        OFF  = 1,
+        ON   = 2,
     }
 }

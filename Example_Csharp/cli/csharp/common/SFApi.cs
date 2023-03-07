@@ -54,6 +54,7 @@ namespace Suprema
             {BS2DeviceTypeEnum.IM_120,         "Input Module 120"},
             {BS2DeviceTypeEnum.XSTATION_2_FP,   "X-Station 2 FP"},
             {BS2DeviceTypeEnum.BIOSTATION_3,    "BioStation 3"},
+            {BS2DeviceTypeEnum.THIRD_OSDP_DEVICE, "3rd party OSDP"},
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -100,6 +101,9 @@ namespace Suprema
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void OnUserPhrase(UInt32 deviceId, UInt16 seq, string userID);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnOsdpStandardDeviceStatusChanged(UInt32 deviceId, IntPtr notifyData);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int IsAcceptableUserID(string uid);
@@ -523,6 +527,56 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetRtspConfig(IntPtr context, UInt32 deviceId, ref BS2RtspConfig config);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetOsdpStandardConfig(IntPtr context, UInt32 deviceId, out BS2OsdpStandardConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetOsdpStandardConfig(IntPtr context, UInt32 deviceId, ref BS2OsdpStandardConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetOsdpStandardActionConfig(IntPtr context, UInt32 deviceId, out BS2OsdpStandardActionConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetOsdpStandardActionConfig(IntPtr context, UInt32 deviceId, ref BS2OsdpStandardActionConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetLicenseConfig(IntPtr context, UInt32 deviceId, out BS2LicenseConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_AddOsdpStandardDevice(IntPtr context, UInt32 deviceId, UInt32 channelIndex, ref BS2OsdpStandardDeviceAdd osdpDevice, out UInt32 osdpChannelIndex);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetOsdpStandardDevice(IntPtr context, UInt32 osdpDeviceId, out BS2OsdpStandardDevice osdpDevice);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_UpdateOsdpStandardDevice(IntPtr context, UInt32 deviceId, IntPtr osdpDevices, UInt32 numOfDevice, out IntPtr outResultObj, out UInt32 outNumOfResult);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_RemoveOsdpStandardDevice(IntPtr context, UInt32 deviceId, IntPtr osdpDeviceIds, UInt32 numOfDevice, out IntPtr outResultObj, out UInt32 outNumOfResult);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetOsdpStandardDeviceCapability(IntPtr context, UInt32 osdpDeviceId, out BS2OsdpStandardDeviceCapability capability);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetOsdpStandardDeviceSecurityKey(IntPtr context, UInt32 masterOrSlaveId, IntPtr key);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetOsdpStandardDeviceStatusListener(IntPtr context, OnOsdpStandardDeviceStatusChanged ptrOsdpStandardDeviceStatus);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetOsdpStandardAvailableID(IntPtr context, UInt32 deviceId, UInt32 channelIndex, out UInt32 osdpDeviceID);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetAvailableOsdpStandardDevice(IntPtr context, UInt32 deviceId, out BS2OsdpStandardDeviceAvailable osdpDevices);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_EnableDeviceLicense(IntPtr context, UInt32 deviceId, ref BS2LicenseBlob licenseBlob, out IntPtr licenseResultObj, out UInt32 outNumOfResult);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_DisableDeviceLicense(IntPtr context, UInt32 deviceId, ref BS2LicenseBlob licenseBlob, out IntPtr licenseResultObj, out UInt32 outNumOfResult);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_QueryDeviceLicense(IntPtr context, UInt32 deviceId, UInt16 licenseType, out IntPtr licenseResultObj, out UInt32 outNumOfResult);
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Door API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetDoor(IntPtr context, UInt32 deviceId, IntPtr doorIds, UInt32 doorIdCount, out IntPtr doorObj, out UInt32 numDoor);

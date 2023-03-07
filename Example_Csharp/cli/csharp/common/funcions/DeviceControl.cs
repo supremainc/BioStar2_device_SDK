@@ -289,6 +289,9 @@ namespace Suprema
             Console.WriteLine("     |--visualQRSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_VISUALQR));
 
             Console.WriteLine("     |--maxVoipExtensionNumbers : {0}", info.maxVoipExtensionNumbers);
+
+            Console.WriteLine("     |--osdpStandardCentralSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_OSDPSTANDARDCENTRAL));
+            Console.WriteLine("     |--enableLicenseFuncSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_ENABLELICENSE));
         }
     }
 }

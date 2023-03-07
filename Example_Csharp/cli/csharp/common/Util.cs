@@ -806,6 +806,56 @@ namespace Suprema
             Console.WriteLine(fullStr.Substring(second));
         }
 
+        public static void HighlightLineMulti(string fullStr, params object[] highlightStrObj)
+        {
+            int before = 0;
+            var oldColor = Console.ForegroundColor;
+            foreach (object str in highlightStrObj)
+            {
+                string tempStr = str.ToString();
+                int first = fullStr.IndexOf(tempStr);
+                int len = tempStr.ToString().Length;
+
+                Console.ForegroundColor = oldColor;
+                Console.Write(fullStr.Substring(before, first - before));
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(fullStr.Substring(first, len));
+                before = first + len;
+            }
+
+            Console.ForegroundColor = oldColor;
+            Console.WriteLine(fullStr.Substring(before));
+        }
+
+        public static UInt32 GetInputMasterOrSlaveID(UInt32 masterID)
+        {
+            UInt32 id = 0;
+
+            Console.WriteLine(">>>> Do you want to process it with master ID? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                id = masterID;
+            }
+            else
+            {
+                id = GetInputSlaveID();
+            }
+
+            return id;
+        }
+
+        public static UInt32 GetInputSlaveID()
+        {
+            UInt32 id = 0;
+
+            Console.WriteLine(">>>> Select the slave ID:");
+            Console.Write(">>>> ");
+            id = (UInt32)Util.GetInput();
+
+            return id;
+        }
+
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
         public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
     }

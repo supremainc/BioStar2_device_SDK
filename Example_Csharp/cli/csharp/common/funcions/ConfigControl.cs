@@ -20,6 +20,26 @@ namespace Suprema
             List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> functionList = new List<KeyValuePair<string, Action<IntPtr, uint, bool>>>();
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get AllConfig", getAllConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get supported Config Mask", getConfigMask));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get auth group", getAuthGroup));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove auth group", removeAuthGroup));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set auth group", setAuthGroup));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("disable ssl", disbleSSL));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DataEncryptKey", getDataEncryptKey));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DataEncryptKey", setDataEncryptKey));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove DataEncryptKey", removeDataEncryptKey));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get Card1xConfig", getCard1xConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Card1xConfig", setCard1xConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get SystemExtConfig", getSystemExtConfig));
@@ -29,38 +49,21 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FaceConfig", getFaceConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FaceConfig", setFaceConfig));
 
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get auth group", getAuthGroup));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove auth group", removeAuthGroup));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set auth group", setAuthGroup));
-
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("disable ssl", disbleSSL));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485Config", getRS485Config));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485Config", setRS485Config));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigEx", getRS485ConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigEx", setRS485ConfigEx));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfigEx", getCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfigEx", setCardConfigEx));
 
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get supported Config Mask", getConfigMask));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DstConfig", getDstConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DstConfig", setDstConfig));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get SystemConfig", getSystemConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set SystemConfig", setSystemConfig));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get InputConfig", getInputConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set InputConfig", setInputConfig));
-
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DataEncryptKey", getDataEncryptKey));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DataEncryptKey", setDataEncryptKey));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove DataEncryptKey", removeDataEncryptKey));
 
             //[IPv6] 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get IPConfig", getIPConfig));
@@ -70,21 +73,27 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get AuthConfig", getAuthConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set AuthConfig", setAuthConfig));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get AuthConfigEx", getAuthConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set AuthConfigEx", setAuthConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FaceConfigEx", getFaceConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FaceConfigEx", setFaceConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get ThermalCameraConfig", getThermalCameraConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set ThermalCameraConfig", setThermalCameraConfig));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get BarcodeConfig", getBarcodeConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set BarcodeConfig", setBarcodeConfig));
-
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get VoipConfigExt", getVoipConfigExt));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set VoipConfigExt", setVoipConfigExt));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RtspConfig", getRtspConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RtspConfig", setRtspConfig));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get LicenseConfig", getLicenseConfig));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get OsdpStandardConfig", getOsdpStandardConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get OsdpStandardActionConfig", getOsdpStandardActionConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set OsdpStandardActionConfig", setOsdpStandardActionConfig));
+
             return functionList;
         }
 
@@ -725,7 +734,7 @@ namespace Suprema
             Console.Write(">>>> ");
             if (Util.IsYes())
             {
-                Console.WriteLine("Trying to get all auth gruops from device.");
+                Console.WriteLine("Trying to get all auth groups from device.");
                 result = (BS2ErrorCode)API.BS2_GetAllAuthGroup(sdkContext, deviceID, out authGroupObj, out numAuthGroup);
             }
             else
@@ -758,7 +767,7 @@ namespace Suprema
                         curAuthGroupIDObj = (IntPtr)((long)curAuthGroupIDObj + 4);
                     }
 
-                    Console.WriteLine("Trying to get auth gruops from device.");
+                    Console.WriteLine("Trying to get auth groups from device.");
                     result = (BS2ErrorCode)API.BS2_GetAuthGroup(sdkContext, deviceID, authGroupIDObj, (UInt32)authGroupIDList.Count, out authGroupObj, out numAuthGroup);
 
                     Marshal.FreeHGlobal(authGroupIDObj);
@@ -801,7 +810,7 @@ namespace Suprema
             Console.Write(">>>> ");
             if (Util.IsYes())
             {
-                Console.WriteLine("Trying to remove all auth gruops from device.");
+                Console.WriteLine("Trying to remove all auth groups from device.");
                 result = (BS2ErrorCode)API.BS2_RemoveAllAuthGroup(sdkContext, deviceID);
             }
             else
@@ -834,7 +843,7 @@ namespace Suprema
                         curAuthGroupIDObj = (IntPtr)((long)curAuthGroupIDObj + 4);
                     }
 
-                    Console.WriteLine("Trying to remove auth gruops from device.");
+                    Console.WriteLine("Trying to remove auth groups from device.");
                     result = (BS2ErrorCode)API.BS2_RemoveAuthGroup(sdkContext, deviceID, authGroupIDObj, (UInt32)authGroupIDList.Count);
 
                     Marshal.FreeHGlobal(authGroupIDObj);
@@ -920,7 +929,7 @@ namespace Suprema
             }
         }
 
-        void getRS485Config(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        public void getRS485Config(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Rs485Config config;
             Console.WriteLine("Trying to get RS485Config");
@@ -2017,7 +2026,7 @@ namespace Suprema
         {
             BS2BarcodeConfig config = Util.AllocateStructure<BS2BarcodeConfig>();
 
-            Console.WriteLine("Trying to get barcode configuration");
+            Console.WriteLine("Trying to set barcode configuration");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetBarcodeConfig(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
@@ -2028,12 +2037,35 @@ namespace Suprema
             Console.WriteLine("Would you like to use barcode function? [Y/n]");
             Console.Write(">> ");
             bool useBarcode = Util.IsYes();
-            config.useBarcode = Convert.ToByte(useBarcode);
-            if (useBarcode)
+
+            switch ((BS2DeviceTypeEnum)deviceInfo.type)
             {
-                Console.WriteLine("Set the barcode scan timeout in seconds. ({0}~{1})", BS2Environment.BS2_BARCODE_TIMEOUT_MIN, BS2Environment.BS2_BARCODE_TIMEOUT_MAX);
-                Console.Write(">> ");
-                config.scanTimeout = Util.GetInput((byte)BS2Environment.BS2_BARCODE_TIMEOUT_DEFAULT);
+                case BS2DeviceTypeEnum.XSTATION_2_QR:
+                    config.useBarcode = Convert.ToByte(useBarcode);
+                    if (useBarcode)
+                    {
+                        Console.WriteLine("Set the barcode scan timeout in seconds. ({0}~{1})", BS2Environment.BS2_BARCODE_TIMEOUT_MIN, BS2Environment.BS2_BARCODE_TIMEOUT_MAX);
+                        Console.Write(">> ");
+                        config.scanTimeout = Util.GetInput((byte)BS2Environment.BS2_BARCODE_TIMEOUT_DEFAULT);
+                    }
+                    break;
+                case BS2DeviceTypeEnum.XSTATION_2_FP:   // Supported V1.2.0
+                case BS2DeviceTypeEnum.XSTATION_2:      // Supported V1.2.0
+                case BS2DeviceTypeEnum.BIOSTATION_3:    // Supported V1.1.0
+                    config.useVisualBarcode = Convert.ToByte(useBarcode);
+                    if (useBarcode)
+                    {
+                        Console.WriteLine("Set the visual barcode scan timeout in seconds. ({0}~{1})", BS2Environment.BS2_VISUAL_BARCODE_TIMEOUT_MIN, BS2Environment.BS2_VISUAL_BARCODE_TIMEOUT_MAX);
+                        Console.Write(">> ");
+                        config.visualCameraScanTimeout = Util.GetInput((byte)BS2Environment.BS2_VISUAL_BARCODE_TIMEOUT_DEFAULT);
+
+                        Console.WriteLine("Set the motion sensitivity. ({0}~{1})", (int)BS2MotionSensitivity.LOW, (int)BS2MotionSensitivity.HIGH);
+                        Console.Write(">> ");
+                        config.motionSensitivity = Util.GetInput((byte)BS2MotionSensitivity.NORMAL);
+                    }
+                    break;
+                default:
+                    return;
             }
 
             Console.WriteLine("Would you like to use QR-bypass? [Y/n]");
@@ -2217,7 +2249,7 @@ namespace Suprema
         public void setRtspConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2RtspConfig config;
-            Console.WriteLine("Trying to get RtspConfig");
+            Console.WriteLine("Trying to set RtspConfig");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRtspConfig(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
@@ -2268,6 +2300,36 @@ namespace Suprema
             {
                 Console.WriteLine("Got error({0}).", result);
             }
+        }
+
+        void getLicenseConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2LicenseConfig config;
+            if (CommonControl.getLicenseConfig(sdkContext, deviceID, out config))
+                CommonControl.print(ref config);
+        }
+
+        void getOsdpStandardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardConfig config;
+            if (CommonControl.getOsdpStandardConfig(sdkContext, deviceID, out config))
+                CommonControl.print(ref config);
+        }
+
+        void getOsdpStandardActionConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardActionConfig config;
+            if (CommonControl.getOsdpStandardActionConfig(sdkContext, deviceID, out config))
+                CommonControl.print(ref config);
+        }
+
+        void setOsdpStandardActionConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardActionConfig config;
+            if (!CommonControl.getOsdpStandardActionConfig(sdkContext, deviceID, out config))
+                return;
+
+            CommonControl.setOsdpStandardActionConfig(sdkContext, deviceID, ref config);
         }
 
         void print(IntPtr sdkContext, BS2DstConfig config)
@@ -2467,6 +2529,7 @@ namespace Suprema
                 Console.WriteLine("         |--channelIndex : {0}", config.channels[idx].channelIndex);
                 Console.WriteLine("         |--useRegistance : {0}", config.channels[idx].useRegistance);
                 Console.WriteLine("         |--numOfDevices : {0}", config.channels[idx].numOfDevices);
+                Console.WriteLine("         |--channelType : {0}", config.channels[idx].channelType);
 
                 for (int idx2 = 0; idx2 < config.channels[idx].numOfDevices; ++idx2)
                 {
@@ -2614,6 +2677,10 @@ namespace Suprema
             Console.WriteLine("     +--scanTimeout : {0}", config.scanTimeout);
             Console.WriteLine("     +--bypassData : {0}", config.bypassData);
             Console.WriteLine("     +--treatAsCSN : {0}", config.treatAsCSN);
+
+            Console.WriteLine("     +--useVisualBarcode : {0}", config.useVisualBarcode);
+            Console.WriteLine("     +--motionSensitivity : {0}", config.motionSensitivity);
+            Console.WriteLine("     +--visualCameraScanTimeout : {0}", config.visualCameraScanTimeout);
         }
 
         void print(BS2Rs485Config config)

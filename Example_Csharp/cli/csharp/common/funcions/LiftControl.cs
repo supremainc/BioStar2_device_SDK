@@ -442,9 +442,9 @@ namespace Suprema
                         }
                     }
 
-                    Console.WriteLine("  Enter the dualAuthScheduleID: [0(default), 1(Always], 2, 3, .....]");
+                    Console.WriteLine("  Enter the dualAuthScheduleID: [0(default), 1(Always), 2, 3, .....]");
                     Console.Write("  >>>> ");
-                    lift.dualAuthScheduleID = (UInt32)Util.GetInput();
+                    lift.dualAuthScheduleID = (UInt32)Util.GetInput(0);
 
                     Console.WriteLine("  How many alarms for this lift do you want to set? [0(default)-{0}]", BS2Environment.BS2_MAX_ALARMS_ON_LIFT);
                     Console.Write("  >>>> ");
@@ -707,7 +707,7 @@ namespace Suprema
 
         void setFloorStatus(IntPtr sdkContext, UInt32 deviceID, string floorType, SetFloorStatusDelegate setFloorStatusDelegate)
         {
-            Console.WriteLine("  Enter the floorFlag.[0(None), 2(Emergency), 4(Operator)]");
+            Console.WriteLine("  Enter the floorFlag.[0(None), 1(Schedule), 2(Emergency), 4(Operator)]");
             Console.Write("  >>>> ");
             byte floorFlag = Util.GetInput(0);
             
@@ -986,7 +986,7 @@ namespace Suprema
             Console.Write(">>>> ");
             if (Util.IsYes())
             {
-                Console.WriteLine("Trying to get all access gruops from device.");
+                Console.WriteLine("Trying to get all access groups from device.");
                 result = (BS2ErrorCode)API.BS2_GetAllAccessGroup(sdkContext, deviceID, out accessGroupObj, out numAccessGroup);
             }
             else
@@ -1019,7 +1019,7 @@ namespace Suprema
                         curAccessGroupIDObj = (IntPtr)((long)curAccessGroupIDObj + 4);
                     }
 
-                    Console.WriteLine("Trying to get access gruops from device.");
+                    Console.WriteLine("Trying to get access groups from device.");
                     result = (BS2ErrorCode)API.BS2_GetAccessGroup(sdkContext, deviceID, accessGroupIDObj, (UInt32)accessGroupIDList.Count, out accessGroupObj, out numAccessGroup);
 
                     Marshal.FreeHGlobal(accessGroupIDObj);
@@ -1062,7 +1062,7 @@ namespace Suprema
             Console.Write(">>>> ");
             if (Util.IsYes())
             {
-                Console.WriteLine("Trying to remove all access gruops from device.");
+                Console.WriteLine("Trying to remove all access groups from device.");
                 result = (BS2ErrorCode)API.BS2_RemoveAllAccessGroup(sdkContext, deviceID);
             }
             else
@@ -1095,7 +1095,7 @@ namespace Suprema
                         curAccessGroupIDObj = (IntPtr)((long)curAccessGroupIDObj + 4);
                     }
 
-                    Console.WriteLine("Trying to remove access gruops from device.");
+                    Console.WriteLine("Trying to remove access groups from device.");
                     result = (BS2ErrorCode)API.BS2_RemoveAccessGroup(sdkContext, deviceID, accessGroupIDObj, (UInt32)accessGroupIDList.Count);
 
                     Marshal.FreeHGlobal(accessGroupIDObj);

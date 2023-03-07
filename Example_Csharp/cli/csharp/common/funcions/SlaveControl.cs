@@ -11,6 +11,9 @@ namespace Suprema
     public class SlaveControl : FunctionModule
     {
         private API.OnReadyToScan cbCardOnReadyToScan = null;
+        private API.OnBarcodeScanned cbOnBarcodeScanned = null;
+        private API.OnOsdpStandardDeviceStatusChanged cbOnOsdpStandardDeviceStatusChanged = null;
+        private List<Tuple<UInt32, UInt16>> searchedSlave = new List<Tuple<UInt32, UInt16>>();
 
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
@@ -25,13 +28,499 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get slave device", getSlaveDevice));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slave device", setSlaveDevice));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get slaveEx device", getSlaveExDevice));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slaveEx device", setSlaveExDevice));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Update to master device", update485Config));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get BarcodeConfig", getBarcodeConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set BarcodeConfig", setBarcodeConfig));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+
             //functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Turn on CST slave AuthMode", turnOnAuthMode));
             //functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Turn off CST slave AuthMode", turnOffAuthMode));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get LicenseConfig", getLicenseConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Device License", setDeviceLicense));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Delete Device License", deleteDeviceLicense));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get Device License", getDeviceLicense));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get OsdpStandardConfig", getOsdpStandardConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get OsdpStandardActionConfig", getOsdpStandardActionConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set OsdpStandardActionConfig", setOsdpStandardActionConfig));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Add OsdpStandardDevice", addOsdpStandardDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get OsdpStandardDevice", getOsdpStandardDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get available OsdpStandardDevice", getAvailableOsdpStandardDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Update OsdpStandardDevice", updateOsdpStandardDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove OsdpStandardDevice", removeOsdpStandardDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get OsdpStandardDeviceCapability", getOsdpStandardDeviceCapability));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set OsdpStandardDeviceSecurityKey", setOsdpStandardDeviceSecurityKey));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Start monitor OsdpStandardDeviceStatus", startMonitorOsdpStandardDeviceStatus));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Stop monitor OsdpStandardDeviceStatus", stopMonitorOsdpStandardDeviceStatus));
 
             return functionList;
+        }
+
+        public void update485Config(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2Rs485Config config;
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485Config(sdkContext, deviceID, out config);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Trying to set to master device.");
+            config.mode = (byte)BS2RS485ModeEnum.MASTER;
+            result = (BS2ErrorCode)API.BS2_SetRS485Config(sdkContext, deviceID, ref config);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+            {
+                Console.WriteLine("Set error({0}).", result);
+                return;
+            }
+        }
+
+        public void getLicenseConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            UInt32 id = Util.GetInputMasterOrSlaveID(deviceID);
+
+            BS2LicenseConfig config;
+            if (CommonControl.getLicenseConfig(sdkContext, id, out config))
+                CommonControl.print(ref config);
+        }
+
+        void getOsdpStandardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardConfig config;
+            if (CommonControl.getOsdpStandardConfig(sdkContext, deviceID, out config))
+                CommonControl.print(ref config);
+        }
+
+        void getOsdpStandardActionConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardActionConfig config;
+            if (CommonControl.getOsdpStandardActionConfig(sdkContext, deviceID, out config))
+                CommonControl.print(ref config);
+        }
+
+        void setOsdpStandardActionConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardActionConfig config;
+            if (!CommonControl.getOsdpStandardActionConfig(sdkContext, deviceID, out config))
+                return;
+
+            CommonControl.setOsdpStandardActionConfig(sdkContext, deviceID, ref config);
+        }
+
+        bool getOsdpID(ref BS2OsdpStandardConfig config, UInt32 osdpDeviceID, ref byte osdpID)
+        {
+            for (int idx = 0; idx < config.numOfChannels; idx++)
+            {
+                for (int sidx = 0; sidx < config.channels[idx].numOfDevices; sidx++)
+                {
+                    if (osdpDeviceID == config.channels[idx].slaveDevices[sidx].deviceID)
+                    {
+                        osdpID = config.channels[idx].slaveDevices[sidx].osdpID;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        void printOSDPDeviceID(ref BS2OsdpStandardConfig config, ref UInt32 numOfActivated)
+        {
+            numOfActivated = 0;
+            for (int idx = 0; idx < config.numOfChannels; idx++)
+            {
+                for (int sidx = 0; sidx < config.channels[idx].numOfDevices; sidx++)
+                {
+                    if (Convert.ToBoolean(config.channels[idx].slaveDevices[sidx].activate))
+                    {
+                        Console.WriteLine("[{0}-{1}] {2}", idx, sidx, config.channels[idx].slaveDevices[sidx].deviceID);
+                        numOfActivated++;
+                    }
+                }
+            }
+        }
+
+        void addOsdpStandardDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardDeviceAvailable allDevice;
+            if (CommonControl.getAvailableOsdpStandardDevice(sdkContext, deviceID, out allDevice))
+                CommonControl.print(ref allDevice);
+
+            BS2OsdpStandardDeviceAdd addDevice = Util.AllocateStructure<BS2OsdpStandardDeviceAdd>();
+            //BS2DeviceTypeEnum type = (BS2DeviceTypeEnum)deviceInfo.type;
+            //byte numOfChannels = (byte)(BS2DeviceTypeEnum.CORESTATION_40 == type ? BS2Environment.BS2_RS485_MAX_CHANNELS : 1);
+
+            Util.HighlightLine(">>>> Now add a OSDP device.", "add");
+            //Console.WriteLine(">>>> Please enter the channel index. (0 ~ {0})", numOfChannels);
+            addDevice.deviceID = Util.GetInputSlaveID();
+
+            UInt32 channelIndex = 0;
+            for (int idx = 0; idx < allDevice.numOfChannel; idx++)
+            {
+                for (int didx = 0; didx < allDevice.channels[idx].numOsdpAvailableDevice; didx++)
+                {
+                    if (allDevice.channels[idx].deviceIDs[didx] == addDevice.deviceID)
+                        channelIndex = allDevice.channels[idx].channelIndex;
+                }
+            }
+
+            Util.HighlightLine(">>>> Please enter the OSDP ID. [0 ~ 126]", "OSDP ID");
+            Console.Write(">>>> ");
+            addDevice.osdpID = Util.GetInput((byte)0);
+            
+            Util.HighlightLine(">>>> Does the OSDP device use secure communication? [Y/n]", "use secure communication");
+            Console.Write(">>>> ");
+            addDevice.useSecureSession = Convert.ToByte(Util.IsYes());
+
+            addDevice.deviceType = Convert.ToByte(BS2DeviceTypeEnum.THIRD_OSDP_DEVICE);
+            addDevice.activate = Convert.ToByte(true);
+
+            UInt32 outChannelIndex = 0;
+            if (CommonControl.addOsdpStandardDevice(sdkContext, deviceID, channelIndex, ref addDevice, out outChannelIndex))
+            {
+                Console.WriteLine("Successfully added OSDP device to channel {0}.", outChannelIndex);
+            }
+        }
+
+        void getOsdpStandardDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardConfig config;
+            if (!CommonControl.getOsdpStandardConfig(sdkContext, deviceID, out config))
+                return;
+
+            UInt32 numOfActivated = 0;
+            printOSDPDeviceID(ref config, ref numOfActivated);
+            if (0 < numOfActivated)
+            {
+                UInt32 id = Util.GetInputSlaveID();
+
+                BS2OsdpStandardDevice osdpDevice;
+                if (CommonControl.getOsdpStandardDevice(sdkContext, id, out osdpDevice))
+                    CommonControl.print(ref osdpDevice);
+            }
+        }
+
+        void getAvailableOsdpStandardDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardDeviceAvailable allDevice;
+            if (CommonControl.getAvailableOsdpStandardDevice(sdkContext, deviceID, out allDevice))
+                CommonControl.print(ref allDevice);
+        }
+
+        void updateOsdpStandardDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardConfig config;
+            if (!CommonControl.getOsdpStandardConfig(sdkContext, deviceID, out config))
+                return;
+
+            UInt32 numOfActivated = 0;
+            printOSDPDeviceID(ref config, ref numOfActivated);
+
+            string tempStr = String.Format("How many devices do you want to update? (0~{0})", numOfActivated);
+            Util.HighlightLineMulti(tempStr, "How many", "update");
+            Console.Write(">>>> ");
+            int numOfDevice = Util.GetInput(1);
+            if (0 < numOfDevice)
+            {
+                BS2OsdpStandardDeviceUpdate[] updateData = Util.AllocateStructureArray<BS2OsdpStandardDeviceUpdate>(numOfDevice);
+                for (int idx = 0; idx < numOfDevice; idx++)
+                {
+                    tempStr = String.Format(">>>> [{0}] Please enter the slave ID to be updated.", idx + 1);
+                    Util.HighlightLine(tempStr, "slave ID to be updated");
+                    Console.Write(">>>> ");
+                    updateData[idx].deviceID = Util.GetInput((UInt32)0);
+
+                    if (!getOsdpID(ref config, updateData[idx].deviceID, ref updateData[idx].osdpID))
+                    {
+                        Console.WriteLine("The OSDP ID could not be found.");
+                        return;
+                    }
+
+                    Console.WriteLine("Do you want to change the OSDP ID? (CurrentID: {0}) [Y/n]", updateData[idx].osdpID);
+                    Console.Write(">>>> ");
+                    if (Util.IsYes())
+                    {
+                        Util.HighlightLine(">>>> Please enter the OSDP ID. [0 ~ 126]", "OSDP ID");
+                        Console.Write(">>>> ");
+                        updateData[idx].osdpID = Util.GetInput((byte)0);
+                    }
+
+                    Util.HighlightLine(">>>> Do you like to enable the OSDP device? [Y/n]", "enable");
+                    Console.Write(">>>> ");
+                    updateData[idx].activate = Convert.ToByte(Util.IsYes());
+
+                    Util.HighlightLine(">>>> Does the OSDP device use secure communication? [Y/n]", "use secure communication");
+                    Console.Write(">>>> ");
+                    updateData[idx].useSecureSession = Convert.ToByte(Util.IsYes());
+                    updateData[idx].deviceType = Convert.ToByte(BS2DeviceTypeEnum.THIRD_OSDP_DEVICE);
+                }
+
+                List<BS2OsdpStandardDeviceResult> listResult = new List<BS2OsdpStandardDeviceResult>();
+                if (CommonControl.updateOsdpStandardDevice(sdkContext, deviceID, ref updateData, ref listResult))
+                {
+                    UInt32 resultIdx = 0;
+                    foreach (BS2OsdpStandardDeviceResult item in listResult)
+                    {
+                        CommonControl.print(item, resultIdx);
+                        resultIdx++;
+                    }
+                }
+            }
+        }
+
+        void removeOsdpStandardDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardConfig config;
+            if (!CommonControl.getOsdpStandardConfig(sdkContext, deviceID, out config))
+                return;
+
+            UInt32 numOfActivated = 0;
+            printOSDPDeviceID(ref config, ref numOfActivated);
+
+            string tempStr = String.Format("How many devices do you want to remove? (0~{0})", numOfActivated);
+            Util.HighlightLineMulti(tempStr, "How many", "remove");
+            Console.Write(">>>> ");
+            int numOfDevice = Util.GetInput(1);
+            if (0 < numOfDevice)
+            {
+                List<UInt32> removeIDs = new List<UInt32>();
+                for (int idx = 0; idx < numOfDevice; idx++)
+                {
+                    tempStr = String.Format(">>>> [{0}] Please enter the slave ID to be removed.", idx + 1);
+                    Util.HighlightLine(tempStr, "slave ID to be removed");
+                    Console.Write(">>>> ");
+                    removeIDs.Add(Util.GetInput((UInt32)0));
+                }
+
+                List<BS2OsdpStandardDeviceResult> listResult = new List<BS2OsdpStandardDeviceResult>();
+                if (CommonControl.removeOsdpStandardDevice(sdkContext, deviceID, removeIDs.ToArray(), ref listResult))
+                {
+                    UInt32 resultIdx = 0;
+                    foreach (BS2OsdpStandardDeviceResult item in listResult)
+                    {
+                        CommonControl.print(item, resultIdx);
+                        resultIdx++;
+                    }
+                }
+            }
+        }
+
+        void getOsdpStandardDeviceCapability(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2OsdpStandardConfig config;
+            if (!CommonControl.getOsdpStandardConfig(sdkContext, deviceID, out config))
+                return;
+
+            UInt32 numOfActivated = 0;
+            printOSDPDeviceID(ref config, ref numOfActivated);
+            if (0 < numOfActivated)
+            {
+                UInt32 id = Util.GetInputSlaveID();
+
+                BS2OsdpStandardDeviceCapability capability;
+                if (CommonControl.getOsdpStandardDeviceCapability(sdkContext, id, out capability))
+                    CommonControl.print(ref capability);
+            }
+        }
+
+        void setOsdpStandardDeviceSecurityKey(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            UInt32 id = Util.GetInputMasterOrSlaveID(deviceID);
+
+            if (id == deviceID)     // set key to master
+            {
+                BS2OsdpStandardDeviceSecurityKey keyInfo = Util.AllocateStructure<BS2OsdpStandardDeviceSecurityKey>();
+
+                Util.HighlightLine(">>>> Please enter the OSDP security key.", "security key");
+                Console.Write(">>>> ");
+                string keyString = Console.ReadLine();
+                byte[] buff = Encoding.UTF8.GetBytes(keyString);
+
+                Array.Clear(keyInfo.key, 0, BS2Environment.BS2_OSDP_STANDARD_KEY_SIZE);
+                Array.Copy(buff, 0, keyInfo.key, 0, keyString.Length);
+
+                IntPtr ptrKey = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BS2OsdpStandardDeviceSecurityKey)));
+                Marshal.StructureToPtr(keyInfo, ptrKey, false);
+
+                CommonControl.setOsdpStandardDeviceSecurityKey(sdkContext, id, ptrKey);
+
+                Marshal.FreeHGlobal(ptrKey);
+            }
+            else
+            {
+                CommonControl.setOsdpStandardDeviceSecurityKey(sdkContext, id, IntPtr.Zero);
+            }
+        }
+
+        void onOSDPStandardDeviceStatusChanged(UInt32 deviceId, IntPtr notifyData)
+        {
+            if (notifyData != IntPtr.Zero)
+            {
+                BS2OsdpStandardDeviceNotify item = (BS2OsdpStandardDeviceNotify)Marshal.PtrToStructure(notifyData, typeof(BS2OsdpStandardDeviceNotify));
+                CommonControl.print(ref item);
+            }
+        }
+
+        void startMonitorOsdpStandardDeviceStatus(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            cbOnOsdpStandardDeviceStatusChanged = new API.OnOsdpStandardDeviceStatusChanged(onOSDPStandardDeviceStatusChanged);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetOsdpStandardDeviceStatusListener(sdkContext, cbOnOsdpStandardDeviceStatusChanged);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+            Console.WriteLine("Start monitoring.");
+        }
+
+        void stopMonitorOsdpStandardDeviceStatus(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetOsdpStandardDeviceStatusListener(sdkContext, null);
+
+            cbOnOsdpStandardDeviceStatusChanged = null;
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                Console.WriteLine("Got error({0}).", result);
+            else
+                Console.WriteLine("Stop monitoring.");
+        }
+
+        public void getBarcodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            UInt32 id = 0;
+
+            Console.WriteLine(">>>> Do you want to get master settings? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                id = deviceID;
+            }
+            else
+            {
+                Console.WriteLine(">>>> Select the slave ID:");
+                Console.Write(">>>> ");
+                id = (UInt32)Util.GetInput();
+            }
+
+            BS2BarcodeConfig config;
+            Console.WriteLine("Trying to get barcode configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetBarcodeConfig(sdkContext, id, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setBarcodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            UInt32 id = 0;
+            UInt16 type = (UInt16)BS2DeviceTypeEnum.UNKNOWN;
+
+            Console.WriteLine(">>>> Do you want to get master settings? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                id = deviceID;
+                type = deviceInfo.type;
+            }
+            else
+            {
+                Console.WriteLine(">>>> Select the slave ID:");
+                Console.Write(">>>> ");
+                id = (UInt32)Util.GetInput();
+
+                foreach(var slave in searchedSlave)
+                {
+                    if (slave.Item1 == id)
+                    {
+                        type = slave.Item2;
+                        break;
+                    }
+                }
+            }
+
+            BS2BarcodeConfig config = Util.AllocateStructure<BS2BarcodeConfig>();
+
+            Console.WriteLine("Trying to set barcode configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetBarcodeConfig(sdkContext, id, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Would you like to use barcode function? [Y/n]");
+            Console.Write(">> ");
+            bool useBarcode = Util.IsYes();
+
+            switch ((BS2DeviceTypeEnum)type)
+            {
+                case BS2DeviceTypeEnum.XSTATION_2_QR:
+                    config.useBarcode = Convert.ToByte(useBarcode);
+                    if (useBarcode)
+                    {
+                        Console.WriteLine("Set the barcode scan timeout in seconds. ({0}~{1})", BS2Environment.BS2_BARCODE_TIMEOUT_MIN, BS2Environment.BS2_BARCODE_TIMEOUT_MAX);
+                        Console.Write(">> ");
+                        config.scanTimeout = Util.GetInput((byte)BS2Environment.BS2_BARCODE_TIMEOUT_DEFAULT);
+                    }
+                    break;
+                case BS2DeviceTypeEnum.XSTATION_2_FP:   // Supported V1.2.0
+                case BS2DeviceTypeEnum.XSTATION_2:      // Supported V1.2.0
+                case BS2DeviceTypeEnum.BIOSTATION_3:    // Supported V1.1.0
+                    config.useVisualBarcode = Convert.ToByte(useBarcode);
+                    if (useBarcode)
+                    {
+                        Console.WriteLine("Set the visual barcode scan timeout in seconds. ({0}~{1})", BS2Environment.BS2_VISUAL_BARCODE_TIMEOUT_MIN, BS2Environment.BS2_VISUAL_BARCODE_TIMEOUT_MAX);
+                        Console.Write(">> ");
+                        config.visualCameraScanTimeout = Util.GetInput((byte)BS2Environment.BS2_VISUAL_BARCODE_TIMEOUT_DEFAULT);
+
+                        Console.WriteLine("Set the motion sensitivity. ({0}~{1})", (int)BS2MotionSensitivity.LOW, (int)BS2MotionSensitivity.HIGH);
+                        Console.Write(">> ");
+                        config.motionSensitivity = Util.GetInput((byte)BS2MotionSensitivity.NORMAL);
+                    }
+                    break;
+                default:
+                    return;
+            }
+
+            Console.WriteLine("Would you like to use QR-bypass? [Y/n]");
+            Console.Write(">> ");
+            bool useQRbypass = Util.IsYes();
+            config.bypassData = Convert.ToByte(useQRbypass);
+            cbOnBarcodeScanned = useQRbypass ? (new API.OnBarcodeScanned(barcodeScanned)) : null;
+            result = (BS2ErrorCode)API.BS2_SetBarcodeScanListener(sdkContext, cbOnBarcodeScanned);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Do you want the barcode to use only number? like CSN? [Y/n]");
+            Console.Write(">> ");
+            config.treatAsCSN = Convert.ToByte(Util.IsYes());
+
+            Console.WriteLine("Trying to set barcode configuration.");
+            result = (BS2ErrorCode)API.BS2_SetBarcodeConfig(sdkContext, id, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
         }
 
         public void getSlaveDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -48,6 +537,7 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
+                searchedSlave.Clear();
                 List<BS2Rs485SlaveDevice> slaveDeviceList = new List<BS2Rs485SlaveDevice>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDevice));
@@ -57,6 +547,7 @@ namespace Suprema
                     BS2Rs485SlaveDevice item = (BS2Rs485SlaveDevice)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDevice));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
+                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
                 }
 
                 API.BS2_ReleaseObject(slaveDeviceObj);
@@ -88,6 +579,7 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
+                searchedSlave.Clear();
                 List<BS2Rs485SlaveDevice> slaveDeviceList = new List<BS2Rs485SlaveDevice>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDevice));
@@ -97,6 +589,7 @@ namespace Suprema
                     BS2Rs485SlaveDevice item = (BS2Rs485SlaveDevice)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDevice));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
+                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
                 }                
 
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
@@ -200,6 +693,7 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
+                searchedSlave.Clear();
                 List<BS2Rs485SlaveDeviceEX> slaveDeviceList = new List<BS2Rs485SlaveDeviceEX>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
@@ -209,6 +703,7 @@ namespace Suprema
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
+                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
                 }
 
                 API.BS2_ReleaseObject(slaveDeviceObj);
@@ -245,6 +740,7 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
+                searchedSlave.Clear();
                 List<BS2Rs485SlaveDeviceEX> slaveDeviceList = new List<BS2Rs485SlaveDeviceEX>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
@@ -254,6 +750,7 @@ namespace Suprema
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
+                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
                 }
 
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
@@ -903,6 +1400,181 @@ namespace Suprema
             }
         }
 
+        public void setDeviceLicense(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2LicenseBlob licenseBlob = Util.AllocateStructure<BS2LicenseBlob>();
+
+            Console.WriteLine("Try adding a license");
+
+            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR)");
+            Console.Write(">>>> ");
+            licenseBlob.licenseType = Util.GetInput((UInt16)BS2LicenseType.VISUAL_QR_MASK);
+
+            Console.WriteLine("How many devices do you want to register?");
+            Console.Write(">>>> ");
+            licenseBlob.numOfDevices = Util.GetInput((UInt16)1);
+
+            if (0 < licenseBlob.numOfDevices)
+            {
+                // Device ID
+                List<UInt32> listID = new List<UInt32>();
+                UInt32 tempID = 0;
+                for (UInt16 idx = 0; idx < licenseBlob.numOfDevices; idx++)
+                {
+                    Console.WriteLine("  Slave device ID #{0}", idx);
+                    Console.Write("  >> ");
+                    tempID = (UInt32)Util.GetInput();
+                    listID.Add(tempID);
+                }
+
+                byte[] byteListID = listID.SelectMany(BitConverter.GetBytes).ToArray();
+                int byteCount = Marshal.SizeOf(typeof(UInt32)) * licenseBlob.numOfDevices;
+
+                licenseBlob.deviceIDObjs = Marshal.AllocHGlobal(byteCount);
+                Marshal.Copy(byteListID, 0, licenseBlob.deviceIDObjs, byteCount);
+
+                // License data
+                Console.WriteLine("Enter the path and name of license.");
+                Console.Write(">>>> ");
+                string licensePath = Console.ReadLine();
+                if (!File.Exists(licensePath))
+                {
+                    Console.WriteLine("Invalid license Path");
+                    return;
+                }
+
+                if (Util.LoadBinary(licensePath, out licenseBlob.licenseObj, out licenseBlob.licenseLen))
+                {
+                    IntPtr resultObj = IntPtr.Zero;
+                    UInt32 numOfResult = 0;
+
+                    BS2ErrorCode result = (BS2ErrorCode)API.BS2_EnableDeviceLicense(sdkContext, deviceID, ref licenseBlob, out resultObj, out numOfResult);
+                    Marshal.FreeHGlobal(licenseBlob.licenseObj);
+
+                    if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                    {
+                        Console.WriteLine("Got error({0}).", result);
+                    }
+                    else
+                    {
+                        IntPtr curResult = resultObj;
+                        int resultSize = Marshal.SizeOf(typeof(BS2LicenseResult));
+                        for (UInt32 idx = 0; idx < numOfResult; idx++)
+                        {
+                            BS2LicenseResult item = (BS2LicenseResult)Marshal.PtrToStructure(curResult, typeof(BS2LicenseResult));
+                            print(item, idx);
+                            curResult += resultSize;
+                        }
+
+                        API.BS2_ReleaseObject(resultObj);
+                    }
+                } // if (Util.LoadBinary(licensePath, out licenseBlob.licenseObj, out licenseBlob.licenseLen))
+            } // if (0 < licenseBlob.numOfDevices)
+
+            Marshal.FreeHGlobal(licenseBlob.deviceIDObjs);
+        }
+
+        public void deleteDeviceLicense(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2LicenseBlob licenseBlob = Util.AllocateStructure<BS2LicenseBlob>();
+
+            Console.WriteLine("Try removing the license");
+
+            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR)");
+            Console.Write(">>>> ");
+            licenseBlob.licenseType = Util.GetInput((UInt16)BS2LicenseType.VISUAL_QR_MASK);
+
+            Console.WriteLine("How many devices do you want to remove?");
+            Console.Write(">>>> ");
+            licenseBlob.numOfDevices = Util.GetInput((UInt16)1);
+
+            if (0 < licenseBlob.numOfDevices)
+            {
+                // Device ID
+                List<UInt32> listID = new List<UInt32>();
+                UInt32 tempID = 0;
+                for (UInt16 idx = 0; idx < licenseBlob.numOfDevices; idx++)
+                {
+                    Console.WriteLine("  Slave device ID #{0}", idx);
+                    Console.Write("  >> ");
+                    tempID = (UInt32)Util.GetInput();
+                    listID.Add(tempID);
+                }
+
+                byte[] byteListID = listID.SelectMany(BitConverter.GetBytes).ToArray();
+                int byteCount = Marshal.SizeOf(typeof(UInt32)) * licenseBlob.numOfDevices;
+
+                licenseBlob.deviceIDObjs = Marshal.AllocHGlobal(byteCount);
+                Marshal.Copy(byteListID, 0, licenseBlob.deviceIDObjs, byteCount);
+
+                // License data
+                licenseBlob.licenseLen = 0;
+                licenseBlob.licenseObj = IntPtr.Zero;
+
+                IntPtr resultObj = IntPtr.Zero;
+                UInt32 numOfResult = 0;
+
+                BS2ErrorCode result = (BS2ErrorCode)API.BS2_DisableDeviceLicense(sdkContext, deviceID, ref licenseBlob, out resultObj, out numOfResult);
+
+                if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                }
+                else
+                {
+                    IntPtr curResult = resultObj;
+                    int resultSize = Marshal.SizeOf(typeof(BS2LicenseResult));
+                    for (UInt32 idx = 0; idx < numOfResult; idx++)
+                    {
+                        BS2LicenseResult item = (BS2LicenseResult)Marshal.PtrToStructure(curResult, typeof(BS2LicenseResult));
+                        print(item, idx);
+                        curResult += resultSize;
+                    }
+
+                    API.BS2_ReleaseObject(resultObj);
+                }
+            } // if (0 < licenseBlob.numOfDevices)
+
+            Marshal.FreeHGlobal(licenseBlob.deviceIDObjs);
+        }
+
+        public void getDeviceLicense(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            Console.WriteLine("Trying to get a license");
+
+            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR)");
+            Console.Write(">>>> ");
+            UInt16 licenseType = Util.GetInput((UInt16)BS2LicenseType.VISUAL_QR_MASK);
+
+            IntPtr resultObj = IntPtr.Zero;
+            UInt32 numOfResult = 0;
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_QueryDeviceLicense(sdkContext, deviceID, licenseType, out resultObj, out numOfResult);
+
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                IntPtr curResult = resultObj;
+                int resultSize = Marshal.SizeOf(typeof(BS2LicenseResult));
+                for (UInt32 idx = 0; idx < numOfResult; idx++)
+                {
+                    BS2LicenseResult item = (BS2LicenseResult)Marshal.PtrToStructure(curResult, typeof(BS2LicenseResult));
+                    print(item, idx);
+                    curResult += resultSize;
+                }
+
+                API.BS2_ReleaseObject(resultObj);
+            }
+        }
+
+        private void barcodeScanned(UInt32 deviceId, string barcode)
+        {
+            Console.WriteLine("Device: {0}, Scanned: {1}", deviceId, barcode);
+        }
+
         void print(IntPtr sdkContext, BS2Rs485SlaveDevice slaveDevice)
         {
             Console.WriteLine(">>>> SlaveDevice id[{0, 10}] type[{1, 3}] model[{2, 16}] enable[{3}], connected[{4}]", 
@@ -1083,6 +1755,47 @@ namespace Suprema
         void ReadyToScanForCard(UInt32 deviceID, UInt32 sequence)
         {
             Console.WriteLine("Place your card on the device.");
+        }
+
+        void print(BS2BarcodeConfig config)
+        {
+            Console.WriteLine(">>>> Barcode configuration ");
+            Console.WriteLine("     +--useBarcode : {0}", config.useBarcode);
+            Console.WriteLine("     +--scanTimeout : {0}", config.scanTimeout);
+            Console.WriteLine("     +--bypassData : {0}", config.bypassData);
+            Console.WriteLine("     +--treatAsCSN : {0}", config.treatAsCSN);
+
+            Console.WriteLine("     +--useVisualBarcode : {0}", config.useVisualBarcode);
+            Console.WriteLine("     +--motionSensitivity : {0}", config.motionSensitivity);
+            Console.WriteLine("     +--visualCameraScanTimeout : {0}", config.visualCameraScanTimeout);
+        }
+
+        void print(BS2LicenseConfig config)
+        {
+            Console.WriteLine(">>>> Device license configuration ");
+            Console.WriteLine("     |--version : {0}", config.version);
+            Console.WriteLine("     |--numOfLicense : {0}", config.numOfLicense);
+
+            for (int idx = 0; idx < config.numOfLicense; idx++)
+            {
+                Console.WriteLine("     +--license[{0}]", idx);
+                Console.WriteLine("         |--index : {0}", config.license[idx].index);
+                Console.WriteLine("         |--hasCapability : {0}", config.license[idx].hasCapability);
+                Console.WriteLine("         |--enable : {0}", config.license[idx].enable);
+                Console.WriteLine("         |--licenseType : {0}", config.license[idx].licenseType);
+                Console.WriteLine("         |--licenseSubType : {0}", config.license[idx].licenseSubType);
+                Console.WriteLine("         |--enableTime : {0}", config.license[idx].enableTime);
+                Console.WriteLine("         |--expiredTime : {0}", config.license[idx].expiredTime);
+                Console.WriteLine("         |--issueNumber : {0}", config.license[idx].issueNumber);
+                Console.WriteLine("         |--licenseName : {0}", Encoding.Default.GetString(config.license[idx].name));
+            }
+        }
+
+        void print(BS2LicenseResult result, UInt32 index)
+        {
+            Console.WriteLine("<<<< License result[{0}]", index);
+            Console.WriteLine("     |--deviceID : {0}", result.deviceID);
+            Console.WriteLine("     |--status : {0}", result.status);
         }
     }
 }

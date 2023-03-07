@@ -220,11 +220,23 @@ namespace Suprema
         public const int BS2_BARCODE_TIMEOUT_DEFAULT = 4;
         public const int BS2_BARCODE_TIMEOUT_MIN = BS2_BARCODE_TIMEOUT_DEFAULT;
         public const int BS2_BARCODE_TIMEOUT_MAX = 10;
+        public const int BS2_VISUAL_BARCODE_TIMEOUT_DEFAULT = 10;
+        public const int BS2_VISUAL_BARCODE_TIMEOUT_MIN = 3;
+        public const int BS2_VISUAL_BARCODE_TIMEOUT_MAX = 20;
 
         // Intelligent PD
         public const int BS2_RS485_MAX_EXCEPTION_CODE_LEN = 8;
         public const int BS2_IPD_OUTPUT_CARDID = 0;
 	    public const int BS2_IPD_OUTPUT_USERID = 1;
+
+        // Device license
+        public const int BS2_MAX_LICENSE_COUNT = 16;
+
+        // OSDP standard
+        public const int BS2_OSDP_STANDARD_ACTION_MAX_COUNT = 32;
+        public const int BS2_OSDP_STANDARD_ACTION_MAX_LED = 2;
+        public const int BS2_OSDP_STANDARD_KEY_SIZE = 16;
+        public const int BS2_OSDP_STANDARD_MAX_DEVICE_PER_CHANNEL = 8;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1222,7 +1234,7 @@ namespace Suprema
         public byte channelIndex;
         public byte useRegistance;
         public byte numOfDevices;
-        public byte reserved;
+        public byte channelType;			        // + 2.9.1
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_SLAVES_PER_CHANNEL)]
         public BS2Rs485SlaveDeviceEX[] slaveDevices;
     }
@@ -2298,7 +2310,7 @@ namespace Suprema
 
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential/*, Pack = 1*/)]
     public struct BS2LiftStatus
     {
         public UInt32 liftID;
@@ -2307,6 +2319,8 @@ namespace Suprema
         public byte tamperOn;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_FLOORS_ON_LIFT)]
         public BS2FloorStatus[] floors;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -2712,15 +2726,19 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct BS2BarcodeConfig          // [+ V2.8]
+    public struct BS2BarcodeConfig              // [+ V2.8]
     {
 	    public byte useBarcode;
         public byte scanTimeout;
 
-        public byte bypassData;             // [+ V2.8.2.7]
-        public byte treatAsCSN;             // [+ V2.8.2.7]
+        public byte bypassData;                 // [+ V2.8.2.7]
+        public byte treatAsCSN;                 // [+ V2.8.2.7]
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+        public byte useVisualBarcode;           // [+ V2.9.1]
+        public byte motionSensitivity;          // [+ V2.9.1]
+        public byte visualCameraScanTimeout;    // [+ V2.9.1]
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
         public byte[] reserved;
     }
 
@@ -2940,10 +2958,16 @@ namespace Suprema
         //smartCardByteOrderSupported: 1;
         //treatAsCSNSupported: 1;
         //rtspSupported: 1;
-        //unused2: 2;
+        //lfdSupported: 1;
+        //visualQRSupported: 1;
+
 	    public byte maxVoipExtensionNumbers;        // [+V2.8.3]
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 431)]
+        public byte functionExSupported;            // [+V2.9.1]
+        //osdpStandardCentralSupported : 1;
+        //enableLicenseFuncSupported : 1;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 429)]
 	    public byte[] reserved;
     }
 
@@ -3022,5 +3046,277 @@ namespace Suprema
         public byte reserved;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public byte[] reserved2;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardLedAction
+    {
+        public byte use;
+        public byte readerNumber;
+        public byte ledNumber;
+
+        public byte tempCommand;
+        public byte tempOnTime;
+        public byte tempOffTime;
+        public byte tempOnColor;
+        public byte tempOffColor;
+        public UInt16 tempRunTime;
+
+        public byte permCommand;
+        public byte permOnTime;
+        public byte permOffTime;
+        public byte permOnColor;
+        public byte permOffColor;
+
+        public byte reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardBuzzerAction
+    {
+        public byte use;
+        public byte readerNumber;
+        public byte tone;
+        public byte onTime;
+        public byte offTime;
+        public byte numOfCycle;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardAction
+    {
+        public byte actionType;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public BS2OsdpStandardLedAction[] led;
+        public BS2OsdpStandardBuzzerAction buzzer;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardActionConfig
+    {
+        public byte version;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_OSDP_STANDARD_ACTION_MAX_COUNT)]
+        public BS2OsdpStandardAction[] actions;
+    }
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	public struct BS2OsdpStandardDeviceNotify
+	{
+        public UInt32 deviceID;
+        public UInt16 deviceType;
+        public byte enableOSDP;
+        public byte connected;
+        public byte channelInfo;
+        public byte osdpID;
+        public byte supremaSearch;
+        public byte activate;
+        public byte useSecure;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] vendorCode;
+        public UInt32 fwVersion;
+        public byte modelNumber;
+        public byte modelVersion;
+        public byte readInfo;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDevice
+    {
+        public UInt32 deviceID;
+        public UInt16 deviceType;
+        public byte enableOSDP;
+        public byte connected;
+        public byte channelInfo;
+        public byte osdpID;
+        public byte supremaSearch;
+        public byte activate;
+        public byte useSecure;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] vendorCode;
+        public UInt32 fwVersion;
+        public byte modelNumber;
+        public byte modelVersion;
+        public byte readInfo;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardChannel
+    {
+        public UInt32 baudRate;
+        public byte channelIndex;
+        public byte useRegistance;
+        public byte numOfDevices;
+        public byte channelType;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_SLAVES_PER_CHANNEL)]
+        public BS2OsdpStandardDevice[] slaveDevices;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2License                                        // + 2.9.1
+    {
+        public byte index;
+        public byte hasCapability;
+        public byte enable;
+        public byte reserved;
+        public UInt16 licenseType;
+        public UInt16 licenseSubType;
+        public UInt32 enableTime;
+        public UInt32 expiredTime;
+        public UInt32 issueNumber;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] name;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2LicenseConfig                                  // + 2.9.1
+    {
+        public byte version;
+        public byte numOfLicense;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_LICENSE_COUNT)]
+        public BS2License[] license;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] reserved1;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2LicenseBlob                                    // + 2.9.1
+    {
+        public UInt16 licenseType;
+        public UInt16 numOfDevices;
+        public IntPtr deviceIDObjs;
+        public UInt32 licenseLen;
+        public IntPtr licenseObj;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2LicenseResult                                  // + 2.9.1
+    {
+        public UInt32 deviceID;
+        public byte status;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDeviceResult                       // + 2.9.1
+    {
+        public UInt32 deviceID;
+        public byte result;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDeviceSecurityKey                        // + 2.9.1
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_OSDP_STANDARD_KEY_SIZE)]
+        public byte[] key;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDeviceCapabilityItem
+    {
+        public byte compliance;
+        public byte count;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDeviceCapability
+    {
+        public BS2OsdpStandardDeviceCapabilityItem input;
+        public BS2OsdpStandardDeviceCapabilityItem output;
+        public BS2OsdpStandardDeviceCapabilityItem led;
+        public BS2OsdpStandardDeviceCapabilityItem audio;
+        public BS2OsdpStandardDeviceCapabilityItem textOutput;
+        public BS2OsdpStandardDeviceCapabilityItem reader;
+
+        public UInt16 recvBufferSize;
+        public UInt16 largeMsgSize;
+
+        public byte osdpVersion;
+        public byte cardFormat;
+        public byte timeKeeping;
+        public byte canCommSecure;
+
+        public byte crcSupport;
+        public byte smartCardSupport;
+        public byte biometricSupport;
+        public byte securePinEntrySupport;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDeviceAdd
+    {
+        public byte osdpID;
+        public byte activate;
+        public byte useSecureSession;
+        public byte deviceType;
+        public UInt32 deviceID;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDeviceUpdate
+    {
+        public byte osdpID;
+        public byte activate;
+        public byte useSecureSession;
+        public byte deviceType;
+        public UInt32 deviceID;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardChannelInfo
+    {
+        public byte channelIndex;
+        public byte channelType;
+        public byte maxOsdpDevice;
+        public byte numOsdpAvailableDevice;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public UInt32[] deviceIDs;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardDeviceAvailable
+    {
+        public byte numOfChannel;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_CHANNELS_EX)]
+        public BS2OsdpStandardChannelInfo[] channels;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved1;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2OsdpStandardConfig
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_CHANNELS_EX)]
+        public byte[] mode;
+        public UInt16 numOfChannels;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved1;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_CHANNELS_EX)]
+        public BS2OsdpStandardChannel[] channels;
     }
 }

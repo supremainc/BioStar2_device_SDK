@@ -86,7 +86,7 @@ namespace Suprema
             }
 
             BS2CardModelEnum cardModelEnum = (BS2CardModelEnum)cardModel;
-            if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OIPW)
+            if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
             {
                 Console.WriteLine("Enter the card format id [0(default)]");
                 Console.Write(">>>> ");
@@ -106,7 +106,7 @@ namespace Suprema
                     cardConfig.useSecondaryKey = 1;
                 }
 
-                if (cardModelEnum == BS2CardModelEnum.OMPW) // mifare card
+                if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OAPW) // mifare card
                 {
                     Console.WriteLine("Enter the start block index for mifare card [0(default)]");
                     Console.Write(">>>> ");
@@ -139,7 +139,9 @@ namespace Suprema
                     Console.Write(">>>> ");
                     enterSmartcardKey(cardConfig.desfire.secondaryKey);
                 }
-                else // iclass card
+
+                //else // iclass card
+                if (cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
                 {
                     Console.WriteLine("Enter the start block index for iclass card [0(default)]");
                     Console.Write(">>>> ");

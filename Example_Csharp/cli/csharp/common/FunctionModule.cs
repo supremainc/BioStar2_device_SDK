@@ -66,7 +66,10 @@ namespace Suprema
                     {
                         if (selection > 0 && selection <= functionList.Count)
                         {
-                            functionList[selection - 1].Value(sdkContext, deviceID, isMasterDevice);
+                            if (null != functionList[selection - 1].Value)
+                            {
+                                functionList[selection - 1].Value(sdkContext, deviceID, isMasterDevice);
+                            }
                         }
                         else if (selection == functionList.Count + 1)
                         {
