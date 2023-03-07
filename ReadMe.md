@@ -45,34 +45,61 @@ Learn how to create a context for device management and connect devices. [Watch 
 <br>
 <br>
 
-### V2.8.4.0 Beta released 12/22/2022:
+### V2.9.1.0 released 02/23/2023:
 
 **New Features**
 
-**1.** Added device license activation feature support.
-* Add Structure BS2License
-* Add Structure BS2LicenseConfig
-* Add Structure BS2LicenseBlob
-* Add Structure BS2LicenseResult
-* API BS2_GetLicenseConfig has been added
-* API BS2_EnableDeviceLicense has been added
-* API BS2_DisableDeviceLicense has been added
-* API BS2_QueryDeviceLicense has been added
+**1.** Added device license activation feature.
+  * Refer to structure BS2License
+  * Refer to structure BS2LicenseConfig
+  * Refer to structure BS2LicenseBlob
+  * Refer to structure BS2LicenseResult
+  * API BS2_GetLicenseConfig has been added
+  * API BS2_EnableDeviceLicense has been added
+  * API BS2_DisableDeviceLicense has been added
+  * API BS2_QueryDeviceLicense has been added
 
-**2.** A function to support recognition and authentication of QR codes through the camera has been added.
-* Refer to structure BS2BarcodeConfig
+**2.** Added features for QR cdoe authentication by using the camera.
+  * Refer to API BS2BarcodeConfig
 
-**3.** If an error occurs while reading and writing packets from the socket in the communication section, the SDK automatically retries a certain number of times, and APIs to set the number of retries have been added.
-* API BS2_GetSocketRetryCount has been added
-* API BS2_SetSocketRetryCount has been added
-* API BS2_GetSocketSSLRetryCount has been added
-* API BS2_SetSocketSSLRetryCount has been added
+**3.** Added retry count for communication used when an error occurs while reading or writing packets from the socket during communication.
+Increasing the number of retries is a way to resolve temporary errors, but care must be taken as direct causes such as network disconnection occurs, can lead to wasted resources by meaningless read/write retries when reconnection is required.
+  * API BS2_GetSocketRetryCount has been added
+  * API BS2_SetSocketRetryCount has been added
+  * API BS2_GetSocketSSLRetryCount has been added
+  * API BS2_SetSocketSSLRetryCount has been added
+
+**4.** Added feature to connect and manage 3rd party OSDP.
+  * Refer to structure BS2OsdpStandardDevice
+  * Refer to structure BS2OsdpStandardDeviceAvailable
+  * Refer to structure BS2OsdpStandardNotify
+  * Refer to structure BS2OsdpStandardConfig
+  * Refer to structure BS2OsdpStandardActionConfig
+  * Refer to structure BS2OsdpStandardDeviceAdd
+  * Refer to structure BS2OsdpStandardDeviceUpdate
+  * Refer to structure BS2OsdpStandardDeviceCapability
+  * Refer to structure BS2OsdpStandardDeviceResult
+  * Refer to structure BS2OsdpStandardDeviceSecurityKey
+  * API BS2_GetOsdpStandardConfig has been added
+  * API BS2_GetOsdpStandardActionConfig has been added
+  * API BS2_SetOsdpStandardActionConfig has been added
+  * API BS2_AddOsdpStandardDevice has been added
+  * API BS2_GetOsdpStandardDevice has been added
+  * API BS2_GetAvailableOsdpStandardDevice has been added
+  * API BS2_UpdateOsdpStandardDevice has been added
+  * API BS2_RemoveOsdpStandardDevice has been added
+  * API BS2_GetOsdpStandardDeviceCapability has been added
+  * API BS2_SetOsdpStandardDeviceSecurityKey has been added
+  * API BS2_SetOsdpStandardDeviceStatusListener has been added
+  * Add callback function OnOsdpStandardDeviceStatusChanged
 
 **Modified Features**
 
-**1.** Fixed a problem that could crash while dumping user information to log when enroll users.
+**1.** Fixed memory leak caused by network switches keepalive check being misunderstood by the SDK.
 
-**2.** Fixed an issue where keep-alive connection attempts could lead to memory leaks. (not a real device connection) 
+**2.** Fixed an issue caused when performing a log dump internally from the SDK that can lead to an abnormal shutdown.
+
+**3.** Fixes were made to stabilize the code internally in the SDK.
 
 <br>
 
