@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <algorithm>
 #include "DeviceList.h"
 #include "BS_Errno.h"
 

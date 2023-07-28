@@ -4,12 +4,19 @@
 #include <cassert>
 #include <memory>
 #include <algorithm>
+#if defined(OS_WINDOWS)
 #include <Windows.h>
+#endif
 #include "UserControl.h"
 #include "BS_Errno.h"
 #include "../Common/Utility.h"
 #include "../Common/ConfigControl.h"
 
+#if defined(OS_LINUX)
+#pragma GCC diagnostic ignored "-Wenum-compare"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 extern void TRACE(const char* fmt, ...);
 using namespace std;
@@ -65,8 +72,10 @@ int UserControl::getUser(BS2_DEVICE_ID id)
 		return BS_SDK_ERROR_INVALID_PARAM;
 	}
 
-	BS2SimpleDeviceInfo deviceInfo = { 0, };
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	BS2SimpleDeviceInfo deviceInfo;
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfo, 0x0, sizeof(deviceInfo));
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 	stringstream msg;
 	msg << "What do you want :\n";
 	msg << "[1: User header, 2: Card, 3: Finger, 4: Face]";
@@ -83,7 +92,6 @@ int UserControl::getUser(BS2_DEVICE_ID id)
 
 	uint32_t numUser = 1;
 	BS2_USER_MASK userMask = 0;
-	size_t dataSize = 0;
 	//shared_ptr<uint8_t> ptrUID(new uint8_t[BS2_USER_ID_SIZE], ArrayDeleter<uint8_t>());
 
 	userMask = BS2_USER_MASK_DATA | BS2_USER_MASK_SETTING;
@@ -114,7 +122,8 @@ int UserControl::getUser(BS2_DEVICE_ID id)
 		return BS_SDK_ERROR_INVALID_PARAM;
 	}
 
-	BS2UserBlob userBlob = { 0, };
+	BS2UserBlob userBlob;
+	memset(&userBlob, 0x0, sizeof(userBlob));
 	sdkResult = BS2_GetUserDatas(context_, id, const_cast<char*>(uid.c_str()), numUser, &userBlob, userMask);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
@@ -245,8 +254,10 @@ int UserControl::getAllUserFaceEx(BS2_DEVICE_ID id)
 
 int UserControl::enrollUser(BS2_DEVICE_ID id)
 {
-	BS2SimpleDeviceInfo deviceInfo = { 0, };
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	BS2SimpleDeviceInfo deviceInfo;
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfo, 0x0, sizeof(deviceInfo));
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 
 	int sdkResult = BS2_GetDeviceInfoEx(context_, id, &deviceInfo, &deviceInfoEx);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -255,7 +266,8 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 		return sdkResult;
 	}
 
-	BS2UserBlob userBlob = { 0, };
+	BS2UserBlob userBlob;
+	memset(&userBlob, 0x0, sizeof(userBlob));
 	BS2User& user = userBlob.user;
 	BS2UserSetting& setting = userBlob.setting;
 	BS2UserPhoto& photo = userBlob.user_photo;
@@ -347,8 +359,10 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 
 int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 {
-	BS2SimpleDeviceInfo deviceInfo = { 0, };
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	BS2SimpleDeviceInfo deviceInfo;
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfo, 0x0, sizeof(deviceInfo));
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 
 	int sdkResult = BS2_GetDeviceInfoEx(context_, id, &deviceInfo, &deviceInfoEx);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -357,10 +371,10 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 		return sdkResult;
 	}
 
-	BS2UserSmallBlob userBlob = { 0, };
+	BS2UserSmallBlob userBlob;
+	memset(&userBlob, 0x0, sizeof(userBlob));
 	BS2User& user = userBlob.user;
 	BS2UserSetting& setting = userBlob.setting;
-	BS2UserPhoto& photo = *userBlob.user_photo_obj;
 	stringstream msg;
 
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
@@ -436,8 +450,10 @@ int UserControl::getUserFaceEx(BS2_DEVICE_ID id)
 		return BS_SDK_ERROR_INVALID_PARAM;
 	}
 
-	BS2SimpleDeviceInfo deviceInfo = { 0, };
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	BS2SimpleDeviceInfo deviceInfo;
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfo, 0x0, sizeof(deviceInfo));
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 	stringstream msg;
 	msg << "What do you want :\n";
 	msg << "[1: User header, 2: Card, 3: Finger, 4: FaceEx]";
@@ -455,7 +471,6 @@ int UserControl::getUserFaceEx(BS2_DEVICE_ID id)
 
 	uint32_t numUser = 1;
 	BS2_USER_MASK userMask = 0;
-	size_t dataSize = 0;
 	//shared_ptr<uint8_t> ptrUID(new uint8_t[BS2_USER_ID_SIZE], ArrayDeleter<uint8_t>());
 
 	userMask = BS2_USER_MASK_DATA | BS2_USER_MASK_SETTING;
@@ -486,7 +501,8 @@ int UserControl::getUserFaceEx(BS2_DEVICE_ID id)
 		return BS_SDK_ERROR_INVALID_PARAM;
 	}
 
-	BS2UserFaceExBlob userBlob = { 0, };
+	BS2UserFaceExBlob userBlob;
+	memset(&userBlob, 0x0, sizeof(userBlob));
 	sdkResult = BS2_GetUserDatasFaceEx(context_, id, const_cast<char*>(uid.c_str()), numUser, &userBlob, userMask);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
@@ -527,8 +543,10 @@ int UserControl::getUserFaceEx(BS2_DEVICE_ID id)
 
 int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 {
-	BS2SimpleDeviceInfo deviceInfo = { 0, };
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	BS2SimpleDeviceInfo deviceInfo;
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfo, 0x0, sizeof(deviceInfo));
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 
 	int sdkResult = BS2_GetDeviceInfoEx(context_, id, &deviceInfo, &deviceInfoEx);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -623,10 +641,6 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 		return sdkResult;
 	}
 
-	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
-	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
-	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
-
 	BS2User& user = userBlob->user;
 	BS2UserSetting& setting = userBlob->setting;
 	BS2UserSettingEx& settingEx = userBlob->settingEx;
@@ -708,7 +722,6 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 		return sdkResult;
 	}
 
-	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
 	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 
@@ -1297,7 +1310,6 @@ int UserControl::getUserBlobPrivateAuthMode(BS2UserSetting& setting, const BS2Si
 {
 	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
 	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
-	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 
 	stringstream msg;
 	if (Utility::isYes("Do you want to register private auth mode?"))
@@ -1397,7 +1409,6 @@ int UserControl::getUserBlobPrivateAuthMode(BS2UserSetting& setting, const BS2Si
 int UserControl::getUserBlobPrivateAuthModeEx(BS2UserSettingEx& settingEx, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx)
 {
 	bool fingerScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FINGER_SCAN;
-	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 
 	stringstream msg;
@@ -1796,7 +1807,8 @@ int UserControl::getUserBlobCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards,
 				*cardObjs = ptrCard;
 				for (uint32_t index = 0; index < numCard;)
 				{
-					BS2Card card = { 0, };
+					BS2Card card;
+					memset(&card, 0x0, sizeof(card));
 					sdkResult = BS2_ScanCard(context_, id, &card, onReadyToScanCard);
 					if (BS_SDK_SUCCESS != sdkResult)
 						TRACE("BS2_ScanCard call failed: %d", sdkResult);
@@ -2098,7 +2110,8 @@ int UserControl::scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOf
 
 int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx)
 {
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 
 	int sdkResult = BS2_GetDeviceInfoEx(context_, id, NULL, &deviceInfoEx);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -2116,8 +2129,6 @@ int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& template
 			uint32_t size = Utility::getResourceSize(imagePath);
 			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
 
-			size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
-			size_t faceSize = dataOffset + size;
 			if (Utility::getResourceFromFile(imagePath, buffer, size))
 			{
 				sdkResult = BS2_ExtractTemplateFaceEx(context_, id, buffer.get(), size, 0, &templateEx);
@@ -2137,7 +2148,8 @@ int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& template
 
 int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer, uint32_t& bufferSize)
 {
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 
 	int sdkResult = BS2_GetDeviceInfoEx(context_, id, NULL, &deviceInfoEx);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -2515,7 +2527,8 @@ int UserControl::enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx)
 	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC("2030-01-01 00:00:00");
 	string pinString = "1234";
 
-	BS2UserFaceExBlob userBlob = { 0, };
+	BS2UserFaceExBlob userBlob;
+	memset(&userBlob, 0x0, sizeof(userBlob));
 	BS2User& user = userBlob.user;
 	BS2UserSetting& setting = userBlob.setting;
 	BS2UserSettingEx& settingEx = userBlob.settingEx;
@@ -2582,7 +2595,8 @@ int UserControl::enrollUserFaceEx_WithImage_1User(BS2_DEVICE_ID id)
 
 	for (uint32_t idx = 0; idx < numOfUser; idx++)
 	{
-		BS2UserFaceExBlob userBlob = { 0, };
+		BS2UserFaceExBlob userBlob;
+		memset(&userBlob, 0x0, sizeof(userBlob));
 		BS2User& user = userBlob.user;
 		BS2UserSetting& setting = userBlob.setting;
 		BS2UserSettingEx& settingEx = userBlob.settingEx;

@@ -45,7 +45,8 @@ int ConfigControl::setSystemConfig(BS2_DEVICE_ID id, const BS2SystemConfig& conf
 
 int ConfigControl::getTimezone(BS2_DEVICE_ID id, int& timezone)
 {
-	BS2SystemConfig systemConfig = { 0, };
+	BS2SystemConfig systemConfig;
+	memset(&systemConfig, 0x0, sizeof(systemConfig));
 	int sdkResult = getSystemConfig(id, systemConfig);
 	if (BS_SDK_SUCCESS == sdkResult)
 		timezone = systemConfig.timezone;
@@ -514,7 +515,8 @@ int ConfigControl::setOsdpStandardActionConfig(BS2_DEVICE_ID id, const BS2OsdpSt
 
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
-	BS2IpConfig config = { 0, };
+	BS2IpConfig config;
+	memset(&config, 0x0, sizeof(config));
 	int sdkResult = BS2_GetIPConfigViaUDP(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
@@ -533,7 +535,8 @@ int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_M
 
 int ConfigControl::updateConnectModeDevice2Server(BS2_DEVICE_ID id, string serverIP, BS2_PORT serverPort)
 {
-	BS2IpConfig config = { 0, };
+	BS2IpConfig config;
+	memset(&config, 0x0, sizeof(config));
 	int sdkResult = getIPConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -547,7 +550,8 @@ int ConfigControl::updateConnectModeDevice2Server(BS2_DEVICE_ID id, string serve
 
 int ConfigControl::updateConnectModeServer2Device(BS2_DEVICE_ID id)
 {
-	BS2IpConfig config = { 0, };
+	BS2IpConfig config;
+	memset(&config, 0x0, sizeof(config));
 	int sdkResult = getIPConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -559,7 +563,8 @@ int ConfigControl::updateConnectModeServer2Device(BS2_DEVICE_ID id)
 
 int ConfigControl::updateRS485OperationMode(BS2_DEVICE_ID id, BS2_RS485_MODE mode)
 {
-	BS2Rs485Config config = { 0, };
+	BS2Rs485Config config;
+	memset(&config, 0x0, sizeof(config));
 	int sdkResult = getRS485Config(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -582,15 +587,15 @@ int ConfigControl::resetConfigExceptNetInfo(BS2_DEVICE_ID id, bool includeDB)
 int ConfigControl::getOperatorInAuthConfig(BS2_DEVICE_ID id, vector<BS2AuthOperatorLevel>& oprList)
 {
 	// Operators in the old FW devices
-	BS2AuthConfig config = { 0, };
-
+	BS2AuthConfig config;
+	memset(&config, 0x0, sizeof(config));
 	int sdkResult = getAuthConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
 	for (int idx = 0; idx < config.numOperators; idx++)
 	{
-		BS2AuthOperatorLevel opr = { 0, };
+		BS2AuthOperatorLevel opr;
 		memcpy(&config.operators[idx], &opr, sizeof(BS2AuthOperatorLevel));
 		oprList.push_back(opr);
 	}
@@ -601,7 +606,8 @@ int ConfigControl::getOperatorInAuthConfig(BS2_DEVICE_ID id, vector<BS2AuthOpera
 int ConfigControl::setOperatorInAuthConfig(BS2_DEVICE_ID id, const vector<BS2AuthOperatorLevel>& oprList)
 {
 	// Operators in the old FW devices
-	BS2AuthConfig config = { 0, };
+	BS2AuthConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	int sdkResult = getAuthConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)

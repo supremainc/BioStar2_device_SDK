@@ -6,6 +6,7 @@
 #include "../Common/LogControl.h"
 #include "../Common/UserControl.h"
 #include "../Common/AccessControl.h"
+#include "../Common/DeviceControl.h"
 #include "../Common/BS2UsbContext.h"
 #include <memory>
 
@@ -15,7 +16,6 @@ extern void TRACE(const char* fmt, ...);
 using namespace std;
 
 static void* sdkContext = NULL;
-static BS2_DEVICE_ID connectedID = 0;
 static DeviceList deviceList;
 
 
@@ -68,7 +68,8 @@ void onDeviceConnected(BS2_DEVICE_ID id)
 	if (!deviceList.findDevice(id))
 	{
 		// Device to server connection
-		BS2SimpleDeviceInfo info = { 0, };
+		BS2SimpleDeviceInfo info;
+		memset(&info, 0x0, sizeof(info));
 		if (BS_SDK_SUCCESS != (sdkResult = dc.getDeviceInfo(id, info)))
 			BS2_DisconnectDevice(sdkContext, id);
 
@@ -97,7 +98,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 	else
 		cc.getTimezone(id, timezone);
 
-	int sdkResult = sdkResult = Utility::getAllLogsFromDevice(sdkContext, id, timezone);
+	int sdkResult = Utility::getAllLogsFromDevice(sdkContext, id, timezone);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("An error occurred while receiving bulk logs from device: %d", sdkResult);
@@ -108,7 +109,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone)
 	return true;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
 	// Set debugging SDK log (to current working directory)
 	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".", 100);
@@ -376,6 +377,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 	ConfigControl cc(context);
 	LogControl lc(context);
 	UserControl uc(context);
+	DeviceControl dc(context);
 
 	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
@@ -453,6 +455,10 @@ int runAPIs(void* context, const DeviceList& deviceList)
 		case MENU_COMM_SET_SOCKETSSL_RETRY_COUNT:
 			sdkResult = setSocketSSLRetryCount(context);
 			break;
+		case MENU_COMM_UPG_FIRMWARE:
+			id = Utility::selectDeviceID(deviceList, true, false);
+			sdkResult = dc.upgradeFirmware(id);
+			break;
 		case MENU_CONF_GET_FACCONFIG:
 			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = getFactoryConfig(context, id);
@@ -506,7 +512,9 @@ int runAPIs(void* context, const DeviceList& deviceList)
 int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList)
 {
 	const string fnFaceTemplate = "C:\\Temp\\user01.dat";
-	BS2Face face = { 0, }, faceTemp = { 0, };
+	BS2Face face, faceTemp;
+	memset(&face, 0x0, sizeof(face));
+	memset(&faceTemp, 0x0, sizeof(faceTemp));
 	uint8_t numOfScanFace(0);
 	UserControl uc(context);
 	int sdkResult = BS_SDK_SUCCESS;
@@ -623,7 +631,8 @@ int setSocketSSLRetryCount(void* context)
 int getFactoryConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
-	BS2FactoryConfig config = { 0, };
+	BS2FactoryConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	int sdkResult = cc.getFactoryConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
@@ -651,7 +660,8 @@ int getFactoryConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
 
 // 	for (auto id : devices)
 // 	{
-// 		BS2Rs485ConfigEX config = { 0, };
+// 		BS2Rs485ConfigEX config;
+//		memset(&config, 0x0, sizeof(config));
 // 		sdkResult = cc.getRS485ConfigEx(id, config);
 // 		if (BS_SDK_SUCCESS == sdkResult)
 // 			ConfigControl::print(config);
@@ -663,7 +673,8 @@ int getFactoryConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
 int getStatusConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
-	BS2StatusConfig config = {0,};
+	BS2StatusConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	int sdkResult = cc.getStatusConfig(id, config);
 	if (BS_SDK_SUCCESS == sdkResult)
@@ -687,7 +698,8 @@ int getStatusConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
 int setStatusConfig(void* context, BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context);
-	BS2StatusConfig config = { 0, };
+	BS2StatusConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	int sdkResult = cc.getStatusConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -772,7 +784,8 @@ int setStatusConfig(void* context, BS2_DEVICE_ID id)
 int setStatusConfigValue(void* context, BS2_DEVICE_ID id, int value)
 {
 	ConfigControl cc(context);
-	BS2StatusConfig config = { 0, };
+	BS2StatusConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	int sdkResult = cc.getStatusConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -873,7 +886,8 @@ int enrollMultipleUsers(void* context, const DeviceList& devices)
 		return sdkResult;
 	}
 	const string fnFaceTemplate = "C:\\Temp\\user01.dat";
-	BS2Face face = { 0, };
+	BS2Face face;
+	memset(&face, 0x0, sizeof(face));
 	FILE* fp = fopen(fnFaceTemplate.c_str(), "rb");
 	if (fp)
 	{
@@ -892,7 +906,6 @@ int enrollMultipleUsers(void* context, const DeviceList& devices)
 	{
 		BS2User& user = userBlob[idx].user;
 		BS2UserSetting& setting = userBlob[idx].setting;
-		BS2UserPhoto& photo = userBlob[idx].user_photo;
 
 		stringstream msg;
 
@@ -915,8 +928,10 @@ int enrollMultipleUsers(void* context, const DeviceList& devices)
 		memcpy(userBlob[idx].faceObjs, &face, sizeof(BS2Face));
 	}
 
+#if _CHECK_RUNTIME
 	unsigned long tm1 = GetTickCount();
 	TRACE("Tick 1: %u", tm1);
+#endif
 	auto allDevices = devices.getAllDevices();
 	for (auto id : allDevices)
 	{
@@ -924,9 +939,11 @@ int enrollMultipleUsers(void* context, const DeviceList& devices)
 		if (BS_SDK_SUCCESS != sdkResult)
 			TRACE("BS2_EnrolUser call failed: %d", sdkResult);
 	}
+#if _CHECK_RUNTIME
 	unsigned long tm2 = GetTickCount();
 	TRACE("Tick 2: %u", tm2);
 	TRACE("Run time: %u.%u", (tm2 - tm1) / 1000, (tm2 - tm1) % 1000);
+#endif
 
 	for (uint32_t idx = 0; idx < numOfUser; idx++)
 	{
@@ -1551,7 +1568,8 @@ int getLogSmallBlobExFromDir()
 int setDeviceLicense(void* context, BS2_DEVICE_ID id)
 {
 	DeviceControl dc(context);
-	BS2LicenseBlob licenseBlob = { 0, };
+	BS2LicenseBlob licenseBlob;
+	memset(&licenseBlob, 0x0, sizeof(licenseBlob));
 	vector<BS2_DEVICE_ID> deviceIDs;
 	vector<BS2LicenseResult> licenseResult;
 	int sdkResult = BS_SDK_SUCCESS;
@@ -1588,7 +1606,8 @@ int setDeviceLicense(void* context, BS2_DEVICE_ID id)
 int deleteDeviceLicense(void* context, BS2_DEVICE_ID id)
 {
 	DeviceControl dc(context);
-	BS2LicenseBlob licenseBlob = { 0, };
+	BS2LicenseBlob licenseBlob;
+	memset(&licenseBlob, 0x0, sizeof(licenseBlob));
 	vector<BS2_DEVICE_ID> deviceIDs;
 	vector<BS2LicenseResult> licenseResult;
 	int sdkResult = BS_SDK_SUCCESS;
@@ -1617,7 +1636,8 @@ int deleteDeviceLicense(void* context, BS2_DEVICE_ID id)
 int getDeviceLicense(void* context, BS2_DEVICE_ID id)
 {
 	DeviceControl dc(context);
-	BS2LicenseBlob licenseBlob = { 0, };
+	BS2LicenseBlob licenseBlob;
+	memset(&licenseBlob, 0x0, sizeof(licenseBlob));
 	vector<BS2LicenseResult> licenseResult;
 	int sdkResult = BS_SDK_SUCCESS;
 
@@ -1632,7 +1652,8 @@ int getDeviceLicense(void* context, BS2_DEVICE_ID id)
 int getOsdpStandardConfig(void* context, const DeviceList& deviceList)
 {
 	ConfigControl cc(context);
-	BS2OsdpStandardConfig config = { 0, };
+	BS2OsdpStandardConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
 	int sdkResult = cc.getOsdpStandardConfig(id, config);
@@ -1645,7 +1666,8 @@ int getOsdpStandardConfig(void* context, const DeviceList& deviceList)
 int getOsdpStandardActionConfig(void* context, const DeviceList& deviceList)
 {
 	ConfigControl cc(context);
-	BS2OsdpStandardActionConfig config = { 0, };
+	BS2OsdpStandardActionConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
 	int sdkResult = cc.getOsdpStandardActionConfig(id, config);
@@ -1658,7 +1680,8 @@ int getOsdpStandardActionConfig(void* context, const DeviceList& deviceList)
 int setOsdpStandardActionConfig(void* context, const DeviceList& deviceList)
 {
 	ConfigControl cc(context);
-	BS2OsdpStandardActionConfig config = { 0, };
+	BS2OsdpStandardActionConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
 	int sdkResult = cc.getOsdpStandardActionConfig(id, config);
@@ -1750,7 +1773,8 @@ int setOsdpStandardActionConfig(void* context, const DeviceList& deviceList)
 int getAvailableOsdpStandardDevice(void* context, DeviceList& deviceList)
 {
 	CommControl cc(context);
-	BS2OsdpStandardDeviceAvailable availDevice = { 0, };
+	BS2OsdpStandardDeviceAvailable availDevice;
+	memset(&availDevice, 0x0, sizeof(availDevice));
 	int sdkResult = BS_SDK_SUCCESS;
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
@@ -1766,8 +1790,10 @@ int getOsdpStandardDevice(void* context, DeviceList& deviceList)
 {
 	ConfigControl cc(context);
 	CommControl mc(context);
-	BS2OsdpStandardConfig config = { 0, };
-	BS2OsdpStandardDevice osdpDevice = { 0, };
+	BS2OsdpStandardConfig config;
+	BS2OsdpStandardDevice osdpDevice;
+	memset(&config, 0x0, sizeof(config));
+	memset(&osdpDevice, 0x0, sizeof(osdpDevice));
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
 	int sdkResult = cc.getOsdpStandardConfig(id, config);
@@ -1790,8 +1816,11 @@ int getOsdpStandardDevice(void* context, DeviceList& deviceList)
 int addOsdpStandardDevice(void* context, DeviceList& deviceList)
 {
 	CommControl mc(context);
-	BS2OsdpStandardDeviceAvailable availDevice = { 0, };
-	BS2OsdpStandardDeviceAdd addDevice = { 0, };
+	BS2OsdpStandardDeviceAvailable availDevice;
+	BS2OsdpStandardDeviceAdd addDevice;
+	memset(&availDevice, 0x0, sizeof(availDevice));
+	memset(&addDevice, 0x0, sizeof(addDevice));
+
 	int sdkResult = BS_SDK_SUCCESS;
 
 	BS2_DEVICE_ID masterID = Utility::selectDeviceID(deviceList, false, false);
@@ -1830,7 +1859,8 @@ int updateOsdpStandardDevice(void* context, DeviceList& deviceList)
 {
 	ConfigControl cc(context);
 	CommControl mc(context);
-	BS2OsdpStandardConfig config = { 0, };
+	BS2OsdpStandardConfig config;
+	memset(&config, 0x0, sizeof(config));
 	vector<BS2OsdpStandardDeviceUpdate> updateData;
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
@@ -1844,7 +1874,8 @@ int updateOsdpStandardDevice(void* context, DeviceList& deviceList)
 	{
 		for (uint32_t idx = 0; idx < numOfDevice; idx++)
 		{
-			BS2OsdpStandardDeviceUpdate item = { 0, };
+			BS2OsdpStandardDeviceUpdate item;
+			memset(&item, 0x0, sizeof(item));
 			item.deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>("[%u] Please enter the slave ID to be updated.", idx + 1);
 
 			if (!ConfigControl::getOsdpID(config, item.deviceID, item.osdpID))
@@ -1879,7 +1910,8 @@ int removeOsdpStandardDevice(void* context, DeviceList& deviceList)
 {
 	ConfigControl cc(context);
 	CommControl mc(context);
-	BS2OsdpStandardConfig config = { 0, };
+	BS2OsdpStandardConfig config;
+	memset(&config, 0x0, sizeof(config));
 	vector<BS2_DEVICE_ID> removeData;
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
@@ -1911,8 +1943,10 @@ int getOsdpStandardDeviceCapability(void* context, DeviceList& deviceList)
 {
 	ConfigControl cc(context);
 	CommControl mc(context);
-	BS2OsdpStandardConfig config = { 0, };
-	BS2OsdpStandardDeviceCapability capability = { 0, };
+	BS2OsdpStandardConfig config;
+	BS2OsdpStandardDeviceCapability capability;
+	memset(&config, 0x0, sizeof(config));
+	memset(&capability, 0x0, sizeof(capability));
 
 	BS2_DEVICE_ID id = Utility::selectDeviceID(deviceList, false, false);
 	int sdkResult = cc.getOsdpStandardConfig(id, config);
@@ -1941,9 +1975,10 @@ int setOsdpStandardDeviceSecurityKey(void* context, DeviceList& deviceList)
 	BS2_DEVICE_ID id = (BS2_DEVICE_ID)Utility::selectMasterOrSlaveID(deviceList, useMaster);
 	if (useMaster)
 	{
-		BS2OsdpStandardDeviceSecurityKey key = { 0, };
+		BS2OsdpStandardDeviceSecurityKey key;
+		memset(&key, 0x0, sizeof(key));
 		string keyInfo = Utility::getInput<string>("Please enter the OSDP security key.");
-		memcpy(key.key, keyInfo.c_str(), min(keyInfo.size(), BS2_OSDP_STANDARD_KEY_SIZE));
+		memcpy(key.key, keyInfo.c_str(), min(keyInfo.size(), (size_t)BS2_OSDP_STANDARD_KEY_SIZE));
 
 		sdkResult = mc.setOsdpStandardDeviceSecurityKey(id, &key);
 	}
@@ -1958,7 +1993,7 @@ int setOsdpStandardDeviceSecurityKey(void* context, DeviceList& deviceList)
 	return sdkResult;
 }
 
-void onOsdpStandardDeviceStatusChanged(BS2_DEVICE_ID deviceId, const BS2OsdpStandardDeviceNotify* notifyData)
+void onOsdpStandardDeviceStatusChanged(BS2_DEVICE_ID /*deviceId*/, const BS2OsdpStandardDeviceNotify* notifyData)
 {
 	if (notifyData)
 		CommControl::print(*notifyData);

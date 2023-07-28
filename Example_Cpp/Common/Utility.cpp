@@ -6,12 +6,18 @@
 #include <iomanip>
 #include <stdexcept>
 #include <sys/timeb.h>
-#include "../Common/Utility.h"
 #include "../Include/BS_Errno.h"
+#include "../Common/Utility.h"
 #include "../Common/CommControl.h"
 #include "../Common/ConfigControl.h"
 #include "../Common/DeviceControl.h"
 #include "../Common/LogControl.h"
+
+#if defined(OS_LINUX)
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 #define STR2INT(x)				isdigit(x.c_str()[0]) ? atoi(x.c_str()) : 0;
 #define MAX_RECV_LOG_AMOUNT		32768
@@ -48,32 +54,41 @@ string Utility::getLocalTime(bool milliSec)
 {
 	struct timeb tb;
 	struct tm tstruct;
+	memset(&tstruct, 0x0, sizeof(tstruct));
 	char buf[128] = { 0, };
 
 	ftime(&tb);
-	if (0 == localtime_s(&tstruct, &tb.time))
+
+#if defined(OS_WINDOWS)
+	if (0 != localtime_s(&tstruct, &tb.time))
+		return "";
+#else
+	struct tm* tempTime = localtime(&tb.time);
+	if (!tempTime)
+		return "";
+	memcpy(tempTime, &tstruct, sizeof(tstruct));
+#endif
+	
+	if (milliSec)
 	{
-		if (milliSec)
-		{
-			sprintf(buf, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-				tstruct.tm_year + 1900,
-				tstruct.tm_mon + 1,
-				tstruct.tm_mday,
-				tstruct.tm_hour,
-				tstruct.tm_min,
-				tstruct.tm_sec,
-				tb.millitm);
-		}
-		else
-		{
-			sprintf(buf, "%04d-%02d-%02d %02d:%02d:%02d",
-				tstruct.tm_year + 1900,
-				tstruct.tm_mon + 1,
-				tstruct.tm_mday,
-				tstruct.tm_hour,
-				tstruct.tm_min,
-				tstruct.tm_sec);
-		}
+		sprintf(buf, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+			tstruct.tm_year + 1900,
+			tstruct.tm_mon + 1,
+			tstruct.tm_mday,
+			tstruct.tm_hour,
+			tstruct.tm_min,
+			tstruct.tm_sec,
+			tb.millitm);
+	}
+	else
+	{
+		sprintf(buf, "%04d-%02d-%02d %02d:%02d:%02d",
+			tstruct.tm_year + 1900,
+			tstruct.tm_mon + 1,
+			tstruct.tm_mday,
+			tstruct.tm_hour,
+			tstruct.tm_min,
+			tstruct.tm_sec);
 	}
 
 	return buf;
@@ -665,7 +680,8 @@ int Utility::connectViaIP(void* context, DeviceInfo& device)
 		return sdkResult;
 	}
 
-	BS2SimpleDeviceInfo info = { 0, };
+	BS2SimpleDeviceInfo info;
+	memset(&info, 0x0, sizeof(info));
 	if (BS_SDK_SUCCESS != (sdkResult = dc.getDeviceInfo(id, info)))
 	{
 		cm.disconnectDevice(id);
@@ -704,7 +720,8 @@ int Utility::connectViaIP(void* context, DeviceList& deviceList)
 		return sdkResult;
 	}
 
-	BS2SimpleDeviceInfo info = { 0, };
+	BS2SimpleDeviceInfo info;
+	memset(&info, 0x0, sizeof(info));
 	if (BS_SDK_SUCCESS != (sdkResult = dc.getDeviceInfo(id, info)))
 	{
 		cm.disconnectDevice(id);
@@ -722,7 +739,7 @@ int Utility::connectSlave(void* context, DeviceInfo& device)
 	int sdkResult = BS_SDK_SUCCESS;
 	if (Utility::isYes("Do you want to find slave devices?"))
 	{
-		BS2_DEVICE_ID slaveID = 0;
+		// BS2_DEVICE_ID slaveID = 0;
 		ConfigControl cc(context);
 
 		switch (device.type_)
@@ -799,7 +816,7 @@ int Utility::searchAndAddSlave(void* context, DeviceList& deviceList)
 
 		auto device = deviceList.getDevice(masterID);
 		BS2_DEVICE_TYPE type = device->type_;
-		BS2_DEVICE_ID slaveID = 0;
+		// BS2_DEVICE_ID slaveID = 0;
 		ConfigControl cc(context);
 
 		switch (type)
@@ -1075,8 +1092,10 @@ int Utility::getSlaveConnectionStatus(void* context, BS2_DEVICE_ID id, BS2_DEVIC
 	ConfigControl cc(context);
 	int sdkResult = BS_SDK_SUCCESS;
 
-	BS2Rs485ConfigEX configEx = { 0, };
-	BS2Rs485Config config = { 0, };
+	BS2Rs485ConfigEX configEx;
+	BS2Rs485Config config;
+	memset(&configEx, 0x0, sizeof(configEx));
+	memset(&config, 0x0, sizeof(config));
 	switch (type)
 	{
 	case BS2_DEVICE_TYPE_CORESTATION_40:

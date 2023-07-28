@@ -83,7 +83,8 @@ int CommControl::searchDevices(vector<BS2SimpleDeviceInfo>& devices, string host
 
 	for (uint32_t index = 0; index < numOfDevices; index++)
 	{
-		BS2SimpleDeviceInfo deviceInfo = { 0, };
+		BS2SimpleDeviceInfo deviceInfo;
+		memset(&deviceInfo, 0x0, sizeof(deviceInfo));
 		sdkResult = BS2_GetDeviceInfo(context_, devicesIDObj[index], &deviceInfo);
 		if (BS_SDK_SUCCESS == sdkResult)
 		{

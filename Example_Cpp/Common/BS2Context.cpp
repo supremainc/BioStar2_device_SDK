@@ -1,8 +1,10 @@
 #include "stdafx.h"
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(OS_WINDOWS)
 #include <Windows.h>
 #else
 #include <stdarg.h>
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #include <string>
@@ -13,6 +15,7 @@
 #include "Utility.h"
 #include "BS_API.h"
 #include "BS_Errno.h"
+
 
 using namespace std;
 
@@ -36,7 +39,7 @@ void TRACE(const char* fmt, ...)
 	vsprintf(buffer, fmt, fmtList);
 	va_end(fmtList);
 	buffer[strlen(buffer)] = '\n';
-#if defined(OS_WIN32) || defined(OS_WIN64)
+#if defined(OS_WINDOWS)
 	::OutputDebugStringA(buffer);
 #else
 	cout << buffer;

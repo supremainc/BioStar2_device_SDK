@@ -50,10 +50,14 @@ int DeviceControl::getSpecifiedDeviceInfo(BS2_DEVICE_ID id)
 	int sdkResult = BS_SDK_SUCCESS;
 	uint32_t inInfoSize(0);
 	uint32_t outInfoSize(0);
-	BS2SimpleDeviceInfo info = { 0, };
-	BS2SimpleDeviceInfoEx infoEx = { 0, };
-	BS2IPv6DeviceInfo infoV6 = { 0, };
+	BS2SimpleDeviceInfo info;
+	BS2SimpleDeviceInfoEx infoEx;
+	BS2IPv6DeviceInfo infoV6;
 	stringstream msg;
+
+	memset(&info, 0x0, sizeof(info));
+	memset(&infoEx, 0x0, sizeof(infoEx));
+	memset(&infoV6, 0x0, sizeof(infoV6));
 
 	msg << "Retrieve device info. What do you want?\n";
 	msg << "[1 : BS2SimpleDeviceInfo, 2 : BS2SimpleDeviceInfoEx, 3 : BS2IPv6DeviceInfo]";
@@ -254,7 +258,8 @@ void DeviceControl::onUpgrade(BS2_DEVICE_ID id, uint32_t percent)
 int DeviceControl::updateResource(BS2_DEVICE_ID id)
 {
 	ConfigControl cc(context_);
-	BS2DisplayConfig config = { 0, };
+	BS2DisplayConfig config;
+	memset(&config, 0x0, sizeof(config));
 
 	int sdkResult = cc.getDisplayConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -271,7 +276,8 @@ int DeviceControl::updateResource(BS2_DEVICE_ID id)
 	shared_ptr<uint8_t> buffer(new uint8_t[fileLen], ArrayDeleter<uint8_t>());
 	if (0 < fileLen && Utility::getResourceFromFile(sampleImage, buffer, fileLen))
 	{
-		BS2ResourceElement res = { 0, };
+		BS2ResourceElement res;
+		memset(&res, 0x0, sizeof(res));
 		res.type = BS2_RESOURCE_TYPE_IMAGE;
 		res.numResData = 1;
 

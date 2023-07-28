@@ -7,6 +7,10 @@
 #include "BS_Errno.h"
 #include "../Common/Utility.h"
 
+#if defined(OS_LINUX)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 #define CAST_UINT32(x)				static_cast<uint32_t>(x)
 
 

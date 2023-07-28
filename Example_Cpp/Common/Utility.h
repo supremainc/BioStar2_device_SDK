@@ -161,7 +161,7 @@ inline T Utility::getInput(std::string msgFormat, ...)
 	vsprintf(buf, msgFormat.c_str(), ap);
 	va_end(ap);
 
-	std::cout << buf << endl;
+	std::cout << buf << std::endl;
 	std::cout << "==> ";
 	T value;
 	std::cin >> value;
@@ -178,7 +178,7 @@ inline T Utility::getInputHexaChar(std::string msgFormat, ...)
 	vsprintf(buf, msgFormat.c_str(), ap);
 	va_end(ap);
 
-	std::cout << buf << endl;
+	std::cout << buf << std::endl;
 	std::cout << "==> ";
 	std::string value;
 	std::cin >> value;

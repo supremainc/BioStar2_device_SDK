@@ -4,6 +4,9 @@
 #include "BS_Errno.h"
 #include "Utility.h"
 
+#if defined(OS_LINUX)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 extern void TRACE(const char* fmt, ...);
 using namespace std;
