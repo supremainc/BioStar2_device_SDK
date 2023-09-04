@@ -2310,7 +2310,7 @@ namespace Suprema
 
     }
 
-    [StructLayout(LayoutKind.Sequential/*, Pack = 1*/)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2LiftStatus
     {
         public UInt32 liftID;
@@ -2966,6 +2966,10 @@ namespace Suprema
         public byte functionExSupported;            // [+V2.9.1]
         //osdpStandardCentralSupported : 1;
         //enableLicenseFuncSupported : 1;
+        //keypadBacklightSupported : 1              // [+V2.9.4]
+        //uzWirelessLockDoorSupported : 1
+        //customSmartCardSupported : 1
+        //tomSupported : 1
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 429)]
 	    public byte[] reserved;
@@ -3318,5 +3322,65 @@ namespace Suprema
         public byte[] reserved1;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_CHANNELS_EX)]
         public BS2OsdpStandardChannel[] channels;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2CustomMifareCard
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public byte[] primaryKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved1;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public byte[] secondaryKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved2;
+        public UInt16 startBlockIndex;
+        public byte dataSize;
+        public byte skipBytes;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2CustomDesFireCard
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] primaryKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] secondaryKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] appID;
+        public byte fileID;
+        public byte encryptionType;                 // 0: DES/3DES, 1: AES
+        public byte operationMode;                  // 0: legacy(use picc master key), 1: new mode(use app master, file read, file write key)
+        public byte dataSize;
+        public byte skipBytes;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved;
+        public BS2DesFireAppLevelKey desfireAppKey;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2CustomCardConfig
+    {
+        public byte dataType;
+        public byte useSecondaryKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reserved1;
+
+        public BS2CustomMifareCard mifare;
+        public BS2CustomDesFireCard desfire;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
+        public byte[] reserved2;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 96)]
+        public byte[] reserved3;
+
+        public byte smartCardByteOrder;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved4;
+        public UInt32 formatID;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public byte[] reserved5;
     }
 }

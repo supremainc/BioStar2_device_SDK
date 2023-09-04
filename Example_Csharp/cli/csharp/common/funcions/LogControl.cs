@@ -375,6 +375,12 @@ namespace Suprema
                 return;
             }
 
+            if (!Convert.ToBoolean(deviceInfo.imageLogSupported))
+            {
+                Console.WriteLine("This device does not support image log.");
+                return;
+            }
+
             Console.WriteLine("Trying to activate image log.");
             result = (BS2ErrorCode)API.BS2_SetEventConfig(sdkContext, deviceID, ref eventConfig);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)

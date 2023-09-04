@@ -64,6 +64,9 @@
     <Compile Include="..\..\..\common\funcions\CardControl.cs">
       <Link>CardControl.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\common\funcions\CommonControl.cs">
+      <Link>CommonControl.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\common\FunctionModule.cs">
       <Link>FunctionModule.cs</Link>
     </Compile>

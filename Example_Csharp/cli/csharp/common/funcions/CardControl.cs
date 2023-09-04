@@ -18,6 +18,8 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get card configuration", getCardConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set card configuration", setCardConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Scan card", scanCard));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Write card", writeCard));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Erase card", eraseCard));
@@ -86,73 +88,88 @@ namespace Suprema
             }
 
             BS2CardModelEnum cardModelEnum = (BS2CardModelEnum)cardModel;
-            if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
+            //if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
+            switch (cardModelEnum)
             {
-                Console.WriteLine("Enter the card format id [0(default)]");
-                Console.Write(">>>> ");
-                cardConfig.formatID = Util.GetInput((UInt32)0);
+                case BS2CardModelEnum.OMPW:
+                case BS2CardModelEnum.OIPW:
+                case BS2CardModelEnum.OAPW:
+                case BS2CardModelEnum.ODPW:
+                    {
+                        Console.WriteLine("Enter the card format id [0(default)]");
+                        Console.Write(">>>> ");
+                        cardConfig.formatID = Util.GetInput((UInt32)0);
 
-                Console.WriteLine("Choose card data type: [0: Binary(default), 1: ASCII, 2: UTF16, 3: BCD]");
-                Console.Write(">>>> ");
-                cardConfig.dataType = Util.GetInput((byte)BS2CardDataTypeEnum.BINARY);
-                Console.WriteLine("Do you want to use secondary key? [y/N]");
-                Console.Write(">>>> ");
-                if (Util.IsNo())
-                {
-                    cardConfig.useSecondaryKey = 0;
-                }
-                else
-                {
-                    cardConfig.useSecondaryKey = 1;
-                }
+                        Console.WriteLine("Choose card data type: [0: Binary(default), 1: ASCII, 2: UTF16, 3: BCD]");
+                        Console.Write(">>>> ");
+                        cardConfig.dataType = Util.GetInput((byte)BS2CardDataTypeEnum.BINARY);
+                        Console.WriteLine("Do you want to use secondary key? [y/N]");
+                        Console.Write(">>>> ");
+                        if (Util.IsNo())
+                        {
+                            cardConfig.useSecondaryKey = 0;
+                        }
+                        else
+                        {
+                            cardConfig.useSecondaryKey = 1;
+                        }
 
-                if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OAPW) // mifare card
-                {
-                    Console.WriteLine("Enter the start block index for mifare card [0(default)]");
-                    Console.Write(">>>> ");
-                    cardConfig.mifare.startBlockIndex = Util.GetInput((UInt16)0);
-                    Console.WriteLine("Enter the hexadecimal primary key for mifare card. [KEY1-KEY2-...-KEY6]");
-                    Console.Write(">>>> ");
-                    enterSmartcardKey(cardConfig.mifare.primaryKey);
-                    Console.WriteLine("Enter the hexadecimal secondary key for mifare card. [KEY1-KEY2-...-KEY6]");
-                    Console.Write(">>>> ");
-                    enterSmartcardKey(cardConfig.mifare.secondaryKey);
+                        if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OAPW || cardModelEnum == BS2CardModelEnum.ODPW) // mifare card
+                        {
+                            Console.WriteLine("Enter the start block index for mifare card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.mifare.startBlockIndex = Util.GetInput((UInt16)0);
+                            Console.WriteLine("Enter the hexadecimal primary key for mifare card. [KEY1-KEY2-...-KEY6]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.mifare.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for mifare card. [KEY1-KEY2-...-KEY6]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.mifare.secondaryKey);
 
-                    Console.WriteLine("Enter the app id for desfire card. [ID1-ID2-ID3]");
-                    Console.Write(">>>> ");
-                    enterSmartcardKey(cardConfig.desfire.appID);
-                    Console.WriteLine("Enter the file id for desfire card [0(default)]");
-                    Console.Write(">>>> ");
-                    cardConfig.desfire.fileID = Util.GetInput((byte)0);
+                            Console.WriteLine("Enter the app id for desfire card. [ID1-ID2-ID3]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.appID);
+                            Console.WriteLine("Enter the file id for desfire card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.fileID = Util.GetInput((byte)0);
 
-#if false //Not yet implemented
-                    Console.WriteLine("Enter the encryption type for desfire card [0: DES(default), 1: AES]");
-                    Console.Write(">>>> ");
-                    cardConfig.desfire.encryptionType = Util.GetInput((byte)0);
+#if true
+                            Console.WriteLine("Enter the encryption type for desfire card [0: DES/3DES(default), 1: AES]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.encryptionType = Util.GetInput((byte)0);
 #else
-                    cardConfig.desfire.encryptionType = 0;
+                            cardConfig.desfire.encryptionType = 0;
 #endif
-                    Console.WriteLine("Enter the hexadecimal primary key for desfire card. [KEY1-KEY2-...-KEY16]");
-                    Console.Write(">>>> ");
-                    enterSmartcardKey(cardConfig.desfire.primaryKey);
-                    Console.WriteLine("Enter the hexadecimal secondary key for desfire card. [KEY1-KEY2-...-KEY16]");
-                    Console.Write(">>>> ");
-                    enterSmartcardKey(cardConfig.desfire.secondaryKey);
-                }
+                            Console.WriteLine("Enter the operation mode for desfire card [0: Legacy, 1: Advanced]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.operationMode = Util.GetInput((byte)0);
 
-                //else // iclass card
-                if (cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
-                {
-                    Console.WriteLine("Enter the start block index for iclass card [0(default)]");
-                    Console.Write(">>>> ");
-                    cardConfig.iclass.startBlockIndex = Util.GetInput((UInt16)0);
-                    Console.WriteLine("Enter the hexadecimal primary key for iclass card. [KEY1-KEY2-...-KEY8]");
-                    Console.Write(">>>> ");
-                    enterSmartcardKey(cardConfig.iclass.primaryKey);
-                    Console.WriteLine("Enter the hexadecimal secondary key for iclass card. [KEY1-KEY2-...-KEY8]");
-                    Console.Write(">>>> ");
-                    enterSmartcardKey(cardConfig.iclass.secondaryKey);
-                }
+                            Console.WriteLine("Enter the hexadecimal primary key for desfire card. [KEY1-KEY2-...-KEY16]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for desfire card. [KEY1-KEY2-...-KEY16]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.secondaryKey);
+                        }
+
+                        //else // iclass card
+                        if (cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
+                        {
+                            Console.WriteLine("Enter the start block index for iclass card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.iclass.startBlockIndex = Util.GetInput((UInt16)0);
+                            Console.WriteLine("Enter the hexadecimal primary key for iclass card. [KEY1-KEY2-...-KEY8]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.iclass.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for iclass card. [KEY1-KEY2-...-KEY8]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.iclass.secondaryKey);
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
             }
 
             Console.WriteLine("Trying to set card configuration.");
@@ -161,6 +178,51 @@ namespace Suprema
             {
                 Console.WriteLine("Got error({0}).", result);
             }
+
+            Console.WriteLine("To use the Smart card function, you must turn on the Suprema smart card function. Do you want to change the card operation mode? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                BS2SystemConfig sysConfig;
+                result = (BS2ErrorCode)API.BS2_GetSystemConfig(sdkContext, deviceID, out sysConfig);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                }
+
+                UInt32 preMask = sysConfig.useCardOperationMask;
+
+                // Turn on Suprema smart card
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CLASSIC_PLUS;
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_DESFIRE_EV1;
+
+                // Turn off Custom smart card
+                sysConfig.useCardOperationMask &= ~(UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CUSTOM_CLASSIC_PLUS;
+                sysConfig.useCardOperationMask &= ~(UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CUSTOM_DESFIRE_EV1;
+
+                // Apply
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_USE;
+
+                result = (BS2ErrorCode)API.BS2_SetSystemConfig(sdkContext, deviceID, ref sysConfig);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                    Console.WriteLine("Card operation mode update failed ({0}).", result);
+                else
+                    Console.WriteLine("Card operation mode was changed 0x{0:x8} => 0x{1:x8}", preMask, sysConfig.useCardOperationMask);
+            }
+        }
+
+        public void getDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2DesFireCardConfigEx config;
+            if (CommonControl.getDesFireCardConfigEx(sdkContext, deviceID, out config))
+                CommonControl.print(ref config);
+        }
+
+        public void setDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2DesFireCardConfigEx config = Util.AllocateStructure<BS2DesFireCardConfigEx>();
+
+            CommonControl.setDesFireCardConfigEx(sdkContext, deviceID, ref config);
         }
 
         public void scanCard(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -197,13 +259,13 @@ namespace Suprema
                     }
                     else
                     {
-                        print(sdkContext, smartCard);
+                        CommonControl.print(ref smartCard);
                     }
                 }
                 else
                 {
                     BS2CSNCard csnCard = Util.ConvertTo<BS2CSNCard>(card.cardUnion);
-                    print(sdkContext, csnCard);
+                    CommonControl.print(ref csnCard);
                 }
             }
 
@@ -402,9 +464,10 @@ namespace Suprema
                 Console.WriteLine("Trying to write card.");
                 result = (BS2ErrorCode)API.BS2_WriteCard(sdkContext, deviceID, ref smartCard);
                 if (result != BS2ErrorCode.BS_SDK_SUCCESS)
-                {
                     Console.WriteLine("Got error({0}).", result);
-                }
+                else
+                    Console.WriteLine("Write success.");
+
             }
         }
 
@@ -413,9 +476,9 @@ namespace Suprema
             Console.WriteLine("Trying to erase card.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_EraseCard(sdkContext, deviceID);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
-            {
                 Console.WriteLine("Got error({0}).", result);
-            }
+            else
+                Console.WriteLine("Erase success.");
         }
 
         public void getBlacklist(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -711,54 +774,54 @@ namespace Suprema
             Console.WriteLine("     |  |--encryptionType[{0}]", cardConfig.desfire.encryptionType);
         }
 
-        void print(IntPtr sdkContext, BS2SmartCardData smartCard)
-        {
-            byte[] cardIDArray = new byte[8];
-            for (int idx = 0; idx < 8; ++idx)
-            {
-                cardIDArray[idx] = smartCard.cardID[BS2Environment.BS2_CARD_DATA_SIZE - idx - 1];
-            }
+        //void print(IntPtr sdkContext, BS2SmartCardData smartCard)
+        //{
+        //    byte[] cardIDArray = new byte[8];
+        //    for (int idx = 0; idx < 8; ++idx)
+        //    {
+        //        cardIDArray[idx] = smartCard.cardID[BS2Environment.BS2_CARD_DATA_SIZE - idx - 1];
+        //    }
 
-            if (!BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(cardIDArray);
-            }
+        //    if (!BitConverter.IsLittleEndian)
+        //    {
+        //        Array.Reverse(cardIDArray);
+        //    }
 
-            UInt64 cardID = BitConverter.ToUInt64(cardIDArray, 0);
-            BS2CardTypeEnum cardType = (BS2CardTypeEnum)smartCard.header.cardType;
+        //    UInt64 cardID = BitConverter.ToUInt64(cardIDArray, 0);
+        //    BS2CardTypeEnum cardType = (BS2CardTypeEnum)smartCard.header.cardType;
 
-            Console.WriteLine(">>>> SmartCard type[{0}]", cardType);
-            Console.WriteLine("     |--cardID[{0}]", cardID);
-            Console.WriteLine("     |--numOfTemplate[{0}]", smartCard.header.numOfTemplate);
-            Console.WriteLine("     |--templateSize[{0}]", smartCard.header.templateSize);
-            Console.WriteLine("     |--issueCount[{0}]", smartCard.header.issueCount);
-            Console.WriteLine("     |--duressMask[{0}]", (BS2FingerprintFlagEnum)smartCard.header.duressMask);
+        //    Console.WriteLine(">>>> SmartCard type[{0}]", cardType);
+        //    Console.WriteLine("     |--cardID[{0}]", cardID);
+        //    Console.WriteLine("     |--numOfTemplate[{0}]", smartCard.header.numOfTemplate);
+        //    Console.WriteLine("     |--templateSize[{0}]", smartCard.header.templateSize);
+        //    Console.WriteLine("     |--issueCount[{0}]", smartCard.header.issueCount);
+        //    Console.WriteLine("     |--duressMask[{0}]", (BS2FingerprintFlagEnum)smartCard.header.duressMask);
 
-            if (cardType == BS2CardTypeEnum.ACCESS)
-            {
-                Console.WriteLine("     |--accessOnCard");
-                Console.WriteLine("     |  |--accessGroups");
-                for (int idx = 0; idx < BS2Environment.BS2_SMART_CARD_MAX_ACCESS_GROUP_COUNT; ++idx)
-                {
-                    if (smartCard.accessOnData.accessGroupID[idx] != 0)
-                    {
-                        Console.WriteLine("     |  |  |--accessGroupID[{0}]", smartCard.accessOnData.accessGroupID[idx]);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+        //    if (cardType == BS2CardTypeEnum.ACCESS)
+        //    {
+        //        Console.WriteLine("     |--accessOnCard");
+        //        Console.WriteLine("     |  |--accessGroups");
+        //        for (int idx = 0; idx < BS2Environment.BS2_SMART_CARD_MAX_ACCESS_GROUP_COUNT; ++idx)
+        //        {
+        //            if (smartCard.accessOnData.accessGroupID[idx] != 0)
+        //            {
+        //                Console.WriteLine("     |  |  |--accessGroupID[{0}]", smartCard.accessOnData.accessGroupID[idx]);
+        //            }
+        //            else
+        //            {
+        //                break;
+        //            }
+        //        }
 
-                Console.WriteLine("     |  |--startTime[{0}]", Util.ConvertFromUnixTimestamp(smartCard.accessOnData.startTime).ToString("yyyy-MM-dd HH:mm:ss"));
-                Console.WriteLine("     |  |--endTime[{0}]", Util.ConvertFromUnixTimestamp(smartCard.accessOnData.endTime).ToString("yyyy-MM-dd HH:mm:ss"));
-            }
-        }
+        //        Console.WriteLine("     |  |--startTime[{0}]", Util.ConvertFromUnixTimestamp(smartCard.accessOnData.startTime).ToString("yyyy-MM-dd HH:mm:ss"));
+        //        Console.WriteLine("     |  |--endTime[{0}]", Util.ConvertFromUnixTimestamp(smartCard.accessOnData.endTime).ToString("yyyy-MM-dd HH:mm:ss"));
+        //    }
+        //}
 
-        void print(IntPtr sdkContext, BS2CSNCard csnCard)
-        {
-            Console.WriteLine(">>>> CSN Card type[{0}] size[{1,2}] data[{2}]", (BS2CardTypeEnum)csnCard.type, csnCard.size, BitConverter.ToString(csnCard.data));
-        }
+        //void print(IntPtr sdkContext, BS2CSNCard csnCard)
+        //{
+        //    Console.WriteLine(">>>> CSN Card type[{0}] size[{1,2}] data[{2}]", (BS2CardTypeEnum)csnCard.type, csnCard.size, BitConverter.ToString(csnCard.data));
+        //}
 
         void print(IntPtr sdkContext, BS2BlackList blacklist)
         {

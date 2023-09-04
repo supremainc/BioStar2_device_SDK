@@ -300,6 +300,81 @@ namespace Suprema
             return BS2ErrorCode.BS_SDK_SUCCESS == result;
         }
 
+        public static bool getDeviceCapabilities(IntPtr sdkContext, UInt32 deviceID, out BS2DeviceCapabilities capabilities)
+        {
+            Console.WriteLine("Trying to get device capabilities");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetDeviceCapabilities(sdkContext, deviceID, out capabilities);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                Console.WriteLine("Got error({0}).", result);
+            else
+                Console.WriteLine("Call success.");
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static bool getDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, out BS2DesFireCardConfigEx config)
+        {
+            Console.WriteLine("Trying to get DesFire card ext configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetDesFireCardConfigEx(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                Console.WriteLine("Got error({0}).", result);
+            else
+                Console.WriteLine("Call success.");
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static bool setDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, ref BS2DesFireCardConfigEx config)
+        {
+            Console.WriteLine("Enter the hexadecimal application master key for DesFireCardConfigEx. [KEY1-KEY2-...-KEY16]");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.desfireAppKey.appMasterKey);
+
+            Console.WriteLine("Enter the hexadecimal file read key. [KEY1-KEY2-...-KEY16]");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.desfireAppKey.fileReadKey);
+
+            Console.WriteLine("Enter the file read key index.");
+            Console.Write(">>>> ");
+            config.desfireAppKey.fileReadKeyNumber = (byte)Util.GetInput();
+
+            Console.WriteLine("Enter the hexadecimal file write key. [KEY1-KEY2-...-KEY16]");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.desfireAppKey.fileWriteKey);
+
+            Console.WriteLine("Enter the file write key index.");
+            Console.Write(">>>> ");
+            config.desfireAppKey.fileWriteKeyNumber = (byte)Util.GetInput();
+
+            Console.WriteLine("Trying to set DesFire card configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetDesFireCardConfigEx(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                Console.WriteLine("Got error({0}).", result);
+            else
+                Console.WriteLine("Set DesFire card configuration succeeded");
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static void enterSmartcardKey(byte[] dst)
+        {
+            int index = 0;
+            string[] keys = Console.ReadLine().Split('-');
+            foreach (string key in keys)
+            {
+                dst[index++] = Convert.ToByte(key, 16);
+                if (index > dst.Length)
+                {
+                    return;
+                }
+            }
+
+            for (; index < dst.Length; ++index)
+            {
+                dst[index] = 0xFF;
+            }
+        }
+
         public static void print(ref BS2LicenseConfig config)
         {
             Console.WriteLine(">>>> Device license configuration ");
@@ -492,5 +567,159 @@ namespace Suprema
             Console.WriteLine("     |--result : {0}", result.result);
         }
 
+        public static void print(ref BS2Card card)
+        {
+            if (Convert.ToBoolean(card.isSmartCard))
+            {
+                BS2SmartCardData smartCard = Util.ConvertTo<BS2SmartCardData>(card.cardUnion);
+                print(ref smartCard);
+            }
+            else
+            {
+                BS2CSNCard csnCard = Util.ConvertTo<BS2CSNCard>(card.cardUnion);
+                print(ref csnCard);
+            }
+        }
+
+        public static void print(ref BS2SmartCardData smartCard)
+        {
+            byte[] cardIDArray = new byte[8];
+            for (int idx = 0; idx < 8; ++idx)
+            {
+                cardIDArray[idx] = smartCard.cardID[BS2Environment.BS2_CARD_DATA_SIZE - idx - 1];
+            }
+
+            if (!BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(cardIDArray);
+            }
+
+            UInt64 cardID = BitConverter.ToUInt64(cardIDArray, 0);
+            BS2CardTypeEnum cardType = (BS2CardTypeEnum)smartCard.header.cardType;
+
+            Console.WriteLine(">>>> SmartCard type[{0}]", cardType);
+            Console.WriteLine("     |--cardID[{0}]", cardID);
+            Console.WriteLine("     |--numOfTemplate[{0}]", smartCard.header.numOfTemplate);
+            Console.WriteLine("     |--templateSize[{0}]", smartCard.header.templateSize);
+            Console.WriteLine("     |--issueCount[{0}]", smartCard.header.issueCount);
+            Console.WriteLine("     |--duressMask[{0}]", (BS2FingerprintFlagEnum)smartCard.header.duressMask);
+
+            if (cardType == BS2CardTypeEnum.ACCESS)
+            {
+                Console.WriteLine("     |--accessOnCard");
+                Console.WriteLine("     |  |--accessGroups");
+                for (int idx = 0; idx < BS2Environment.BS2_SMART_CARD_MAX_ACCESS_GROUP_COUNT; ++idx)
+                {
+                    if (smartCard.accessOnData.accessGroupID[idx] != 0)
+                    {
+                        Console.WriteLine("     |  |  |--accessGroupID[{0}]", smartCard.accessOnData.accessGroupID[idx]);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                Console.WriteLine("     |  |--startTime[{0}]", Util.ConvertFromUnixTimestamp(smartCard.accessOnData.startTime).ToString("yyyy-MM-dd HH:mm:ss"));
+                Console.WriteLine("     |  |--endTime[{0}]", Util.ConvertFromUnixTimestamp(smartCard.accessOnData.endTime).ToString("yyyy-MM-dd HH:mm:ss"));
+            }
+        }
+
+        public static void print(ref BS2CSNCard csnCard)
+        {
+            Console.WriteLine(">>>> CSN Card type[{0}] size[{1,2}] data[{2}]", (BS2CardTypeEnum)csnCard.type, csnCard.size, BitConverter.ToString(csnCard.data));
+        }
+
+        public static void print(ref BS2DeviceCapabilities info)
+        {
+            Console.WriteLine(">>>> Device capabilities");
+            Console.WriteLine("     |--maxUsers : {0}", info.maxUsers);
+            Console.WriteLine("     |--maxEventLogs : {0}", info.maxEventLogs);
+            Console.WriteLine("     |--maxImageLogs : {0}", info.maxImageLogs);
+            Console.WriteLine("     |--maxBlacklists : {0}", info.maxBlacklists);
+            Console.WriteLine("     |--maxOperators : {0}", info.maxOperators);
+            Console.WriteLine("     |--maxCards : {0}", info.maxCards);
+            Console.WriteLine("     |--maxFaces : {0}", info.maxFaces);
+            Console.WriteLine("     |--maxFingerprints : {0}", info.maxFingerprints);
+            Console.WriteLine("     |--maxUserNames : {0}", info.maxUserNames);
+            Console.WriteLine("     |--maxUserImages : {0}", info.maxUserImages);
+            Console.WriteLine("     |--maxUserJobs : {0}", info.maxUserJobs);
+            Console.WriteLine("     |--maxUserPhrases : {0}", info.maxUserPhrases);
+            Console.WriteLine("     |--maxCardsPerUser : {0}", info.maxCardsPerUser);
+            Console.WriteLine("     |--maxFacesPerUser : {0}", info.maxFacesPerUser);
+            Console.WriteLine("     |--maxFingerprintsPerUser : {0}", info.maxFingerprintsPerUser);
+            Console.WriteLine("     |--maxInputPorts : {0}", info.maxInputPorts);
+            Console.WriteLine("     |--maxOutputPorts : {0}", info.maxOutputPorts);
+            Console.WriteLine("     |--maxRelays : {0}", info.maxRelays);
+            Console.WriteLine("     |--maxRS485Channels : {0}", info.maxRS485Channels);
+
+            Console.WriteLine("     |--cameraSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_CAMERA));
+            Console.WriteLine("     |--tamperSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_TAMPER));
+            Console.WriteLine("     |--wlanSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_WLAN));
+            Console.WriteLine("     |--displaySupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_DISPLAY));
+            Console.WriteLine("     |--thermalSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_THERMAL));
+            Console.WriteLine("     |--maskSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_MASK));
+            Console.WriteLine("     |--faceExSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_FACEEX));
+            Console.WriteLine("     |--voipExSupported : {0}", Convert.ToBoolean(info.systemSupported & (byte)BS2CapabilitySystemSupport.SYSTEM_SUPPORT_VOIPEX));
+
+            Console.WriteLine("     |--[Card Supported]");
+            Console.WriteLine("     |--mask : 0x{0}", Convert.ToString(info.cardSupportedMask, 16));
+            Console.WriteLine("     |--BLE : {0}", Convert.ToBoolean(info.cardSupportedMask & (UInt32)BS2CapabilityCardSupport.CARD_SUPPORT_BLE));
+
+            bool extMode = Convert.ToBoolean(info.authSupported.extendedMode);
+            Console.WriteLine("     |--[ExtendedMode] : {0}", extMode);
+            Console.WriteLine("     |--(Credentials)");
+            Console.WriteLine("     |--mask : 0x{0}", Convert.ToString(info.authSupported.credentialsMask, 16));
+
+            if (!extMode)
+            {
+                BS2LagacyAuth auth = Util.BytesToStruct<BS2LagacyAuth>(ref info.authSupported.auth);
+
+                Console.WriteLine("     |--(Legacy)");
+                Console.WriteLine("     |--biometricAuthMask : 0x{0}", Convert.ToString(auth.biometricAuthMask, 16));
+                Console.WriteLine("     |--cardAuthMask : 0x{0}", Convert.ToString(auth.cardAuthMask, 16));
+                Console.WriteLine("     |--idAuthMask : 0x{0}", Convert.ToString(auth.idAuthMask, 16));
+            }
+            else
+            {
+                BS2ExtendedAuth auth = Util.BytesToStruct<BS2ExtendedAuth>(ref info.authSupported.auth);
+
+                Console.WriteLine("     |--(Extended)");
+                Console.WriteLine("     |--faceAuthMask : 0x{0}", Convert.ToString(auth.faceAuthMask, 16));
+                Console.WriteLine("     |--fingerprintAuthMask : 0x{0}", Convert.ToString(auth.fingerprintAuthMask, 16));
+                Console.WriteLine("     |--cardAuthMask : 0x{0}", Convert.ToString(auth.cardAuthMask, 16));
+                Console.WriteLine("     |--idAuthMask : 0x{0}", Convert.ToString(auth.idAuthMask, 16));
+                Console.WriteLine("     |--faceAuth : 0x{0}", Convert.ToString(auth.faceAuthMask, 16));
+            }
+
+            Console.WriteLine("     |--intelligentPDSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_INTELLIGENTPD));
+            Console.WriteLine("     |--updateUserSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_UPDATEUSER));
+            Console.WriteLine("     |--simulatedUnlockSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_SIMULATEDUNLOCK));
+            Console.WriteLine("     |--smartCardByteOrderSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_SMARTCARDBYTEORDER));
+            Console.WriteLine("     |--treatAsCSNSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_TREATASCSN));
+            Console.WriteLine("     |--rtspSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_RTSP));
+            Console.WriteLine("     |--lfdSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_LFD));
+            Console.WriteLine("     |--visualQRSupported : {0}", Convert.ToBoolean(info.functionSupported & (byte)BS2CapabilityFunctionSupport.FUNCTION_SUPPORT_VISUALQR));
+
+            Console.WriteLine("     |--maxVoipExtensionNumbers : {0}", info.maxVoipExtensionNumbers);
+
+            Console.WriteLine("     |--osdpStandardCentralSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_OSDPSTANDARDCENTRAL));
+            Console.WriteLine("     |--enableLicenseFuncSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_ENABLELICENSE));
+            Console.WriteLine("     |--keypadBacklightSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_KEYPADBACKLIGHT));
+            Console.WriteLine("     |--uzWirelessLockDoorSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_UZWIRELESSLOCKDOOR));
+            Console.WriteLine("     |--customSmartCardSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_CUSTOMSMARTCARD));
+            Console.WriteLine("     |--tomSupported : {0}", Convert.ToBoolean(info.functionExSupported & (byte)BS2CapabilityFunctionExSupport.FUNCTIONEX_SUPPORT_TOM));
+        }
+
+        public static void print(ref BS2DesFireCardConfigEx config)
+        {
+            Console.WriteLine(">>>> DesFire card configuration ");
+            Console.WriteLine("     |--appMasterKey : {0}", config.desfireAppKey.appMasterKey);
+            Console.WriteLine("     |--fileReadKey : {0}", config.desfireAppKey.fileReadKey);
+            Console.WriteLine("     |--fileWriteKey : {0}", config.desfireAppKey.fileWriteKey);
+            Console.WriteLine("     |--fileReadKeyNumber : {0}", config.desfireAppKey.fileReadKeyNumber);
+            Console.WriteLine("     +--fileWriteKeyNumber : {0}", config.desfireAppKey.fileWriteKeyNumber);
+            Console.WriteLine("<<<< ");
+        }
     }
 }

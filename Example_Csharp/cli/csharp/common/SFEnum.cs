@@ -409,6 +409,7 @@ namespace Suprema
 
         WIEGAND = 0x0A,
         CONFIG_CARD = 0x0B,
+    	CUSTOM_SMART= 0x0D,
     }
 
     [Flags]
@@ -724,8 +725,10 @@ namespace Suprema
         XSTATION_2_FP   = 0x22,     // [+2.8.1]
         BIOSTATION_3    = 0x23,     // [+2.8.3]
         THIRD_OSDP_DEVICE = 0x24,   // [+2.9.1]
+        THIRD_OSDP_IO_DEVICE = 0x25,   // [+2.9.1]
+        BIOSTATION_2A   = 0x26,     // [+2.9.4]
 
-        TYPE_MAX        = BIOSTATION_3,
+        TYPE_MAX        = BIOSTATION_2A,
         //UNKNOWN         = 0xFF,
     }
 
@@ -837,6 +840,7 @@ namespace Suprema
     {
         IN = 0,
         OUT = 1,
+        INOUT = 2,      // FISSDK-147  missing I/O mode
     }
 
     [Flags]
@@ -1033,7 +1037,9 @@ namespace Suprema
         NORMAL = 0,
         ALARM = 1,
         FORCED_LOCKED = 2,
-        FORCED_UNLOCKED = 4
+        FORCED_UNLOCKED = 4,
+        ARM = 8,
+        DISARM = NORMAL,
     }
 
     [Flags]
@@ -1756,6 +1762,8 @@ namespace Suprema
     {
         CARD_OPERATION_MASK_DEFAULT = 0xFFFFFFFF,
         CARD_OPERATION_USE = 0x80000000,
+        CARD_OPERATION_MASK_CUSTOM_DESFIRE_EV1 = 0x00000800,
+        CARD_OPERATION_MASK_CUSTOM_CLASSIC_PLUS = 0x00000400,
         CARD_OPERATION_MASK_BLE = 0x00000200,
         CARD_OPERATION_MASK_NFC = 0x00000100,
         CARD_OPERATION_MASK_SEOS = 0x00000080,
@@ -1862,8 +1870,12 @@ namespace Suprema
     [Flags]
     public enum BS2CapabilityFunctionExSupport
     {
-        FUNCTIONEX_SUPPORT_OSDPSTANDARDCENTRAL = 0x01,  // [V2.9.1]
-        FUNCTIONEX_SUPPORT_ENABLELICENSE = 0x02,        // [V2.9.1]
+        FUNCTIONEX_SUPPORT_OSDPSTANDARDCENTRAL  = 0x01,  // [V2.9.1]
+        FUNCTIONEX_SUPPORT_ENABLELICENSE        = 0x02,  // [V2.9.1]
+	    FUNCTIONEX_SUPPORT_KEYPADBACKLIGHT      = 0x04,  // [V2.9.4]
+	    FUNCTIONEX_SUPPORT_UZWIRELESSLOCKDOOR   = 0x08,  // [V2.9.4]
+	    FUNCTIONEX_SUPPORT_CUSTOMSMARTCARD      = 0x10,  // [V2.9.4]
+        FUNCTIONEX_SUPPORT_TOM                  = 0x20,  // [V2.9.4]
     }
 
     [Flags]
