@@ -498,6 +498,10 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 
 	TRACE("osdpStandardCentralSupported : %u", info.osdpStandardCentralSupported);
 	TRACE("enableLicenseFuncSupported : %u", info.enableLicenseFuncSupported);
+	TRACE("keypadBacklightSupported : %u", info.keypadBacklightSupported);
+	TRACE("uzWirelessLockDoorSupported : %u", info.uzWirelessLockDoorSupported);
+	TRACE("customSmartCardSupported : %u", info.customSmartCardSupported);
+	TRACE("tomSupported : %u", info.tomSupported);
 }
 
 #if 0

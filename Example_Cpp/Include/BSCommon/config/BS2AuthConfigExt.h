@@ -80,7 +80,7 @@ typedef struct {
 	BS2_BOOL useGlobalAPB;													///< 1 byte
 	BS2_GLOBAL_APB_FAIL_ACTION_TYPE globalAPBFailAction;		///< 1 byte
 	BS2_BOOL useGroupMatching;											///< 1 byte
-	uint8_t reserved;																///< 1 byte (packing)
+	uint8_t reserved;															///< 1 byte (packing)
 
 	uint8_t reserved2[4];																		///< 4 bytes (reserved)
 

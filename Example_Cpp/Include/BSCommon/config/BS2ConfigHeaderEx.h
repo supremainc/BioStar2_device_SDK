@@ -34,9 +34,10 @@ enum {
 	BS2_CONFIG_MASK_EX_RELAY_ACTION = 0x00000040,	///< Relay Action(Linkage & Latching) configuration
 	BS2_CONFIG_MASK_EX_RTSP         = 0x00000080,	///< RTSP configuration
 	BS2_CONFIG_MASK_EX_VOIP			= 0x00000100,	///< Voip configuration
-	BS2_CONFIG_MASK_EX_OSDP_STANDARD= 0x00000200,   ///< OSDP Standard Central
-	BS2_CONFIG_MASK_EX_OSDP_ACTION 	= 0x00000400,	///< OSDP Standard ACTION
-	BS2_CONFIG_MASK_EX_LICENSE		= 0x00000800,	///< License
+	BS2_CONFIG_MASK_EX_OSDP_STANDARD= 0x00000200,   ///< OSDP Standard Central configuration
+	BS2_CONFIG_MASK_EX_OSDP_ACTION 	= 0x00000400,	///< OSDP Standard ACTION configuration
+	BS2_CONFIG_MASK_EX_LICENSE		= 0x00000800,	///< License configuration
+	BS2_CONFIG_MASK_EX_CUSTOM_CARD	= 0x00001000,	///< 3rd party custom smartcard configuration
 };
 
 #define BS2_CONFIG_MASK_EX_ALL			0xFFFFFFFF	///< 4 bytes

@@ -600,6 +600,7 @@ BS_API_EXPORT const char* BS_CALLING_CONVENTION BS2_Version();
 BS_API_EXPORT void* BS_CALLING_CONVENTION BS2_AllocateContext();
 BS_API_EXPORT void BS_CALLING_CONVENTION BS2_ReleaseContext(void* context);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_Initialize(void* context);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_InitializeEx(void* context, const char* hostIPAddr);
 BS_API_EXPORT void BS_CALLING_CONVENTION BS2_ReleaseObject(void* object);
 
 //Timeout
@@ -761,6 +762,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetOsdpStandardConfig(void* const, B
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetOsdpStandardActionConfig(void* const, BS2_DEVICE_ID deviceId, BS2OsdpStandardActionConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardActionConfig(void* const, BS2_DEVICE_ID deviceId, const BS2OsdpStandardActionConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLicenseConfig(void* const, BS2_DEVICE_ID deviceId, BS2LicenseConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCustomCardConfig(void* const, BS2_DEVICE_ID deviceId, BS2CustomCardConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetCustomCardConfig(void* const, BS2_DEVICE_ID deviceId, const BS2CustomCardConfig* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);

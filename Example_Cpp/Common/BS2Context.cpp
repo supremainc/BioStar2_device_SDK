@@ -40,7 +40,11 @@ void TRACE(const char* fmt, ...)
 	va_end(fmtList);
 	buffer[strlen(buffer)] = '\n';
 #if defined(OS_WINDOWS)
+#if 0
 	::OutputDebugStringA(buffer);
+#else
+	cout << buffer;
+#endif
 #else
 	cout << buffer;
 #endif

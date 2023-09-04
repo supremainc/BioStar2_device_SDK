@@ -146,7 +146,7 @@ typedef struct {
 	uint8_t shortcutHome[BS2_MAX_SHORTCUT_HOME];	///< 8 bytes
 	uint8_t tnaIcon[BS2_MAX_TNA_KEY];		///< 16 bytes : tnaIcon
 
-	BS2_BOOL useScreenSaver;	///< 1 byte
+	BS2_BOOL useScreenSaver;		///< 1 byte
 	uint8_t reserved1[31];		///< 31 bytes (reserved)
 } BS2DisplayConfig;
 

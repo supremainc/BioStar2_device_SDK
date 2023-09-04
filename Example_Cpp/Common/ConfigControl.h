@@ -70,6 +70,8 @@ public:
 	int getOsdpStandardConfig(BS2_DEVICE_ID id, BS2OsdpStandardConfig& config) const;
 	int getOsdpStandardActionConfig(BS2_DEVICE_ID id, BS2OsdpStandardActionConfig& config) const;
 	int setOsdpStandardActionConfig(BS2_DEVICE_ID id, const BS2OsdpStandardActionConfig& config) const;
+	int getCustomCardConfig(BS2_DEVICE_ID id, BS2CustomCardConfig& config) const;
+	int setCustomCardConfig(BS2_DEVICE_ID id, const BS2CustomCardConfig& config) const;
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -129,6 +131,10 @@ public:
 	static void print(const BS2LicenseConfig& config);
 	static void print(const BS2OsdpStandardConfig& config);
 	static void print(const BS2OsdpStandardActionConfig& config);
+	static void print(const BS2CustomMifareCard& card);
+	static void print(const BS2CustomDesFireCard& card);
+	static void print(const BS2DesFireAppLevelKey& key);
+	static void print(const BS2CustomCardConfig& config);
 	static uint32_t printOSDPDeviceID(const BS2OsdpStandardConfig& config);
 	static bool getOsdpID(const BS2OsdpStandardConfig& config, uint32_t osdpDeviceID, uint8_t& osdpID);
 

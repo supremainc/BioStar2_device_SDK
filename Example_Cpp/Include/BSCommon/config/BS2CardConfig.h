@@ -129,7 +129,7 @@ typedef struct {
 	BS2_BOOL cipher;						   ///< 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
 	BS2_CARD_BYTE_ORDER smartCardByteOrder;    ///< 1 byte (0: MSB, 1: LSB)
 	uint8_t reserved[22];                      ///< 22 bytes (packing)
-} BS2CardConfig;                               ///< 120 bytes
+} BS2CardConfig;                             ///< 120 bytes
 
 /**
  *	BS2CardConfigEx
@@ -158,6 +158,58 @@ typedef struct {
 	BS2DesFireAppLevelKey desfireAppKey;    ///< 52 bytes
 	uint8_t reserved[16];
 } BS2DesFireCardConfigEx;                   ///< 68 bytes
+
+/**
+ *  BS2CustomMifareCard
+ */
+typedef struct {
+	uint8_t primaryKey[6];
+	uint8_t reserved1[2];
+	uint8_t secondaryKey[6];
+	uint8_t reserved2[2];
+	uint16_t startBlockIndex;
+	uint8_t dataSize;
+	uint8_t skipBytes;
+	uint8_t reserved[4];
+} BS2CustomMifareCard;                             //24 Bytes
+
+
+/**
+ *  BS2CustomDesFireCard
+ */
+typedef struct {
+	uint8_t primaryKey[16];
+	uint8_t secondaryKey[16];
+	uint8_t appID[3];
+	uint8_t fileID;
+	uint8_t encryptionType;                 // 0: DES/3DES, 1: AES
+	uint8_t operationMode;                  // 0: legacy(use picc master key), 1: new mode(use app master, file read, file write key)
+	uint8_t dataSize;
+	uint8_t skipBytes;
+	uint8_t reserved[4];
+	BS2DesFireAppLevelKey desfireAppKey;		///<52 bytes
+} BS2CustomDesFireCard;                           ///<96 Bytes
+
+
+/**
+ *  BS2CustomCardConfig
+ */
+typedef struct {
+	BS2_CARD_DATA_TYPE dataType;               ///< 1 byte
+	BS2_BOOL useSecondaryKey;                  ///< 1 byte	
+	uint8_t reserved1[2];						///< 2 bytes (packing)
+
+	BS2CustomMifareCard mifare;                      ///< 24 bytes
+	BS2CustomDesFireCard desfire;                    ///< 96 bytes
+	uint8_t reserved2[24];
+	uint8_t reserved3[96];
+
+	BS2_CARD_BYTE_ORDER smartCardByteOrder;    ///< 1 byte (0: MSB, 1: LSB)
+	uint8_t reserved4[3];                     ///< 11 bytes (packing)
+	BS2_UID formatID;                          ///< 4 bytes (card format ID / use only application)	
+	uint8_t reserved5[8];                     ///< 11 bytes (packing)
+} BS2CustomCardConfig;                             ///< 260 bytes
+
 
 struct callbackCardInfo_
 {

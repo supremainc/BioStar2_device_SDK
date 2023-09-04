@@ -513,6 +513,24 @@ int ConfigControl::setOsdpStandardActionConfig(BS2_DEVICE_ID id, const BS2OsdpSt
 	return sdkResult;
 }
 
+int ConfigControl::getCustomCardConfig(BS2_DEVICE_ID id, BS2CustomCardConfig& config) const
+{
+	int sdkResult = BS2_GetCustomCardConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetCustomCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setCustomCardConfig(BS2_DEVICE_ID id, const BS2CustomCardConfig& config) const
+{
+	int sdkResult = BS2_SetCustomCardConfig(context_, id, const_cast<BS2CustomCardConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetCustomCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config;
@@ -1552,6 +1570,48 @@ void ConfigControl::print(const BS2OsdpStandardActionConfig& config)
 		TRACE("        |--offTime (*100): %u", config.actions[idx].buzzer.offTime);
 		TRACE("        |--numOfCycle : %u", config.actions[idx].buzzer.numOfCycle);
 	}
+}
+
+void ConfigControl::print(const BS2CustomMifareCard& card)
+{
+	TRACE("+--mifare.primaryKey : %s", Utility::getHexaString(card.primaryKey, sizeof(card.primaryKey)).c_str());
+	TRACE("+--mifare.secondaryKey : %s", Utility::getHexaString(card.secondaryKey, sizeof(card.secondaryKey)).c_str());
+	TRACE("+--mifare.startBlockIndex : %u", card.startBlockIndex);
+	TRACE("+--mifare.dataSize : %u", card.dataSize);
+	TRACE("+--mifare.skipBytes : %u", card.skipBytes);
+}
+
+void ConfigControl::print(const BS2CustomDesFireCard& card)
+{
+	TRACE("+--desfire.primaryKey : %s", Utility::getHexaString(card.primaryKey, sizeof(card.primaryKey)).c_str());
+	TRACE("+--desfire.secondaryKey : %s", Utility::getHexaString(card.secondaryKey, sizeof(card.secondaryKey)).c_str());
+	TRACE("+--desfire.appID : %s", Utility::getHexaString(card.appID, sizeof(card.appID)).c_str());
+	TRACE("+--desfire.fileID : %u", card.fileID);
+	TRACE("+--desfire.encryptionType : %u", card.encryptionType);
+	TRACE("+--desfire.operationMode : %u", card.operationMode);
+	TRACE("+--desfire.dataSize : %u", card.dataSize);
+	TRACE("+--desfire.skipBytes : %u", card.skipBytes);
+	print(card.desfireAppKey);
+}
+
+void ConfigControl::print(const BS2DesFireAppLevelKey& key)
+{
+	TRACE("+--desfire.desfireAppKey.appMasterKey:%s", Utility::getHexaString(key.appMasterKey, 16).c_str());	// maybe 0
+	TRACE("+--desfire.desfireAppKey.fileReadKey:%s", Utility::getHexaString(key.fileReadKey, 16).c_str());	// maybe 0
+	TRACE("+--desfire.desfireAppKey.fileWriteKey:%s", Utility::getHexaString(key.fileWriteKey, 16).c_str());	// maybe 0
+	TRACE("+--desfire.desfireAppKey.fileReadKeyNumber:%u", key.fileReadKeyNumber);
+	TRACE("+--desfire.desfireAppKey.fileWriteKeyNumber:%u", key.fileWriteKeyNumber);
+}
+
+void ConfigControl::print(const BS2CustomCardConfig& config)
+{
+	TRACE("==[BS2CustomCardConfig]==");
+	TRACE("+--dataType : %u", config.dataType);
+	TRACE("|--useSecondaryKey : %u", config.useSecondaryKey);
+	print(config.mifare);
+	print(config.desfire);
+	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
+	TRACE("+--formatID : %u", config.formatID);
 }
 
 uint32_t ConfigControl::printOSDPDeviceID(const BS2OsdpStandardConfig& config)

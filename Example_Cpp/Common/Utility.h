@@ -78,6 +78,8 @@ public:
 	template <typename T>
 	static bool getLineWiegandBits(std::string msg, T* data, uint32_t size);
 	template <typename T>
+	static bool getLineHexaString(std::string msg, T* data, uint32_t size);
+	template <typename T>
 	static std::vector<T> getLineNumbers(std::string msg, const char delimiter = ',');
 	static void displayConnectedDevices(const DeviceList& devices, bool includeSlave = false, bool includeWiegand = false);
 
@@ -197,6 +199,17 @@ inline bool Utility::getLineWiegandBits(std::string msg, T* data, uint32_t size)
 	uint32_t startIdx = size - result.size();
 	for (uint32_t idx = startIdx, dataIdx = 0; idx < size; idx++, dataIdx++)
 		data[idx] = result[dataIdx];
+
+	return true;
+}
+
+template <typename T>
+inline bool Utility::getLineHexaString(std::string msg, T* data, uint32_t size)
+{
+	auto result = Utility::tokenizeHexaString<T>(Utility::getLine(msg));
+	uint32_t count = min(size, result.size());
+	for (uint32_t idx = 0; idx < count; idx++)
+		data[idx] = result[idx];
 
 	return true;
 }

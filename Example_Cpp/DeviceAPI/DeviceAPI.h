@@ -100,6 +100,9 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,
 	MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,
 
+	MENU_DEV_GET_CUSTOMCARDCONFIG,
+	MENU_DEV_SET_CUSTOMCARDCONFIG,
+
 	MENU_DEV_UPD_DEVICE_VOLUME,
 
 	MENU_DEV_TURNON_QRBYPASS,
@@ -192,6 +195,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,	"BS2_GetOsdpStandardActionConfig"},
 	{MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,	"BS2_SetOsdpStandardActionConfig"},
 
+	{MENU_DEV_GET_CUSTOMCARDCONFIG,		"BS2_GetCustomCardConfig"},
+	{MENU_DEV_SET_CUSTOMCARDCONFIG,		"BS2_SetCustomCardConfig"},
+
 	{MENU_DEV_UPD_DEVICE_VOLUME,		"Update device volume"},
 
 	{MENU_DEV_TURNON_QRBYPASS,			"Turn On QR Bypass"},
@@ -249,3 +255,5 @@ int getLicenseConfig(void* context, const DeviceInfo& device);
 int getOsdpStandardConfig(void* context, const DeviceInfo& device);
 int getOsdpStandardActionConfig(void* context, const DeviceInfo& device);
 int setOsdpStandardActionConfig(void* context, const DeviceInfo& device);
+int getCustomCardConfig(void* context, const DeviceInfo& device);
+int setCustomCardConfig(void* context, const DeviceInfo& device);

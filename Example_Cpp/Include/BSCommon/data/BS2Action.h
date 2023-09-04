@@ -77,7 +77,8 @@ typedef struct {
 typedef struct {
 	uint8_t		portIndex;		///< 1 byte
 	uint8_t		reserved[3];	///< 3 bytes (packing)
-	BS2Signal	signal;				///< 12 bytes
+
+	BS2Signal	signal;			///< 12 bytes
 } BS2OutputPortAction;
 
 /**
@@ -86,7 +87,8 @@ typedef struct {
 typedef struct {
 	uint8_t		relayIndex;		///< 1 byte
 	uint8_t		reserved[3];	///< 3 bytes (packing)
-	BS2Signal	signal;				///< 12 bytes
+
+	BS2Signal	signal;			///< 12 bytes
 } BS2RelayAction;
 
 /**
@@ -95,8 +97,9 @@ typedef struct {
 typedef struct {
 	uint8_t targetType;			///< 1 byte : Device, Door, Zone
 	uint8_t reserved[3];		///< 3 bytes
+
 	union {
-		BS2_DEVICE_ID deviceID;
+		BS2_DEVICE_ID deviceID;		///< 4 bytes
 		BS2_DOOR_ID doorID;
 		BS2_ZONE_ID zoneID;
 	};
@@ -114,6 +117,9 @@ enum {
 	BS2_LED_COLOR_BLUE,
 	BS2_LED_COLOR_MAGENTA,
 	BS2_LED_COLOR_WHITE,
+
+	//BS3FW-1283
+	BS2_LED_COLOR_BLUE_BREATHING,
 };
 
 typedef uint8_t BS2_LED_COLOR;

@@ -317,6 +317,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG:
 			sdkResult = setOsdpStandardActionConfig(context, device);
 			break;
+		case MENU_DEV_GET_CUSTOMCARDCONFIG:
+			sdkResult = getCustomCardConfig(context, device);
+			break;
+		case MENU_DEV_SET_CUSTOMCARDCONFIG:
+			sdkResult = setCustomCardConfig(context, device);
+			break;
 		case MENU_DEV_UPD_DEVICE_VOLUME:
 			sdkResult = updateDeviceVolume(context, device);
 			break;
@@ -2197,4 +2203,204 @@ int setOsdpStandardActionConfig(void* context, const DeviceInfo& device)
 	}
 
 	return cc.setOsdpStandardActionConfig(id, config);
+}
+
+int getCustomCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CustomCardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	sdkResult = cc.getCustomCardConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+	else
+		return sdkResult;
+
+	if (Utility::isYes("Do you want to scan card test?"))
+	{
+		UserControl uc(context);
+		BS2Card cardID;
+
+		sdkResult = uc.scanCard(id, &cardID);
+		if (BS_SDK_SUCCESS == sdkResult)
+			UserControl::print(cardID);
+	}
+
+	return sdkResult;
+}
+
+int setCustomCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CustomCardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	sdkResult = cc.getCustomCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Please enter a data type of cards. (0: Binary, 1: ASCII, 2: UTF16, 3: BCS)";
+	config.dataType = (BS2_CARD_DATA_TYPE)Utility::getInput<uint32_t>(msg);
+	config.useSecondaryKey = Utility::isYes("Do you want to use secondary key?");
+
+	ostringstream oss;
+
+	if (Utility::isYes("Do you want to change mifare custom card settings?"))
+	{
+		memset(&config.mifare.primaryKey, 0x0, sizeof(config.mifare.primaryKey));
+		oss << "Please enter the hexadecimal " << sizeof(config.mifare.primaryKey) << "-bytes primary key for mifare card." << endl;
+		oss << " [Like 12 34 56 ... EF]" << endl;
+		Utility::getLineHexaString<uint8_t>(oss.str(), config.mifare.primaryKey, sizeof(config.mifare.primaryKey));
+
+		if (config.useSecondaryKey)
+		{
+			memset(&config.mifare.secondaryKey, 0x0, sizeof(config.mifare.secondaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.mifare.secondaryKey) << "-bytes secondary key for mifare card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.mifare.secondaryKey, sizeof(config.mifare.secondaryKey));
+		}
+
+		msg = "Please enter the start block index of mifare card.";
+		config.mifare.startBlockIndex = (uint16_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the card data size of mifare card.";
+		config.mifare.dataSize = (uint8_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the skip bytes of mifare card.";
+		config.mifare.skipBytes = (uint8_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	if (Utility::isYes("Do you want to change desfire custom card settings?"))
+	{
+		msg = "Please enter a operation mode for desfire card. (0: Legacy, 1: Advanced(AppLevelKey))";
+		config.desfire.operationMode = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		if (DESFIRECARD_OPERATION_MODE_LEGACY == config.desfire.operationMode)
+		{
+			memset(&config.desfire.primaryKey, 0x0, sizeof(config.desfire.primaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.desfire.primaryKey) << "-bytes primary key for desfire card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.primaryKey, sizeof(config.desfire.primaryKey));
+
+			if (config.useSecondaryKey)
+			{
+				memset(&config.desfire.secondaryKey, 0x0, sizeof(config.desfire.secondaryKey));
+				oss.str("");
+				oss << "Please enter the hexadecimal " << sizeof(config.desfire.secondaryKey) << "-bytes secondary key for desfire card." << endl;
+				oss << " [Like 12 34 56 ... EF]" << endl;
+				Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.secondaryKey, sizeof(config.desfire.secondaryKey));
+			}
+		}
+		else	// DESFIRECARD_OPERATION_MODE_APPLEVELKEY
+		{
+			memset(&config.desfire.desfireAppKey.appMasterKey, 0x0, sizeof(config.desfire.desfireAppKey.appMasterKey));
+			memset(&config.desfire.desfireAppKey.fileReadKey, 0x0, sizeof(config.desfire.desfireAppKey.fileReadKey));
+			memset(&config.desfire.desfireAppKey.fileWriteKey, 0x0, sizeof(config.desfire.desfireAppKey.fileWriteKey));
+
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.desfire.desfireAppKey.appMasterKey) << "-bytes appMasterKey for desfire card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.desfireAppKey.appMasterKey, sizeof(config.desfire.desfireAppKey.appMasterKey));
+
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.desfire.desfireAppKey.fileReadKey) << "-bytes fileReadKey for desfire card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.desfireAppKey.fileReadKey, sizeof(config.desfire.desfireAppKey.fileReadKey));
+
+			msg = "Please enter the fileReadKeyNumber of desfire card.";
+			config.desfire.desfireAppKey.fileReadKeyNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+#if DO_NOT_NEED
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.desfire.desfireAppKey.fileWriteKey) << "-bytes fileWriteKey for desfire card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.desfireAppKey.fileWriteKey, sizeof(config.desfire.desfireAppKey.fileWriteKey));
+
+			msg = "Please enter the fileWriteKeyNumber of desfire card.";
+			config.desfire.desfireAppKey.fileWriteKeyNumber = (uint8_t)Utility::getInput<uint32_t>(msg);
+#endif
+		}
+
+		oss.str("");
+		oss << "Please enter the hexadecimal " << sizeof(config.desfire.appID) << "-bytes appID for desfire card." << endl;
+		oss << " [Like 12 34 EF]" << endl;
+		Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.appID, sizeof(config.desfire.appID));
+
+		msg = "Please enter the fileID for desfire card.";
+		config.desfire.fileID = (uint8_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter a encryption type for desfire card. (0: DES/3DES, 1: AES)";
+		config.desfire.encryptionType = (uint8_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the card data size of desfire card.";
+		config.desfire.dataSize = (uint8_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the skip bytes of desfire card.";
+		config.desfire.skipBytes = (uint8_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	msg = "Please enter a smart card byte order. (0: MSB, 1: LSB)";
+	config.smartCardByteOrder = (BS2_CARD_BYTE_ORDER)Utility::getInput<uint32_t>(msg);
+	msg = "Please enter a formatID.";
+	config.formatID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+	sdkResult = cc.setCustomCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	oss.str("");
+	oss << "To use the custom smart card function, you must turn off the Suprema smart card function." << endl;
+	oss << "Do you want to change the card operation mode?";
+	if (Utility::isYes(oss.str()))
+	{
+		BS2SystemConfig sysConfig = { 0, };
+		sdkResult = cc.getSystemConfig(id, sysConfig);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		uint32_t preMask = sysConfig.useCardOperationMask;
+
+		// Turn off Suprema smart card
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_CLASSIC_PLUS;
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_DESFIRE_EV1;
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_SR_SE;
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_SEOS;
+
+		// Turn on Custom smart card
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_MASK_CUSTOM_CLASSIC_PLUS;
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_MASK_CUSTOM_DESFIRE_EV1;
+
+		// Apply
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_USE;
+
+		sdkResult = cc.setSystemConfig(id, sysConfig);
+		if (BS_SDK_SUCCESS == sdkResult)
+			TRACE("Card operation mode was changed 0x08d => 0x08d", preMask, sysConfig.useCardOperationMask);
+	}
+
+	return sdkResult;
 }

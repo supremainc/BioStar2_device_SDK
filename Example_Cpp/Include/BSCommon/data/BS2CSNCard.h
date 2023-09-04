@@ -53,6 +53,7 @@ enum {
 	BS2_CARD_TYPE_SECURE_QR	 	 = 0x07,
 	BS2_CARD_TYPE_WIEGAND		 = 0x0A,		// from Wiegand reader or iClass/HID Card reader
 	BS2_CARD_TYPE_CONFIG_CARD	 = 0x0B,	
+	BS2_CARD_TYPE_CUSTOM_SMART	 = 0x0D,	
 };
 
 typedef uint8_t	BS2_CARD_TYPE;

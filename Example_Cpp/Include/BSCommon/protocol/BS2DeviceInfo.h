@@ -430,7 +430,27 @@ typedef struct {
 	 */
 	uint8_t enableLicenseFuncSupported : 1;   ///< 1 byte
 
-	uint8_t unused2: 6;		///< 1 byte
+	/*
+	 * Keypad Backlight Supported.
+	 */
+	uint8_t keypadBacklightSupported: 1;
+
+	/*
+	 * UZ Wireless Lock Supported.
+	 */
+	uint8_t uzWirelessLockDoorSupported: 1;
+
+	/*
+	 * If true, Custom Smard Card is supported.
+	 */
+	uint8_t customSmartCardSupported: 1; 
+
+	/*
+	 * If true, Template On Mobile is supported.
+	 */
+	uint8_t tomSupported: 1;
+
+	uint8_t unused2: 2;		///< 1 byte
 
 	uint8_t reserved[429];		///< 429 bytes
 } BS2DeviceCapabilities;
