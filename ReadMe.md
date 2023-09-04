@@ -14,8 +14,8 @@ SDK supports the following platforms:
 * [SDK files and folders structure](https://kb.supremainc.com/bs2sdk/doku.php?id=en:getting_started#sdk_components)
 * [Windows 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
 * [Windows 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
-* [Ubuntu 18.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
-* [Ubuntu 18.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
+* [Ubuntu 22.04 32-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
+* [Ubuntu 22.04 64-bit](https://github.com/supremainc/BioStar2_device_SDK/tree/master/SDK_Release)
 
 ### Learn More About The BioStar2 Device SDK
 
@@ -43,6 +43,32 @@ Learn how to create a context for device management and connect devices. [Watch 
 
 **Note**: Feature enhancements, updates, and resolved issues from previous releases are available to view in [Release Notes](http://kb.supremainc.com/bs2sdk/doku.php?id=en:release_note).
 <br>
+<br>
+
+### V2.9.4.0 released 09/04/2023:
+
+**New Features**
+
+**1.** New device BioStation 2a connection is supported.
+
+**2.** Support for reading Custom smart card.
+  * Refer to structure BS2CustomMifareCard
+  * Add structure BS2CustomDesFireCard
+  * Add structure BS2CustomCardConfig
+  * Add API BS2_GetCustomCardConfig
+  * Add API BS2_SetCustomCardConfig
+  * Refer to structure BS2DeviceCapabilities
+
+**Modified Features**
+
+**1.** Supported Linux environments have been upgraded to Ubuntu 22.04.
+|SDK Version|Supported Linux Version|
+|---|---|
+|Before V2.9.4|Ubuntu 18.04|
+|Later V2.9.4|Ubuntu 22.04|
+
+**2.** Fixes were made to stabilize the code internally in the SDK.
+
 <br>
 
 ### V2.9.1.0 released 02/23/2023:
