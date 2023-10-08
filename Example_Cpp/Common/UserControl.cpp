@@ -2177,21 +2177,19 @@ int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer
 			return sdkResult;
 		}
 
-		if (!imageBuffer)
-		{
-			string warpedPath = Utility::getInput<string>("Enter the path and name of warped image file:");
-			if (0 < warpedPath.size())
-			{
-				if (Utility::setResourceToFile(warpedPath, warpedBuffer, warpedSize))
-					TRACE("File write success: %s", warpedPath.c_str());
-				else
-					TRACE("File write failed: %s", warpedPath.c_str());
-			}
-		}
-		else
+		if (imageBuffer)
 		{
 			memcpy(imageBuffer, warpedBuffer.get(), warpedSize);
 			bufferSize = warpedSize;
+		}
+
+		string warpedPath = Utility::getInput<string>("Enter the path and name of warped image file:");
+		if (0 < warpedPath.size())
+		{
+			if (Utility::setResourceToFile(warpedPath, warpedBuffer, warpedSize))
+				TRACE("File write success: %s", warpedPath.c_str());
+			else
+				TRACE("File write failed: %s", warpedPath.c_str());
 		}
 	}
 

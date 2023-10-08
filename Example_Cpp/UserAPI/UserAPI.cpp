@@ -529,14 +529,17 @@ int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id)
 	int sdkResult = uc.getNormalizedImageFaceEx(id, imageData, imageLen);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
-		BS2FaceEx faceEx = { 0, };
-		faceEx.faceIndex = 0;
-		faceEx.numOfTemplate = 1;
-		faceEx.flag = BS2_FACE_EX_FLAG_WARPED;
-		faceEx.imageLen = imageLen;
-		faceEx.irImageLen = 0;
-		memcpy(faceEx.imageData, imageData, faceEx.imageLen);
-		sdkResult = uc.enrollUserFaceEx(id, NULL, NULL, NULL, &faceEx);
+		if (Utility::isYes("Do you want to enroll a user with the warped image?"))
+		{
+			BS2FaceEx faceEx = { 0, };
+			faceEx.faceIndex = 0;
+			faceEx.numOfTemplate = 1;
+			faceEx.flag = BS2_FACE_EX_FLAG_WARPED;
+			faceEx.imageLen = imageLen;
+			faceEx.irImageLen = 0;
+			memcpy(faceEx.imageData, imageData, faceEx.imageLen);
+			sdkResult = uc.enrollUserFaceEx(id, NULL, NULL, NULL, &faceEx);
+		}
 	}
 
 	return sdkResult;
