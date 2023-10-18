@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -854,6 +855,30 @@ namespace Suprema
             id = (UInt32)Util.GetInput();
 
             return id;
+        }
+
+
+        public static List<string> GetHostIPAddresses()
+        {
+            List<string> ipAddrs = new List<string>();
+            NetworkInterface[] allInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+            foreach (NetworkInterface netInterface in allInterfaces)
+            {
+                if (netInterface.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                    netInterface.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                    netInterface.OperationalStatus == OperationalStatus.Up)
+                {
+                    IPInterfaceProperties ipProp = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation ipInfo in ipProp.UnicastAddresses)
+                    {
+                        if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            ipAddrs.Add(ipInfo.Address.ToString());
+                    }
+                }
+            }
+
+            return ipAddrs;
         }
 
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]

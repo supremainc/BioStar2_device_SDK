@@ -151,6 +151,9 @@ namespace Suprema
         extern public static int BS2_Initialize(IntPtr context);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_InitializeEx(IntPtr context, IntPtr hostipAddr);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetDeviceSearchingTimeout(IntPtr context, UInt32 second);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]

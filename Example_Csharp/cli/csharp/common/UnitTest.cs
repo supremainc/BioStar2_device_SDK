@@ -244,6 +244,40 @@ namespace Suprema
 
         public void run()
         {
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+
+            //cbDebugExPrint = null;
+            //Console.WriteLine("Do you want print debug message? [y/n]");
+            Console.WriteLine("Do you want output debug message to file? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                //cbDebugExPrint = new API.CBDebugExPrint(DebugExPrint);
+                //result = (BS2ErrorCode)API.BS2_SetDebugExCallback(cbDebugExPrint, Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL);
+                //if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                //{
+                //    Console.WriteLine("Got error({0}).", result);
+                //    return;
+                //}
+
+                const string CURRENT_DIR = ".";
+                const int MAX_SIZE_LOG_FILE = 100;  // 100MB
+                IntPtr ptrDir = Marshal.StringToHGlobalAnsi(CURRENT_DIR);
+                result = (BS2ErrorCode)API.BS2_SetDebugFileLogEx(Constants.DEBUG_LOG_ALL, Constants.DEBUG_MODULE_ALL, ptrDir, MAX_SIZE_LOG_FILE);
+                Marshal.FreeHGlobal(ptrDir);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                    API.BS2_ReleaseContext(sdkContext);
+                    sdkContext = IntPtr.Zero;
+                    return;
+                }
+
+                //Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+                //Trace.AutoFlush = true;
+                //Trace.Indent();
+            }
+
             UInt32 deviceID = 0;
             IntPtr versionPtr = API.BS2_Version();
             //bool bSsl = false;
@@ -262,9 +296,9 @@ namespace Suprema
                 return;
             }
 
-            Console.WriteLine("Do you want to set up ssl configuration? [Y/n]");
+            Console.WriteLine("Do you want to set up ssl configuration? [y/N]");
             Console.Write(">>>> ");
-            if (Util.IsYes())
+            if (!Util.IsNo())
             {
                 cbPreferMethod = new API.PreferMethod(PreferMethodHandle);
                 cbGetRootCaFilePath = new API.GetRootCaFilePath(GetRootCaFilePathHandle);
@@ -288,14 +322,54 @@ namespace Suprema
                 }
 
             }
-            
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_Initialize(sdkContext);
-            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+
+            Console.WriteLine("+-----------------------------------------------------------+");
+            Console.WriteLine("| 1. Search and connect device                              |");
+            Console.WriteLine("| 2. Search and connect device within the subnetwork        |");
+            Console.WriteLine("| 3. Connect to device via Ip                               |");
+            Console.WriteLine("| 4. Server mode test                                       |");
+            Console.WriteLine("+-----------------------------------------------------------+");
+            Console.WriteLine("How to connect to device? [3(default)]");
+            Console.Write(">>>> ");
+            int selection = Util.GetInput(3);
+            switch (selection)
             {
-                Console.WriteLine("SDK initialization failed with : {0}", result);
-                API.BS2_ReleaseContext(sdkContext);
-                sdkContext = IntPtr.Zero;
-                return;
+                case 2:
+                    Console.WriteLine("Enter the IP Address for host ethernet card.");
+                    foreach (string ipAddr in Util.GetHostIPAddresses())
+                        Console.WriteLine("* {0}", ipAddr);
+                    Console.Write(">>>> ");
+                    string deviceIpAddress = Console.ReadLine();
+                    IPAddress ipAddress;
+
+                    if (!IPAddress.TryParse(deviceIpAddress, out ipAddress))
+                    {
+                        Console.WriteLine("Invalid ip : " + deviceIpAddress);
+                        return;
+                    }
+
+                    IntPtr ptrIPAddr = Marshal.StringToHGlobalAnsi(deviceIpAddress);
+
+                    result = (BS2ErrorCode)API.BS2_InitializeEx(sdkContext, ptrIPAddr);
+                    if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                    {
+                        Console.WriteLine("SDK initialization failed with : {0}, {1}", result, deviceIpAddress);
+                        API.BS2_ReleaseContext(sdkContext);
+                        sdkContext = IntPtr.Zero;
+                        return;
+                    }
+                    break;
+
+                default:
+                    result = (BS2ErrorCode)API.BS2_Initialize(sdkContext);
+                    if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                    {
+                        Console.WriteLine("SDK initialization failed with : {0}", result);
+                        API.BS2_ReleaseContext(sdkContext);
+                        sdkContext = IntPtr.Zero;
+                        return;
+                    }
+                    break;
             }
 
             cbOnDeviceFound = new API.OnDeviceFound(DeviceFound);
@@ -324,66 +398,26 @@ namespace Suprema
             }
             */
 
-            //cbDebugExPrint = null;
-            //Console.WriteLine("Do you want print debug message? [y/n]");
-            Console.WriteLine("Do you want output debug message to file? [y/n]");
-            Console.Write(">>>> ");
-            if (Util.IsYes())
-            {
-                //cbDebugExPrint = new API.CBDebugExPrint(DebugExPrint);
-                //result = (BS2ErrorCode)API.BS2_SetDebugExCallback(cbDebugExPrint, Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL);
-                //if (result != BS2ErrorCode.BS_SDK_SUCCESS)
-                //{
-                //    Console.WriteLine("Got error({0}).", result);
-                //    return;
-                //}
-
-                const string CURRENT_DIR = ".";
-                const int MAX_SIZE_LOG_FILE = 100;  // 100MB
-                IntPtr ptrDir = Marshal.StringToHGlobalAnsi(CURRENT_DIR);
-                result = (BS2ErrorCode)API.BS2_SetDebugFileLogEx(Constants.DEBUG_LOG_OPERATION_ALL, Constants.DEBUG_MODULE_ALL, ptrDir, MAX_SIZE_LOG_FILE);
-                Marshal.FreeHGlobal(ptrDir);
-                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
-                {
-                    Console.WriteLine("Got error({0}).", result);
-	                API.BS2_ReleaseContext(sdkContext);
-	                sdkContext = IntPtr.Zero;
-                    return;
-                }
-
-                //Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
-                //Trace.AutoFlush = true;
-                //Trace.Indent();
-            }
-
 #if SDK_AUTO_CONNECTION
             result = (BS2ErrorCode)API.BS2_SetAutoConnection(sdkContext, 1);
 #endif
 
-            Console.WriteLine("+-----------------------------------------------------------+");
-            Console.WriteLine("| 1. Search and connect device                              |");
-            Console.WriteLine("| 2. Connect to device via Ip                               |");
-            Console.WriteLine("| 3. Server mode test                                       |");
-            Console.WriteLine("+-----------------------------------------------------------+");
-            Console.WriteLine("How to connect to device? [2(default)]");
-            Console.Write(">>>> ");
-            int selection = Util.GetInput(2);
-
             switch (selection)
             {
                 case 1:
+                case 2:
                     if (!SearchAndConnectDevice(ref deviceID))
                     {
                         deviceID = 0;
                     }
                     break;
-                case 2:
+                case 3:
                     if (!ConnectToDevice(ref deviceID))
                     {
                         deviceID = 0;
                     }
                     break;
-                case 3:
+                case 4:
                     {
                         if(deviceIDForServerMode == 0)
                         {

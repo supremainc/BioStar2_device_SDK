@@ -1015,9 +1015,10 @@ namespace Suprema
     public struct BS2SoundAction
     {
         public byte count;
+        public byte unused;             // padding      BS2AFW-241
         public UInt16 soundIndex;
         public UInt16 delay;        ///< deprecated
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public byte[] reserved;
     }
 
