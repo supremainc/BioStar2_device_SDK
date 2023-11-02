@@ -2108,8 +2108,11 @@ int UserControl::scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOf
 	return sdkResult;
 }
 
-int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx)
+int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, uint8_t* imageData, uint32_t imageSize, BS2TemplateEx& templateEx)
 {
+	if (!imageData || 0 == imageSize)
+		return BS_SDK_ERROR_INVALID_PARAM;
+
 	BS2SimpleDeviceInfoEx deviceInfoEx;
 	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
 
@@ -2123,6 +2126,7 @@ int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& template
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 	if (faceExScanSupported)
 	{
+#if OLD_CODE
 		if (Utility::isYes("Do you want to extract faceEx template from image?"))
 		{
 			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
@@ -2141,6 +2145,16 @@ int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& template
 				print(templateEx);
 			}
 		}
+#else
+		sdkResult = BS2_ExtractTemplateFaceEx(context_, id, imageData, imageSize, 1, &templateEx);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_ExtractTemplateFaceEx call failed: %d", sdkResult);
+			return sdkResult;
+		}
+
+		print(templateEx);
+#endif
 	}
 
 	return sdkResult;

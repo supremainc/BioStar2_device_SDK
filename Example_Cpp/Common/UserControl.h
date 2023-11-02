@@ -117,7 +117,8 @@ public:
 	int scanFace(BS2_DEVICE_ID id, BS2Face* ptrFace, uint8_t& numOfFace);
 	int scanFaceEx(BS2_DEVICE_ID id, BS2FaceEx* ptrFace, uint8_t& numOfFace);
 	int scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, BS2_DEVICE_ID id, uint32_t numOfScan, uint32_t numOfImage);
-	int extractTemplateFaceEx(BS2_DEVICE_ID id, BS2TemplateEx& templateEx);
+	int extractTemplateFaceEx(BS2_DEVICE_ID id, uint8_t* imageData, uint32_t imageSize, BS2TemplateEx& templateEx);
+
 	int getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer, uint32_t& bufferSize);
 
 	int getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic);

@@ -433,7 +433,14 @@ int writeCard(UserControl& uc, BS2_DEVICE_ID id)
 	{
 		cout << "Now scan your face." << endl;
 
-		sdkResult = uc.extractTemplateFaceEx(id, templateEx);
+		uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
+		uint32_t imageLen = 0;
+
+		int sdkResult = uc.getNormalizedImageFaceEx(id, imageData, imageLen);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		sdkResult = uc.extractTemplateFaceEx(id, imageData, imageLen, templateEx);
 		if (BS_SDK_SUCCESS != sdkResult)
 			return sdkResult;
 
@@ -511,8 +518,16 @@ int eraseCard(UserControl& uc, BS2_DEVICE_ID id)
 int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)
 {
 	UserControl uc(context);
+
+	uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
+	uint32_t imageLen = 0;
+
+	int sdkResult = uc.getNormalizedImageFaceEx(id, imageData, imageLen);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
 	BS2TemplateEx templateEx = { 0, };
-	int sdkResult = uc.extractTemplateFaceEx(id, templateEx);
+	sdkResult = uc.extractTemplateFaceEx(id, imageData, imageLen, templateEx);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
