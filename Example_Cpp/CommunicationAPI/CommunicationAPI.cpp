@@ -455,6 +455,10 @@ int runAPIs(void* context, const DeviceList& deviceList)
 		case MENU_COMM_SET_SOCKETSSL_RETRY_COUNT:
 			sdkResult = setSocketSSLRetryCount(context);
 			break;
+		case MENU_COMM_DEL_SSL:
+			id = Utility::selectDeviceID(deviceList);
+			sdkResult = cm.disableSSL(id);
+			break;
 		case MENU_COMM_UPG_FIRMWARE:
 			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = dc.upgradeFirmware(id);

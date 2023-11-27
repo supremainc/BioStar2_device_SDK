@@ -76,6 +76,7 @@ public:
 	int setSocketRetryCount(uint32_t count);
 	int getSocketSSLRetryCount(uint32_t& count);
 	int setSocketSSLRetryCount(uint32_t count);
+	int disableSSL(BS2_DEVICE_ID id);
 
 	static void print(const BS2OsdpStandardDeviceAvailable& devices);
 	static void print(const BS2OsdpStandardDevice& device);

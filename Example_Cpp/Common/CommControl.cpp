@@ -634,6 +634,15 @@ int CommControl::setSocketSSLRetryCount(uint32_t count)
 	return sdkResult;
 }
 
+int CommControl::disableSSL(BS2_DEVICE_ID id)
+{
+	int sdkResult = BS2_DisableSSL(context_, id);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_DisableSSL call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 void CommControl::print(const BS2OsdpStandardDeviceAvailable& devices)
 {
 	TRACE("==[BS2OsdpStandardDeviceAvailable]==");
