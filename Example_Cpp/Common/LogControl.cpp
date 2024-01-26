@@ -24,9 +24,15 @@ LogControl::~LogControl()
 {
 }
 
-string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone)
+string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature)
 {
 	char buffer[1024] = { 0, };
+	float temper = 0.0;
+	if (0 < temperature)
+	{
+		temper = (float)temperature / (float)100.0;
+	}
+
 	switch (event.code & BS2_EVENT_MASK)
 	{
 	case BS2_EVENT_USER_ENROLL_SUCCESS:
@@ -35,20 +41,30 @@ string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32
 	case BS2_EVENT_USER_UPDATE_FAIL:
 	case BS2_EVENT_USER_DELETE_SUCCESS:
 	case BS2_EVENT_USER_DELETE_FAIL:
-	case BS2_EVENT_VERIFY_SUCCESS:
-	case BS2_EVENT_VERIFY_DURESS:
-	case BS2_EVENT_IDENTIFY_SUCCESS:
-	case BS2_EVENT_IDENTIFY_DURESS:
-	case BS2_EVENT_DUAL_AUTH_SUCCESS:
-	case BS2_EVENT_ACCESS_DENIED:
-	case BS2_EVENT_FAKE_FINGER_DETECTED:
-	case BS2_EVENT_BYPASS_SUCCESS:
-#if VER_272_OR_HIGHER
-	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
+	case BS2_EVENT_USER_DELETE_ALL_SUCCESS:
+#ifndef _NEW_CODE
+		if (0 < temperature)
+		{
+			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
+				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
+		}
+		else
+		{
+			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s)",
+				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server");
+		}
+#else
+		if (0 < temperature)
+		{
+			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
+				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, (event.subCode == BS2_SUB_EVENT_USER_BY_DEVICE) ? "Device" : "Server", temper);
+		}
+		else
+		{
+			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%d) deviceID(%d) userID(%s) where(%s)",
+				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, (event.subCode == BS2_SUB_EVENT_USER_BY_DEVICE) ? "Device" : "Server");
+		}
 #endif
-	case BS2_EVENT_UNMASKED_FACE_DETECTED:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s)",
-			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server");
 		break;
 
 	case BS2_EVENT_RELAY_ACTION_ON:
@@ -59,45 +75,16 @@ string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32
 		break;
 
 	default:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d)",
-			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID);
-		break;
-	}
-
-	return buffer;
-}
-
-string LogControl::getEventStringWithThermal(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature)
-{
-	char buffer[1024] = { 0, };
-	float temper = (float)temperature / (float)100.0;
-	switch (event.code & BS2_EVENT_MASK)
-	{
-	case BS2_EVENT_USER_ENROLL_SUCCESS:
-	case BS2_EVENT_USER_ENROLL_FAIL:
-	case BS2_EVENT_USER_UPDATE_SUCCESS:
-	case BS2_EVENT_USER_UPDATE_FAIL:
-	case BS2_EVENT_USER_DELETE_SUCCESS:
-	case BS2_EVENT_USER_DELETE_FAIL:
-	case BS2_EVENT_VERIFY_SUCCESS:
-	case BS2_EVENT_VERIFY_DURESS:
-	case BS2_EVENT_IDENTIFY_SUCCESS:
-	case BS2_EVENT_IDENTIFY_DURESS:
-	case BS2_EVENT_DUAL_AUTH_SUCCESS:
-	case BS2_EVENT_ACCESS_DENIED:
-	case BS2_EVENT_FAKE_FINGER_DETECTED:
-	case BS2_EVENT_BYPASS_SUCCESS:
-#if VER_272_OR_HIGHER
-	case BS2_EVENT_ABNORMAL_TEMPERATURE_DETECTED:
-#endif
-	case BS2_EVENT_UNMASKED_FACE_DETECTED:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
-			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
-		break;
-
-	default:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) temperature(%.2f)",
-			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, temper);
+		if (0 < temperature)
+		{
+			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) temperature(%.2f)",
+				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, temper);
+		}
+		else
+		{
+			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d)",
+				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID);
+		}
 		break;
 	}
 

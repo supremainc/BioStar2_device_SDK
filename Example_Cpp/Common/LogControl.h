@@ -11,8 +11,7 @@ public:
 	LogControl(void* sdkContext);
 	virtual ~LogControl();
 
-	static std::string getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone);
-	static std::string getEventStringWithThermal(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature);
+	static std::string getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32_t timezone, BS2_TEMPERATURE temperature = 0);
 
 public:
 	int getLogSmallBlob(BS2_DEVICE_ID id);

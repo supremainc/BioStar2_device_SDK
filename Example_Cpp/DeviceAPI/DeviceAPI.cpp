@@ -49,7 +49,7 @@ void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE te
 	if (deviceInfo.id_ == id)
 	{
 		int32_t timezone = deviceInfo.timezone_;
-		cout << LogControl::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
+		cout << LogControl::getEventString(id, *event, timezone, temperature) << endl;
 	}
 }
 
@@ -1104,6 +1104,24 @@ int setTriggerActionConfig(void* context, const DeviceInfo& device)
 		BS2Action& action = config.items[idx].action;
 		msg = "[Action] Please insert device ID.";
 		action.deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>(msg);
+
+		//ostringstream ss;
+		//ss << "[Action] Please insert type of action." << endl;
+		//ss << "		0 : BS2_ACTION_NONE" << endl;
+		//ss << "		1 : BS2_ACTION_LOCK_DEVICE" << endl;
+		//ss << "		2 : BS2_ACTION_UNLOCK_DEVICE" << endl;
+		//ss << "		3 : BS2_ACTION_REBOOT_DEVICE" << endl;
+		//ss << "		4 : BS2_ACTION_RELEASE_ALARM" << endl;
+		//ss << "		5 : BS2_ACTION_GENERAL_INPUT" << endl;
+		//ss << "		6 : BS2_ACTION_RELAY" << endl;
+		//ss << "		13 : BS2_ACTION_AUTH_SUCCESS" << endl;
+		//ss << "		14 : BS2_ACTION_AUTH_FAIL" << endl;
+
+		//action.type = (uint8_t)Utility::getInput<uint32_t>(ss.str());
+		//action.stopFlag = BS2_STOP_NONE;
+
+		//msg = "[Action] Please insert delay of relay.";
+		//action.delay = (uint8_t)Utility::getInput<uint32_t>(msg);
 
 		action.type = BS2_ACTION_RELAY;
 		action.stopFlag = BS2_STOP_NONE;

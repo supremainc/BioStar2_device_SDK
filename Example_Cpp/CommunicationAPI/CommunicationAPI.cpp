@@ -29,7 +29,7 @@ void onLogReceived(BS2_DEVICE_ID id, const BS2Event* event)
 void onLogReceivedEx(BS2_DEVICE_ID id, const BS2Event* event, BS2_TEMPERATURE temperature)
 {
 	int32_t timezone = deviceList.getTimezone(id);
-	cout << LogControl::getEventStringWithThermal(id, *event, timezone, temperature) << endl;
+	cout << LogControl::getEventString(id, *event, timezone, temperature) << endl;
 }
 
 
