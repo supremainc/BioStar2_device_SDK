@@ -56,6 +56,9 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_FACECONFIGEX,
 	MENU_DEV_SET_FACECONFIGEX,
 
+	MENU_DEV_GET_IPCONFIG,
+	MENU_DEV_SET_IPCONFIG,
+
 	MENU_DEV_GET_THERMALCAMERACONFIG,
 	MENU_DEV_SET_THERMALCAMERACONFIG,
 
@@ -139,6 +142,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_FACECONFIG,			"BS2_GetFaceConfig"},
 	{MENU_DEV_SET_FACECONFIG,			"BS2_SetFaceConfig"},
 
+	{MENU_DEV_GET_IPCONFIG,				"BS2_GetIpConfig"},
+	{MENU_DEV_SET_IPCONFIG,				"BS2_SetIpConfig"},
+
 	{MENU_DEV_GET_SYSTEMCONFIG,			"BS2_GetSystemConfig"},
 	{MENU_DEV_SET_SYSTEMCONFIG,			"BS2_SetSystemConfig"},
 
@@ -213,6 +219,8 @@ int getFingerprintConfig(void* context, const DeviceInfo& device);
 int setFingerprintConfig(void* context, const DeviceInfo& device);
 int getFaceConfig(void* context, const DeviceInfo& device);
 int setFaceConfig(void* context, const DeviceInfo& device);
+int getIPConfig(void* context, const DeviceInfo& device);
+int setIPConfig(void* context, const DeviceInfo& device);
 int getSystemConfig(void* context, const DeviceInfo& device);
 int setSystemConfig(void* context, const DeviceInfo& device);
 int getDesFireCardConfigEx(void* context, const DeviceInfo& device);

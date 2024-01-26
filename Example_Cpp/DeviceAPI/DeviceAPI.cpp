@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <sstream>
+#include <random>
 #include "DeviceAPI.h"
 #include "../Common/Utility.h"
 #include "../Common/CommControl.h"
@@ -205,6 +206,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 		case MENU_DEV_SET_FACECONFIG:
 			sdkResult = setFaceConfig(context, device);
+			break;
+		case MENU_DEV_GET_IPCONFIG:
+			sdkResult = getIPConfig(context, device);
+			break;
+		case MENU_DEV_SET_IPCONFIG:
+			sdkResult = setIPConfig(context, device);
 			break;
 		case MENU_DEV_GET_SYSTEMCONFIG:
 			sdkResult = getSystemConfig(context, device);
@@ -576,6 +583,84 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 	}
 
 	return sdkResult;
+}
+
+int getIPConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2IpConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getIPConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setIPConfig(void* context, const DeviceInfo& device)
+{
+#if 0
+	ConfigControl cc(context);
+	BS2IpConfig config = { 0, };
+
+	BS2_DEVICE_ID id(0);
+	BS2_DEVICE_TYPE type(0);
+	if (!Utility::getSelectedDeviceID(device, id, type))
+		return BS_SDK_SUCCESS;
+
+	int sdkResult = cc.getIPConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		string msg = "Enter the connection mode. (0: Server->Device, 1: Device->Server)";
+		config.connectionMode = Utility::getInput<uint32_t>(msg);
+
+		msg = "Do you want to use the DHCP?";
+		config.useDHCP = Utility::isYes(msg);
+
+		string addr;
+		if (!config.useDHCP)
+		{
+			memset(config.ipAddress, 0x0, sizeof(config.ipAddress));
+			memset(config.gateway, 0x0, sizeof(config.gateway));
+			memset(config.subnetMask, 0x0, sizeof(config.gateway));
+
+			addr = Utility::getInput<string>("Enter the IP address.");
+			memcpy(config.ipAddress, addr.c_str(), addr.size());
+
+			addr = Utility::getInput<string>("Enter the gateway address.");
+			memcpy(config.gateway, addr.c_str(), addr.size());
+
+			addr = Utility::getInput<string>("Enter the subnet mask.");
+			memcpy(config.gateway, addr.c_str(), addr.size());
+
+			config.port = (BS2_PORT)Utility::getInput<uint32_t>("Enter the port number.");
+		}
+
+		config.useDNS = Utility::isYes("Do you want to use DNS?");
+
+		memset(config.serverAddr, 0x0, sizeof(config.serverAddr));
+		addr = Utility::getInput<string>("Enter the server address.");
+		memcpy(config.serverAddr, addr.c_str(), addr.size());
+
+		config.serverPort = (BS2_PORT)Utility::getInput<uint32_t>("Enter the server port.");
+		config.sslServerPort = (BS2_PORT)Utility::getInput<uint32_t>("Enter the SSL server port.");
+
+		ostringstream oss;
+		oss << "Enter the MTU size. (Current: " << (uint32_t)config.mtuSize << ")" << endl;
+		config.mtuSize = (uint16_t)Utility::getInput<uint32_t>(oss.str());
+
+		oss.str("");
+		oss << "Enter the baseband. (Current: " << (uint32_t)config.baseband << ")" << endl;
+		config.baseband = (BS2_TCP_BASEBAND)Utility::getInput<uint32_t>(oss.str());
+
+		sdkResult = cc.setIPConfig(id, config);
+	}
+
+	return sdkResult;
+#else
+	return BS_SDK_SUCCESS;
+#endif
 }
 
 int getSystemConfig(void* context, const DeviceInfo& device)
@@ -1174,9 +1259,29 @@ int updateDeviceVolume(void* context, const DeviceInfo& device)
 
 	ConfigControl::print(config);
 
-	config.volume = 10;
+#if 1
+	config.volume = (uint8_t)Utility::getInput<uint32_t>("Please insert volumn of the device.");
+	config.backlightTimeout = (uint16_t)Utility::getInput<uint32_t>("Please insert backlight timeout.");
 
 	return cc.setDisplayConfig(id, config);
+#else
+	std::random_device rd;
+	std::mt19937 engine(rd());
+	std::uniform_int_distribution<int> dist(0, 20);
+
+	for (uint16_t idx = 0; idx < 3000; idx++)
+	{
+		config.menuTimeout = (uint16_t)dist(engine);
+		config.msgTimeout = (uint16_t)dist(engine);
+		config.backlightTimeout = (uint16_t)dist(engine);
+
+		sdkResult = cc.setDisplayConfig(id, config);
+
+		Sleep(1 * 1000);
+	}
+
+	return sdkResult;
+#endif
 }
 
 int getBarcodeConfig(void* context, const DeviceInfo& device)
