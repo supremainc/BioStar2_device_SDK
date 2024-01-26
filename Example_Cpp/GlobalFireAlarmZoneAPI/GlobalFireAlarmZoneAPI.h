@@ -45,6 +45,7 @@ enum EN_MENU_COMM
 	MENU_COMM_GET_CONFIG_TRIGGERACTION,
 	MENU_COMM_SET_CONFIG_TRIGGERACTION,
 	MENU_COMM_SET_ZONE_GLOBAL_FIREALARM,
+	MENU_COMM_SET_ZONE_GLOBAL_APB,
 };
 
 std::vector<MENU_ITEM> menuInfoCommAPI =
@@ -57,6 +58,7 @@ std::vector<MENU_ITEM> menuInfoCommAPI =
 	{MENU_COMM_GET_CONFIG_TRIGGERACTION,	"Get TriggerAction config"},
 	{MENU_COMM_SET_CONFIG_TRIGGERACTION,	"Set TriggerAction config"},
 	{MENU_COMM_SET_ZONE_GLOBAL_FIREALARM,	"Set Global FireAlarm zone"},
+	{MENU_COMM_SET_ZONE_GLOBAL_APB,			"Set Global APB" },
 };
 
 using DoorList = std::map<BS2_DEVICE_ID, std::vector<BS2Door>>;
@@ -78,3 +80,4 @@ void postUnlockDoor(BS2_DEVICE_ID id);
 DWORD WINAPI onPostAction(LPVOID lpParam);
 DWORD WINAPI onPostUnlockDoor(LPVOID lpParam);
 bool findDoor(BS2_DEVICE_ID deviceID, std::vector<BS2_DOOR_ID>& doorIDs);
+int setGlobalAPBZone(void* context, const DeviceList& devices);

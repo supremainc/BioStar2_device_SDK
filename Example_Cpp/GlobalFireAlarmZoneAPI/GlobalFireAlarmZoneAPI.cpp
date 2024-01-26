@@ -154,7 +154,11 @@ int main(int argc, char* argv[])
 
 	sdkContext = BS2Context::getInstance()->getContext();
 
+#if _DEBUG
+	bool sslMode = false;
+#else
 	bool sslMode = Utility::isYes("Do you want to connect your device with SSL?");
+#endif
 	if (sslMode)
 	{
 		if (BS_SDK_SUCCESS != setSSLHandler())
@@ -199,6 +203,37 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 	bool menuBreak = false;
 	while (!menuBreak)
 	{
+#if _DEBUG
+		DeviceControl dc(context);
+		ConfigControl cc(context);
+		CommControl cm(context);
+		string ip = "192.168.40.139";
+		BS2_PORT port = 51211;
+		BS2_DEVICE_ID id = 0;
+
+		sdkResult = cm.connectDevice(id, ip, port);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return;
+
+		int timezone(0);
+		if (BS_SDK_SUCCESS != (sdkResult = cc.getTimezone(id, timezone)))
+		{
+			cm.disconnectDevice(id);
+			return;
+		}
+
+		BS2SimpleDeviceInfo info;
+		memset(&info, 0x0, sizeof(info));
+		if (BS_SDK_SUCCESS != (sdkResult = dc.getDeviceInfo(id, info)))
+		{
+			cm.disconnectDevice(id);
+			return;
+		}
+
+		BS2_DEVICE_TYPE type = info.type;
+		deviceList.appendDevice(id, type, info.ipv4Address, info.port, timezone);
+		menuBreak = true;
+#else
 		uint32_t selected = Utility::showMenu(menuInfoTop);
 		switch (selected)
 		{
@@ -218,6 +253,7 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 		default:
 			break;
 		}
+#endif
 	}
 
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -262,6 +298,9 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			break;
 		case MENU_COMM_SET_ZONE_GLOBAL_FIREALARM:
 			sdkResult = setGlobalFireAlarmZone(context, deviceList);
+			break;
+		case MENU_COMM_SET_ZONE_GLOBAL_APB:
+			//sdkResult = setGlobalAPBZone(context, deviceList);
 			break;
 		default:
 			break;
@@ -544,3 +583,71 @@ bool findDoor(BS2_DEVICE_ID deviceID, vector<BS2_DOOR_ID>& doorIDs)
 
 	return false;
 }
+
+//void onCheckGlobalAPBViolation(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID_1, const char* userID_2, bool isDualAuth)
+//{
+//	ostringstream msg;
+//	msg << "Device: " << deviceId << ", Sequence: " << seq << ", Dual: " << isDualAuth;
+//
+//	if (userID_1)
+//		msg << ", User1: " << userID_1;
+//	if (userID_2)
+//		msg << ", User2: " << userID_2;
+//
+//	std::cout << "APB Check request [" << msg.str() << "]" << std::endl;
+//}
+//
+//int setGlobalAPBZone(void* context, const DeviceList& devices)
+//{
+//	BS2TriggerActionConfig config = { 0, };
+//	ConfigControl cc(context);
+//
+//	int sdkResult = BS_SDK_SUCCESS;
+//	vector<BS2_DEVICE_ID> inDevice;
+//	vector<BS2_DEVICE_ID> outDevice;
+//	ostringstream str;
+//	bool more = false;
+//#if _DEBUG
+//	BS2_DEVICE_ID devID = 511111111;
+//	inDevice.push_back(devID);
+//	BS2_GLOBAL_APB_FAIL_ACTION_TYPE failType = GLOBAL_APB_FAIL_ACTION_SOFT;
+//#else
+//	do
+//	{
+//		BS2_DEVICE_ID devID = Utility::selectDeviceID(devices);
+//		str.str("");
+//		str << "What type of device is " << devID << " (0: Entry, 1: Exit)" << endl;
+//		uint32_t ioType = Utility::getInput<uint32_t>(str.str());
+//		if (ioType == 0)
+//			inDevice.push_back(devID);
+//		else
+//			outDevice.push_back(devID);
+//
+//		more = Utility::isYes("Want to add more devices?");
+//	} while (more);
+//
+//	//string msg = "What kind of this zone? (0: Hard, 1: Soft)";
+//	//uint32_t zoneType = Utility::getInput<uint32_t>(msg);
+//
+//	string msg = "What kind of network fail action. (0: None, 1: Soft, 2: Hard)";
+//	BS2_GLOBAL_APB_FAIL_ACTION_TYPE failType = (BS2_GLOBAL_APB_FAIL_ACTION_TYPE)Utility::getInput<uint32_t>(msg);
+//#endif
+//
+//	for (auto id : inDevice)
+//	{
+//		BS2AuthConfig authConfig;
+//		sdkResult = cc.getAuthConfig(id, authConfig);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//			return sdkResult;
+//
+//		authConfig.globalAPBFailAction = failType;
+//		authConfig.useGlobalAPB = 1;
+//		sdkResult = cc.setAuthConfig(id, authConfig);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//			return sdkResult;
+//	}
+//
+//	sdkResult = BS2_SetCheckGlobalAPBViolationHandler(context, onCheckGlobalAPBViolation);
+//
+//	return sdkResult;
+//}
