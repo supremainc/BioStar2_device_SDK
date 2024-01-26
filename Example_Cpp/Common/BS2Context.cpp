@@ -207,12 +207,40 @@ int BS2Context::initSDK(BS2_PORT port)
 	}
 	else
 	{
-		sdkResult = BS2_Initialize(context_);
-		if (BS_SDK_SUCCESS != sdkResult)
+#if _DEBUG
+		bool selectNetwork = false;
+#else
+		ostringstream msg;
+		msg << "Would you like to specify a network ?" << endl;
+		msg << "This way, when discovering devices, they will search in the specified subnetwork.";
+		bool selectNetwork = Utility::isYes(msg.str());
+#endif
+		if (selectNetwork)
 		{
-			TRACE("BS2_Initialize call failed: %d", sdkResult);
-			BS2_ReleaseContext(context_);
-			context_ = NULL;
+			vector<string> hostAddrs = Utility::getHostIPAddress();
+			for (auto addr : hostAddrs)
+			{
+				cout << " * " << addr << endl;
+			}
+
+			string hostAddr = Utility::getInput<string>("Please enter the host network address.");
+			sdkResult = BS2_InitializeEx(context_, hostAddr.c_str());
+			if (BS_SDK_SUCCESS != sdkResult)
+			{
+				TRACE("BS2_InitializeEx call failed: %d", sdkResult);
+				BS2_ReleaseContext(context_);
+				context_ = NULL;
+			}
+		}
+		else
+		{
+			sdkResult = BS2_Initialize(context_);
+			if (BS_SDK_SUCCESS != sdkResult)
+			{
+				TRACE("BS2_Initialize call failed: %d", sdkResult);
+				BS2_ReleaseContext(context_);
+				context_ = NULL;
+			}
 		}
 	}
 

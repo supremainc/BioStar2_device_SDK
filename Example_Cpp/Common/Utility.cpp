@@ -13,6 +13,13 @@
 #include "../Common/DeviceControl.h"
 #include "../Common/LogControl.h"
 
+#if defined(OS_WINDOWS)
+#include <WinSock2.h>
+#include <iphlpapi.h>
+
+#pragma comment(lib, "iphlpapi.lib")
+#endif
+
 #if defined(OS_LINUX)
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -404,6 +411,8 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 		return "XS2-Fp";
 	case BS2_DEVICE_TYPE_BIOSTATION_3:
 		return "BS3";
+	case BS2_DEVICE_TYPE_BIOSTATION_2A:
+		return "BS2a";
 	case BS2_DEVICE_TYPE_UNKNOWN:
 	default:
 		break;
@@ -1261,4 +1270,45 @@ int Utility::getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, 
 	}
 
 	return sdkResult;
+}
+
+vector<string> Utility::getHostIPAddress()
+{
+	vector<string> hostIPAddrs;
+	PIP_ADAPTER_INFO adapterInfo;
+	unsigned long bufferSize = sizeof(IP_ADAPTER_INFO);
+	adapterInfo = (IP_ADAPTER_INFO *)malloc(bufferSize);
+
+	if (GetAdaptersInfo(adapterInfo, &bufferSize) == ERROR_BUFFER_OVERFLOW)
+	{
+		free(adapterInfo);
+		adapterInfo = (IP_ADAPTER_INFO *)malloc(bufferSize);
+	}
+
+	if (GetAdaptersInfo(adapterInfo, &bufferSize) == NO_ERROR)
+	{
+		PIP_ADAPTER_INFO adapter = adapterInfo;
+		while (adapter)
+		{
+			IP_ADDR_STRING* ipAddress = &(adapter->IpAddressList);
+			while (ipAddress)
+			{
+				if (ipAddress->IpAddress.String[0] != '0')
+				{
+					hostIPAddrs.push_back(ipAddress->IpAddress.String);
+				}
+				ipAddress = ipAddress->Next;
+			}
+
+			adapter = adapter->Next;
+		}
+	}
+	else
+	{
+		std::cerr << "Failed to get adapter information." << std::endl;
+	}
+
+	free(adapterInfo);
+
+	return hostIPAddrs;
 }

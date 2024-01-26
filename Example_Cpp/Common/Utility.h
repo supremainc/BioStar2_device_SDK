@@ -148,7 +148,7 @@ public:
 	static int getAllLogsFromDevice(void* context, BS2_DEVICE_ID id, int32_t timezone);
 	static int getLogsFromDevice(void* context, BS2_DEVICE_ID id, int& latestIndex, int timezone);
 	static int getImageLog(void* context, BS2_DEVICE_ID id, BS2_EVENT_ID eventID, uint8_t* imageBuf, uint32_t& imageSize);
-
+	static std::vector<std::string> Utility::getHostIPAddress();
 
 private:
 	static void writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits);
