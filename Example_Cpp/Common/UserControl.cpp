@@ -1936,7 +1936,46 @@ int UserControl::getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces
 
 	if (faceExScanSupported)
 	{
-		if (Utility::isYes("Do you want to scan faceEx from device?"))
+		if (Utility::isYes("Do you want to extract the template directly and register with this template only?"))
+		{
+			// Template only
+			uint32_t numImage = Utility::getInput<uint32_t>("How many images do you want to extract?");
+			vector<BS2TemplateEx> vecFaceTemplates;
+
+			for (uint32_t idx = 0; idx < numImage; idx++)
+			{
+				uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
+				uint32_t imageLen = 0;
+
+				sdkResult = getNormalizedImageFaceEx(id, imageData, imageLen);
+				if (BS_SDK_SUCCESS != sdkResult)
+					return sdkResult;
+
+				BS2TemplateEx templateEx = { 0, };
+				sdkResult = extractTemplateFaceEx(id, imageData, imageLen, templateEx);
+				if (BS_SDK_SUCCESS != sdkResult)
+					return sdkResult;
+
+				vecFaceTemplates.push_back(templateEx);
+			}
+
+			if (0 < vecFaceTemplates.size())
+			{
+				size_t dataOffset = offsetof(BS2FaceEx, onlyTemplateEx);
+				size_t templateSize = vecFaceTemplates.size() * sizeof(BS2TemplateEx);
+				size_t faceSize = dataOffset + templateSize;
+
+				uint8_t* ptrFace = new uint8_t[faceSize];
+				memset(ptrFace, 0x0, faceSize);
+				*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrFace);
+				(*faceExObjs)->flag = BS2_FACE_EX_FLAG_TEMPLATE_ONLY;
+				(*faceExObjs)->numOfTemplate = (uint8_t)vecFaceTemplates.size();
+				memcpy(ptrFace + dataOffset, vecFaceTemplates.data(), templateSize);
+
+				numOfFaces = 1;
+			}
+		}
+		else if (Utility::isYes("Do you want to scan faceEx from device?"))
 		{
 			uint32_t numFace = Utility::getInput<uint32_t>("How many faceEx would you like to register?");
 			BS2FaceEx* ptrFace = new BS2FaceEx[numFace];
@@ -1951,27 +1990,24 @@ int UserControl::getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces
 				}
 			}
 		}
-		else
+		else if (Utility::isYes("Do you want to register from file image? (Send the image to the device and the device automatically extracts the template.)"))
 		{
-			if (Utility::isYes("Do you want to register from file image?"))
+			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
+			uint32_t size = Utility::getResourceSize(imagePath);
+			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
+
+			size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
+			size_t faceSize = dataOffset + size;
+			if (Utility::getResourceFromFile(imagePath, buffer, size))
 			{
-				string imagePath = Utility::getInput<string>("Enter the face image path and name:");
-				uint32_t size = Utility::getResourceSize(imagePath);
-				shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
+				uint8_t* ptrFace = new uint8_t[faceSize];
+				memset(ptrFace, 0x0, faceSize);
+				*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrFace);
+				(*faceExObjs)->flag = BS2_FACE_EX_FLAG_NONE;
+				(*faceExObjs)->imageLen = size;
+				memcpy(ptrFace + dataOffset, buffer.get(), size);
 
-				size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
-				size_t faceSize = dataOffset + size;
-				if (Utility::getResourceFromFile(imagePath, buffer, size))
-				{
-					uint8_t* ptrFace = new uint8_t[faceSize];
-					memset(ptrFace, 0x0, faceSize);
-					*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrFace);
-					(*faceExObjs)->flag = 0;
-					(*faceExObjs)->imageLen = size;
-					memcpy(ptrFace + dataOffset, buffer.get(), size);
-
-					numOfFaces = 1;
-				}
+				numOfFaces = 1;
 			}
 		}
 	}
@@ -2197,6 +2233,7 @@ int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer
 			bufferSize = warpedSize;
 		}
 
+#if SAVE_WARPED_IMAGE
 		string warpedPath = Utility::getInput<string>("Enter the path and name of warped image file:");
 		if (0 < warpedPath.size())
 		{
@@ -2205,6 +2242,7 @@ int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer
 			else
 				TRACE("File write failed: %s", warpedPath.c_str());
 		}
+#endif
 	}
 
 	return sdkResult;

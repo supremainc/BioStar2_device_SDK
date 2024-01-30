@@ -207,7 +207,7 @@ int BS2Context::initSDK(BS2_PORT port)
 	}
 	else
 	{
-#if _DEBUG
+#if 0
 		bool selectNetwork = false;
 #else
 		ostringstream msg;
