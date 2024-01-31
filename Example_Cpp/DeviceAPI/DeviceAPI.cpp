@@ -579,6 +579,9 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 			break;
 		}
 
+		msg = "Would you like to have facial images stored on the device?. (0: Store facial images, 1: Store template only)";
+		config.unableToSaveImageOfVisualFace = (uint8_t)Utility::getInput<uint32_t>(msg);
+
 		sdkResult = cc.setFaceConfig(id, config);
 	}
 

@@ -875,6 +875,8 @@ void ConfigControl::print(const BS2FaceConfig& config)
 	// BS3 supported
 	TRACE("detectDistance.min:%u, detectDistance.max:%u", config.detectDistance.min, config.detectDistance.max);
 	TRACE("wideSearch:%u", config.wideSearch);
+
+	TRACE("unableToSaveImageOfVisualFace:%u", config.unableToSaveImageOfVisualFace);
 }
 
 void ConfigControl::print(const BS2DesFireCardConfigEx& config)
