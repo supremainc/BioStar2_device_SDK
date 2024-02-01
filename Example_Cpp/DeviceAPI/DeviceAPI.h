@@ -44,6 +44,9 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_FACECONFIG,
 	MENU_DEV_SET_FACECONFIG,
 
+	MENU_DEV_GET_DISPLAYCONFIG,
+	MENU_DEV_SET_DISPLAYCONFIG,
+
 	MENU_DEV_GET_SYSTEMCONFIG,
 	MENU_DEV_SET_SYSTEMCONFIG,
 
@@ -142,6 +145,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_FACECONFIG,			"BS2_GetFaceConfig"},
 	{MENU_DEV_SET_FACECONFIG,			"BS2_SetFaceConfig"},
 
+	{MENU_DEV_GET_DISPLAYCONFIG,		"BS2_GetDisplayConfig"},
+	{MENU_DEV_SET_DISPLAYCONFIG,		"BS2_SetDisplayConfig"},
+
 	{MENU_DEV_GET_IPCONFIG,				"BS2_GetIpConfig"},
 	{MENU_DEV_SET_IPCONFIG,				"BS2_SetIpConfig"},
 
@@ -219,6 +225,8 @@ int getFingerprintConfig(void* context, const DeviceInfo& device);
 int setFingerprintConfig(void* context, const DeviceInfo& device);
 int getFaceConfig(void* context, const DeviceInfo& device);
 int setFaceConfig(void* context, const DeviceInfo& device);
+int getDisplayConfig(void* context, const DeviceInfo& device);
+int setDisplayConfig(void* context, const DeviceInfo& device);
 int getIPConfig(void* context, const DeviceInfo& device);
 int setIPConfig(void* context, const DeviceInfo& device);
 int getSystemConfig(void* context, const DeviceInfo& device);

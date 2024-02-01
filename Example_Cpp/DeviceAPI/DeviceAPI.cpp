@@ -207,6 +207,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_FACECONFIG:
 			sdkResult = setFaceConfig(context, device);
 			break;
+		case MENU_DEV_GET_DISPLAYCONFIG:
+			sdkResult = getDisplayConfig(context, device);
+			break;
+		case MENU_DEV_SET_DISPLAYCONFIG:
+			sdkResult = setDisplayConfig(context, device);
+			break;
 		case MENU_DEV_GET_IPCONFIG:
 			sdkResult = getIPConfig(context, device);
 			break;
@@ -588,6 +594,71 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 	}
 
 	return sdkResult;
+}
+
+int getDisplayConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2DisplayConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getDisplayConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setDisplayConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2DisplayConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getDisplayConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Please select a language. (0: Korean, 1: English, 2: Custom)";
+	config.language = (BS2_LANGUAGE)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please select a background style. (0: Logo, 1: Notice, 2: Slide, 3: PDF)";
+	config.background = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Enter the volume. (0 ~ 100)";
+	config.volume = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please select a background theme. (0: Theme1, 1: Theme2, 2: Theme3, 3: Theme4)";
+	config.bgTheme = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please select a data format. (0: YYYY/MM/DD, 1: MM/DD/YYYY, 2: DD/MM/YYYY)";
+	config.dateFormat = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please select a menu timeout. (0, 10, 20, 30, 40, 50, 60)";
+	config.menuTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please select a message timeout in millisec. (500, 1000, 2000, 3000, 4000, 5000)";
+	config.backlightTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please select a backlight timeout. (0, 10, 20, 30, 40, 50, 60)";
+	config.backlightTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	config.displayDateTime = Utility::isYes("Would you like to display the clock?");
+
+	config.useVoice = Utility::isYes("Would you like to use voice instruction?");
+
+	msg = "Please select a time format. (0: 12hour, 1: 24hour)";
+	config.timeFormat = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	config.homeFormation = 0;
+	config.useUserPhrase = Utility::isYes("Would you like to use a personal authentication message? (Using device user message)");
+	config.queryUserPhrase = Utility::isYes("Would you like to use a personal authentication message? (Ask the server)");
+	config.backlightTimeout = Utility::isYes("Would you like to use screen saver?");
+
+	msg = "Choose whether to show authentication result on OSDP. (0: None, 1: Visible, 2: Invisible)";
+	config.showOsdpResult = (BS2_SHOW_OSDP_RESULT)Utility::getInput<uint32_t>(msg);
+
+	return cc.setDisplayConfig(id, config);
 }
 
 int getIPConfig(void* context, const DeviceInfo& device)
@@ -1192,7 +1263,7 @@ void setTrigger(const DeviceInfo& device, BS2Trigger& trigger)
 	string msg = "[Trigger] Select trigger type. (0: None, 1: Event, 2: Input, 3: Schedule)";
 	trigger.type = (BS2_TRIGGER_TYPE)Utility::getInput<uint32_t>(msg);
 
-	msg = "[Trigger] Enter the interval(ms) to ignore the input signal. (ignore wiegand input).";
+	msg = "[Trigger] Enter the interval(sec) to ignore the input signal. (ignore wiegand input).";
 	trigger.ignoreSignalTime = (uint16_t)Utility::getInput<uint32_t>(msg);
 
 	switch (trigger.type)

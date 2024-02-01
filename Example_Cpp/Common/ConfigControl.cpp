@@ -806,6 +806,7 @@ void ConfigControl::print(const BS2DisplayConfig& config)
 	for (int idx = 0; idx < BS2_MAX_TNA_KEY; idx++)
 		TRACE("tnaIcon[%d]:%d", idx, config.tnaIcon[idx]);
 	TRACE("useScreenSaver:%u", config.useScreenSaver);
+	TRACE("showOsdpResult:%u", config.showOsdpResult);
 }
 
 void ConfigControl::print(const BS2IpConfig& config)
