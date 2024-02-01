@@ -457,17 +457,35 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("thermalSupported : %u", info.thermalSupported);
 	TRACE("maskSupported : %u", info.maskSupported);
 	TRACE("faceExSupported : %u", info.faceExSupported);
+	TRACE("voipExSupported : %u", info.voipExSupported);
 
 	TRACE("[Card Supported]");
 	TRACE("mask : 0x%04x", info.cardSupported.mask);
+	TRACE("EM : %u", info.cardSupported.EM);
+	TRACE("HIDProx : %u", info.cardSupported.HIDProx);
 	TRACE("MifareFelica : %u", info.cardSupported.MifareFelica);
+	TRACE("iClass : %u", info.cardSupported.iClass);
+	TRACE("ClassicPlus : %u", info.cardSupported.ClassicPlus);
+	TRACE("DesFireEV1 : %u", info.cardSupported.DesFireEV1);
+	TRACE("SRSE : %u", info.cardSupported.SRSE);
+	TRACE("SEOS : %u", info.cardSupported.SEOS);
+	TRACE("NFC : %u", info.cardSupported.NFC);
 	TRACE("BLE : %u", info.cardSupported.BLE);
+	TRACE("CustomClassicPlus : %u", info.cardSupported.CustomClassicPlus);
+	TRACE("CustomDesFireEV1 : %u", info.cardSupported.CustomDesFireEV1);
+	TRACE("TOM_NFC : %u", info.cardSupported.TOM_NFC);
+	TRACE("TOM_BLE : %u", info.cardSupported.TOM_BLE);
+	TRACE("CustomFelica : %u", info.cardSupported.CustomFelica);
+	TRACE("useCardOperation : %u", info.cardSupported.useCardOperation);
 
 	TRACE("[ExtendedMode] : %u", info.authSupported.extendedMode);
 	TRACE("(Credentials)");
 	TRACE("mask : 0x%01x", info.authSupported.credentials.mask);
 	TRACE("card : %u", info.authSupported.credentials.card);
+	TRACE("fingerprint : %u", info.authSupported.credentials.fingerprint);
 	TRACE("face : %u", info.authSupported.credentials.face);
+	TRACE("id : %u", info.authSupported.credentials.id);
+	TRACE("pin : %u", info.authSupported.credentials.pin);
 
 	if (!info.authSupported.extendedMode)
 	{
@@ -502,6 +520,13 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("uzWirelessLockDoorSupported : %u", info.uzWirelessLockDoorSupported);
 	TRACE("customSmartCardSupported : %u", info.customSmartCardSupported);
 	TRACE("tomSupported : %u", info.tomSupported);
+
+	TRACE("tomEnrollSupported : %u", info.tomEnrollSupported);
+	TRACE("showOsdpResultbyLED : %u", info.showOsdpResultbyLED);
+	TRACE("customSmartCardFelicaSupported : %u", info.customSmartCardFelicaSupported);
+	TRACE("ignoreInputAfterWiegandOut : %u", info.ignoreInputAfterWiegandOut);
+	TRACE("setSlaveBaudrateSupported : %u", info.setSlaveBaudrateSupported);
+	TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
 }
 
 #if 0
