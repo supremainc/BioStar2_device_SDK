@@ -1169,76 +1169,274 @@ int setTriggerActionConfig(void* context, const DeviceInfo& device)
 
 	for (uint8_t idx = 0; idx < config.numItems; idx++)
 	{
-		BS2Trigger& trigger = config.items[idx].trigger;
-
-		msg = "[Trigger] Please insert device ID.";
-		trigger.deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>(msg);
-
-		trigger.type = BS2_TRIGGER_INPUT;
-		BS2InputTrigger& inputTrigger = trigger.input;
-
-		msg = "[Trigger] Please insert input port No.";
-		inputTrigger.port = (uint8_t)Utility::getInput<uint32_t>(msg);
-
-		msg = "[Trigger] Please insert switchType (N/O:0, N/C:1).";
-		BS2_SWITCH_TYPE sw = (BS2_SWITCH_TYPE)Utility::getInput<uint32_t>(msg);
-		inputTrigger.switchType = (sw == BS2_SWITCH_TYPE_NORMAL_OPEN) ? BS2_SWITCH_TYPE_NORMAL_OPEN : BS2_SWITCH_TYPE_NORMAL_CLOSED;
-
-		msg = "[Trigger] Please insert duration.";
-		inputTrigger.duration = (uint16_t)Utility::getInput<uint32_t>(msg);
-		inputTrigger.scheduleID = BS2_SCHEDULE_ALWAYS_ID;
-
-
-		BS2Action& action = config.items[idx].action;
-		msg = "[Action] Please insert device ID.";
-		action.deviceID = (BS2_DEVICE_ID)Utility::getInput<uint32_t>(msg);
-
-		//ostringstream ss;
-		//ss << "[Action] Please insert type of action." << endl;
-		//ss << "		0 : BS2_ACTION_NONE" << endl;
-		//ss << "		1 : BS2_ACTION_LOCK_DEVICE" << endl;
-		//ss << "		2 : BS2_ACTION_UNLOCK_DEVICE" << endl;
-		//ss << "		3 : BS2_ACTION_REBOOT_DEVICE" << endl;
-		//ss << "		4 : BS2_ACTION_RELEASE_ALARM" << endl;
-		//ss << "		5 : BS2_ACTION_GENERAL_INPUT" << endl;
-		//ss << "		6 : BS2_ACTION_RELAY" << endl;
-		//ss << "		13 : BS2_ACTION_AUTH_SUCCESS" << endl;
-		//ss << "		14 : BS2_ACTION_AUTH_FAIL" << endl;
-
-		//action.type = (uint8_t)Utility::getInput<uint32_t>(ss.str());
-		//action.stopFlag = BS2_STOP_NONE;
-
-		//msg = "[Action] Please insert delay of relay.";
-		//action.delay = (uint8_t)Utility::getInput<uint32_t>(msg);
-
-		action.type = BS2_ACTION_RELAY;
-		action.stopFlag = BS2_STOP_NONE;
-
-		msg = "[Action] Please insert delay of relay.";
-		action.delay = (uint8_t)Utility::getInput<uint32_t>(msg);
-
-		BS2RelayAction& relayAction = action.relay;
-		msg = "[Action] Please insert relay index.";
-		relayAction.relayIndex = (uint8_t)Utility::getInput<uint32_t>(msg);
-
-		BS2Signal& relaySignal = relayAction.signal;
-		msg = "[Action] Please insert signal ID.";
-		relaySignal.signalID = (BS2_UID)Utility::getInput<uint32_t>(msg);
-
-		msg = "[Action] Please insert signal count.";
-		relaySignal.count = (uint16_t)Utility::getInput<uint32_t>(msg);
-
-		msg = "[Action] Please insert signal On-Duration.";
-		relaySignal.onDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
-
-		msg = "[Action] Please insert signal Off-Duration.";
-		relaySignal.offDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
-
-		msg = "[Action] Please insert signal delay.";
-		relaySignal.delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+		BS2TriggerAction& triggerAction = config.items[idx];
+		setTriggerAction(device, triggerAction);
 	}
 
 	return cc.setTriggerActionConfig(id, config);
+}
+
+void setTriggerAction(const DeviceInfo& device, BS2TriggerAction& triggerAction)
+{
+	setTrigger(device, triggerAction.trigger);
+	setAction(device, triggerAction.action);
+}
+
+void setTrigger(const DeviceInfo& device, BS2Trigger& trigger)
+{
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	trigger.deviceID = id;
+
+	string msg = "[Trigger] Select trigger type. (0: None, 1: Event, 2: Input, 3: Schedule)";
+	trigger.type = (BS2_TRIGGER_TYPE)Utility::getInput<uint32_t>(msg);
+
+	msg = "[Trigger] Enter the interval(ms) to ignore the input signal. (ignore wiegand input).";
+	trigger.ignoreSignalTime = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	switch (trigger.type)
+	{
+	case BS2_TRIGGER_EVENT:
+		setEventTrigger(trigger.event);
+		break;
+	case BS2_TRIGGER_INPUT:
+		setInputTrigger(trigger.input);
+		break;
+	case BS2_TRIGGER_SCHEDULE:
+		setScheduleTrigger(trigger.schedule);
+		break;
+	case BS2_TRIGGER_NONE:
+	default:
+		break;
+	}
+}
+
+void setEventTrigger(BS2EventTrigger& eventTrigger)
+{
+	string msg = "[EventTrigger] Enter the event code.";
+	eventTrigger.code = (BS2_EVENT_CODE)Utility::getInput<uint32_t>(msg);
+}
+
+void setInputTrigger(BS2InputTrigger& inputTrigger)
+{
+	string msg = "[InputTrigger] Enter the input port No.";
+	inputTrigger.port = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[InputTrigger] Enter the switchType (N/O: 0, N/C: 1).";
+	BS2_SWITCH_TYPE sw = (BS2_SWITCH_TYPE)Utility::getInput<uint32_t>(msg);
+	inputTrigger.switchType = (sw == BS2_SWITCH_TYPE_NORMAL_OPEN) ? BS2_SWITCH_TYPE_NORMAL_OPEN : BS2_SWITCH_TYPE_NORMAL_CLOSED;
+
+	msg = "[InputTrigger] Enter the duration.";
+	inputTrigger.duration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[InputTrigger] Enter the schedule ID. (Always: 1)";
+	inputTrigger.scheduleID = (BS2_SCHEDULE_ID)Utility::getInput<uint32_t>(msg);
+}
+
+void setScheduleTrigger(BS2ScheduleTrigger& scheduleTrigger)
+{
+	string msg = "[ScheduleTrigger] Enter the schedule trigger type. (0: On start, 1: On end)";
+	scheduleTrigger.type = (BS2_SCHEDULE_TRIGGER_TYPE)Utility::getInput<uint32_t>(msg);
+
+	msg = "[ScheduleTrigger] Enter the schedule ID. (Always: 1)";
+	scheduleTrigger.scheduleID = (BS2_SCHEDULE_ID)Utility::getInput<uint32_t>(msg);
+}
+
+void setAction(const DeviceInfo& device, BS2Action& action)
+{
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	action.deviceID = id;
+
+	ostringstream ss;
+	ss << "[Action] Select action type." << endl;
+	ss << "    0 : BS2_ACTION_NONE" << endl;
+	ss << "    1 : BS2_ACTION_LOCK_DEVICE" << endl;
+	ss << "    2 : BS2_ACTION_UNLOCK_DEVICE" << endl;
+	ss << "    3 : BS2_ACTION_REBOOT_DEVICE" << endl;
+	ss << "    4 : BS2_ACTION_RELEASE_ALARM" << endl;
+	ss << "    5 : BS2_ACTION_GENERAL_INPUT" << endl;
+	ss << "    6 : BS2_ACTION_RELAY" << endl;
+	ss << "    7 : BS2_ACTION_TTL" << endl;
+	ss << "    8 : BS2_ACTION_SOUND" << endl;
+	ss << "    9 : BS2_ACTION_DISPLAY" << endl;
+	ss << "   10 : BS2_ACTION_BUZZER" << endl;
+	ss << "   11 : BS2_ACTION_LED" << endl;
+	ss << "   12 : BS2_ACTION_FIRE_ALARM_INPUT" << endl;
+	ss << "   13 : BS2_ACTION_AUTH_SUCCESS" << endl;
+	ss << "   14 : BS2_ACTION_AUTH_FAIL" << endl;
+	ss << "   15 : BS2_ACTION_LIFT" << endl;
+	action.type = (BS2_ACTION_TYPE)Utility::getInput<uint32_t>(ss.str());
+
+	string msg = "[Action] Enter the stop flag. (0: None, 1: When door closed, 2: By command action)";
+	action.stopFlag = (BS2_STOP_FLAG)Utility::getInput<uint32_t>(msg);
+
+	msg = "[Action] Enter the action delay";
+	action.delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	switch (action.type)
+	{
+	case BS2_ACTION_RELAY:
+		setRelayAction(action.relay);
+		break;
+	case BS2_ACTION_TTL:
+		setOutputPortAction(action.outputPort);
+		break;
+	case BS2_ACTION_SOUND:
+		setSoundAction(action.sound);
+		break;
+	case BS2_ACTION_DISPLAY:
+		setDisplayAction(action.display);
+		break;
+	case BS2_ACTION_BUZZER:
+		setBuzzerAction(action.buzzer);
+		break;
+	case BS2_ACTION_LED:
+		setLedAction(action.led);
+		break;
+	case BS2_ACTION_LIFT:
+		setLiftAction(action.lift);
+		break;
+	case BS2_ACTION_LOCK_DEVICE:
+	case BS2_ACTION_UNLOCK_DEVICE:
+	case BS2_ACTION_REBOOT_DEVICE:
+	case BS2_ACTION_RELEASE_ALARM:
+	case BS2_ACTION_GENERAL_INPUT:
+	case BS2_ACTION_FIRE_ALARM_INPUT:
+	case BS2_ACTION_AUTH_SUCCESS:
+	case BS2_ACTION_AUTH_FAIL:
+		break;
+	case BS2_ACTION_NONE:
+	default:
+		break;
+	}
+}
+
+void setRelayAction(BS2RelayAction& relayAction)
+{
+	string msg = "[RelayAction] Enter the relay index.";
+	relayAction.relayIndex = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	BS2Signal& relaySignal = relayAction.signal;
+	msg = "[RelayAction] Enter the signal ID.";
+	relaySignal.signalID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+	msg = "[RelayAction] Enter the signal count.";
+	relaySignal.count = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[RelayAction] Enter the signal On-duration.";
+	relaySignal.onDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[RelayAction] Enter the signal Off-duration.";
+	relaySignal.offDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[RelayAction] Enter the signal delay.";
+	relaySignal.delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+}
+
+void setOutputPortAction(BS2OutputPortAction& outputPortAction)
+{
+	string msg = "[OutputPortAction] Enter the port index.";
+	outputPortAction.portIndex = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	BS2Signal& outputPortSignal = outputPortAction.signal;
+	msg = "[OutputPortAction] Enter the signal ID.";
+	outputPortSignal.signalID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+	msg = "[OutputPortAction] Enter the signal count.";
+	outputPortSignal.count = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[OutputPortAction] Enter the signal On-duration.";
+	outputPortSignal.onDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[OutputPortAction] Enter the signal Off-duration.";
+	outputPortSignal.offDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[OutputPortAction] Enter the signal delay.";
+	outputPortSignal.delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+}
+
+void setSoundAction(BS2SoundAction& soundAction)
+{
+	string msg = "[SoundAction] Enter the count.";
+	soundAction.count = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[SoundAction] Enter the sound index . (0: Welcome, 1: Auth success, 2: Auth fail, 3: Alarm1, 4: Alarm2)";
+	soundAction.soundIndex = (BS2_SOUND_INDEX)Utility::getInput<uint32_t>(msg);
+
+	msg = "[SoundAction] Enter the delay.";
+	soundAction.delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+}
+
+void setDisplayAction(BS2DisplayAction& displayAction)
+{
+	string msg = "[DisplayAction] Enter the duration.";
+	displayAction.duration = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "[DisplayAction] Enter the display ID.";
+	displayAction.displayID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+	msg = "[DisplayAction] Enter the resource ID.";
+	displayAction.resourceID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+}
+
+void setBuzzerAction(BS2BuzzerAction& buzzerAction)
+{
+	string msg = "[BuzzerAction] Enter the repeat count. (0: Infinite)";
+	buzzerAction.count = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	for (uint32_t idx = 0; idx < BS2_BUZZER_SIGNAL_NUM; idx++)
+	{
+		BS2BuzzerSignal& buzzerSignal = buzzerAction.signal[idx];
+		msg = "[BuzzerAction] Enter the buzzer tone. (0: Off, 1: Low, 2: Middle, 3: High)";
+		buzzerSignal.tone = (BS2_BUZZER_TONE)Utility::getInput<uint32_t>(msg);
+
+		msg = "[BuzzerAction] Do you want to enable face out.";
+		buzzerSignal.fadeout = Utility::isYes(msg);
+
+		msg = "[BuzzerAction] Enter the buzzer duration.";
+		buzzerSignal.duration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "[BuzzerAction] Enter the buzzer delay.";
+		buzzerSignal.delay = (uint16_t)Utility::getInput<uint32_t>(msg);
+	}
+}
+
+void setLedAction(BS2LedAction& ledAction)
+{
+	string msg = "[LedAction] Enter the repeat count. (0: Infinite)";
+	ledAction.count = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	for (uint32_t idx = 0; idx < BS2_LED_SIGNAL_NUM; idx++)
+	{
+		BS2LedSignal& ledSignal = ledAction.signal[idx];
+
+		ostringstream ss;
+		ss << "[LedAction] Select the buzzer color" << endl;
+		ss << "    0 : BS2_LED_COLOR_OFF" << endl;
+		ss << "    1 : BS2_LED_COLOR_RED" << endl;
+		ss << "    2 : BS2_LED_COLOR_YELLOW" << endl;
+		ss << "    3 : BS2_LED_COLOR_GREEN" << endl;
+		ss << "    4 : BS2_LED_COLOR_CYAN" << endl;
+		ss << "    5 : BS2_LED_COLOR_BLUE" << endl;
+		ss << "    6 : BS2_LED_COLOR_MAGENTA" << endl;
+		ss << "    7 : BS2_LED_COLOR_WHITE" << endl;
+		ss << "    8 : BS2_LED_COLOR_BLUE_BREATHING" << endl;
+		ledSignal.color = (BS2_LED_COLOR)Utility::getInput<uint32_t>(ss.str());
+
+		msg = "[LedAction] Enter the duration.";
+		ledSignal.duration = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "[LedAction] Enter the delay.";
+		ledSignal.delay = (uint16_t)Utility::getInput<uint16_t>(msg);
+	}
+}
+
+void setLiftAction(BS2LiftAction& liftAction)
+{
+	string msg = "[LiftAction] Enter the lift ID.";
+	liftAction.liftID = (BS2_LIFT_ID)Utility::getInput<uint32_t>(msg);
+
+	msg = "[LiftAction] Enter the lift action type. (0: Activate floors, 1: Deactivate floors, 2: Release floors)";
+	liftAction.type = (BS2_LIFT_ACTION_TYPE)Utility::getInput<uint32_t>(msg);
 }
 
 int removeTriggerActionConfig(void* context, const DeviceInfo& device)

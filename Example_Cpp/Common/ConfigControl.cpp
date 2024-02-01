@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <iostream>
+#include <map>
 #include "ConfigControl.h"
 #include "BS_Errno.h"
 #include "Utility.h"
@@ -9,6 +10,37 @@
 extern void TRACE(const char* fmt, ...);
 using namespace std;
 
+
+const map<BS2_TRIGGER_TYPE, string> kTRIGGER_TYPE = {
+	{BS2_TRIGGER_NONE,     "none"},
+	{BS2_TRIGGER_EVENT,    "event"},
+	{BS2_TRIGGER_INPUT,    "input"},
+	{BS2_TRIGGER_SCHEDULE, "schedule"},
+};
+
+const map<BS2_ACTION_TYPE, string> kACTION_TYPE = {
+	{BS2_ACTION_NONE,				"none"},
+
+	{BS2_ACTION_LOCK_DEVICE,		"lock device"},
+	{BS2_ACTION_UNLOCK_DEVICE,		"unlock device"},
+	{BS2_ACTION_REBOOT_DEVICE,		"reboot device"},
+	{BS2_ACTION_RELEASE_ALARM,		"release alarm"},
+	{BS2_ACTION_GENERAL_INPUT,		"general input"},
+
+	{BS2_ACTION_RELAY,				"relay"},
+	{BS2_ACTION_TTL,				"output"},
+	{BS2_ACTION_SOUND,				"sound"},
+	{BS2_ACTION_DISPLAY,			"display"},
+	{BS2_ACTION_BUZZER,				"buzzer"},
+	{BS2_ACTION_LED,				"led"},
+
+	{BS2_ACTION_FIRE_ALARM_INPUT,	"fire alarm input"},
+
+	{BS2_ACTION_AUTH_SUCCESS,		"auth success"},
+	{BS2_ACTION_AUTH_FAIL,			"auth fail"},
+
+	{BS2_ACTION_LIFT,				"lift"},
+};
 
 ConfigControl::ConfigControl(void* sdkContext) : context_(sdkContext)
 {
@@ -1041,30 +1073,25 @@ void ConfigControl::print(const BS2TriggerActionConfig& config)
 void ConfigControl::print(const BS2Trigger& trigger)
 {
 	TRACE("==[BS2Trigger]==");
+	TRACE("   +--device : %u", trigger.deviceID);
+	TRACE("   |--type : %s", kTRIGGER_TYPE.at(trigger.type).c_str());
+	TRACE("   |--ignoreSignalTime : %u", trigger.ignoreSignalTime);
 	switch (trigger.type)
 	{
 	case BS2_TRIGGER_EVENT:
-		TRACE("   +--device : %u", trigger.deviceID);
-		TRACE("   |--type : event");
 		TRACE("   +--code : %u", trigger.event.code);
 		break;
 	case BS2_TRIGGER_INPUT:
-		TRACE("   +--device : %u", trigger.deviceID);
-		TRACE("   |--type : input");
 		TRACE("   |--port : %u", trigger.input.port);
 		TRACE("   |--switchType : %u", trigger.input.switchType);
 		TRACE("   |--duration : %u", trigger.input.duration);
 		TRACE("   +--scheduleID : %u", trigger.input.scheduleID);
 		break;
 	case BS2_TRIGGER_SCHEDULE:
-		TRACE("   +--device : %u", trigger.deviceID);
-		TRACE("   |--type : schedule");
 		TRACE("   |--scheduleType : %u", trigger.schedule.type);
 		TRACE("   +--scheduleID : %u", trigger.schedule.scheduleID);
 		break;
 	case BS2_TRIGGER_NONE:
-		TRACE("   +--device : %u", trigger.deviceID);
-		TRACE("   +--type : None");
 		break;
 	default:
 		break;
@@ -1074,13 +1101,13 @@ void ConfigControl::print(const BS2Trigger& trigger)
 void ConfigControl::print(const BS2Action& action)
 {
 	TRACE("==[BS2Action]==");
+	TRACE("   +--device : %u", action.deviceID);
+	TRACE("   |--type : %s", kACTION_TYPE.at(action.type).c_str());
+	TRACE("   |--stopFlag : %u", action.stopFlag);
+	TRACE("   |--delay : %u", action.delay);
 	switch (action.type)
 	{
 	case BS2_ACTION_RELAY:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : relay");
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   |--delay : %u", action.delay);
 		TRACE("   |--relayIndex : %u", action.relay.relayIndex);
 		TRACE("   |--signalID : %u", action.relay.signal.signalID);
 		TRACE("   |--count : %u", action.relay.signal.count);
@@ -1089,10 +1116,6 @@ void ConfigControl::print(const BS2Action& action)
 		TRACE("   +--delay : %u", action.relay.signal.delay);
 		break;
 	case BS2_ACTION_TTL:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : output");
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   |--delay : %u", action.delay);
 		TRACE("   |--relayIndex : %u", action.outputPort.portIndex);
 		TRACE("   |--signalID : %u", action.outputPort.signal.signalID);
 		TRACE("   |--count : %u", action.outputPort.signal.count);
@@ -1101,28 +1124,16 @@ void ConfigControl::print(const BS2Action& action)
 		TRACE("   +--delay : %u", action.outputPort.signal.delay);
 		break;
 	case BS2_ACTION_DISPLAY:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : display");
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   |--delay : %u", action.delay);
 		TRACE("   |--duration : %u", action.display.duration);
 		TRACE("   |--displayID : %u", action.display.displayID);
 		TRACE("   +--resourceID : %u", action.display.resourceID);
 		break;
 	case BS2_ACTION_SOUND:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : sound");
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   |--delay : %u", action.delay);
 		TRACE("   |--count : %u", action.sound.count);
 		TRACE("   |--soundIndex : %u", action.sound.soundIndex);
 		TRACE("   +--delay : %u", action.sound.delay);
 		break;
 	case BS2_ACTION_LED:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : led");
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   |--delay : %u", action.delay);
 		TRACE("   |--count : %u", action.led.count);
 		for (int idx = 0; idx < action.led.count; idx++)
 		{
@@ -1133,10 +1144,6 @@ void ConfigControl::print(const BS2Action& action)
 		}
 		break;
 	case BS2_ACTION_BUZZER:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : buzzer");
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   |--delay : %u", action.delay);
 		TRACE("   |--count : %u", action.buzzer.count);
 		for (int idx = 0; idx < action.buzzer.count; idx++)
 		{
@@ -1148,10 +1155,6 @@ void ConfigControl::print(const BS2Action& action)
 		}
 		break;
 	case BS2_ACTION_LIFT:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : lift");
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   |--delay : %u", action.delay);
 		TRACE("   |--liftID : %u", action.lift.liftID);
 		TRACE("   +--type : %u", action.lift.type);
 		break;
@@ -1163,14 +1166,8 @@ void ConfigControl::print(const BS2Action& action)
 	case BS2_ACTION_FIRE_ALARM_INPUT:
 	case BS2_ACTION_AUTH_SUCCESS:
 	case BS2_ACTION_AUTH_FAIL:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   |--type : %u", action.type);
-		TRACE("   |--stopFlag : %u", action.stopFlag);
-		TRACE("   +--delay : %u", action.delay);
 		break;
 	case BS2_ACTION_NONE:
-		TRACE("   +--device : %u", action.deviceID);
-		TRACE("   +--type : None");
 		break;
 	default:
 		break;
