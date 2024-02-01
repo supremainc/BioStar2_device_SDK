@@ -500,6 +500,7 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 		case BS2_DEVICE_TYPE_FACESTATION_F2_FP:
 		case BS2_DEVICE_TYPE_FACESTATION_F2:
 		case BS2_DEVICE_TYPE_BIOSTATION_3:
+		case BS2_DEVICE_TYPE_BIOENTRY_W3:
 			defaultEnrollTimeout = 20;
 			defaultLFD = 1;
 			needInput = true;
@@ -558,6 +559,7 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 			break;
 
 		case BS2_DEVICE_TYPE_BIOSTATION_3:
+		case BS2_DEVICE_TYPE_BIOENTRY_W3:
 			sprintf(buf, "Insert min value of detectDistance. (%d~%d, default: %d)",
 				BS2_FACE_DETECT_DISTANCE_MIN_MIN,
 				BS2_FACE_DETECT_DISTANCE_MIN_MAX,
@@ -1548,6 +1550,7 @@ int setBarcodeConfig(void* context, const DeviceInfo& device)
 		}
 		break;
 
+	case BS2_DEVICE_TYPE_BIOENTRY_W3:
 	default:
 		return sdkResult;
 	}

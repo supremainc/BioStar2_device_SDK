@@ -413,6 +413,8 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 		return "BS3";
 	case BS2_DEVICE_TYPE_BIOSTATION_2A:
 		return "BS2a";
+	case BS2_DEVICE_TYPE_BIOENTRY_W3:
+		return "BEW3";
 	case BS2_DEVICE_TYPE_UNKNOWN:
 	default:
 		break;
