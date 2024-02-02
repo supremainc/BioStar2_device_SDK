@@ -650,7 +650,7 @@ int setDisplayConfig(void* context, const DeviceInfo& device)
 	msg = "Please select a time format. (0: 12hour, 1: 24hour)";
 	config.timeFormat = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	config.homeFormation = 0;
+	//config.homeFormation = 0;
 	config.useUserPhrase = Utility::isYes("Would you like to use a personal authentication message? (Using device user message)");
 	config.queryUserPhrase = Utility::isYes("Would you like to use a personal authentication message? (Ask the server)");
 	config.useScreenSaver = Utility::isYes("Would you like to use screen saver?");
@@ -1263,7 +1263,7 @@ void setTrigger(const DeviceInfo& device, BS2Trigger& trigger)
 	string msg = "[Trigger] Select trigger type. (0: None, 1: Event, 2: Input, 3: Schedule)";
 	trigger.type = (BS2_TRIGGER_TYPE)Utility::getInput<uint32_t>(msg);
 
-	msg = "[Trigger] Enter the interval(sec) to ignore the input signal. (ignore wiegand input).";
+	msg = "[Trigger] Enter the interval(millisec) to ignore the input signal. (ignore wiegand input).";
 	trigger.ignoreSignalTime = (uint16_t)Utility::getInput<uint32_t>(msg);
 
 	switch (trigger.type)
