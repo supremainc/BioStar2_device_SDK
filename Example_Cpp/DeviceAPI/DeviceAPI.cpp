@@ -631,14 +631,14 @@ int setDisplayConfig(void* context, const DeviceInfo& device)
 	msg = "Please select a background theme. (0: Theme1, 1: Theme2, 2: Theme3, 3: Theme4)";
 	config.bgTheme = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	msg = "Please select a data format. (0: YYYY/MM/DD, 1: MM/DD/YYYY, 2: DD/MM/YYYY)";
+	msg = "Please select a date format. (0: YYYY/MM/DD, 1: MM/DD/YYYY, 2: DD/MM/YYYY)";
 	config.dateFormat = (uint8_t)Utility::getInput<uint32_t>(msg);
 
 	msg = "Please select a menu timeout. (0, 10, 20, 30, 40, 50, 60)";
 	config.menuTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
 
 	msg = "Please select a message timeout in millisec. (500, 1000, 2000, 3000, 4000, 5000)";
-	config.backlightTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.msgTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
 
 	msg = "Please select a backlight timeout. (0, 10, 20, 30, 40, 50, 60)";
 	config.backlightTimeout = (uint16_t)Utility::getInput<uint32_t>(msg);
@@ -653,9 +653,9 @@ int setDisplayConfig(void* context, const DeviceInfo& device)
 	config.homeFormation = 0;
 	config.useUserPhrase = Utility::isYes("Would you like to use a personal authentication message? (Using device user message)");
 	config.queryUserPhrase = Utility::isYes("Would you like to use a personal authentication message? (Ask the server)");
-	config.backlightTimeout = Utility::isYes("Would you like to use screen saver?");
+	config.useScreenSaver = Utility::isYes("Would you like to use screen saver?");
 
-	msg = "Choose whether to show authentication result on OSDP. (0: None, 1: Visible, 2: Invisible)";
+	msg = "Choose whether to show authentication result on OSDP. (0: Show, 1: Not show)";
 	config.showOsdpResult = (BS2_SHOW_OSDP_RESULT)Utility::getInput<uint32_t>(msg);
 
 	return cc.setDisplayConfig(id, config);
