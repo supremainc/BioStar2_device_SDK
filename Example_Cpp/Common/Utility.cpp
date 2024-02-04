@@ -617,7 +617,7 @@ bool Utility::selectDeviceIDAndType(const DeviceList& deviceList, bool includeSl
 
 void Utility::selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand)
 {
-	cout << "==> Select upgrade order." << endl;
+	cout << "==> Select order." << endl;
 	selectedDevices.clear();
 	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
 	while (true)

@@ -272,6 +272,9 @@ int slaveMenu(void* context, DeviceList& deviceList)
 		case MENU_SLV_SEARCH_DEVICE:
 			sdkResult = Utility::searchAndAddSlave(context, deviceList);
 			break;
+		case MENU_SLV_SET_BAUDRATE:
+			sdkResult = setSlaveBaudrate(context, deviceList);
+			break;
 		case MENU_SLV_UPG_FIRMWARE:
 			if (!selectedOrder)
 			{
@@ -655,6 +658,20 @@ int getFactoryConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
 	}
 
 	return sdkResult;
+}
+
+int setSlaveBaudrate(void* context, const DeviceList& devices)
+{
+	CommControl cm(context);
+
+	Utility::displayConnectedDevices(devices, true);
+	BS2_DEVICE_ID masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the master device ID:");
+	BS2_DEVICE_ID slaveID = Utility::getInput<BS2_DEVICE_ID>("Please enter the slave device ID:");
+
+	string msg = "Please select a baudrate. (9600, 19200, 38400, 57600, 115200)";
+	uint32_t baudrate = Utility::getInput<uint32_t>(msg);
+
+	return cm.setSlaveBaudrate(masterID, slaveID, baudrate);
 }
 
 // int getRS485ExConfig(void* context, const vector<BS2_DEVICE_ID>& devices)
