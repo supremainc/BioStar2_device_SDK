@@ -800,6 +800,7 @@ void ConfigControl::print(const BS2DisplayConfig& config)
 	TRACE("timeFormat:%u", config.timeFormat);
 	TRACE("homeFormation:%u", config.homeFormation);
 	TRACE("useUserPhrase:%u", config.useUserPhrase);
+	TRACE("queryUserPhrase:%u", config.queryUserPhrase);
 
 	for (int idx = 0; idx < BS2_MAX_SHORTCUT_HOME; idx++)
 		TRACE("shortcutHome[%d]:%d", idx, config.shortcutHome[idx]);
