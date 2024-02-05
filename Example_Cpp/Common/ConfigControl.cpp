@@ -1066,7 +1066,7 @@ void ConfigControl::print(const BS2TriggerActionConfig& config)
 	TRACE("==[BS2TriggerActionConfig]==");
 	for (int idx = 0; idx < config.numItems; idx++)
 	{
-		TRACE("+--BS2TriggerAction : %d", idx);
+		TRACE("+--BS2TriggerAction[%d]", idx);
 		print(config.items[idx].trigger);
 		print(config.items[idx].action);
 	}
@@ -1137,23 +1137,21 @@ void ConfigControl::print(const BS2Action& action)
 		break;
 	case BS2_ACTION_LED:
 		TRACE("   |--count : %u", action.led.count);
-		for (int idx = 0; idx < action.led.count; idx++)
+		for (int idx = 0; idx < BS2_LED_SIGNAL_NUM; idx++)
 		{
-			TRACE("   +--led : %u", idx);
-			TRACE("      +--color : %u", action.led.signal[idx].color);
-			TRACE("      |--duration : %u", action.led.signal[idx].duration);
-			TRACE("      +--delay : %u", action.led.signal[idx].delay);
+			TRACE("   |--led[%u].color : %u", idx, action.led.signal[idx].color);
+			TRACE("   |--led[%u].duration : %u", idx, action.led.signal[idx].duration);
+			TRACE("   +--led[%u].delay : %u", idx, action.led.signal[idx].delay);
 		}
 		break;
 	case BS2_ACTION_BUZZER:
 		TRACE("   |--count : %u", action.buzzer.count);
-		for (int idx = 0; idx < action.buzzer.count; idx++)
+		for (int idx = 0; idx < BS2_BUZZER_SIGNAL_NUM; idx++)
 		{
-			TRACE("   +--buzzer : %u", idx);
-			TRACE("      +--tone : %u", action.buzzer.signal[idx].tone);
-			TRACE("      |--fadeout : %u", action.buzzer.signal[idx].fadeout);
-			TRACE("      |--duration : %u", action.buzzer.signal[idx].duration);
-			TRACE("      +--delay : %u", action.buzzer.signal[idx].delay);
+			TRACE("   |--buzzer[%u].tone : %u", idx, action.buzzer.signal[idx].tone);
+			TRACE("   |--buzzer[%u].fadeout : %u", idx, action.buzzer.signal[idx].fadeout);
+			TRACE("   |--buzzer[%u].duration : %u", idx, action.buzzer.signal[idx].duration);
+			TRACE("   +--buzzer[%u].delay : %u", idx, action.buzzer.signal[idx].delay);
 		}
 		break;
 	case BS2_ACTION_LIFT:

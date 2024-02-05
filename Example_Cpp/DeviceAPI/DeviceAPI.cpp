@@ -1294,14 +1294,14 @@ void setInputTrigger(BS2InputTrigger& inputTrigger)
 	string msg = "[InputTrigger] Enter the input port No.";
 	inputTrigger.port = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	msg = "[InputTrigger] Enter the switchType (N/O: 0, N/C: 1).";
+	msg = "[InputTrigger] Enter the switchType (0: N/O, 1: N/C).";
 	BS2_SWITCH_TYPE sw = (BS2_SWITCH_TYPE)Utility::getInput<uint32_t>(msg);
 	inputTrigger.switchType = (sw == BS2_SWITCH_TYPE_NORMAL_OPEN) ? BS2_SWITCH_TYPE_NORMAL_OPEN : BS2_SWITCH_TYPE_NORMAL_CLOSED;
 
 	msg = "[InputTrigger] Enter the duration.";
 	inputTrigger.duration = (uint16_t)Utility::getInput<uint32_t>(msg);
 
-	msg = "[InputTrigger] Enter the schedule ID. (Always: 1)";
+	msg = "[InputTrigger] Enter the schedule ID. (1: Always)";
 	inputTrigger.scheduleID = (BS2_SCHEDULE_ID)Utility::getInput<uint32_t>(msg);
 }
 
@@ -1310,7 +1310,7 @@ void setScheduleTrigger(BS2ScheduleTrigger& scheduleTrigger)
 	string msg = "[ScheduleTrigger] Enter the schedule trigger type. (0: On start, 1: On end)";
 	scheduleTrigger.type = (BS2_SCHEDULE_TRIGGER_TYPE)Utility::getInput<uint32_t>(msg);
 
-	msg = "[ScheduleTrigger] Enter the schedule ID. (Always: 1)";
+	msg = "[ScheduleTrigger] Enter the schedule ID. (1: Always)";
 	scheduleTrigger.scheduleID = (BS2_SCHEDULE_ID)Utility::getInput<uint32_t>(msg);
 }
 
@@ -1432,7 +1432,7 @@ void setSoundAction(BS2SoundAction& soundAction)
 	string msg = "[SoundAction] Enter the count.";
 	soundAction.count = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	msg = "[SoundAction] Enter the sound index . (0: Welcome, 1: Auth success, 2: Auth fail, 3: Alarm1, 4: Alarm2)";
+	msg = "[SoundAction] Enter the sound index. (0: Welcome, 1: Auth success, 2: Auth fail, 3: Alarm1, 4: Alarm2)";
 	soundAction.soundIndex = (BS2_SOUND_INDEX)Utility::getInput<uint32_t>(msg);
 
 	msg = "[SoundAction] Enter the delay.";
@@ -1462,7 +1462,7 @@ void setBuzzerAction(BS2BuzzerAction& buzzerAction)
 		msg = "[BuzzerAction] Enter the buzzer tone. (0: Off, 1: Low, 2: Middle, 3: High)";
 		buzzerSignal.tone = (BS2_BUZZER_TONE)Utility::getInput<uint32_t>(msg);
 
-		msg = "[BuzzerAction] Do you want to enable face out.";
+		msg = "[BuzzerAction] Do you want to enable fade out.";
 		buzzerSignal.fadeout = Utility::isYes(msg);
 
 		msg = "[BuzzerAction] Enter the buzzer duration.";
