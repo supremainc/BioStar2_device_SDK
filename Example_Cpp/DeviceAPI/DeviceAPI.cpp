@@ -499,6 +499,7 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 		{
 		case BS2_DEVICE_TYPE_FACESTATION_2:
 		case BS2_DEVICE_TYPE_FACELITE:
+		case BS2_DEVICE_TYPE_CORESTATION_40:
 			defaultEnrollTimeout = 60;
 			defaultLFD = 0;
 			needInput = true;
