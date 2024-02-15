@@ -181,7 +181,7 @@ inline T Utility::getInputHexaChar(std::string msgFormat, ...)
 	va_end(ap);
 
 	std::cout << buf << std::endl;
-	std::cout << "==> ";
+	std::cout << "==> 0x";
 	std::string value;
 	std::cin >> value;
 	std::stringstream conv;

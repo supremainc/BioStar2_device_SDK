@@ -656,8 +656,8 @@ int setDisplayConfig(void* context, const DeviceInfo& device)
 	config.queryUserPhrase = Utility::isYes("Would you like to use a personal authentication message? (Ask the server)");
 	config.useScreenSaver = Utility::isYes("Would you like to use screen saver?");
 
-	msg = "Choose whether to show authentication result on OSDP. (0: Show, 1: Not show)";
-	config.showOsdpResult = (BS2_SHOW_OSDP_RESULT)Utility::getInput<uint32_t>(msg);
+	msg = "Display authentication result from Controller.";
+	config.showOsdpResult = Utility::isYes(msg) ? BS2_SHOW_OSDP_RESULT_ON : BS2_SHOW_OSDP_RESULT_OFF;
 
 	return cc.setDisplayConfig(id, config);
 }
@@ -764,21 +764,20 @@ int setSystemConfig(void* context, const DeviceInfo& device)
 	{
 		ostringstream strm;
 		strm << "Please enter the card combination you wish to set." << endl;
-		strm << "    0xFFFFFFFF : DEFAULT" << endl;
-		strm << "    0x00000000 : NONE" << endl;
-		strm << "    0x00000001 : (LowFrequency)  EM" << endl;
-		strm << "    0x00000002 : (LowFrequency)  PROX" << endl;
-		strm << "    0x00000004 : (HighFrequency) CSN_MIFARE" << endl;
-		strm << "    0x00000008 : (HighFrequency) CSN_ICLASS" << endl;
-		strm << "    0x00000010 : (HighFrequency) SMART_MIFARE" << endl;
-		strm << "    0x00000020 : (HighFrequency) SMART_MIFARE_DESFIRE" << endl;
-		strm << "    0x00000040 : (HighFrequency) SMART_ICLASS" << endl;
-		strm << "    0x00000080 : (HighFrequency) SMART_ICLASS_SEOS" << endl;
-		strm << "    0x00000100 : (Mobile)        NFC" << endl;
-		strm << "    0x00000200 : (Mobile)        BLE" << endl;
-		strm << "    0x00000400 : (HighFrequency) CSN_OTHERS" << endl;
+		strm << "    0x00000800 : CUSTOM_DESFIRE_EV1" << endl;
+		strm << "    0x00000400 : CUSTOM_CLASSIC_PLUS" << endl;
+		strm << "    0x00000200 : BLE" << endl;
+		strm << "    0x00000100 : NFC" << endl;
+		strm << "    0x00000080 : SEOS" << endl;
+		strm << "    0x00000040 : SR_SE" << endl;
+		strm << "    0x00000020 : DESFIRE_EV1" << endl;
+		strm << "    0x00000010 : CLASSIC_PLUS" << endl;
+		strm << "    0x00000008 : ICLASS" << endl;
+		strm << "    0x00000004 : MIFARE_FELICA" << endl;
+		strm << "    0x00000002 : HIDPROX" << endl;
+		strm << "    0x00000001 : EM" << endl;
 
-		uint32_t cardTypes = Utility::getInput<uint32_t>(strm.str());
+		uint32_t cardTypes = Utility::getInputHexaChar<uint32_t>(strm.str());
 		cardTypes |= CARD_OPERATION_USE;		// Card operation apply
 		config.useCardOperationMask = cardTypes;
 
@@ -2019,7 +2018,7 @@ int setWiegandConfig(void* context, const DeviceInfo& device)
 			config.useFailCode = Utility::isYes(msg);
 			if (config.useFailCode)
 			{
-				msg = "Enter the FAILCODE in hexa-decimal 1byte like 0xFF.  0x";
+				msg = "Enter the FAILCODE in hexa-decimal 1byte like 0xFF.";
 				config.failCode = Utility::getInputHexaChar<uint8_t>(msg);
 			}
 		}

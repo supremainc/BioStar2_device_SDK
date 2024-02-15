@@ -780,6 +780,18 @@ void ConfigControl::print(const BS2SystemConfig& config)
 	TRACE("cameraFrequency:%u", config.cameraFrequency);
 	TRACE("secureTamper:%d", config.secureTamper);
 	TRACE("useCardOperationMask:0x%08x", config.useCardOperationMask);
+	TRACE("   |--CUSTOM_DESFIRE_EV1 : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_CUSTOM_DESFIRE_EV1) == CARD_OPERATION_MASK_CUSTOM_DESFIRE_EV1);
+	TRACE("   |--CUSTOM_CLASSIC_PLUS : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_CUSTOM_CLASSIC_PLUS) == CARD_OPERATION_MASK_CUSTOM_CLASSIC_PLUS);
+	TRACE("   |--BLE : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_BLE) == CARD_OPERATION_MASK_BLE);
+	TRACE("   |--NFC : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_NFC) == CARD_OPERATION_MASK_NFC);
+	TRACE("   |--SEOS : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_SEOS) == CARD_OPERATION_MASK_SEOS);
+	TRACE("   |--SR_SE : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_SR_SE) == CARD_OPERATION_MASK_SR_SE);
+	TRACE("   |--DESFIRE_EV1 : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_DESFIRE_EV1) == CARD_OPERATION_MASK_DESFIRE_EV1);
+	TRACE("   |--CLASSIC_PLUS : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_CLASSIC_PLUS) == CARD_OPERATION_MASK_CLASSIC_PLUS);
+	TRACE("   |--ICLASS : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_ICLASS) == CARD_OPERATION_MASK_ICLASS);
+	TRACE("   |--MIFARE_FELICA : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_MIFARE_FELICA) == CARD_OPERATION_MASK_MIFARE_FELICA);
+	TRACE("   |--HIDPROX : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_HIDPROX) == CARD_OPERATION_MASK_HIDPROX);
+	TRACE("   +--EM : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_EM) == CARD_OPERATION_MASK_EM);
 }
 
 void ConfigControl::print(const BS2DisplayConfig& config)
