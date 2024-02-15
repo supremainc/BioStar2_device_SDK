@@ -1253,6 +1253,19 @@ void setTriggerAction(const DeviceInfo& device, BS2TriggerAction& triggerAction)
 {
 	setTrigger(device, triggerAction.trigger);
 	setAction(device, triggerAction.action);
+
+	if (triggerAction.trigger.type == BS2_TRIGGER_INPUT &&
+		(triggerAction.action.type == BS2_ACTION_AUTH_SUCCESS ||
+			triggerAction.action.type == BS2_ACTION_AUTH_FAIL ||
+			triggerAction.action.type == BS2_ACTION_LED))
+	{
+		string msg = "[Trigger] Enter the interval(millisec) to ignore the input signal. (ignore input).";
+		triggerAction.trigger.ignoreSignalTime = (uint16_t)Utility::getInput<uint32_t>(msg);
+	}
+	else
+	{
+		triggerAction.trigger.ignoreSignalTime = 0;
+	}
 }
 
 void setTrigger(const DeviceInfo& device, BS2Trigger& trigger)
@@ -1262,9 +1275,6 @@ void setTrigger(const DeviceInfo& device, BS2Trigger& trigger)
 
 	string msg = "[Trigger] Select trigger type. (0: None, 1: Event, 2: Input, 3: Schedule)";
 	trigger.type = (BS2_TRIGGER_TYPE)Utility::getInput<uint32_t>(msg);
-
-	msg = "[Trigger] Enter the interval(millisec) to ignore the input signal. (ignore wiegand input).";
-	trigger.ignoreSignalTime = (uint16_t)Utility::getInput<uint32_t>(msg);
 
 	switch (trigger.type)
 	{
