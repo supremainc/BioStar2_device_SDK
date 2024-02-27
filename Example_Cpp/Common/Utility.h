@@ -121,6 +121,7 @@ public:
 	// Solution common functions
 	static uint32_t showMenu(std::vector<MENU_ITEM>& info);
 	static uint32_t getSelectedIndex();
+	static std::vector<uint32_t> getSelectedIndexes();
 	static BS2_DEVICE_ID getSelectedDeviceID(const DeviceInfo& info);
 	static bool getSelectedDeviceID(const DeviceInfo& info, BS2_DEVICE_ID& id, BS2_DEVICE_TYPE& type);
 	static BS2_DEVICE_ID selectDeviceID(const DeviceList& deviceList, bool includeSlave = false, bool includeWiegand = false);

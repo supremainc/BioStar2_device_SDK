@@ -564,6 +564,11 @@ uint32_t Utility::getSelectedIndex()
 	return Utility::getInput<uint32_t>("Select number:");
 }
 
+vector<uint32_t> Utility::getSelectedIndexes()
+{
+	return Utility::getLineNumbers<uint32_t>("Select numbers (Separated \",\") :");
+}
+
 BS2_DEVICE_ID Utility::selectDeviceID(const DeviceList& deviceList, bool includeSlave, bool includeWiegand)
 {
 	Utility::displayConnectedDevices(deviceList, includeSlave, includeWiegand);
@@ -630,6 +635,7 @@ void Utility::selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& maste
 	masterID = Utility::getInput<BS2_DEVICE_ID>("Please enter the master device ID :");
 }
 
+#if OLD_CODE
 int Utility::searchAndConnect(void* context, DeviceList& deviceList)
 {
 	vector<BS2SimpleDeviceInfo> searchedList;
@@ -668,6 +674,50 @@ int Utility::searchAndConnect(void* context, DeviceList& deviceList)
 
 	return sdkResult;
 }
+#else
+int Utility::searchAndConnect(void* context, DeviceList& deviceList)
+{
+	vector<BS2SimpleDeviceInfo> searchedList;
+	CommControl cm(context);
+	int sdkResult = cm.searchDevices(searchedList);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	Utility::displayDeviceList(searchedList);
+	vector<uint32_t> selectedIndexes = Utility::getSelectedIndexes();
+	for (uint32_t selected : selectedIndexes)
+	{
+		if (MENU_BREAK == selected || searchedList.size() < selected)
+			return BS_SDK_SUCCESS;
+
+		uint32_t ip = searchedList[selected - 1].ipv4Address;
+		string ipAddr = Utility::getIPAddress(ip);
+		BS2_PORT port = searchedList[selected - 1].port;
+		BS2_DEVICE_ID id = searchedList[selected - 1].id;
+		BS2_DEVICE_TYPE type = searchedList[selected - 1].type;
+
+		TRACE("Now connect to device (ID:%u, IP:%s, Port:%u)", id, ipAddr.c_str(), port);
+
+		sdkResult = cm.connectDevice(id);
+		if (BS_SDK_SUCCESS == sdkResult)
+		{
+			int timezone(0);
+			ConfigControl cc(context);
+			sdkResult = cc.getTimezone(id, timezone);
+			if (BS_SDK_SUCCESS != sdkResult)
+			{
+				cm.disconnectDevice(id);
+			}
+			else
+			{
+				deviceList.appendDevice(id, type, ip, port, timezone);
+			}
+		}
+	}
+
+	return sdkResult;
+}
+#endif
 
 int Utility::connectViaIP(void* context, DeviceInfo& device)
 {
