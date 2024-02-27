@@ -77,7 +77,8 @@ typedef struct {
 typedef struct {
 	BS2_DEVICE_ID		deviceID;		///< 4 bytes
 	BS2_TRIGGER_TYPE	type;			///< 1 byte
-	uint8_t				reserved[3];	///< 3 bytes (packing)
+	uint8_t				reserved;		///< 1 byte (packing)
+	uint16_t			ignoreSignalTime;  ///< 2 bytes	
 
 	union {
 		BS2EventTrigger event;		///< 4 bytes

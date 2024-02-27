@@ -201,7 +201,12 @@ typedef struct {
 			uint32_t SEOS: 1;
 			uint32_t NFC: 1;
 			uint32_t BLE: 1;
-			uint32_t reserved: 21;
+			uint32_t CustomClassicPlus: 1;
+			uint32_t CustomDesFireEV1: 1;
+			uint32_t TOM_NFC: 1;
+			uint32_t TOM_BLE: 1;
+			uint32_t CustomFelica: 1;
+			uint32_t reserved: 16;
 			uint32_t useCardOperation: 1;
 		};
 	} cardSupported;
@@ -423,12 +428,13 @@ typedef struct {
 	/*
 	 * OSDP Standard Central supported.
 	 */
-	uint8_t osdpStandardCentralSupported : 1;		///< 1 byte
+	uint8_t osdpStandardCentralSupported: 1;
 
 	/*
 	 * License Enable function supported.
 	 */
-	uint8_t enableLicenseFuncSupported : 1;   ///< 1 byte
+
+	uint8_t enableLicenseFuncSupported: 1;
 
 	/*
 	 * Keypad Backlight Supported.
@@ -450,9 +456,37 @@ typedef struct {
 	 */
 	uint8_t tomSupported: 1;
 
-	uint8_t unused2: 2;		///< 1 byte
+	uint8_t tomEnrollSupported: 1;
 
-	uint8_t reserved[429];		///< 429 bytes
+	/*
+	 * OSDP Slave - show auth result from osdp_LED 
+	 */
+	uint8_t showOsdpResultbyLED: 1;		// BDP-805 
+
+	//-------------------------------------------------------------------------------- 1byte
+
+	/*
+	 * If true, Custom Smard Card (Felica) is supported.
+	 */
+	uint8_t customSmartCardFelicaSupported: 1;		// BDP-870
+
+	/*
+	 * if true, ignore input detect for certain time after wiegand out
+	 */
+	uint8_t ignoreInputAfterWiegandOut: 1;		//BDP-877
+
+	/*
+	 * if true, can change slave baudrate
+	 */
+	uint8_t setSlaveBaudrateSupported: 1;		//BDP-853
+
+	uint8_t unused: 5;
+
+	uint16_t visualFaceTemplateVersion; // BDP-659
+	uint8_t unused2[2]; 
+	
+	uint8_t reserved[424];		///< 424 bytes
+
 } BS2DeviceCapabilities;
 
 #endif	// __BS2_DEVICE_INFO_H__

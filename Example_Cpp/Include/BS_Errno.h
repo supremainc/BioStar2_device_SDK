@@ -210,6 +210,7 @@
 #define BS_SDK_ERROR_CANNOT_SCAN_FACE                       -908
 #define BS_SDK_ERROR_SLAVE_FULL                             -910
 #define BS_SDK_ERROR_CANNOT_ADD_DEVICE                      -911
+#define BS_SDK_ERROR_SLAVE_NOT_READY                        -912
 
 //Door errors
 #define BS_SDK_ERROR_CANNOT_FIND_DOOR                       -1000
@@ -319,6 +320,7 @@
 #define BS_SDK_ERROR_JPEG_ENCODER_DEINIT_FAIL               -1504
 #define BS_SDK_ERROR_CAMERA_CAPTURE_FAIL                    -1505
 #define BS_SDK_ERROR_CANNOT_DETECT_FACE                     -1506
+#define BS_SDK_ERROR_CANNOT_EXECUTE_THREAD                  -1507
 
 //ETC.
 #define BS_SDK_ERROR_FILE_IO                                -2000

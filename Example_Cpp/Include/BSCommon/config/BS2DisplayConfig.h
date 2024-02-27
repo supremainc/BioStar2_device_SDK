@@ -38,6 +38,7 @@ enum {
 	BS2_BG_THEME_02			= 1,
 	BS2_BG_THEME_03			= 2,
 	BS2_BG_THEME_04			= 3,
+    BS2_BG_THEME_DEFAULT    = 4,
 
 	BS2_VOLUME_DEFAULT 		= 50,
 
@@ -120,6 +121,20 @@ enum {
 
 typedef uint32_t BS2_LANGUAGE;
 
+enum {
+	BS2_OSDP_LED_SHOW_TIMEOUT	= 3000, 	// 3s (ms)
+};
+
+/**
+ *	BS2_SHOW_OSDP_RESULT
+ */
+enum {
+	BS2_SHOW_OSDP_RESULT_ON = 0,
+	BS2_SHOW_OSDP_RESULT_OFF = 1,
+};
+
+typedef uint8_t BS2_SHOW_OSDP_RESULT;
+
 /**
  *	BS2DisplayConfig
  */
@@ -147,7 +162,8 @@ typedef struct {
 	uint8_t tnaIcon[BS2_MAX_TNA_KEY];		///< 16 bytes : tnaIcon
 
 	BS2_BOOL useScreenSaver;		///< 1 byte
-	uint8_t reserved1[31];		///< 31 bytes (reserved)
+	BS2_SHOW_OSDP_RESULT showOsdpResult;	///< 1 byte	
+	uint8_t reserved1[30];		///< 30 bytes (reserved)
 } BS2DisplayConfig;
 
 #endif	// __BS2_DISPLAY_CONFIG_H__
