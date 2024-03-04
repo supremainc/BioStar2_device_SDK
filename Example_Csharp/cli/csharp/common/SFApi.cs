@@ -57,6 +57,7 @@ namespace Suprema
             {BS2DeviceTypeEnum.THIRD_OSDP_DEVICE, "3rd party OSDP"},
             {BS2DeviceTypeEnum.THIRD_OSDP_IO_DEVICE, "3rd party OSDP IO"},
             {BS2DeviceTypeEnum.BIOSTATION_2A,   "BioStation 2A"},
+            {BS2DeviceTypeEnum.BIOENTRY_W3,     "BioEntry W3"},
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -642,12 +643,6 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetLog(IntPtr context, UInt32 deviceId, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
         
-        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int BS2_GetFilteredLog(IntPtr context, UInt32 deviceId, IntPtr uid, UInt16 eventCode, UInt32 start, UInt32 end, byte tnakey, out IntPtr logObjs, out UInt32 numLog);
-        
-        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int BS2_GetFilteredLogSinceEventId(IntPtr context, UInt32 deviceId, IntPtr uid, UInt16 eventCode, UInt32 start, UInt32 end, byte tnakey, UInt32 lastEventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
-
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetImageLog(IntPtr context, UInt32 deviceId, UInt32 eventId, out IntPtr imageObj, out UInt32 imageSize);
 
