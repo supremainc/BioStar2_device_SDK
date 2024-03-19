@@ -3427,38 +3427,11 @@ namespace Suprema
 
         public void getNormalizedImageFaceEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
-            bool faceExScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN;
-            if (!faceExScanSupported)
-            {
-                Console.WriteLine("Not supported device");
-                return;
-            }
-
-            Console.WriteLine("Enter the path and name of unwarped face image file.");
-            Console.Write(">> ");
-            string unwarpedPath = Console.ReadLine();
-            if (unwarpedPath.Length == 0)
-            {
-                Console.WriteLine("The path and name can not be empty.");
-                return;
-            }
-
-            byte[] readData = File.ReadAllBytes(unwarpedPath);
-            if (readData.Length == 0)
-            {
-                Console.WriteLine("Invalid file. Check please. {0}", unwarpedPath);
-                return;
-            }
-
-            IntPtr unwarpedImagePtr = Marshal.AllocHGlobal(readData.Length);
-            Marshal.Copy(readData, 0, unwarpedImagePtr, readData.Length);
-            UInt32 unwarpedImageLen = (UInt32)readData.Length;
             IntPtr warpedImagePtr = Marshal.AllocHGlobal(BS2Environment.BS2_MAX_WARPED_IMAGE_LENGTH);
             UInt32 warpedImageLen = 0;
 
-            Console.WriteLine("Trying to get warped face image with unwarped.");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetNormalizedImageFaceEx(sdkContext, deviceID, unwarpedImagePtr, unwarpedImageLen, warpedImagePtr, out warpedImageLen);
-            if (BS2ErrorCode.BS_SDK_SUCCESS == result)
+            bool result = getNormalizedImage(sdkContext, deviceID, warpedImagePtr, ref warpedImageLen);
+            if (result)
             {
                 byte[] warpedBuffer = new byte[warpedImageLen];
                 Array.Clear(warpedBuffer, 0, (int)warpedImageLen);
@@ -3475,13 +3448,72 @@ namespace Suprema
 
                 File.WriteAllBytes(warpedPath, warpedBuffer);
             }
-            else
+
+            Marshal.FreeHGlobal(warpedImagePtr);
+        }
+
+        bool getNormalizedImage(IntPtr sdkContext, UInt32 deviceID, IntPtr warpedImagePtr, ref UInt32 warpedImageLen)
+        {
+            bool faceExScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN;
+            if (!faceExScanSupported)
             {
-                Console.WriteLine("Got error({0}).", result);
+                Console.WriteLine("Not supported device");
+                return false;
             }
 
+            Console.WriteLine("Enter the path and name of unwarped face image file.");
+            Console.Write(">> ");
+            string unwarpedPath = Console.ReadLine();
+            if (unwarpedPath.Length == 0)
+            {
+                Console.WriteLine("The path and name can not be empty.");
+                return false;
+            }
+
+            byte[] readData = File.ReadAllBytes(unwarpedPath);
+            if (readData.Length == 0)
+            {
+                Console.WriteLine("Invalid file. Check please. {0}", unwarpedPath);
+                return false;
+            }
+
+            IntPtr unwarpedImagePtr = Marshal.AllocHGlobal(readData.Length);
+            Marshal.Copy(readData, 0, unwarpedImagePtr, readData.Length);
+            UInt32 unwarpedImageLen = (UInt32)readData.Length;
+            //IntPtr warpedImagePtr = Marshal.AllocHGlobal(BS2Environment.BS2_MAX_WARPED_IMAGE_LENGTH);
+            //UInt32 warpedImageLen = 0;
+
+            Console.WriteLine("Trying to get warped face image with unwarped.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetNormalizedImageFaceEx(sdkContext, deviceID, unwarpedImagePtr, unwarpedImageLen, warpedImagePtr, out warpedImageLen);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                Console.WriteLine("Got error({0}).", result);
+
             Marshal.FreeHGlobal(unwarpedImagePtr);
-            Marshal.FreeHGlobal(warpedImagePtr);
+
+            return (BS2ErrorCode.BS_SDK_SUCCESS == result);
+        }
+
+        bool extractTemplate(IntPtr sdkContext, UInt32 deviceID, IntPtr warpedImagePtr, UInt32 warpedImageLen, ref BS2TemplateEx template)
+        {
+            bool faceExScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN;
+            if (!faceExScanSupported)
+            {
+                Console.WriteLine("Not supported device");
+                return false;
+            }
+
+            if (warpedImagePtr == IntPtr.Zero || warpedImageLen == 0)
+            {
+                Console.WriteLine("Invalid image parameter");
+                return false;
+            }
+
+            Console.WriteLine("Trying to get template with face warped image.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_ExtractTemplateFaceEx(sdkContext, deviceID, warpedImagePtr, warpedImageLen, 1, out template);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                Console.WriteLine("Got error({0}).", result);
+
+            return (BS2ErrorCode.BS_SDK_SUCCESS == result);
         }
 
         public void insertFaceExUserDirectly(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -4114,106 +4146,7 @@ namespace Suprema
 	        }
 	        else if (faceExScanSupported)
 	        {
-		        Console.WriteLine("Do you want to scan faceEx? [y/n]");
-		        Console.Write(">> ");
-                if (Util.IsYes())
-		        {
-			        Console.WriteLine("How many faceEx would you like to register?");
-		            Console.Write(">> ");
-			        int numOfFace = Util.GetInput(1);
-			        if (0 < numOfFace)
-			        {
-                        int structSize = Marshal.SizeOf(typeof(BS2FaceExWarped));
-                        BS2FaceExWarped[] faceEx = Util.AllocateStructureArray<BS2FaceExWarped>(1);
-				        userBlob[0].faceExObjs = Marshal.AllocHGlobal(structSize * numOfFace);
-                        IntPtr curFaceExObjs = userBlob[0].faceExObjs;
-                        cbFaceOnReadyToScan = new API.OnReadyToScan(ReadyToScanForFace);
-
-				        for (int index = 0; index < numOfFace;)
-				        {
-					        sdkResult = (BS2ErrorCode)API.BS2_ScanFaceEx(sdkContext, deviceID, faceEx, (byte)BS2FaceEnrollThreshold.THRESHOLD_DEFAULT, cbFaceOnReadyToScan);
-					        if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
-						        Console.WriteLine("BS2_ScanFaceEx call failed: %d", sdkResult);
-					        else
-					        {
-                                Console.WriteLine("Do you want to save warpped image? [y/n]");
-                                Console.Write(">> ");
-                                if (Util.IsYes())
-                                {
-                                    int written = 0;
-                                    int size = (int)faceEx[index].imageLen;
-                                    IntPtr imgPtr = Marshal.AllocHGlobal(size);
-                                    Marshal.Copy(faceEx[index].imageData, 0, imgPtr, size);
-                                    FileStream file = new FileStream(String.Format("{0}-{1}.jpg", userID, index), FileMode.Create, FileAccess.Write);
-                                    WriteFile(file.Handle, imgPtr, (int)faceEx[index].imageLen, out written, IntPtr.Zero);
-                                    file.Close();
-                                    Marshal.FreeHGlobal(imgPtr);
-                                }
-                                userBlob[0].user.numFaces++;
-						        index++;
-                                faceEx[0].faceIndex = (byte)index;
-                                Marshal.StructureToPtr(faceEx[0], curFaceExObjs, false);
-                                curFaceExObjs += structSize;
-
-                                Thread.Sleep(100);
-					        }
-				        }
-
-                        cbFaceOnReadyToScan = null;
-			        }
-		        }
-		        else
-		        {
-			        Console.WriteLine("Do you want to register from image? [y/n]");
-			        Console.Write(">> ");
-			        if (Util.IsYes())
-			        {
-				        Console.WriteLine("Enter the face image path and name:");
-			            Console.Write(">> ");
-				        string imagePath = Console.ReadLine();
-
-                        if (!File.Exists(imagePath))
-                        {
-                            Console.WriteLine("Invalid file path");
-                            return;
-                        }
-
-                        Image faceImage = Image.FromFile(imagePath);
-                        if (!faceImage.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Jpeg))
-                        {
-                            Console.WriteLine("Invalid image file format");
-                            return;
-                        }
-                        
-                        IntPtr imageData = IntPtr.Zero;
-				        UInt32 imageLen = 0;
-                        if (Util.LoadBinary(imagePath, out imageData, out imageLen))
-                        {
-                            if (0 == imageLen)
-                            {
-                                Console.WriteLine("Empty image file");
-                                return;
-                            }
-
-                            int structHeaderSize = Marshal.SizeOf(typeof(BS2FaceExUnwarped));
-                            int totalSize = structHeaderSize + (int)imageLen;
-                            userBlob[0].faceExObjs = Marshal.AllocHGlobal(totalSize);
-                            IntPtr curFaceExObjs = userBlob[0].faceExObjs;
-
-                            BS2FaceExUnwarped unwarped = Util.AllocateStructure<BS2FaceExUnwarped>();
-                            unwarped.flag = 0;
-                            unwarped.imageLen = imageLen;
-
-				            Marshal.StructureToPtr(unwarped, curFaceExObjs, false);
-				            curFaceExObjs += structHeaderSize;
-
-                            Util.CopyMemory(curFaceExObjs, imageData, imageLen);
-
-                            userBlob[0].user.numFaces = 1;
-                            unwarpedMemory = true;
-				        }
-			        }
-		        }
+                sdkResult = getUserBlobFaceExInfo(sdkContext, deviceID, ref userBlob[0].faceExObjs, ref userBlob[0].user.numFaces);
 	        }
 
 	        sdkResult = (BS2ErrorCode)API.BS2_EnrollUserFaceEx(sdkContext, deviceID, userBlob, 1, 1);
@@ -5067,104 +5000,160 @@ namespace Suprema
 
             if (faceExScanSupported)
             {
-                Console.WriteLine("Do you want to scan faceEx? [y/n]");
+                Console.WriteLine("Do you want to extract the template directly and register with this template only? [Y/n]");
                 Console.Write(">> ");
                 if (Util.IsYes())
                 {
-                    Console.WriteLine("How many faceEx would you like to register?");
+                    // Template only
+                    Console.WriteLine("How many images do you want to extract?");
                     Console.Write(">> ");
-                    int numOfFace = Util.GetInput(1);
-                    if (0 < numOfFace)
+                    int numImage = Util.GetInput(1);
+                    BS2TemplateEx[] templates = Util.AllocateStructureArray<BS2TemplateEx>(numImage);
+
+                    for (int idx = 0; idx < numImage; idx++)
                     {
-                        int structSize = Marshal.SizeOf(typeof(BS2FaceExWarped));
-                        BS2FaceExWarped[] faceEx = Util.AllocateStructureArray<BS2FaceExWarped>(1);
-                        faceExObjs = Marshal.AllocHGlobal(structSize * numOfFace);
-                        IntPtr curFaceExObjs = faceExObjs;
-                        cbFaceOnReadyToScan = new API.OnReadyToScan(ReadyToScanForFace);
+                        IntPtr warpedImagePtr = Marshal.AllocHGlobal(BS2Environment.BS2_MAX_WARPED_IMAGE_LENGTH);
+                        UInt32 warpedImageLen = 0;
 
-                        for (int index = 0; index < numOfFace; )
+                        try
                         {
-                            sdkResult = (BS2ErrorCode)API.BS2_ScanFaceEx(sdkContext, deviceID, faceEx, (byte)BS2FaceEnrollThreshold.THRESHOLD_DEFAULT, cbFaceOnReadyToScan);
-                            if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
-                                Console.WriteLine("BS2_ScanFaceEx call failed: %d", sdkResult);
-                            else
-                            {
-#if _SAVE_TO_FILE
-                                Console.WriteLine("Do you want to save warpped image? [y/n]");
-                                Console.Write(">> ");
-                                if (Util.IsYes())
-                                {
-                                    int written = 0;
-                                    int size = (int)faceEx[index].imageLen;
-                                    IntPtr imgPtr = Marshal.AllocHGlobal(size);
-                                    Marshal.Copy(faceEx[index].imageData, 0, imgPtr, size);
-                                    FileStream file = new FileStream(String.Format("{0}-{1}.jpg", userID, index), FileMode.Create, FileAccess.Write);
-                                    WriteFile(file.Handle, imgPtr, (int)faceEx[index].imageLen, out written, IntPtr.Zero);
-                                    file.Close();
-                                    Marshal.FreeHGlobal(imgPtr);
-                                }
-#endif
-                                numFaces++;
-                                index++;
-                                faceEx[0].faceIndex = (byte)index;
-                                Marshal.StructureToPtr(faceEx[0], curFaceExObjs, false);
-                                curFaceExObjs += structSize;
+                            if (!getNormalizedImage(sdkContext, deviceID, warpedImagePtr, ref warpedImageLen))
+                                break;
 
-                                Thread.Sleep(100);
-                            }
+                            if (!extractTemplate(sdkContext, deviceID, warpedImagePtr, warpedImageLen, ref templates[idx]))
+                                break;
+                        }
+                        finally
+                        {
+                            Marshal.FreeHGlobal(warpedImagePtr);
+                        }
+                    }
+
+                    if (0 < numImage && numImage == templates.Length)
+                    {
+                        int structHeaderSize = Marshal.SizeOf(typeof(BS2FaceExTemplateOnly));
+                        int templateSize = Marshal.SizeOf(typeof(BS2TemplateEx));
+                        faceExObjs = Marshal.AllocHGlobal(structHeaderSize + numImage * templateSize);
+
+                        IntPtr curFaceExObjs = faceExObjs;
+
+                        BS2FaceExTemplateOnly templateOnly = Util.AllocateStructure<BS2FaceExTemplateOnly>();
+                        templateOnly.flag = Convert.ToByte(BS2FaceExFlag.TEMPLATE_ONLY);
+                        templateOnly.numOfTemplate = Convert.ToByte(numImage);
+
+                        Marshal.StructureToPtr(templateOnly, curFaceExObjs, false);
+                        curFaceExObjs += structHeaderSize;
+
+                        for (int templateIdx = 0; templateIdx < templates.Length; templateIdx++)
+                        {
+                            Marshal.StructureToPtr(templates[templateIdx], curFaceExObjs, false);
+                            curFaceExObjs += templateSize;
                         }
 
-                        cbFaceOnReadyToScan = null;
+                        numFaces = 1;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Do you want to register from image? [y/n]");
+                    Console.WriteLine("Do you want to scan faceEx? [Y/n]");
                     Console.Write(">> ");
                     if (Util.IsYes())
                     {
-                        Console.WriteLine("Enter the face image path and name:");
+                        Console.WriteLine("How many faceEx would you like to register?");
                         Console.Write(">> ");
-                        string imagePath = Console.ReadLine();
-
-                        if (!File.Exists(imagePath))
+                        int numOfFace = Util.GetInput(1);
+                        if (0 < numOfFace)
                         {
-                            Console.WriteLine("Invalid file path");
-                            return BS2ErrorCode.BS_SDK_ERROR_INVALID_PARAM;
-                        }
+                            int structSize = Marshal.SizeOf(typeof(BS2FaceExWarped));
+                            BS2FaceExWarped[] faceEx = Util.AllocateStructureArray<BS2FaceExWarped>(1);
+                            faceExObjs = Marshal.AllocHGlobal(structSize * numOfFace);
+                            IntPtr curFaceExObjs = faceExObjs;
+                            cbFaceOnReadyToScan = new API.OnReadyToScan(ReadyToScanForFace);
 
-                        Image faceImage = Image.FromFile(imagePath);
-                        if (!faceImage.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Jpeg))
-                        {
-                            Console.WriteLine("Invalid image file format");
-                            return BS2ErrorCode.BS_SDK_ERROR_INVALID_FILE_FORMAT;
-                        }
-
-                        IntPtr imageData = IntPtr.Zero;
-                        UInt32 imageLen = 0;
-                        if (Util.LoadBinary(imagePath, out imageData, out imageLen))
-                        {
-                            if (0 == imageLen)
+                            for (int index = 0; index < numOfFace; )
                             {
-                                Console.WriteLine("Empty image file");
-                                return BS2ErrorCode.BS_SDK_ERROR_EXIST;
+                                sdkResult = (BS2ErrorCode)API.BS2_ScanFaceEx(sdkContext, deviceID, faceEx, (byte)BS2FaceEnrollThreshold.THRESHOLD_DEFAULT, cbFaceOnReadyToScan);
+                                if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+                                    Console.WriteLine("BS2_ScanFaceEx call failed: %d", sdkResult);
+                                else
+                                {
+#if _SAVE_TO_FILE
+                                    Console.WriteLine("Do you want to save warpped image? [y/n]");
+                                    Console.Write(">> ");
+                                    if (Util.IsYes())
+                                    {
+                                        int written = 0;
+                                        int size = (int)faceEx[index].imageLen;
+                                        IntPtr imgPtr = Marshal.AllocHGlobal(size);
+                                        Marshal.Copy(faceEx[index].imageData, 0, imgPtr, size);
+                                        FileStream file = new FileStream(String.Format("{0}-{1}.jpg", userID, index), FileMode.Create, FileAccess.Write);
+                                        WriteFile(file.Handle, imgPtr, (int)faceEx[index].imageLen, out written, IntPtr.Zero);
+                                        file.Close();
+                                        Marshal.FreeHGlobal(imgPtr);
+                                    }
+#endif
+                                    numFaces++;
+                                    index++;
+                                    faceEx[0].faceIndex = (byte)index;
+                                    Marshal.StructureToPtr(faceEx[0], curFaceExObjs, false);
+                                    curFaceExObjs += structSize;
+
+                                    Thread.Sleep(100);
+                                }
                             }
 
-                            int structHeaderSize = Marshal.SizeOf(typeof(BS2FaceExUnwarped));
-                            int totalSize = structHeaderSize + (int)imageLen;
-                            faceExObjs = Marshal.AllocHGlobal(totalSize);
-                            IntPtr curFaceExObjs = faceExObjs;
+                            cbFaceOnReadyToScan = null;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Do you want to register from file image? (Send the image to the device and the device automatically extracts the template.) [Y/n]");
+                        Console.Write(">> ");
+                        if (Util.IsYes())
+                        {
+                            Console.WriteLine("Enter the face image path and name:");
+                            Console.Write(">> ");
+                            string imagePath = Console.ReadLine();
 
-                            BS2FaceExUnwarped unwarped = Util.AllocateStructure<BS2FaceExUnwarped>();
-                            unwarped.flag = 0;
-                            unwarped.imageLen = imageLen;
+                            if (!File.Exists(imagePath))
+                            {
+                                Console.WriteLine("Invalid file path");
+                                return BS2ErrorCode.BS_SDK_ERROR_INVALID_PARAM;
+                            }
 
-                            Marshal.StructureToPtr(unwarped, curFaceExObjs, false);
-                            curFaceExObjs += structHeaderSize;
+                            Image faceImage = Image.FromFile(imagePath);
+                            if (!faceImage.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Jpeg))
+                            {
+                                Console.WriteLine("Invalid image file format");
+                                return BS2ErrorCode.BS_SDK_ERROR_INVALID_FILE_FORMAT;
+                            }
 
-                            Util.CopyMemory(curFaceExObjs, imageData, imageLen);
+                            IntPtr imageData = IntPtr.Zero;
+                            UInt32 imageLen = 0;
+                            if (Util.LoadBinary(imagePath, out imageData, out imageLen))
+                            {
+                                if (0 == imageLen)
+                                {
+                                    Console.WriteLine("Empty image file");
+                                    return BS2ErrorCode.BS_SDK_ERROR_EXIST;
+                                }
 
-                            numFaces = 1;
+                                int structHeaderSize = Marshal.SizeOf(typeof(BS2FaceExUnwarped));
+                                int totalSize = structHeaderSize + (int)imageLen;
+                                faceExObjs = Marshal.AllocHGlobal(totalSize);
+                                IntPtr curFaceExObjs = faceExObjs;
+
+                                BS2FaceExUnwarped unwarped = Util.AllocateStructure<BS2FaceExUnwarped>();
+                                unwarped.flag = Convert.ToByte(BS2FaceExFlag.NONE);
+                                unwarped.imageLen = imageLen;
+
+                                Marshal.StructureToPtr(unwarped, curFaceExObjs, false);
+                                curFaceExObjs += structHeaderSize;
+
+                                Util.CopyMemory(curFaceExObjs, imageData, imageLen);
+
+                                numFaces = 1;
+                            }
                         }
                     }
                 }

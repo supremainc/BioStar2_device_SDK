@@ -112,7 +112,7 @@ namespace Suprema
         public const int BS2_FACE_SEARCH_RANGE_WIDTH_DEFAULT = 432;     // F2
         public const int BS2_FACE_DETECT_DISTANCE_MIN_MIN = 30;         // BS3
         public const int BS2_FACE_DETECT_DISTANCE_MIN_MAX = 100;        // BS3
-        public const int BS2_FACE_DETECT_DISTANCE_MIN_DEFAULT = 60;     // BS3
+        public const int BS2_FACE_DETECT_DISTANCE_MIN_DEFAULT = 30;     // BS3      (60 -> 30)
         public const int BS2_FACE_DETECT_DISTANCE_MAX_MIN = 40;         // BS3
         public const int BS2_FACE_DETECT_DISTANCE_MAX_MAX = 100;        // BS3
         public const int BS2_FACE_DETECT_DISTANCE_MAX_INF = 255;        // BS3
@@ -449,7 +449,8 @@ namespace Suprema
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_TNA_KEY)]
         public byte[] tnaIcon;
         public byte useScreenSaver;         // FS2, F2
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 31)]		// FISSDK-83 memory resizing bug when adding useScreenSaver (32->31)
+        public byte showOsdpResult;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]		// FISSDK-83 memory resizing bug when adding useScreenSaver (32->31)
         public byte[] reserved2;
     }
 
@@ -907,8 +908,8 @@ namespace Suprema
     {
         public UInt32 deviceID;
         public byte type;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public byte[] reserved;
+        public byte reserved;
+        public UInt16 ignoreSignalTime;             // [+ 2.9.6]
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public byte[] triggerUnion; //BS2XXXXTrigger
     }
@@ -1212,7 +1213,9 @@ namespace Suprema
         public byte wideSearch;                 	// [+ 2.8.3]        BS3 support
 
         public byte unused;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 14)]
+
+        public byte unableToSaveImageOfVisualFace;  // [+ 2.9.6]        Save template only
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 13)]
         public byte[] reserved;
     }
 
@@ -2703,6 +2706,16 @@ namespace Suprema
         //public IntPtr image;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]         // + 2.9.6
+    public struct BS2FaceExTemplateOnly
+    {
+        public byte faceIndex;
+        public byte numOfTemplate;
+        public byte flag;
+        public byte reserved;
+        public UInt32 imageLen;
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2UserFaceExBlob
     {
@@ -2964,13 +2977,22 @@ namespace Suprema
 
 	    public byte maxVoipExtensionNumbers;        // [+V2.8.3]
 
-        public byte functionExSupported;            // [+V2.9.1]
+        public byte functionSupported2;             // [+V2.9.1]
         //osdpStandardCentralSupported : 1;
         //enableLicenseFuncSupported : 1;
         //keypadBacklightSupported : 1              // [+V2.9.4]
         //uzWirelessLockDoorSupported : 1
         //customSmartCardSupported : 1
         //tomSupported : 1
+       	//tomEnrollSupported: 1;
+	    //showOsdpResultbyLED: 1;
+
+        public byte functionSupported3;             // [+ 2.9.6]
+  	    //customSmartCardFelicaSupported: 1;
+	    //ignoreInputAfterWiegandOut: 1;
+	    //setSlaveBaudrateSupported: 1;
+
+        public UInt16 visualFaceTemplateVersion;    // [+ 2.9.6]
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 429)]
 	    public byte[] reserved;
