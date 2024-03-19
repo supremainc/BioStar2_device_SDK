@@ -272,9 +272,11 @@ int slaveMenu(void* context, DeviceList& deviceList)
 		case MENU_SLV_SEARCH_DEVICE:
 			sdkResult = Utility::searchAndAddSlave(context, deviceList);
 			break;
+#if _NOT_SUPPORTED
 		case MENU_SLV_SET_BAUDRATE:
 			sdkResult = setSlaveBaudrate(context, deviceList);
 			break;
+#endif
 		case MENU_SLV_UPG_FIRMWARE:
 			if (!selectedOrder)
 			{
@@ -660,6 +662,7 @@ int getFactoryConfigMulti(void* context, const vector<BS2_DEVICE_ID>& devices)
 	return sdkResult;
 }
 
+#if _NOT_SUPPORTED
 int setSlaveBaudrate(void* context, const DeviceList& devices)
 {
 	CommControl cm(context);
@@ -673,6 +676,7 @@ int setSlaveBaudrate(void* context, const DeviceList& devices)
 
 	return cm.setSlaveBaudrate(masterID, slaveID, baudrate);
 }
+#endif
 
 // int getRS485ExConfig(void* context, const vector<BS2_DEVICE_ID>& devices)
 // {

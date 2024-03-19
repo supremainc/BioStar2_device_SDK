@@ -34,7 +34,9 @@ public:
 	// Slave
 	int searchSlaveDevice(BS2_DEVICE_ID id, std::vector<BS2Rs485SlaveDevice>& slaveList);
 	int addSlaveDevice(BS2_DEVICE_ID id, const std::vector<BS2Rs485SlaveDevice>& slaveList);
+#if _NOT_SUPPORTED
 	int setSlaveBaudrate(BS2_DEVICE_ID masterID, BS2_DEVICE_ID slaveID, uint32_t baudrate);
+#endif
 	// Slave (CST)
 	int searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, std::vector<BS2Rs485SlaveDeviceEX>& slaveList);
 	int addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, const std::vector<BS2Rs485SlaveDeviceEX>& slaveList);
