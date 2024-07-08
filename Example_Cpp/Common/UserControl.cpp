@@ -273,6 +273,8 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	BS2UserPhoto& photo = userBlob.user_photo;
 	stringstream msg;
 
+	user.flag = BS2_USER_FLAG_CREATED;
+
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
@@ -325,9 +327,6 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserUpdate(user)))
-		return sdkResult;
-
 	user.numFingers = 0;
 	user.numCards = 0;
 	user.numFaces = 0;
@@ -341,7 +340,9 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob.faceObjs, user.numFaces, id, deviceInfoEx)))
 		return sdkResult;
 
-	sdkResult = BS2_EnrolUser(context_, id, &userBlob, 1, 1);
+	uint8_t overwrite = Utility::isYes("Do you want to overwrite the user if it exist?") ? 1 : 0;
+
+	sdkResult = BS2_EnrolUser(context_, id, &userBlob, 1, overwrite);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_EnrolUser call failed: %d", sdkResult);
 
@@ -377,6 +378,8 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 	BS2UserSetting& setting = userBlob.setting;
 	stringstream msg;
 
+	user.flag = BS2_USER_FLAG_CREATED;
+
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
@@ -407,9 +410,6 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserUpdate(user)))
-		return sdkResult;
-
 	user.numFingers = 0;
 	user.numCards = 0;
 	user.numFaces = 0;
@@ -423,7 +423,9 @@ int UserControl::enrollUserSmall(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfo(&userBlob.faceObjs, user.numFaces, id, deviceInfoEx)))
 		return sdkResult;
 
-	sdkResult = BS2_EnrollUserSmall(context_, id, &userBlob, 1, 1);
+	uint8_t overwrite = Utility::isYes("Do you want to overwrite the user if it exist?") ? 1 : 0;
+
+	sdkResult = BS2_EnrollUserSmall(context_, id, &userBlob, 1, overwrite);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_EnrollUserSmall call failed: %d", sdkResult);
 
@@ -564,6 +566,8 @@ int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 	userBlob->user_photo_obj = NULL;
 	stringstream msg;
 
+	user.flag = BS2_USER_FLAG_CREATED;
+
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
@@ -600,9 +604,6 @@ int UserControl::makeUserFaceEx(BS2_DEVICE_ID id, BS2UserFaceExBlob* userBlob)
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
-		return sdkResult;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserUpdate(user)))
 		return sdkResult;
 
 	user.numFingers = 0;
@@ -647,6 +648,8 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 	userBlob->user_photo_obj = NULL;
 	stringstream msg;
 
+	user.flag = BS2_USER_FLAG_CREATED;
+
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
@@ -683,9 +686,6 @@ int UserControl::makeUserFaceExWithImage(BS2_DEVICE_ID id, const BS2TemplateEx& 
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
-		return sdkResult;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserUpdate(user)))
 		return sdkResult;
 
 	user.numFingers = 0;
@@ -732,6 +732,8 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 	userBlob.user_photo_obj = NULL;
 	stringstream msg;
 
+	user.flag = BS2_USER_FLAG_CREATED;
+
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
@@ -768,9 +770,6 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 		return sdkResult;
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
-		return sdkResult;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserUpdate(user)))
 		return sdkResult;
 
 	user.numFingers = 0;
@@ -827,7 +826,9 @@ int UserControl::enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card, BS2Fingerp
 		}
 	}
 
-	sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
+	uint8_t overwrite = Utility::isYes("Do you want to overwrite the user if it exist?") ? 1 : 0;
+
+	sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, overwrite);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
 
@@ -871,6 +872,8 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	userBlob.user_photo_obj = NULL;
 	stringstream msg;
 
+	user.flag = BS2_USER_FLAG_CREATED;
+
 	setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
 	setting.cardAuthMode = BS2_AUTH_MODE_NONE;
 	setting.idAuthMode = BS2_AUTH_MODE_NONE;
@@ -909,9 +912,6 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceAuthGroupID(user)))
 		return sdkResult;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobUserUpdate(user)))
-		return sdkResult;
-
 	user.numFingers = 0;
 	user.numCards = 0;
 	user.numFaces = 0;
@@ -925,7 +925,9 @@ int UserControl::enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id)
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfoEx(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
 		return sdkResult;
 
-	sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
+	uint8_t overwrite = Utility::isYes("Do you want to overwrite the user if it exist?") ? 1 : 0;
+
+	sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, overwrite);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
 
@@ -1736,14 +1738,6 @@ int UserControl::getUserBlobFaceAuthGroupID(BS2User& user)
 	msg << "This is used for face authentication. [0: Not using]";
 	uint32_t authGroupID = Utility::getInput<uint32_t>(msg.str());
 	user.authGroupID = authGroupID;
-
-	return BS_SDK_SUCCESS;
-}
-
-int UserControl::getUserBlobUserUpdate(BS2User& user)
-{
-	bool flag = Utility::isYes("Do you want to overwrite the user if it exist?");
-	user.flag = flag ? BS2_USER_FLAG_CREATED | BS2_USER_FLAG_UPDATED : BS2_USER_FLAG_CREATED;
 
 	return BS_SDK_SUCCESS;
 }
@@ -2603,7 +2597,9 @@ int UserControl::enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	int sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
+	uint8_t overwrite = Utility::isYes("Do you want to overwrite the user if it exist?") ? 1 : 0;
+
+	int sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, overwrite);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
 
@@ -2629,6 +2625,7 @@ int UserControl::enrollUserFaceEx_WithImage_1User(BS2_DEVICE_ID id)
 #else
 	uint32_t numOfUser = Utility::getInput<uint32_t>("How many users would you like to create:");
 #endif
+	uint8_t overwrite = Utility::isYes("Do you want to overwrite the user if it exist?") ? 1 : 0;
 
 	uint32_t uid = 1;
 	string name = "test";
@@ -2722,7 +2719,7 @@ int UserControl::enrollUserFaceEx_WithImage_1User(BS2_DEVICE_ID id)
 			}
 		}
 
-		sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, 1);
+		sdkResult = BS2_EnrollUserFaceEx(context_, id, &userBlob, 1, overwrite);
 		if (BS_SDK_SUCCESS != sdkResult)
 			TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
 
@@ -2752,6 +2749,7 @@ int UserControl::enrollUserFaceEx_WithImage_Multi(BS2_DEVICE_ID id)
 #else
 	uint32_t numOfUser = Utility::getInput<uint32_t>("How many users would you like to create:");
 #endif
+	uint8_t overwrite = Utility::isYes("Do you want to overwrite the user if it exist?") ? 1 : 0;
 
 	int sdkResult = BS_SDK_SUCCESS;
 
@@ -2842,7 +2840,7 @@ int UserControl::enrollUserFaceEx_WithImage_Multi(BS2_DEVICE_ID id)
 			}
 		}
 
-		sdkResult = BS2_EnrollUserFaceEx(context_, id, userBlob, numOfUser, 1);
+		sdkResult = BS2_EnrollUserFaceEx(context_, id, userBlob, numOfUser, overwrite);
 		if (BS_SDK_SUCCESS != sdkResult)
 			TRACE("BS2_EnrollUserFaceEx call failed: %d", sdkResult);
 
