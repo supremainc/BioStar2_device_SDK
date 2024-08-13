@@ -4036,7 +4036,7 @@ namespace Suprema
                     {
                         int structSize = Marshal.SizeOf(typeof(BS2CSNCard));
                         BS2Card card = Util.AllocateStructure<BS2Card>();
-			            userBlob[0].cardObjs = Marshal.AllocHGlobal(structSize + numOfCard);
+			            userBlob[0].cardObjs = Marshal.AllocHGlobal(structSize * numOfCard);
                         IntPtr curCardObjs = userBlob[0].cardObjs;
                         cbCardOnReadyToScan = new API.OnReadyToScan(ReadyToScanForCard);
 
@@ -4867,7 +4867,7 @@ namespace Suprema
                     {
                         int structSize = Marshal.SizeOf(typeof(BS2CSNCard));
                         BS2Card card = Util.AllocateStructure<BS2Card>();
-                        cardObjs = Marshal.AllocHGlobal(structSize + numOfCard);
+                        cardObjs = Marshal.AllocHGlobal(structSize * numOfCard);
                         IntPtr curCardObjs = cardObjs;
                         cbCardOnReadyToScan = new API.OnReadyToScan(ReadyToScanForCard);
 
