@@ -22,6 +22,17 @@ enum {
 	BS2_EXT_VOIP_VOLUME_DEFAULT = 50,
 };
 
+enum {
+	VOIP_TRANSPORT_UDP = 0,
+	VOIP_TRANSPORT_TCP = 1,
+	VOIP_TRANSPORT_TLS = 2,
+};
+
+enum {
+	VOIP_RESOLUTION_TYPE_1 = 0,	// BS3:360x640
+	VOIP_RESOLUTION_TYPE_2 = 1,	// BS3:720x480
+};
+
 typedef struct {
 	BS2_USER_ID phoneNumber;
     char description[BS2_EXT_VOIP_MAX_DESCRIPTION_LEN];
@@ -60,7 +71,9 @@ typedef struct {
 
 	BS2ExtensionNumber phonebook[BS2_EXT_VOIP_MAX_EXTENSION_NUMBER];
 
-	uint8_t reserved2[32];		///< 32 bytes (reserved)
+	uint8_t resolution;
+	uint8_t transport;
+	uint8_t reserved2[30];		///< 30 bytes (reserved)
 } BS2VoipConfigExt;
 
 #endif /* BS2VOIPCONFIG_EXT_H_ */

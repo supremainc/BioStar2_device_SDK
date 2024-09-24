@@ -820,6 +820,10 @@ void ConfigControl::print(const BS2DisplayConfig& config)
 		TRACE("tnaIcon[%d]:%d", idx, config.tnaIcon[idx]);
 	TRACE("useScreenSaver:%u", config.useScreenSaver);
 	TRACE("showOsdpResult:%u", config.showOsdpResult);
+
+	TRACE("authMsgUserId:%u", config.authMsgUserId);
+	TRACE("authMsgUserName:%u", config.authMsgUserName);
+	TRACE("scrambleKeyboardMode:%u", config.scrambleKeyboardMode);
 }
 
 void ConfigControl::print(const BS2IpConfig& config)
@@ -1044,7 +1048,12 @@ void ConfigControl::print(const BS2EventConfig& config)
 void ConfigControl::print(const BS2InputConfig& config)
 {
 	TRACE("==[BS2InputConfig]==");
-	TRACE("+--distance : %u", config.numInputs);
+	TRACE("+--numInputs : %u", config.numInputs);
+	TRACE("+--Aux");
+	TRACE("   |--Aux index of Tamper : %s", config.aux.field.tamperAuxIndex == BS2_INPUT_AUX0 ? "Aux0" : "Aux1");
+	TRACE("   |--Aux index of ACFail : %s", config.aux.field.acFailAuxIndex == BS2_INPUT_AUX0 ? "Aux0" : "Aux1");
+	TRACE("   |--Aux0 Type : %s", config.aux.field.aux0Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+	TRACE("   |--Aux1 Type : %s", config.aux.field.aux1Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
 	TRACE("|--numSupervised : %u", config.numSupervised);
 
 	for (uint8_t idx = 0; idx < config.numSupervised; idx++)
@@ -1447,29 +1456,30 @@ void ConfigControl::print(const BS2VoipConfigExt& config)
 {
 	TRACE("==[BS2VoipConfigExt]==");
 	TRACE("+--enabled : %u", config.enabled);
-	TRACE("+--useOutboundProxy : %u", config.useOutboundProxy);
 	TRACE("+--registrationDuration : %u", config.registrationDuration);
 	TRACE("+--address : %s", config.address);
+	TRACE("+--transport : %u", config.transport);
 	TRACE("+--port : %u", config.port);
 	TRACE("+--speaker : %u", config.volume.speaker);
 	TRACE("+--mic : %u", config.volume.mic);
 	TRACE("+--id : %s", config.id);
 	TRACE("+--password : %s", config.password);
 	TRACE("+--authorizationCode : %s", config.authorizationCode);
-	TRACE("+--outboundProxy");
-	TRACE("   +--address : %s", config.outboundProxy.address);
-	TRACE("   +--port : %u", config.outboundProxy.port);
+	TRACE("+--useOutboundProxy : %u", config.useOutboundProxy);
+	if (config.useOutboundProxy) {
+		TRACE("+--outboundProxy");
+		TRACE("   +--address : %s", config.outboundProxy.address);
+		TRACE("   +--port : %u", config.outboundProxy.port);
+	}
 	TRACE("+--exitButton : %c", config.exitButton);
-	TRACE("+--numPhoneBook : %u", config.numPhoneBook);
 	TRACE("+--showExtensionNumber : %u", config.showExtensionNumber);
-	//if (config.showExtensionNumber)
-	//{
-		for (int idx = 0; idx < config.numPhoneBook; idx++)
-		{
-			TRACE("+--phonebook[%d]", idx);
-			printExtPhoneNumber(config.phonebook[idx]);
-		}
-	//}
+	TRACE("+--numPhoneBook : %u", config.numPhoneBook);
+	for (int idx = 0; idx < config.numPhoneBook; idx++)
+	{
+		TRACE("+--phonebook[%d]", idx);
+		printExtPhoneNumber(config.phonebook[idx]);
+	}
+	TRACE("+--resolution : %u", config.resolution);
 }
 
 void ConfigControl::print(const BS2RtspConfig& config)
@@ -1480,6 +1490,7 @@ void ConfigControl::print(const BS2RtspConfig& config)
 	TRACE("+--address : %s", config.address);
 	TRACE("+--port : %u", config.port);
 	TRACE("+--enabled : %u", config.enabled);
+	TRACE("+--resolution : %u", config.resolution);
 }
 
 void ConfigControl::print(const BS2License& license)

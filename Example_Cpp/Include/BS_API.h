@@ -850,6 +850,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RunAction(void* context, BS2_DEVICE_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice** slaveDeviceObj, uint32_t* slaveDeviceCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice* slaveDevices, uint32_t slaveDeviceCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveSlaveDevice(void* context, BS2_DEVICE_ID deviceId);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSlaveBaudrate(void* context, BS2_DEVICE_ID deviceId, BS2_DEVICE_ID slaveDeviceId, uint32_t baudrate);
 
 // Server Matching api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetServerMatchingHandler(void* context, OnVerifyUser ptrVerifyUser, OnIdentifyUser ptrIdentifyUser);

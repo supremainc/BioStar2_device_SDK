@@ -162,7 +162,6 @@ int CommControl::addSlaveDevice(BS2_DEVICE_ID id, const vector<BS2Rs485SlaveDevi
 	return sdkResult;
 }
 
-#if _NOT_SUPPORTED
 int CommControl::setSlaveBaudrate(BS2_DEVICE_ID masterID, BS2_DEVICE_ID slaveID, uint32_t baudrate)
 {
 	int sdkResult = BS2_SetSlaveBaudrate(context_, masterID, slaveID, baudrate);
@@ -173,7 +172,6 @@ int CommControl::setSlaveBaudrate(BS2_DEVICE_ID masterID, BS2_DEVICE_ID slaveID,
 
 	return sdkResult;
 }
-#endif
 
 int CommControl::searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, vector<BS2Rs485SlaveDeviceEX>& slaveList)
 {

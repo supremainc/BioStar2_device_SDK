@@ -65,9 +65,7 @@ std::vector<MENU_ITEM> menuInfoSlave =
 	{MENU_SLV_GET_CONFIG_RS485EX,	"Connected status (of slave devices)"},
 	{MENU_SEPARATOR,				""},
 	{MENU_SLV_SEARCH_DEVICE,		"Discover and add (slave devices)"},
-#if _NOT_SUPPORTED
 	{MENU_SLV_SET_BAUDRATE,			"Set slave baudrate"},
-#endif
 	{MENU_SEPARATOR,				""},
 	{MENU_SLV_UPG_FIRMWARE,			"Upgrade firmware"},
 	{MENU_SEPARATOR,				""},
@@ -297,9 +295,7 @@ int getSocketSSLRetryCount(void* context);
 int setSocketSSLRetryCount(void* context);
 int getFactoryConfig(void* context, BS2_DEVICE_ID id);
 int getFactoryConfigMulti(void* context, const std::vector<BS2_DEVICE_ID>& devices);
-#if _NOT_SUPPORTED
 int setSlaveBaudrate(void* context, const DeviceList& devices);
-#endif
 int getStatusConfig(void* context, BS2_DEVICE_ID id);
 int getStatusConfigMulti(void* context, const std::vector<BS2_DEVICE_ID>& devices);
 int setStatusConfig(void* context, BS2_DEVICE_ID id);

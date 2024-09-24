@@ -17,6 +17,12 @@ enum {
 	RTSP_PORT_DEFAULT = 554,		// BDP-568
 };
 
+enum {
+	RTSP_RESOLUTION_DEFAULT = 0,
+	RTSP_RESOLUTION_TYPE_1 = 0, //BS3, W3: 180x320
+	RTSP_RESOLUTION_TYPE_2 = 1, //BS3, W3: 720x48
+};
+
 /**
  *	BS2RtspConfig
  */
@@ -30,7 +36,8 @@ typedef struct {
 	BS2_BOOL enabled;
 	uint8_t reserved;				///< 1 byte (packing)
 
-	uint8_t reserved2[32];			///< 32 bytes (reserved)
+	uint8_t resolution;
+	uint8_t reserved2[31];			///< 31 bytes (reserved)
 } BS2RtspConfig;
 
 #endif /* _BS2_RTSP_CONFIG_H_ */

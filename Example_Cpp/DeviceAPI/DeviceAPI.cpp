@@ -659,6 +659,15 @@ int setDisplayConfig(void* context, const DeviceInfo& device)
 	msg = "Display authentication result from Controller.";
 	config.showOsdpResult = Utility::isYes(msg) ? BS2_SHOW_OSDP_RESULT_ON : BS2_SHOW_OSDP_RESULT_OFF;
 
+	msg = "Display User name in Auth result message? (0: All, 1: Partial, 2: No)";
+	config.authMsgUserName = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Display User ID in Auth result message? (0: All, 1: Partial, 2: No)";
+	config.authMsgUserId = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Would you like to use scramble keyboard mode for pin input (0:scramble 1:non-scramble)?";
+	config.scrambleKeyboardMode = (uint8_t)Utility::getInput<uint32_t>(msg);
+
 	return cc.setDisplayConfig(id, config);
 }
 
@@ -1057,7 +1066,7 @@ int setFaceConfigEx(void* context, const DeviceInfo& device)
 	msg = "Insert thermal check mode. (0: Not use, 1: Hard, 2: Soft)";
 	config.thermalCheckMode = (BS2_FACE_CHECK_MODE)Utility::getInput<uint32_t>(msg);
 
-	msg = "Insert mask check mode. (0: Not use, 1: Hard, 2: Soft)";
+	msg = "Insert mask check mode. (0: Not use, 1: Hard, 2: Soft 3: DenyMask)";
 	config.maskCheckMode = (BS2_FACE_CHECK_MODE)Utility::getInput<uint32_t>(msg);
 
 	msg = "Insert thermal format. (0: Fahrenheit, 1: Celsius)";
@@ -2354,9 +2363,6 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 	{
 		config.enabled = true;
 
-		msg = "Do you want to use Outbound proxy?";
-		config.useOutboundProxy = (BS2_BOOL)Utility::isYes(msg);
-
 		msg = "Enter the interval in seconds to update the information on the SIP server. (60~600)";
 		config.registrationDuration = (uint16_t)Utility::getInput<uint32_t>(msg);
 
@@ -2389,13 +2395,18 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 		memset(config.authorizationCode, 0x0, BS2_USER_ID_SIZE);
 		memcpy(config.authorizationCode, authCode.c_str(), authCode.size());
 
-		msg = "Enter the address of the Outbound proxy server.";
-		string proxyAddr = Utility::getInput<string>(msg);
-		memset(config.outboundProxy.address, 0x0, BS2_URL_SIZE);
-		memcpy(config.outboundProxy.address, proxyAddr.c_str(), proxyAddr.size());
+		msg = "Do you want to use Outbound proxy?";
+		config.useOutboundProxy = (BS2_BOOL)Utility::isYes(msg);
 
-		msg = "Enter the port of the Outbound proxy server.";
-		config.outboundProxy.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+		if (config.useOutboundProxy) {
+			msg = "Enter the address of the Outbound proxy server.";
+			string proxyAddr = Utility::getInput<string>(msg);
+			memset(config.outboundProxy.address, 0x0, BS2_URL_SIZE);
+			memcpy(config.outboundProxy.address, proxyAddr.c_str(), proxyAddr.size());
+
+			msg = "Enter the port of the Outbound proxy server.";
+			config.outboundProxy.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+		}
 
 		msg = "Select the button symbol to be used as the exit button. (*, #, 0 ~ 9)";
 		config.exitButton = (uint8_t)Utility::getInput<char>(msg);
@@ -2406,19 +2417,27 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 		msg = "How many extension numbers would you like to register? (MAX: 128)";
 		config.numPhoneBook = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-		memset(config.phonebook, 0x0, sizeof(config.phonebook));
-		for (uint8_t idx = 0; idx < config.numPhoneBook; idx++)
-		{
-			ostringstream msgStrm;
-			msgStrm << "Enter the extension phone number #" << idx;
-			string phoneNum = Utility::getInput<string>(msgStrm.str());
-			memcpy(config.phonebook[idx].phoneNumber, phoneNum.c_str(), phoneNum.size());
+		if (config.numPhoneBook) {
+			memset(config.phonebook, 0x0, sizeof(config.phonebook));
+			for (uint8_t idx = 0; idx < config.numPhoneBook; idx++)
+			{
+				ostringstream msgStrm;
+				msgStrm << "Enter the extension phone number #" << static_cast<int>(idx);
+				string phoneNum = Utility::getInput<string>(msgStrm.str());
+				memcpy(config.phonebook[idx].phoneNumber, phoneNum.c_str(), phoneNum.size());
 
-			msgStrm.str("");
-			msgStrm << "Enter the extension phone number #" << idx << " description";
-			string phoneDesc = Utility::getInput<string>(msgStrm.str());
-			memcpy(config.phonebook[idx].description, phoneDesc.c_str(), phoneDesc.size());
+				msgStrm.str("");
+				msgStrm << "Enter the extension phone number #" << static_cast<int>(idx) << " description";
+				string phoneDesc = Utility::getInput<string>(msgStrm.str());
+				memcpy(config.phonebook[idx].description, phoneDesc.c_str(), phoneDesc.size());
+			}
 		}
+
+		msg = "Select video resolution (0:360x640, 1: 720x480, default:0)";
+		config.resolution = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+
+		msg = "Select the transport (0:UDP, 1:TCP, 2:TLS, default:0)";
+		config.transport = (BS2_PORT)Utility::getInput<uint32_t>(msg);
 	}
 	else
 	{
@@ -2466,13 +2485,17 @@ int setRtspConfig(void* context, const DeviceInfo& device)
 		memset(config.password, 0x0, BS2_USER_ID_SIZE);
 		memcpy(config.password, pw.c_str(), pw.size());
 
+		/* No need to set address which is updated by the device.
 		msg = "Enter the address of the RTSP server.";
 		string addr = Utility::getInput<string>(msg);
 		memset(config.address, 0x0, BS2_URL_SIZE);
-		memcpy(config.address, addr.c_str(), addr.size());
+		memcpy(config.address, addr.c_str(), addr.size());*/
 
 		msg = "Enter the port of the RTSP server. (default: 554)";
 		config.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+
+		msg = "Select video resolution (0:180x320, 1:720x480, default:0)";
+		config.resolution = (BS2_PORT)Utility::getInput<uint32_t>(msg);
 	}
 	else
 	{
