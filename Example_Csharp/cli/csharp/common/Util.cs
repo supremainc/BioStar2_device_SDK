@@ -297,6 +297,21 @@ namespace Suprema
             } while (true);
         }
 
+        public static T GetInputToNumeric<T>(T defaultValue)
+        {
+            string inputStr = Console.ReadLine();
+  
+            try
+            {
+                T convertedValue = (T)Convert.ChangeType(inputStr, typeof(T));
+                return convertedValue;
+            }
+            catch (Exception)
+            {
+                return defaultValue;
+            }
+        }
+
         public static UInt32 GetInputHexa()
         {
             do
@@ -907,6 +922,18 @@ namespace Suprema
             }
 
             return ipAddrs;
+        }
+
+        public static string GetStringUTF8(byte[] byteArray)
+        {
+            string str = Encoding.UTF8.GetString(byteArray);
+            int nullIdx = str.IndexOf('\0');
+            if (nullIdx == -1)
+            {
+                str += '\0';
+                nullIdx = str.Length - 1;
+            }
+            return str.Substring(0, nullIdx);
         }
 
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]

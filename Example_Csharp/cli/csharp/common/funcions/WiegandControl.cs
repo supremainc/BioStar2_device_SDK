@@ -40,7 +40,7 @@ namespace Suprema
             {
                 for (int idx = 0; idx < numWiegandDevice; ++idx)
                 {
-                    UInt32 wiegandDeviceID = Convert.ToUInt32(Marshal.ReadInt32(wiegandDeviceObj, (int)idx * sizeof(UInt32)));
+                    UInt32 wiegandDeviceID = unchecked((UInt32)Marshal.ReadInt32(wiegandDeviceObj, (int)idx * sizeof(UInt32)));
                     Console.WriteLine(">>>> WiegandDevice id[{0, 10}]", wiegandDeviceID);
                 }
 
@@ -68,7 +68,7 @@ namespace Suprema
             {
                 for (int idx = 0; idx < numWiegandDevice; ++idx)
                 {
-                    UInt32 wiegandDeviceID = Convert.ToUInt32(Marshal.ReadInt32(wiegandDeviceObj, (int)idx * sizeof(UInt32)));
+                    UInt32 wiegandDeviceID = unchecked((UInt32)Marshal.ReadInt32(wiegandDeviceObj, (int)idx * sizeof(UInt32)));
                     Console.WriteLine(">>>> WiegandDevice id[{0, 10}]", wiegandDeviceID);
                 }
 

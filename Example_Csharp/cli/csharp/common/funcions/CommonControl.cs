@@ -1247,8 +1247,15 @@ namespace Suprema
             Console.WriteLine("     |--customSmartCardFelicaSupported : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_CUSTOMSMARTCARDFELICA));
             Console.WriteLine("     |--ignoreInputAfterWiegandOut : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_IGNOREINPUTAFTERWIEGANDOUT));
             Console.WriteLine("     |--setSlaveBaudrateSupported : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_SETSLAVEBAUDRATE));
+            Console.WriteLine("     |--rtspResolutionChangeSupported : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_RTSP_RESOLUTIONCHANGE));
+            Console.WriteLine("     |--voipResolutionChangeSupported : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_VOIP_RESOLUTIONCHANGE));
+            Console.WriteLine("     |--voipTransportChangeSupported : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_VOIP_TRANSPORTCHANGE));
+            Console.WriteLine("     |--authMsgUsrInfoSupported : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_AUTHMSG_USERINFO));
+            Console.WriteLine("     |--scrambleKeyboardModeSupported : {0}", Convert.ToBoolean(info.functionSupported3 & (byte)BS2CapabilityFunctionSupport3.FUNCTION3_SUPPORT_SCRAMBLEKEYBOARDMODE));
 
             Console.WriteLine("     |--visualFaceTemplateVersion : {0}", info.visualFaceTemplateVersion);
+
+            Console.WriteLine("     |--authDenyMaskSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_AUTHDENYMASK));
         }
 
         public static void print(ref BS2DesFireCardConfigEx config)

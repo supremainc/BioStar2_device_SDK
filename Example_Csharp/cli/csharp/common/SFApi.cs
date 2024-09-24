@@ -731,6 +731,9 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetSlaveDevice(IntPtr context, UInt32 deviceId, IntPtr slaveDeviceObj, UInt32 slaveDeviceCount);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetSlaveBaudrate(IntPtr context, UInt32 deviceId, UInt32 slaveId, UInt32 baudrate);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Server Matching API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetServerMatchingHandler(IntPtr context, OnVerifyUser cbOnVerifyUser, OnIdentifyUser cbOnIdentifyUser);

@@ -27,6 +27,7 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get slave device", getSlaveDevice));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slave device", setSlaveDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slave baudrate", setSlaveBaudrate));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
 
@@ -676,6 +677,35 @@ namespace Suprema
             else
             {
                 Console.WriteLine(">>> There is no slave device in the device.");
+            }
+        }
+        public void setSlaveBaudrate(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            List<UInt32> slaveDeviceList = new List<UInt32>();
+
+            Console.WriteLine("What slave device will the baudrate be set to?");
+            foreach (var slave in searchedSlave)
+            {
+                Console.WriteLine("    {0} ({1})", slave.Item1, slave.Item2);
+            }
+            Console.Write(">> ");
+            UInt32 slaveID = Util.GetInput((UInt32)0);
+            if (0 == slaveID)
+                return;
+
+            Console.WriteLine("Please select a baudrate. (9600, 19200, 38400, 57600, 115200)");
+            Console.Write(">> ");
+            UInt32 baudrate = Util.GetInput((UInt32)9600);
+
+            Console.WriteLine("Trying to set slave baudrate.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetSlaveBaudrate(sdkContext, deviceID, slaveID, baudrate);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                Console.WriteLine("Set success.", result);
             }
         }
 

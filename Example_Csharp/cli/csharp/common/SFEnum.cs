@@ -211,6 +211,7 @@ namespace Suprema
         BS_SDK_ERROR_CANNOT_SCAN_FACE                       = -908,
         BS_SDK_ERROR_SLAVE_FULL                             = -910,
         BS_SDK_ERROR_CANNOT_ADD_DEVICE                      = -911,
+        BS_SDK_ERROR_SLAVE_NOT_READY                        = -912,     // SetSlaveBaudrate
 
         //Door errors
         BS_SDK_ERROR_CANNOT_FIND_DOOR                       = -1000,
@@ -1983,6 +1984,17 @@ namespace Suprema
         FUNCTION3_SUPPORT_CUSTOMSMARTCARDFELICA         = 0x01,  // [V2.9.6]
         FUNCTION3_SUPPORT_IGNOREINPUTAFTERWIEGANDOUT    = 0x02,  // [V2.9.6]
         FUNCTION3_SUPPORT_SETSLAVEBAUDRATE              = 0x04,  // [V2.9.6]
+        FUNCTION3_SUPPORT_RTSP_RESOLUTIONCHANGE         = 0x08,  // [V2.9.8]
+        FUNCTION3_SUPPORT_VOIP_RESOLUTIONCHANGE         = 0x10,  // [V2.9.8]
+        FUNCTION3_SUPPORT_VOIP_TRANSPORTCHANGE          = 0x20,  // [V2.9.8]
+        FUNCTION3_SUPPORT_AUTHMSG_USERINFO              = 0x40,  // [V2.9.8]
+        FUNCTION3_SUPPORT_SCRAMBLEKEYBOARDMODE          = 0x80,  // [V2.9.8]
+    }
+
+    [Flags]
+    public enum BS2CapabilityFunctionSupport4
+    {
+        FUNCTION4_SUPPORT_AUTHDENYMASK                = 0x01,  // [V2.9.8]
     }
 
     [Flags]

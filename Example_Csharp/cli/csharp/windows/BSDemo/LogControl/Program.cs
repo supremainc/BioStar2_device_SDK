@@ -7,8 +7,13 @@ namespace BSDemo
     {
         private LogControl lc = new LogControl();
 
-        protected override void runImpl(UInt32 deviceID)
+        Program()
         {
+            setConnectionCb(lc.onConnection, lc.onDisconnection);
+        }
+
+        protected override void runImpl(UInt32 deviceID)
+        {           
             lc.execute(sdkContext, deviceID, true);
         }
 

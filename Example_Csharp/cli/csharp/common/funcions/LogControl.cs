@@ -15,6 +15,33 @@ namespace Suprema
         private API.OnLogReceived cbOnLogReceived = null; //To prevent garbage collection
         private API.OnLogReceivedEx cbOnLogReceivedEx = null;
 
+        bool mAutoLogMonitoring = true;
+
+        public void onConnection(IntPtr sdkContext, UInt32 deviceID)
+        {
+            Console.WriteLine("[LogControl-CB] Device[{0, 10}] has been connected.", deviceID);
+            if (mAutoLogMonitoring)
+            {
+                BS2ErrorCode result;
+
+                cbOnLogReceived = new API.OnLogReceived(RealtimeLogReceived);
+                Console.WriteLine("Trying to activate log monitoring.");
+                result = (BS2ErrorCode)API.BS2_StartMonitoringLog(sdkContext, deviceID, cbOnLogReceived);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                }
+                else
+                {
+                    Console.WriteLine("log monitoring activated!");
+                }
+            }
+        }
+        public void onDisconnection(IntPtr sdkContext, UInt32 deviceID)
+        {
+            Console.WriteLine("[LogControl-CB] Device[{0, 10}] has been disconnected.", deviceID);
+        }
+
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> functionList = new List<KeyValuePair<string, Action<IntPtr, uint, bool>>>();
@@ -23,7 +50,7 @@ namespace Suprema
             {
                 Console.WriteLine("Not supported in slave device.");
                 return functionList;
-            }
+            }            
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get log", getLog));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Clear log", clearLog));
@@ -109,6 +136,13 @@ namespace Suprema
             {
                 monitoringLogEx(sdkContext, deviceID, isMasterDevice);
                 return;
+            }
+
+            mAutoLogMonitoring = true;
+            Console.WriteLine("Do you want to disable auto log monitoring? [y/n]");            
+            if (Util.IsYes())
+            {
+                mAutoLogMonitoring = false;
             }
 
             cbOnLogReceivedEx = null;

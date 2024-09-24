@@ -20,11 +20,18 @@ namespace Suprema
         private readonly object locker = new object();
         private EventWaitHandle eventWaitHandle = new AutoResetEvent(false);
         private Queue<UInt32> deviceIDQueue = new Queue<UInt32>();
-
+        private static string m_ip;
+        private static UInt16 m_port = (UInt16)BS2Environment.BS2_TCP_DEVICE_PORT_DEFAULT;
         public ReconnectionTask(IntPtr sdkContext)
         {
             this.sdkContext = sdkContext;
             thread = new Thread(run);
+        }
+
+        public static void setIpPort(string ip, UInt16 port)
+        {
+            m_ip = ip;
+            m_port = port;
         }
 
         public void enqueue(UInt32 deviceID)
@@ -100,42 +107,24 @@ namespace Suprema
 
                 if (deviceID != 0)
                 {
-                    Console.WriteLine("trying to reconnect Device[{0, 10}].", deviceID);
-                   
-                    /*
+                    Console.WriteLine("trying to reconnect DeviceID[{0, 10}] IP:[{1}]port:[{2}].", deviceID, m_ip, m_port);
+
                     BS2ErrorCode result = new BS2ErrorCode();
+                    IntPtr ptrIPAddr = Marshal.StringToHGlobalAnsi(m_ip);
                     while (result != BS2ErrorCode.BS_SDK_SUCCESS)
                     {
-                        //result = (BS2ErrorCode)API.BS2_DisconnectDevice(sdkContext, deviceID);
-                        result = (BS2ErrorCode)API.BS2_ConnectDevice(sdkContext, deviceID);
-                        if (result != BS2ErrorCode.BS_SDK_ERROR_CANNOT_CONNECT_SOCKET)
+                        result = (BS2ErrorCode)API.BS2_ConnectDeviceViaIP(sdkContext, ptrIPAddr, m_port, out deviceID);
+
+                        if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                         {
                             Console.WriteLine("Can't connect to device(errorCode : {0}).", result);
                         }
-                        else
-                        {
-                            enqueue(deviceID);
-                        }
 
+                        Thread.Sleep(1000);
                     }
-                    */
-                    
+                    Marshal.FreeHGlobal(ptrIPAddr);
+
                     /*
-                    if (result != BS2ErrorCode.BS_SDK_SUCCESS)
-                    {
-                        if (result != BS2ErrorCode.BS_SDK_ERROR_CANNOT_CONNECT_SOCKET)
-                        {
-                            //Console.WriteLine("Can't connect to device(errorCode : {0}).", result);
-                            return;
-                        }
-                        else
-                        {
-                            enqueue(deviceID);
-                        }
-                    }
-                    */            
-                    
-                    //원본
                     BS2ErrorCode result = (BS2ErrorCode)API.BS2_ConnectDevice(sdkContext, deviceID);
                     if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                     {
@@ -148,9 +137,8 @@ namespace Suprema
                         {
                             enqueue(deviceID);
                         }
-                    }       
-                    
-                     
+                    }*/
+
                 }
                 else
                 {
@@ -163,11 +151,17 @@ namespace Suprema
 
     public abstract class UnitTest
     {
+        public delegate void connectionPtr(IntPtr sdkcontext, uint deviceID);
+
         private string title;
         private API.OnDeviceFound cbOnDeviceFound = null;
         private API.OnDeviceAccepted cbOnDeviceAccepted = null;
         private API.OnDeviceConnected cbOnDeviceConnected = null;
         private API.OnDeviceDisconnected cbOnDeviceDisconnected = null;
+
+        private connectionPtr cbOnDeviceConnectedImpl = null;
+        private connectionPtr cbOnDeviceDisconnectedImpl = null;
+
         protected IntPtr sdkContext = IntPtr.Zero;
 #if !SDK_AUTO_CONNECTION
         private ReconnectionTask reconnectionTask = null;
@@ -206,6 +200,12 @@ namespace Suprema
                 title = value;
                 Console.Title = value;
             }
+        }
+
+        public void setConnectionCb(connectionPtr cbConn, connectionPtr cbDisconn)
+        {
+            cbOnDeviceConnectedImpl = cbConn;
+            cbOnDeviceDisconnectedImpl = cbDisconn;
         }
 
         public UnitTest()
@@ -665,7 +665,9 @@ namespace Suprema
                 return false;
             }
             Marshal.FreeHGlobal(ptrIPAddr);
-
+#if !SDK_AUTO_CONNECTION
+            ReconnectionTask.setIpPort(deviceIpAddress, port);
+#endif
             Console.WriteLine(">>>> Successfully connected to the device[{0}].", deviceID);
             return true;
         }
@@ -739,6 +741,13 @@ namespace Suprema
         void DeviceConnected(UInt32 deviceID)
         {
             Console.WriteLine("[CB] Device[{0, 10}] has been connected.", deviceID);
+            if (cbOnDeviceConnectedImpl != null)
+            {
+                cbOnDeviceConnectedImpl(sdkContext, deviceID);
+            } else
+            {
+                Console.WriteLine("cbOnDeviceConnectedImpl is null");
+            }
         }
 
         void DeviceDisconnected(UInt32 deviceID)
@@ -752,6 +761,13 @@ namespace Suprema
 
             }
 #endif
+            if (cbOnDeviceDisconnectedImpl != null)
+            {
+                cbOnDeviceDisconnectedImpl(sdkContext, deviceID);
+            } else
+            {
+                Console.WriteLine("cbOnDeviceDisconnectedImpl is null");
+            }         
         }
 
         UInt32 PreferMethodHandle(UInt32 deviceID)

@@ -5153,6 +5153,8 @@ namespace Suprema
                                 Util.CopyMemory(curFaceExObjs, imageData, imageLen);
 
                                 numFaces = 1;
+
+                                Marshal.FreeHGlobal(imageData);
                             }
                         }
                     }
