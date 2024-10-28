@@ -104,7 +104,6 @@ public:
 
 	int getUserBlobAccessGroupID(BS2_ACCESS_GROUP_ID* accessGroupId);
 	int getUserBlobFaceAuthGroupID(BS2User& user);
-	int getUserBlobUserUpdate(BS2User& user);
 	int getUserBlobJobCode(BS2Job& job);
 	int getUserBlobPhrase(BS2_USER_PHRASE phrase, const BS2SimpleDeviceInfo& deviceInfo);
 	int getUserBlobCardInfo(BS2CSNCard** cardObjs, uint8_t& numOfCards, BS2_DEVICE_ID id, const BS2SimpleDeviceInfo& deviceInfo, const BS2SimpleDeviceInfoEx& deviceInfoEx);
