@@ -135,6 +135,23 @@ enum {
 
 typedef uint8_t BS2_SHOW_OSDP_RESULT;
 
+// BDP-910
+enum{
+	BS2_USER_INFO_SHOW_ALL = 0,
+	BS2_USER_INFO_SHOW_PARTIAL = 1,
+	BS2_USER_INFO_SHOW_NOTHING = 2
+};
+
+typedef uint8_t BS2_AUTHMSG_USERINFO;
+
+// BDP-948
+enum {
+	BS2_KEYBOARD_MODE_SCRAMBLE = 0,		// 0 : Scramble keyboard(Default)
+	BS2_KEYBOARD_MODE_NON_SCRAMBLE = 1,	// 1 : Non-scramble keyborad
+};
+
+typedef uint8_t BS2_SCRAMBLE_KEYBOARD_MODE;
+
 /**
  *	BS2DisplayConfig
  */
@@ -163,7 +180,13 @@ typedef struct {
 
 	BS2_BOOL useScreenSaver;		///< 1 byte
 	BS2_SHOW_OSDP_RESULT showOsdpResult;	///< 1 byte	
-	uint8_t reserved1[30];		///< 30 bytes (reserved)
+
+	BS2_AUTHMSG_USERINFO authMsgUserName;			///< 1 byte
+	BS2_AUTHMSG_USERINFO authMsgUserId;			///< 1 byte
+
+	BS2_SCRAMBLE_KEYBOARD_MODE scrambleKeyboardMode ;		///< 1 byte
+
+	uint8_t reserved3[27];		///< 27 bytes (padding)
 } BS2DisplayConfig;
 
 #endif	// __BS2_DISPLAY_CONFIG_H__

@@ -57,13 +57,31 @@ enum{
 	SUPERVISED_REG_CUSTOM = 255,
 };
 
+enum {
+	BS2_INPUT_NONE = 0,
+	BS2_INPUT_AUX0 = 1,
+	BS2_INPUT_AUX1 = 2,
+	BS2_INPUT_AUXTYPENO = 0,
+	BS2_INPUT_AUXTYPENC = 1,
+};
+
 /**
  *	BS2InputConfig
  */
 typedef struct{
 	uint8_t		numInputs;		///< 1 byte
 	uint8_t		numSupervised;	///< 1 byte
-	uint16_t	reseved;		///< 2 byte
+	
+	union {
+		uint16_t value;			///< 2 byte
+		struct {
+			uint16_t tamperAuxIndex : 4;
+			uint16_t acFailAuxIndex : 4;
+			uint16_t aux0Type : 1;
+			uint16_t aux1Type : 1;
+			uint16_t reserved : 6;
+		} field;
+	} aux;
 
 	struct {
 		uint8_t		portIndex;				///< 1 byte

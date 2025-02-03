@@ -526,7 +526,14 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("customSmartCardFelicaSupported : %u", info.customSmartCardFelicaSupported);
 	TRACE("ignoreInputAfterWiegandOut : %u", info.ignoreInputAfterWiegandOut);
 	TRACE("setSlaveBaudrateSupported : %u", info.setSlaveBaudrateSupported);
+	TRACE("rtspResolutionChangeSupported : %u", info.rtspResolutionChangeSupported);
+	TRACE("voipResolutionChangeSupported : %u", info.voipResolutionChangeSupported);
+	TRACE("voipTransportChangeSupported : %u", info.voipTransportChangeSupported);
+	TRACE("authMsgUserInfoSupported : %u", info.authMsgUserInfoSupported);
+	TRACE("scrambleKeyboardModeSupported : %u", info.scrambleKeyboardModeSupported);
 	TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
+	TRACE("authOnlyNoMaskSupported : %u", info.authDenyMaskSupported);
+
 }
 
 #if 0

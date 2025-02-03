@@ -272,9 +272,11 @@ int slaveMenu(void* context, DeviceList& deviceList)
 		case MENU_SLV_SEARCH_DEVICE:
 			sdkResult = Utility::searchAndAddSlave(context, deviceList);
 			break;
+
 		case MENU_SLV_SET_BAUDRATE:
 			sdkResult = setSlaveBaudrate(context, deviceList);
 			break;
+
 		case MENU_SLV_UPG_FIRMWARE:
 			if (!selectedOrder)
 			{

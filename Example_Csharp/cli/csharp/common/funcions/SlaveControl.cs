@@ -27,6 +27,7 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get slave device", getSlaveDevice));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slave device", setSlaveDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slave baudrate", setSlaveBaudrate));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
 
@@ -495,6 +496,7 @@ namespace Suprema
                         config.motionSensitivity = Util.GetInput((byte)BS2MotionSensitivity.NORMAL);
                     }
                     break;
+                case BS2DeviceTypeEnum.BIOENTRY_W3:
                 default:
                     return;
             }
@@ -677,6 +679,35 @@ namespace Suprema
                 Console.WriteLine(">>> There is no slave device in the device.");
             }
         }
+        public void setSlaveBaudrate(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            List<UInt32> slaveDeviceList = new List<UInt32>();
+
+            Console.WriteLine("What slave device will the baudrate be set to?");
+            foreach (var slave in searchedSlave)
+            {
+                Console.WriteLine("    {0} ({1})", slave.Item1, slave.Item2);
+            }
+            Console.Write(">> ");
+            UInt32 slaveID = Util.GetInput((UInt32)0);
+            if (0 == slaveID)
+                return;
+
+            Console.WriteLine("Please select a baudrate. (9600, 19200, 38400, 57600, 115200)");
+            Console.Write(">> ");
+            UInt32 baudrate = Util.GetInput((UInt32)9600);
+
+            Console.WriteLine("Trying to set slave baudrate.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetSlaveBaudrate(sdkContext, deviceID, slaveID, baudrate);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                Console.WriteLine("Set success.", result);
+            }
+        }
 
         public void getSlaveExDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
@@ -796,6 +827,7 @@ namespace Suprema
                 }
 
                 curSlaveDeviceObj = slaveDeviceObj;
+                UInt32 slaveID = 0;
                 for (int idx = 0; idx < slaveDeviceCount; ++idx)
                 {
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
@@ -807,6 +839,7 @@ namespace Suprema
                             item.enableOSDP = 1;
                             Marshal.StructureToPtr(item, curSlaveDeviceObj, false);
                         }
+                        slaveID = item.deviceID;
                     }
                     else
                     {
@@ -829,14 +862,34 @@ namespace Suprema
                 {
                     Console.WriteLine("Got error({0}).", result);
                 }
-                else
+                //else
+                //{
+                //    //slaveExControl(sdkContext, slaveDeviceList);
+                //    Console.WriteLine("Do you want update config of CST slaves? [y/n]");
+                //    Console.Write(">>>> ");
+                //    if (Util.IsYes())
+                //        slaveExConfig(sdkContext, deviceID, slaveDeviceList);
+                //}
+
+                IntPtr wiegandDeviceObj = IntPtr.Zero;
+                UInt32 wiegandDeviceCount = 0;
+                Console.WriteLine("Trying to get the wiegand devices under the {0}", slaveID);
+                result = (BS2ErrorCode)API.BS2_SearchWiegandDevices(sdkContext, slaveID, out wiegandDeviceObj, out wiegandDeviceCount);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                 {
-                    //slaveExControl(sdkContext, slaveDeviceList);
-                    Console.WriteLine("Do you want update config of CST slaves? [y/n]");
-                    Console.Write(">>>> ");
-                    if (Util.IsYes())
-                        slaveExConfig(sdkContext, deviceID, slaveDeviceList);
+                    Console.WriteLine("Got error({0}).", result);
+                    return;
                 }
+
+                IntPtr tempPtr = wiegandDeviceObj;
+                for (UInt32 idx = 0; idx < wiegandDeviceCount; idx++)
+                {
+                    UInt32 wiegandID = (UInt32)Marshal.PtrToStructure(tempPtr, typeof(UInt32));
+                    Console.WriteLine(" *[{0}] {1}", idx, wiegandID);
+                    tempPtr = (IntPtr)((long)tempPtr + sizeof(UInt32));
+                }
+
+                API.BS2_ReleaseObject(wiegandDeviceObj);
             }
             else
             {

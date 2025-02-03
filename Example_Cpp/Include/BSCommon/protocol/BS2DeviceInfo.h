@@ -449,7 +449,7 @@ typedef struct {
 	/*
 	 * If true, Custom Smard Card is supported.
 	 */
-	uint8_t customSmartCardSupported: 1; 
+	uint8_t customSmartCardSupported: 1;
 
 	/*
 	 * If true, Template On Mobile is supported.
@@ -459,7 +459,7 @@ typedef struct {
 	uint8_t tomEnrollSupported: 1;
 
 	/*
-	 * OSDP Slave - show auth result from osdp_LED 
+	 * OSDP Slave - show auth result from osdp_LED
 	 */
 	uint8_t showOsdpResultbyLED: 1;		// BDP-805 
 
@@ -480,11 +480,25 @@ typedef struct {
 	 */
 	uint8_t setSlaveBaudrateSupported: 1;		//BDP-853
 
-	uint8_t unused: 5;
+	uint8_t rtspResolutionChangeSupported: 1;	//BDP-829
+	uint8_t voipResolutionChangeSupported: 1;	//BDP-829
+	uint8_t voipTransportChangeSupported: 1;	//BDP-830
+
+	uint8_t authMsgUserInfoSupported: 1;			//BDP-910
+
+	uint8_t scrambleKeyboardModeSupported: 1; //BDP-948
+
+	//-------------------------------------------------------------------------------- 1byte
 
 	uint16_t visualFaceTemplateVersion; // BDP-659
-	uint8_t unused2[2]; 
-	
+
+	//-------------------------------------------------------------------------------- 2byte
+
+	uint8_t authDenyMaskSupported: 1;	// BDP-938
+	uint8_t unused: 7;
+
+	uint8_t unused2;
+
 	uint8_t reserved[424];		///< 424 bytes
 
 } BS2DeviceCapabilities;
