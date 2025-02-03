@@ -763,25 +763,35 @@ int setSystemConfig(void* context, const DeviceInfo& device)
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
 		ostringstream strm;
-		strm << "Please enter the card combination you wish to set." << endl;
-		strm << "    0x00000800 : CUSTOM_DESFIRE_EV1" << endl;
-		strm << "    0x00000400 : CUSTOM_CLASSIC_PLUS" << endl;
-		strm << "    0x00000200 : BLE" << endl;
-		strm << "    0x00000100 : NFC" << endl;
-		strm << "    0x00000080 : SEOS" << endl;
-		strm << "    0x00000040 : SR_SE" << endl;
-		strm << "    0x00000020 : DESFIRE_EV1" << endl;
-		strm << "    0x00000010 : CLASSIC_PLUS" << endl;
-		strm << "    0x00000008 : ICLASS" << endl;
-		strm << "    0x00000004 : MIFARE_FELICA" << endl;
-		strm << "    0x00000002 : HIDPROX" << endl;
-		strm << "    0x00000001 : EM" << endl;
+		if (Utility::isYes("Update card operation mask?"))
+		{
+			strm << "Please enter the card combination you wish to set." << endl;
+			strm << "    0x00000800 : CUSTOM_DESFIRE_EV1" << endl;
+			strm << "    0x00000400 : CUSTOM_CLASSIC_PLUS" << endl;
+			strm << "    0x00000200 : BLE" << endl;
+			strm << "    0x00000100 : NFC" << endl;
+			strm << "    0x00000080 : SEOS" << endl;
+			strm << "    0x00000040 : SR_SE" << endl;
+			strm << "    0x00000020 : DESFIRE_EV1" << endl;
+			strm << "    0x00000010 : CLASSIC_PLUS" << endl;
+			strm << "    0x00000008 : ICLASS" << endl;
+			strm << "    0x00000004 : MIFARE_FELICA" << endl;
+			strm << "    0x00000002 : HIDPROX" << endl;
+			strm << "    0x00000001 : EM" << endl;
 
-		uint32_t cardTypes = Utility::getInputHexaChar<uint32_t>(strm.str());
-		cardTypes |= CARD_OPERATION_USE;		// Card operation apply
-		config.useCardOperationMask = cardTypes;
+			uint32_t cardTypes = Utility::getInputHexaChar<uint32_t>(strm.str());
+			cardTypes |= CARD_OPERATION_USE;		// Card operation apply
+			config.useCardOperationMask = cardTypes;
 
-		TRACE("CardType:0x%08x", config.useCardOperationMask);
+			TRACE("CardType:0x%08x", config.useCardOperationMask);
+		}
+
+		strm.str("");
+		strm << "Update field usbJobCode? (current:" << config.useJobCode << ")";
+		if (Utility::isYes(strm.str()))
+		{
+			config.useJobCode = (BS2_BOOL)Utility::getInput<uint32_t>("Please insert useJobCode. (0: false, 1: true)");
+		}
 
 		sdkResult = cc.setSystemConfig(id, config);
 	}
