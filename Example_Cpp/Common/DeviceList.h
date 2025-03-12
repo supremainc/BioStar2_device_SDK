@@ -8,10 +8,22 @@
 #include "BS_API.h"
 
 
+enum {
+	SLAVETYPE_OSDP = 1,
+	SLAVETYPE_WIEGAND
+};
+
+typedef struct
+{
+	BS2_DEVICE_ID		id;
+	uint8_t				slaveType;	// 1:suprema-osdp, 2:wiegand
+} BS2_DEVICE_GSLAVE_TYPE;
+
 typedef struct  
 {
 	BS2_DEVICE_ID		id;
 	BS2_DEVICE_TYPE		type;
+	std::vector<BS2_DEVICE_GSLAVE_TYPE> gSlaveDevices_;	// Master - slave - grand slave
 } BS2_DEVICE_ID_TYPE;
 
 class DeviceInfo
@@ -42,11 +54,18 @@ public:
 	bool removeDevice(BS2_DEVICE_ID id);
 	bool findDevice(BS2_DEVICE_ID id) /*const*/;
 	bool findSlave(BS2_DEVICE_ID slaveID) /*const*/;
+	bool findSlave(BS2_DEVICE_ID slaveID, BS2_DEVICE_TYPE& slaveType, BS2_DEVICE_ID& masterID);
+	bool findSlave(BS2_DEVICE_ID slaveID, std::vector<BS2_DEVICE_GSLAVE_TYPE>** slaveDevices, bool needLock=true);
 	std::shared_ptr<DeviceInfo>& getDevice(BS2_DEVICE_ID id);
+	std::shared_ptr<DeviceInfo>& getMasterDevice(BS2_DEVICE_ID id);
 	void clearDevices();
 
 	bool appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, BS2_DEVICE_TYPE slaveType);
+	bool appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, BS2_DEVICE_TYPE slaveType, bool isSlave=false);
 	bool appendWiegand(BS2_DEVICE_ID hostID, BS2_DEVICE_ID wiegandID);
+	bool appendWiegand(BS2_DEVICE_ID hostID, BS2_DEVICE_ID wiegandID, bool isSlave=false);
+
+	bool removeSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, bool isSlave=false);
 
 	const std::map<BS2_DEVICE_ID, std::shared_ptr<DeviceInfo>>& getAllDevices() const { return devList_; }
 	uint32_t getSize() { return static_cast<uint32_t>(devList_.size()); };

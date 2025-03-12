@@ -15,6 +15,7 @@ using namespace std;
 static void* sdkContext = NULL;
 static BS2_DEVICE_ID connectedID = 0;
 static DeviceInfo deviceInfo = { 0, 0, 0, 51211, 0 };
+static DeviceList deviceList;
 
 // Wiegand format preset
 enum
@@ -75,7 +76,7 @@ void onDeviceDisconnected(BS2_DEVICE_ID id)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::setDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".", 100);
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".", 100);
 
 	TRACE("Version: %s", BS2_Version());
 
@@ -98,10 +99,23 @@ int main(int argc, char* argv[])
 
 void connectTestDevice(void* context)
 {
-	memset(&deviceInfo, 0x0, sizeof(DeviceInfo));
-	int sdkResult = Utility::connectViaIP(context, deviceInfo);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return;
+	bool isDirectConnect = false;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (isDirectConnect)
+	{
+		memset(&deviceInfo, 0x0, sizeof(DeviceInfo));
+		sdkResult = Utility::connectViaIP(context, deviceInfo);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return;
+	}
+	else 
+	{		
+		sdkResult = Utility::searchAndConnect(sdkContext, deviceList);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return;
+		deviceInfo = *deviceList.getAllDevices().begin()->second.get();
+	}
 
 	// Retrieve bulk logs.
 	CommControl cm(context);
@@ -123,12 +137,13 @@ void connectTestDevice(void* context)
 
 	Utility::connectSlave(context, deviceInfo);
 	Utility::connectWiegand(context, deviceInfo);
+	
 
 	runAPIs(context, deviceInfo);
 }
 
 
-int runAPIs(void* context, const DeviceInfo& device)
+int runAPIs(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	int selectedTop(0);
@@ -345,6 +360,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_TURNOFF_QRBYPASS:
 			sdkResult = turnOffQRBypass(context, device);
 			break;
+		case MENU_DEV_SEARCH_SLAVE:
+			sdkResult = searchSlave(context, device);
+			break;
+		case MENU_DEV_DISPLAY_SLAVE:
+			displaySlave(context, device);
+			break;
 		default:
 			break;
 		}
@@ -352,6 +373,36 @@ int runAPIs(void* context, const DeviceInfo& device)
 
 	return sdkResult;
 }
+
+int searchSlave(void* context, DeviceInfo& device)
+{
+	bool isSlave = false;
+	bool found = false;
+	int sdkResult = BS_SDK_ERROR_CANNOT_FIND_DEVICE;
+
+	BS2_DEVICE_ID selected = Utility::getSelectedDeviceID(device);
+	if (device.id_ == selected) {
+		isSlave = false;
+		found = true;
+	}
+	else {
+		auto& slaveList = device.slaveDevices_;
+		auto it = find_if(slaveList.begin(), slaveList.end(), [selected](const BS2_DEVICE_ID_TYPE idType) { return idType.id == selected; });
+		if (it != slaveList.end()) {
+			isSlave = true;
+			found = true;
+		}
+	}
+
+	if (found) sdkResult = Utility::connectSlave(context, device, isSlave, selected);
+
+	return sdkResult;
+}
+
+ void displaySlave(void* context, const DeviceInfo& device)
+ {
+	Utility::displayConnectedSlaves(device);
+ }
 
 int getDeviceInfo(void* context, const DeviceInfo& device)
 {

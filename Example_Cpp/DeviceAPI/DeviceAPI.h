@@ -113,6 +113,9 @@ enum EN_MENU_DEV
 
 	MENU_DEV_TURNON_QRBYPASS,
 	MENU_DEV_TURNOFF_QRBYPASS,
+
+	MENU_DEV_SEARCH_SLAVE,
+	MENU_DEV_DISPLAY_SLAVE,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -214,11 +217,14 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_TURNON_QRBYPASS,			"Turn On QR Bypass"},
 	{MENU_DEV_TURNOFF_QRBYPASS,			"Turn Off QR Bypass"},
+
+	{MENU_DEV_SEARCH_SLAVE,				"Search Slave"},
+	{MENU_DEV_DISPLAY_SLAVE,			"Display Slave"},
 };
 
 
 void connectTestDevice(void* context);
-int runAPIs(void* context, const DeviceInfo& device);
+int runAPIs(void* context, DeviceInfo& device);
 int getDeviceInfo(void* context, const DeviceInfo& device);
 int getDeviceInfoEx(void* context, const DeviceInfo& device);
 int getFingerprintConfig(void* context, const DeviceInfo& device);
@@ -286,3 +292,5 @@ void setDisplayAction(BS2DisplayAction& displayAction);
 void setBuzzerAction(BS2BuzzerAction& buzzerAction);
 void setLedAction(BS2LedAction& ledAction);
 void setLiftAction(BS2LiftAction& liftAction);
+int searchSlave(void* context, DeviceInfo& device);
+void displaySlave(void* context, const DeviceInfo& device);
