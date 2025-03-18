@@ -563,6 +563,24 @@ int ConfigControl::setCustomCardConfig(BS2_DEVICE_ID id, const BS2CustomCardConf
 	return sdkResult;
 }
 
+int ConfigControl::getFacilityCodeConfig(BS2_DEVICE_ID id, BS2FacilityCodeConfig& config) const
+{
+	int sdkResult = BS2_GetFacilityCodeConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetFacilityCodeConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setFacilityCodeConfig(BS2_DEVICE_ID id, const BS2FacilityCodeConfig& config) const
+{
+	int sdkResult = BS2_SetFacilityCodeConfig(context_, id, const_cast<BS2FacilityCodeConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetFacilityCodeConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::updateConnectionModeViaUDP(BS2_DEVICE_ID id, BS2_CONNECTION_MODE mode)
 {
 	BS2IpConfig config;
@@ -1287,16 +1305,33 @@ void ConfigControl::printRS485Status(const BS2Rs485ConfigEX& config)
 void ConfigControl::print(const BS2InputConfigEx& config)
 {
 	TRACE("==[BS2InputConfigEx]==");
-	TRACE("+--numInputs : %u", config.numInputs);
+	TRACE("|--numInputs : %u", config.numInputs);
+	TRACE("+--Aux");
+	TRACE("   |--aux index of ACFail     : Aux%u", config.aux.field.acFailAuxIndex - 1);
+	TRACE("   |--aux index of Tamper     : Aux%u", config.aux.field.tamperAuxIndex - 1);
+	TRACE("   |--aux index of Fire       : Aux%u", config.aux.field.fireAuxIndex - 1);
+	TRACE("   |--aux index of Aux0Type:  : %s", config.aux.field.aux0Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+	TRACE("   |--aux index of Aux1Type:  : %s", config.aux.field.aux1Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+	TRACE("   |--aux index of Aux2Type:  : %s", config.aux.field.aux2Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
 	TRACE("|--numSupervised : %u", config.numSupervised);
-
 	for (uint8_t idx = 0; idx < config.numSupervised; idx++)
 	{
 		TRACE("+--inputs (%u)", idx);
 		TRACE("   |--portIndex : %u", config.inputs[idx].portIndex);
-		TRACE("   |--switchType : %u", config.inputs[idx].switchType);
+		TRACE("   |--switchType : %s", config.inputs[idx].switchType == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
 		TRACE("   |--duration : %u", config.inputs[idx].duration);
 		TRACE("   |--supervisedResistor : %u", config.inputs[idx].supervisedResistor);
+		if (config.inputs[idx].supervisedResistor == SUPERVISED_REG_CUSTOM)
+		{
+			TRACE("   |--shortInput.minValue : %u", config.inputs[idx].supervisedConfig.shortInput.minValue);
+			TRACE("   |--shortInput.maxValue : %u", config.inputs[idx].supervisedConfig.shortInput.maxValue);
+			TRACE("   |--openInput.minValue : %u", config.inputs[idx].supervisedConfig.openInput.minValue);
+			TRACE("   |--openInput.maxValue : %u", config.inputs[idx].supervisedConfig.openInput.maxValue);
+			TRACE("   |--onInput.minValue : %u", config.inputs[idx].supervisedConfig.onInput.minValue);
+			TRACE("   |--onInput.maxValue : %u", config.inputs[idx].supervisedConfig.onInput.maxValue);
+			TRACE("   |--offInput.minValue : %u", config.inputs[idx].supervisedConfig.offInput.minValue);
+			TRACE("   |--offInput.maxValue : %u", config.inputs[idx].supervisedConfig.offInput.maxValue);
+		}
 	}
 }
 
@@ -1634,6 +1669,18 @@ void ConfigControl::print(const BS2CustomCardConfig& config)
 	print(config.desfire);
 	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
 	TRACE("+--formatID : %u", config.formatID);
+}
+
+void ConfigControl::print(const BS2FacilityCodeConfig& config)
+{
+	TRACE("==[BS2FacilityCodeConfig]==");
+	TRACE("+--numFacilityCode : %u", config.numFacilityCode);
+	for (uint32_t idx = 0; idx < config.numFacilityCode; idx++)
+	{
+		TRACE("+--facilityCode[%u] : %x:%x:%x:%x", idx, config.facilityCodes[idx].code[0],
+		config.facilityCodes[idx].code[1], config.facilityCodes[idx].code[2],
+		config.facilityCodes[idx].code[3]);
+	}
 }
 
 uint32_t ConfigControl::printOSDPDeviceID(const BS2OsdpStandardConfig& config)

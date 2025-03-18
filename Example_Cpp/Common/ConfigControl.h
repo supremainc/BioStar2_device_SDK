@@ -72,6 +72,8 @@ public:
 	int setOsdpStandardActionConfig(BS2_DEVICE_ID id, const BS2OsdpStandardActionConfig& config) const;
 	int getCustomCardConfig(BS2_DEVICE_ID id, BS2CustomCardConfig& config) const;
 	int setCustomCardConfig(BS2_DEVICE_ID id, const BS2CustomCardConfig& config) const;
+	int getFacilityCodeConfig(BS2_DEVICE_ID id, BS2FacilityCodeConfig & config) const;
+	int setFacilityCodeConfig(BS2_DEVICE_ID id, const BS2FacilityCodeConfig& config) const;
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -135,6 +137,7 @@ public:
 	static void print(const BS2CustomDesFireCard& card);
 	static void print(const BS2DesFireAppLevelKey& key);
 	static void print(const BS2CustomCardConfig& config);
+	static void print(const BS2FacilityCodeConfig& config);
 	static uint32_t printOSDPDeviceID(const BS2OsdpStandardConfig& config);
 	static bool getOsdpID(const BS2OsdpStandardConfig& config, uint32_t osdpDeviceID, uint8_t& osdpID);
 

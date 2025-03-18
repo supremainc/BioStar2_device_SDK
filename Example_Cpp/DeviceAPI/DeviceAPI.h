@@ -116,6 +116,9 @@ enum EN_MENU_DEV
 
 	MENU_DEV_SEARCH_SLAVE,
 	MENU_DEV_DISPLAY_SLAVE,
+
+	MENU_DEV_GET_FACILITYCODECONFIG,
+	MENU_DEV_SET_FACILITYCODECONFIG,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -220,6 +223,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_SEARCH_SLAVE,				"Search Slave"},
 	{MENU_DEV_DISPLAY_SLAVE,			"Display Slave"},
+
+	{MENU_DEV_GET_FACILITYCODECONFIG,	"BS2_GetFacilityCodeConfig" },
+	{MENU_DEV_SET_FACILITYCODECONFIG,	"BS2_SetFacilityCodeConfig" },
 };
 
 
@@ -294,3 +300,5 @@ void setLedAction(BS2LedAction& ledAction);
 void setLiftAction(BS2LiftAction& liftAction);
 int searchSlave(void* context, DeviceInfo& device);
 void displaySlave(void* context, const DeviceInfo& device);
+int getFacilityCodeConfig(void* context, const DeviceInfo& device);
+int setFacilityCodeConfig(void* context, const DeviceInfo& device);

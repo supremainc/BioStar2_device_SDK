@@ -83,6 +83,7 @@
 #include "BSCommon/config/BS2OsdpStandardActionConfig.h"
 #include "BSCommon/config/BS2OsdpStandardConfig.h"
 #include "BSCommon/config/BS2LicenseConfig.h"
+#include "BSCommon/config/BS2FacilityCodeConfig.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -764,7 +765,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardActionConfig(void* co
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLicenseConfig(void* const, BS2_DEVICE_ID deviceId, BS2LicenseConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCustomCardConfig(void* const, BS2_DEVICE_ID deviceId, BS2CustomCardConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetCustomCardConfig(void* const, BS2_DEVICE_ID deviceId, const BS2CustomCardConfig* config);
-
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFacilityCodeConfig(void* const, BS2_DEVICE_ID deviceId, BS2FacilityCodeConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetFacilityCodeConfig(void* const, BS2_DEVICE_ID deviceId, const BS2FacilityCodeConfig* config);
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllDoor(void* context, BS2_DEVICE_ID deviceId, BS2Door** doorObj, uint32_t* numDoor);

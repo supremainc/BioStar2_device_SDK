@@ -598,6 +598,13 @@ void Utility::displayConnectedDevices(const DeviceList& devices, bool includeSla
 	cout << "-----------------------------------------------------------------" << endl;
 }
 
+bool Utility::isBigEndianSystem()
+{
+	uint32_t value = 0x12345678;
+	uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
+	return (0x12 == ptr[0]);
+}
+
 uint32_t Utility::showMenu(vector<MENU_ITEM>& info)
 {
 	for (const auto& item : info)

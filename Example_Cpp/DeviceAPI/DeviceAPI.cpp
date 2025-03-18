@@ -366,6 +366,12 @@ int runAPIs(void* context, DeviceInfo& device)
 		case MENU_DEV_DISPLAY_SLAVE:
 			displaySlave(context, device);
 			break;
+		case MENU_DEV_GET_FACILITYCODECONFIG:
+			sdkResult = getFacilityCodeConfig(context, device);
+			break;
+		case MENU_DEV_SET_FACILITYCODECONFIG:
+			sdkResult = setFacilityCodeConfig(context, device);
+			break;
 		default:
 			break;
 		}
@@ -402,6 +408,51 @@ int searchSlave(void* context, DeviceInfo& device)
  void displaySlave(void* context, const DeviceInfo& device)
  {
 	Utility::displayConnectedSlaves(device);
+ }
+
+
+ int getFacilityCodeConfig(void* context, const DeviceInfo& device)
+ {
+	 ConfigControl cc(context);
+	 BS2FacilityCodeConfig cofig;
+	 
+	 BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	 int sdkResult = cc.getFacilityCodeConfig(id, cofig);
+	 if (BS_SDK_SUCCESS == sdkResult)
+		 ConfigControl::print(cofig);
+	 return sdkResult;
+ }
+ 
+ int setFacilityCodeConfig(void* context, const DeviceInfo& device)
+ {
+	 ConfigControl cc(context);
+	 BS2FacilityCodeConfig config;
+	 
+	 BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	 int sdkResult = cc.getFacilityCodeConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Enter the number of facility code";
+	config.numFacilityCode = Utility::getInput<uint32_t>(msg);
+	if (config.numFacilityCode > BS2_MAX_NUMBER_FACILITY_CODE)
+		config.numFacilityCode = BS2_MAX_NUMBER_FACILITY_CODE;
+
+	for (uint8_t i = 0; i < config.numFacilityCode; i++)
+	{
+		msg = "Enter the facility code";
+		uint32_t inputValue = Utility::getInput<uint32_t>(msg);
+		if (Utility::isBigEndianSystem())
+			*(uint32_t*)config.facilityCodes[i].code = inputValue;
+		else
+			*(uint32_t*)config.facilityCodes[i].code = ((inputValue & 0xFF000000) >> 24) |
+										   ((inputValue & 0x00FF0000) >> 8) |
+										   ((inputValue & 0x0000FF00) << 8) |
+										   ((inputValue & 0x000000FF) << 24);
+	}	
+	sdkResult = cc.setFacilityCodeConfig(id, config);
+
+	 return sdkResult;
  }
 
 int getDeviceInfo(void* context, const DeviceInfo& device)
@@ -1917,6 +1968,85 @@ int setInputConfigEx(void* context, const DeviceInfo& device)
 		strmMsg << "Please enter the type of resistance value for supervised input." << endl;
 		strmMsg << "[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised]";
 		config.inputs[idx].supervisedResistor = (uint8_t)Utility::getInput<uint32_t>(strmMsg.str());
+
+		if (config.inputs[idx].supervisedResistor == SUPERVISED_REG_CUSTOM)
+		{
+			msg = "Please enter shortInput.minValue.";
+			config.inputs[idx].supervisedConfig.shortInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter shortInput.maxValue.";
+			config.inputs[idx].supervisedConfig.shortInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			msg = "Please enter openInput.minValue.";
+			config.inputs[idx].supervisedConfig.openInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter openInput.maxValue.";
+			config.inputs[idx].supervisedConfig.openInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			msg = "Please enter onInput.minValue.";
+			config.inputs[idx].supervisedConfig.onInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter onInput.maxValue.";
+			config.inputs[idx].supervisedConfig.onInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			msg = "Please enter offInput.minValue.";
+			config.inputs[idx].supervisedConfig.offInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter offInput.maxValue.";
+			config.inputs[idx].supervisedConfig.offInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+		}
+	}
+
+	//Aux index
+	msg = "Please enter acFailAuxIndex (0~2) : ";
+	uint16_t value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	if (value > 2)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	config.aux.field.acFailAuxIndex = value + 1;
+
+	msg = "Please enter TamperAuxIndex (0~2) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	if (value > 2)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	config.aux.field.tamperAuxIndex = value + 1;
+
+	msg = "Please enter FireAuxIndex (0~2) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	if (value > 2)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	config.aux.field.fireAuxIndex = value + 1;
+
+	//Aux Type
+	msg = "Please enter aux0 switchType (0:NO, 1:NC) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.aux.field.aux0Type = value;
+	if (value > 1)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	
+	msg = "Please enter aux1 switchType (0:NO, 1:NC) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.aux.field.aux1Type = value;
+	if (value > 1)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+
+	msg = "Please enter aux2 switchType (0:NO, 1:NC) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.aux.field.aux2Type = value;
+	if (value > 1)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
 	}
 
 	return cc.setInputConfigEx(id, config);

@@ -120,6 +120,7 @@ public:
 	static std::string convertArrayToString(const T* data, int numOfData, char delimiter);
 
 	// Solution common functions
+	static 	bool isBigEndianSystem();
 	static uint32_t showMenu(std::vector<MENU_ITEM>& info);
 	static uint32_t getSelectedIndex();
 	static std::vector<uint32_t> getSelectedIndexes();
