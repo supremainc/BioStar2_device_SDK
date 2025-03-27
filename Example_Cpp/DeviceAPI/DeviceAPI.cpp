@@ -1148,7 +1148,28 @@ int setAuthConfigEx(void* context, const DeviceInfo& device)
 	msg = "Insert authentication timeout in seconds";
 	config.authTimeout = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	config.numOperators = 0;
+	msg = "How many Operator ID do you want to register?";
+	config.numOperators = (uint8_t)Utility::getInput<uint32_t>(msg);
+	if (config.numOperators > BS2_MAX_OPERATORS)
+	{
+		TRACE("Exceed the maximum number of operators.");
+		config.numOperators = BS2_MAX_OPERATORS;
+	}
+
+	for (size_t i = 0; i < config.numOperators; i++)
+	{
+		msg = "Insert Operator ID";
+		string userID = Utility::getInput<string>(msg);
+		if (BS2_USER_NAME_SIZE < userID.size())
+		{
+			TRACE("User ID is too long.");
+			return BS_SDK_ERROR_INVALID_PARAM;
+		}
+		strcpy(reinterpret_cast<char*>(config.operators[i].userID), userID.c_str());
+
+		msg = "Insert Operator Level. (0: none, 1: Admin, 2:Config, 3:User)";
+		config.operators[i].level = (BS2_OPERATOR_LEVEL)Utility::getInput<uint32_t>(msg);
+	}
 
 	return cc.setAuthConfigEx(id, config);
 }

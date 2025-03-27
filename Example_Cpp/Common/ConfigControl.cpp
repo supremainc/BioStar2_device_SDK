@@ -1010,6 +1010,12 @@ void ConfigControl::print(const BS2AuthConfigExt& config)
 	TRACE("|--matchTimeout : %u", config.matchTimeout);
 	TRACE("|--authTimeout : %u", config.authTimeout);
 	TRACE("+--numOperators : %u", config.numOperators);
+	for (uint32_t idx = 0; idx < config.numOperators; idx++)
+	{
+		TRACE("   +--operator[%u]", idx);
+		TRACE("   |--userID : %s", config.operators[idx].userID);
+		TRACE("   |--level : %u", config.operators[idx].level);
+	}
 }
 
 void ConfigControl::print(const BS2FaceConfigExt& config)
