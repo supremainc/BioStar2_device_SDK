@@ -50,6 +50,9 @@ public:
 	int getRS485Config(BS2_DEVICE_ID id, BS2Rs485Config& config);
 	int setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config);
 	int getRS485ConfigEx(BS2_DEVICE_ID id, BS2Rs485ConfigEX& config);
+	int setRS485ConfigEx(BS2_DEVICE_ID id, const BS2Rs485ConfigEX& config);
+	int getRS485ConfigExDynamic(BS2_DEVICE_ID id, BS2Rs485ConfigEXDynamic& config);
+	int setRS485ConfigExDynamic(BS2_DEVICE_ID id, const BS2Rs485ConfigEXDynamic& config);
 	int getInputConfigEx(BS2_DEVICE_ID id, BS2InputConfigEx& config);
 	int setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config);
 	int getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config);
@@ -111,10 +114,15 @@ public:
 	static void print(const BS2Action& action);
 	static void print(const BS2BarcodeConfig& config);
 	static void print(const BS2Rs485Config& config);
+	static void print(const BS2Rs485ConfigEX& config);
+	static void print(const BS2Rs485ConfigEXDynamic& config);
 	static void printRS485Status(const BS2Rs485Config& config);
 	static void printRS485Status(const BS2Rs485ConfigEX& config);
 	static void print(const BS2Rs485Channel& channel);
+	static void print(const BS2Rs485ChannelEX& channel);
+	static void print(const BS2Rs485ChannelEXDynamic& channel);
 	static void print(const BS2Rs485SlaveDevice& device);
+	static void print(const BS2Rs485SlaveDeviceEX& device);
 	static void print(const BS2InputConfigEx& config);
 	static void print(const BS2RelayActionConfig& config);
 	static void print(const BS2WlanConfig& config);

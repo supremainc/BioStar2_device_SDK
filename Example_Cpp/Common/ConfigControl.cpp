@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <iostream>
 #include <map>
+#include <iomanip>
 #include "ConfigControl.h"
 #include "BS_Errno.h"
 #include "Utility.h"
@@ -361,6 +362,33 @@ int ConfigControl::getRS485ConfigEx(BS2_DEVICE_ID id, BS2Rs485ConfigEX& config)
 	int sdkResult = BS2_GetRS485ConfigEx(context_, id, &config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetRS485ConfigEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setRS485ConfigEx(BS2_DEVICE_ID id, const BS2Rs485ConfigEX& config)
+{
+	int sdkResult = BS2_SetRS485ConfigEx(context_, id, const_cast<BS2Rs485ConfigEX*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getRS485ConfigExDynamic(BS2_DEVICE_ID id, BS2Rs485ConfigEXDynamic& config)
+{
+	int sdkResult = BS2_GetRS485ConfigExDynamic(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetRS485ConfigEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setRS485ConfigExDynamic(BS2_DEVICE_ID id, const BS2Rs485ConfigEXDynamic& config)
+{
+	int sdkResult = BS2_SetRS485ConfigExDynamic(context_, id, const_cast<BS2Rs485ConfigEXDynamic*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
 
 	return sdkResult;
 }
@@ -1252,6 +1280,33 @@ void ConfigControl::print(const BS2Rs485Config& config)
 	TRACE("+  +--osdpID : %u", config.intelligentInfo.osdpID);
 }
 
+
+void ConfigControl::print(const BS2Rs485ConfigEX& config)
+{
+	TRACE("==[BS2Rs485ConfigEX]==");	
+	TRACE("|--numOfChannels : %u", config.numOfChannels);
+	for (int index = 0; index < config.numOfChannels; index++)
+	{
+		TRACE("+--channels[%u]", index);
+		TRACE("|--mode : %u", config.mode[index]);
+		print(config.channels[index]);
+	}
+
+}
+
+void ConfigControl::print(const BS2Rs485ConfigEXDynamic& config)
+{
+	TRACE("==[BS2Rs485ConfigEXDynamic]==");
+	
+	TRACE("|--numOfChannels : %u", config.numOfChannels);
+	for (int index = 0; index < config.numOfChannels; index++)
+	{
+		TRACE("+--channels[%u]", index);
+		TRACE("|--mode : %u", config.mode[index]);
+		print(config.channels[index]);
+	}
+}
+
 void ConfigControl::print(const BS2Rs485Channel& channel)
 {
 	TRACE("|  |--baudRate : %u", channel.baudRate);
@@ -1265,12 +1320,52 @@ void ConfigControl::print(const BS2Rs485Channel& channel)
 	}
 }
 
+void ConfigControl::print(const BS2Rs485ChannelEX& channel)
+{
+	TRACE("|  |--baudRate : %u", channel.baudRate);
+	TRACE("|  |--channelIndex : %u", channel.channelIndex);
+	TRACE("|  |--useRegistance : %u", channel.useRegistance);
+	TRACE("|  |--numOfDevices : %u", channel.numOfDevices);
+	TRACE("|  |--channelType : %u", channel.channelType);
+	for (int index = 0; index < channel.numOfDevices; index++)
+	{
+		TRACE("|  +--slaveDevices[%u]", index);
+		print(channel.slaveDevices[index]);
+	}
+}
+
+void ConfigControl::print(const BS2Rs485ChannelEXDynamic& channel)
+{
+	TRACE("|  |--baudRate : %u", channel.baudRate);
+	TRACE("|  |--channelIndex : %u", channel.channelIndex);
+	TRACE("|  |--useRegistance : %u", channel.useRegistance);
+	TRACE("|  |--numOfDevices : %u", channel.numOfDevices);
+	TRACE("|  |--channelType : %u", channel.channelType);
+	for (int index = 0; index < channel.numOfDevices; index++)
+	{
+		TRACE("|  +--slaveDevices[%u]", index);
+		print(channel.slaveDevices[index]);
+	}
+}
+
 void ConfigControl::print(const BS2Rs485SlaveDevice& device)
 {
 	TRACE("|  |  |--deviceID : %u", device.deviceID);
 	TRACE("|  |  |--deviceType : %u", device.deviceType);
 	TRACE("|  |  |--enableOSDP : %u", device.enableOSDP);
 	TRACE("|  |  |--connected : %u", device.connected);
+}
+
+void ConfigControl::print(const BS2Rs485SlaveDeviceEX& device)
+{
+	TRACE("|  |  |--deviceID : %u", device.deviceID);
+	TRACE("|  |  |--deviceType : %u", device.deviceType);
+	TRACE("|  |  |--enableOSDP : %u", device.enableOSDP);
+	TRACE("|  |  |--connected : %u", device.connected);
+	TRACE("|  |  |--channelInfo : %u", device.channelInfo);
+	TRACE("|  |  |--osdpID : %u", device.osdpID);
+	TRACE("|  |  |--useSecureSession : %u", device.useSecureSession);
+	TRACE("|  |  |--parentID : %u", device.parentID);
 }
 
 void ConfigControl::printRS485Status(const BS2Rs485Config& config)
@@ -1381,6 +1476,7 @@ void ConfigControl::print(const std::vector<BS2AuthOperatorLevel>& list)
 	{
 		ostringstream str;
 		str << "userID: " << list[idx].userID;
+
 		switch (list[idx].level)
 		{
 		case BS2_OPERATOR_LEVEL_ADMIN:
@@ -1395,6 +1491,14 @@ void ConfigControl::print(const std::vector<BS2AuthOperatorLevel>& list)
 		}
 
 		TRACE("[%d] %s", idx, str.str().c_str());
+
+		TRACE("---------------------------------");
+		str.str("userID(hex):");
+		for (uint32_t i = 0; i < BS2_USER_ID_SIZE; i++) {		
+			str << std::hex << std::setw(2) << std::setfill('0') << (int)list[idx].userID[i] << " ";
+		}
+		TRACE("%s", str.str().c_str());
+		TRACE("\n---------------------------------");
 	}
 }
 

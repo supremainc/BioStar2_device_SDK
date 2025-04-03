@@ -24,6 +24,7 @@
  *	Constants
  */
 enum {
+	BS2_RS485_MAX_DYNAMIC_SLAVES_PER_CHANNEL	= 128,
 	BS2_RS485_MAX_SLAVES_PER_CHANNEL	= 32,
 	BS2_RS485_INVALID_BAUD_RATE			= -1,		///< @TODO: must be zero
 };
@@ -48,10 +49,16 @@ typedef struct {
 	BS2_DEVICE_TYPE	deviceType;		///< 2 bytes
 	BS2_BOOL		enableOSDP;		///< 1 byte
 	BS2_BOOL		connected;		///< 1 bytes (packing)
-	uint8_t			channelInfo;	///< 1byte
-	uint8_t			osdpID;			///< 1 byte
-	uint8_t			reserved;		///< 1 byte (packing)
-	uint8_t			useSecureSession; ///< 1 byte
+
+	union {
+		struct {
+			uint8_t			channelInfo;	///< 1byte
+			uint8_t			osdpID;			///< 1 byte	: Deprecated in v2.x.x.x
+			uint8_t			reserved;		///< 1 byte (packing) : Deprecated in v2.x.x.x
+			uint8_t			useSecureSession; ///< 1 byte : Deprecated in v2.x.x.x
+		};
+		BS2_DEVICE_ID 	parentID;
+	};
 } BS2Rs485SlaveDeviceEX;			///< 12 bytes
 
 /**
@@ -65,6 +72,15 @@ typedef struct {
 	BS2_OSDP_CHANNEL_TYPE	channelType;		///< 1 byte
 	BS2Rs485SlaveDeviceEX 	slaveDevices[BS2_RS485_MAX_SLAVES_PER_CHANNEL];	///< 8 * 12 = 96 bytes
 } BS2Rs485ChannelEX;
+
+typedef struct {
+	uint32_t				baudRate;		///< 4 bytes
+	uint8_t					channelIndex;		///< 1 byte
+	uint8_t					useRegistance;		///< 1 byte
+	uint8_t					numOfDevices;		///< 1 byte
+	BS2_OSDP_CHANNEL_TYPE 	channelType;		///< 1 bytes
+	BS2Rs485SlaveDeviceEX  *slaveDevices;
+} BS2Rs485ChannelEXDynamic;
 
 /**
  *	BS2Rs485SlaveDevice

@@ -79,6 +79,10 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_RS485CONFIG,
 	MENU_DEV_SET_RS485CONFIG,
+	MENU_DEV_GET_RS485CONFIGEX,
+	MENU_DEV_SET_RS485CONFIGEX,
+	MENU_DEV_GET_RS485CONFIGEXDYNAMIC,
+	MENU_DEV_SET_RS485CONFIGEXDYNAMIC,
 
 	MENU_DEV_GET_INPUTCONFIGEX,
 	MENU_DEV_SET_INPUTCONFIGEX,
@@ -186,6 +190,10 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_RS485CONFIG,			"BS2_GetRS485Config"},
 	{MENU_DEV_SET_RS485CONFIG,			"BS2_SetRS485Config"},
+	{MENU_DEV_GET_RS485CONFIGEX,		"BS2_GetRS485ConfigEx"},
+	{MENU_DEV_SET_RS485CONFIGEX,		"BS2_SetRS485ConfigEx"},
+	{MENU_DEV_GET_RS485CONFIGEXDYNAMIC,		"BS2_GetRS485ConfigExDynamic"},
+	{MENU_DEV_SET_RS485CONFIGEXDYNAMIC,		"BS2_SetRS485ConfigExDynamic"},
 
 	{MENU_DEV_GET_INPUTCONFIGEX,		"BS2_GetInputConfigEx"},
 	{MENU_DEV_SET_INPUTCONFIGEX,		"BS2_SetInputConfigEx"},
@@ -264,6 +272,10 @@ int turnOnQRBypass(void* context, const DeviceInfo& device);
 int turnOffQRBypass(void* context, const DeviceInfo& device);
 int getRS485Config(void* context, const DeviceInfo& device);
 int setRS485Config(void* context, const DeviceInfo& device);
+int getRS485ConfigEx(void* context, const DeviceInfo& device);
+int setRS485ConfigEx(void* context, const DeviceInfo& device);
+int getRS485ConfigExDynamic(void* context, const DeviceInfo& device);
+int setRS485ConfigExDynamic(void* context, const DeviceInfo& device);
 int getDeviceCapabilities(void* context, const DeviceInfo& device);
 int getInputConfigEx(void* context, const DeviceInfo& device);
 int setInputConfigEx(void* context, const DeviceInfo& device);

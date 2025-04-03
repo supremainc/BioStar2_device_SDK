@@ -294,6 +294,18 @@ int runAPIs(void* context, DeviceInfo& device)
 		case MENU_DEV_SET_RS485CONFIG:
 			sdkResult = setRS485Config(context, device);
 			break;
+		case MENU_DEV_GET_RS485CONFIGEX:
+			sdkResult = getRS485ConfigEx(context, device);
+			break;
+		case MENU_DEV_SET_RS485CONFIGEX:
+			sdkResult = setRS485ConfigEx(context, device);
+			break;
+		case MENU_DEV_GET_RS485CONFIGEXDYNAMIC:
+			sdkResult = getRS485ConfigExDynamic(context, device);
+			break;
+		case MENU_DEV_SET_RS485CONFIGEXDYNAMIC:
+			sdkResult = setRS485ConfigExDynamic(context, device);
+			break;
 		case MENU_DEV_GET_INPUTCONFIGEX:
 			sdkResult = getInputConfigEx(context, device);
 			break;
@@ -1840,6 +1852,42 @@ int getRS485Config(void* context, const DeviceInfo& device)
 	return sdkResult;
 }
 
+int getRS485ConfigEx(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2Rs485ConfigEX config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getRS485ConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int getRS485ConfigExDynamic(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2Rs485ConfigEXDynamic config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getRS485ConfigExDynamic(id, config);
+	if (BS_SDK_SUCCESS == sdkResult) {
+		ConfigControl::print(config);
+
+		//deallocating memory
+		for(auto& channel: config.channels)
+		{
+			if (channel.slaveDevices != nullptr)
+			{
+				BS2_ReleaseObject(channel.slaveDevices);				
+			}
+		}
+	}
+
+	return sdkResult;
+}
+
 int setRS485Config(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
@@ -1863,6 +1911,7 @@ int setRS485Config(void* context, const DeviceInfo& device)
 	msg = "How many RS485 channels do you want to set up? (0 ~ %u)";
 	config.numOfChannels = (uint8_t)Utility::getInput<uint32_t>(msg, numOfChannels);
 
+	// The device applies only baudRate.
 	for (uint8_t idx = 0; idx < config.numOfChannels; idx++)
 	{
 		msg = "Please insert baud rate. (Default: 115200)";
@@ -1921,6 +1970,128 @@ int setRS485Config(void* context, const DeviceInfo& device)
 	}
 
 	return cc.setRS485Config(id, config);
+}
+
+int setRS485ConfigEx(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2Rs485ConfigEX config = { 0, };
+	string msg;
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	BS2SimpleDeviceInfo info = {0,};
+	int sdkResult = dc.getDeviceInfo(id, info);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	uint32_t numOfChannels =
+		(BS2_DEVICE_TYPE_CORESTATION_40 == info.type) ? BS2_RS485_MAX_CHANNELS : 1;
+
+	msg = "How many RS485 channels do you want to set up? (0 ~ %u)";
+	config.numOfChannels = (uint8_t)Utility::getInput<uint32_t>(msg, numOfChannels);
+
+
+	// numOfChannels and mode are fixed base on the device type.
+	// Use BS2_GetSlaveDevice()/BS2_SetSlaveDevice() for slave device control.
+
+	for (uint8_t idx = 0; idx < config.numOfChannels; idx++)
+	{
+		msg = "Please insert baud rate. (Default: 115200)";
+		config.channels[idx].baudRate = Utility::getInput<uint32_t>(msg);
+	
+		config.mode[idx] = BS2_RS485_MODE_MASTER;
+#if 0
+		msg = "Please insert channel index.";
+		config.channels[idx].channelIndex = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Please insert useRegistance.";
+		config.channels[idx].useRegistance = (uint8_t)Utility::getInput<uint32_t>(msg);
+		
+		msg = "Please insert channelType.";
+		config.channels[idx].channelType = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Please insert number of devices.";
+		config.channels[idx].numOfDevices = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		for (uint8_t slaveIdx = 0; slaveIdx < config.channels[idx].numOfDevices; slaveIdx++)
+		{
+			BS2Rs485SlaveDeviceEX& slaveDevice = config.channels[idx].slaveDevices[slaveIdx];
+
+			msg = "Please insert #%u deviceID.";
+			slaveDevice.deviceID = Utility::getInput<BS2_DEVICE_ID>(msg, slaveIdx);
+
+			msg = "Please insert #%u deviceType.";
+			slaveDevice.deviceType = (uint16_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+
+			msg = "Please insert #%u enableOSDP.";
+			slaveDevice.enableOSDP = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+
+			msg = "Please insert #%u connected.";
+			slaveDevice.connected = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+			
+			msg = "Please insert #%u connected.";
+			slaveDevice.connected = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+		}
+#endif
+	}
+
+	return cc.setRS485ConfigEx(id, config);
+}
+
+int setRS485ConfigExDynamic(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2Rs485ConfigEXDynamic config = { 0, };
+	string msg;
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	BS2SimpleDeviceInfo info = {0,};
+	int sdkResult = dc.getDeviceInfo(id, info);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	TRACE("deviceType : %s(0x%02X)",  Utility::getStringOfDeviceType(info.type).c_str(), info.type);
+
+	// get channel count from BS2DeviceCapabilities.maxRS485Channels
+	switch (info.type)
+	{
+	case BS2_DEVICE_TYPE_CORESTATION_20:
+	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
+		config.numOfChannels = 3;
+		break;
+	default:
+		config.numOfChannels = 1;
+		break;
+	}
+
+	// numOfChannels and mode are fixed base on the device type.
+	// Use BS2_GetSlaveDevice()/BS2_SetSlaveDevice() for slave device control.
+	for (uint8_t ch = 0; ch < config.numOfChannels; ch++)
+	{		
+		if (info.type == BS2_DEVICE_TYPE_DOOR_INTERFACE_24)
+		{			
+			if (ch < (config.numOfChannels - 1)) config.mode[ch] = BS2_RS485_MODE_MASTER;
+			else config.mode[ch] = BS2_RS485_MODE_SLAVE;
+		}
+		else if (info.type == BS2_DEVICE_TYPE_CORESTATION_20)
+		{			
+			config.mode[ch] = BS2_RS485_MODE_MASTER;
+		}
+		TRACE("channel %u mode: %u", ch, config.mode[ch]);
+
+		config.channels[ch].channelIndex = (uint8_t)ch;		
+		config.channels[ch].numOfDevices = 0;
+		config.channels[ch].slaveDevices = nullptr;	
+
+		msg = "Please insert baud rate (Default: 115200)";
+		config.channels[ch].baudRate = Utility::getInput<uint32_t>(msg);
+	}
+
+	return cc.setRS485ConfigExDynamic(id, config);
 }
 
 int getDeviceCapabilities(void* context, const DeviceInfo& device)

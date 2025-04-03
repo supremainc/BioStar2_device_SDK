@@ -417,9 +417,9 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 	case BS2_DEVICE_TYPE_BIOENTRY_W3:
 		return "BEW3";
 	case BS2_DEVICE_TYPE_CORESTATION_20:
-		return "CS20";
+		return "CS-20";
 	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
-		return "DI24";
+		return "DI-24";
 	case BS2_DEVICE_TYPE_UNKNOWN:
 	default:
 		break;
@@ -489,15 +489,15 @@ string Utility::convertString2HexByte(const string& input)
 
 BS2_DEVICE_ID Utility::getSelectedDeviceID(const DeviceInfo& info)
 {
-	cout << "(M) - " << info.id_ << endl;
+	cout << "(M) - " << info.id_ << ", " << getStringOfDeviceType(info.type_) <<endl;
 	auto data = info.slaveDevices_;
 	for (auto item : data)
 	{
-		cout << "(S) - " << item.id << endl;
+		cout << "(S) - " << item.id <<  ", " << getStringOfDeviceType(item.type) << endl;
 		auto gSlaveList = item.gSlaveDevices_;
 		for (auto it : gSlaveList)
 		{
-			cout << "  (GS) - " << it.id << endl;
+			cout << "(GS) - " << it.id << endl;
 		}
 	}
 
