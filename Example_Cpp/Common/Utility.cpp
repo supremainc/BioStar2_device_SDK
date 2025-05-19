@@ -1142,6 +1142,7 @@ int Utility::searchCSTSlave(void* context, vector<BS2_DEVICE_ID_TYPE>& deviceLis
 					BS2_DEVICE_GSLAVE_TYPE item;
 					item.id = slaveDevice.deviceID;
 					item.slaveType = SLAVETYPE_OSDP;
+					cout << "Added grand slave:" << item.id << ", type:" << (uint32_t)item.slaveType << endl;
 					it->gSlaveDevices_.push_back(item);
 
 				}

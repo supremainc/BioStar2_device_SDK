@@ -83,6 +83,7 @@ enum EN_MENU_DEV
 	MENU_DEV_SET_RS485CONFIGEX,
 	MENU_DEV_GET_RS485CONFIGEXDYNAMIC,
 	MENU_DEV_SET_RS485CONFIGEXDYNAMIC,
+	MENU_DEV_GET_RS485CONFIGEXDYNAMICREMOVE,
 
 	MENU_DEV_GET_INPUTCONFIGEX,
 	MENU_DEV_SET_INPUTCONFIGEX,
@@ -110,6 +111,9 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,
 	MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,
 
+	MENU_DEV_GET_CARDCONFIG,
+	MENU_DEV_SET_CARDCONFIG,
+	
 	MENU_DEV_GET_CUSTOMCARDCONFIG,
 	MENU_DEV_SET_CUSTOMCARDCONFIG,
 
@@ -194,6 +198,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_RS485CONFIGEX,		"BS2_SetRS485ConfigEx"},
 	{MENU_DEV_GET_RS485CONFIGEXDYNAMIC,		"BS2_GetRS485ConfigExDynamic"},
 	{MENU_DEV_SET_RS485CONFIGEXDYNAMIC,		"BS2_SetRS485ConfigExDynamic"},
+	{MENU_DEV_GET_RS485CONFIGEXDYNAMICREMOVE,	"BS2_GetRS485ConfigExDynamicRemove"},
 
 	{MENU_DEV_GET_INPUTCONFIGEX,		"BS2_GetInputConfigEx"},
 	{MENU_DEV_SET_INPUTCONFIGEX,		"BS2_SetInputConfigEx"},
@@ -220,6 +225,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_OSDPSTANDARDCONFIG,		"BS2_GetOsdpStandardConfig"},
 	{MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,	"BS2_GetOsdpStandardActionConfig"},
 	{MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,	"BS2_SetOsdpStandardActionConfig"},
+
+	{MENU_DEV_GET_CARDCONFIG,		"BS2_GetCardConfig"},
+	{MENU_DEV_SET_CARDCONFIG,		"BS2_SetCardConfig"},
 
 	{MENU_DEV_GET_CUSTOMCARDCONFIG,		"BS2_GetCustomCardConfig"},
 	{MENU_DEV_SET_CUSTOMCARDCONFIG,		"BS2_SetCustomCardConfig"},
@@ -276,6 +284,7 @@ int getRS485ConfigEx(void* context, const DeviceInfo& device);
 int setRS485ConfigEx(void* context, const DeviceInfo& device);
 int getRS485ConfigExDynamic(void* context, const DeviceInfo& device);
 int setRS485ConfigExDynamic(void* context, const DeviceInfo& device);
+int getRS485ConfigExDynamicAndRemove(void* context, const DeviceInfo& device);
 int getDeviceCapabilities(void* context, const DeviceInfo& device);
 int getInputConfigEx(void* context, const DeviceInfo& device);
 int setInputConfigEx(void* context, const DeviceInfo& device);
@@ -295,6 +304,8 @@ int getLicenseConfig(void* context, const DeviceInfo& device);
 int getOsdpStandardConfig(void* context, const DeviceInfo& device);
 int getOsdpStandardActionConfig(void* context, const DeviceInfo& device);
 int setOsdpStandardActionConfig(void* context, const DeviceInfo& device);
+int getCardConfig(void* context, const DeviceInfo& device);
+int setCardConfig(void* context, const DeviceInfo& device);
 int getCustomCardConfig(void* context, const DeviceInfo& device);
 int setCustomCardConfig(void* context, const DeviceInfo& device);
 void setTriggerAction(const DeviceInfo& device, BS2TriggerAction& triggerAction);

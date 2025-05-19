@@ -770,6 +770,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCustomCardConfig(void* const, BS2
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetCustomCardConfig(void* const, BS2_DEVICE_ID deviceId, const BS2CustomCardConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFacilityCodeConfig(void* const, BS2_DEVICE_ID deviceId, BS2FacilityCodeConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetFacilityCodeConfig(void* const, BS2_DEVICE_ID deviceId, const BS2FacilityCodeConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetMifareCardConfigEx(void* const, BS2_DEVICE_ID deviceId, BS2MifareCardConfigEx* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetMifareCardConfigEx(void* const, BS2_DEVICE_ID deviceId, const BS2MifareCardConfigEx* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);

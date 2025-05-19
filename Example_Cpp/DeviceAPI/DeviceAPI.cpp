@@ -306,6 +306,9 @@ int runAPIs(void* context, DeviceInfo& device)
 		case MENU_DEV_SET_RS485CONFIGEXDYNAMIC:
 			sdkResult = setRS485ConfigExDynamic(context, device);
 			break;
+		case MENU_DEV_GET_RS485CONFIGEXDYNAMICREMOVE:
+			sdkResult = getRS485ConfigExDynamicAndRemove(context, device);
+			break;
 		case MENU_DEV_GET_INPUTCONFIGEX:
 			sdkResult = getInputConfigEx(context, device);
 			break;
@@ -357,6 +360,12 @@ int runAPIs(void* context, DeviceInfo& device)
 		case MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG:
 			sdkResult = setOsdpStandardActionConfig(context, device);
 			break;
+		case MENU_DEV_GET_CARDCONFIG:
+			sdkResult = getCardConfig(context, device);
+			break;
+		case MENU_DEV_SET_CARDCONFIG:
+			sdkResult = setCardConfig(context, device);
+			break;		
 		case MENU_DEV_GET_CUSTOMCARDCONFIG:
 			sdkResult = getCustomCardConfig(context, device);
 			break;
@@ -1888,6 +1897,57 @@ int getRS485ConfigExDynamic(void* context, const DeviceInfo& device)
 	return sdkResult;
 }
 
+int getRS485ConfigExDynamicAndRemove(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2Rs485ConfigEXDynamic config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getRS485ConfigExDynamic(id, config);
+	if (BS_SDK_SUCCESS == sdkResult) {
+		ConfigControl::print(config);
+
+		BS2Rs485SlaveDeviceEX rmSlaveList[BS2_RS485_MAX_SLAVES_PER_CHANNEL] = { 0, };
+		uint32_t rmCnt = 0;
+
+		for(uint32_t ch = 0; ch <  config.numOfChannels; ch++)
+		{
+			auto& channel = config.channels[ch];
+			rmCnt = 0;
+
+			for(uint32_t idx = 0; idx <  channel.numOfDevices; idx++)
+			{
+				rmSlaveList[rmCnt] = channel.slaveDevices[idx];
+				rmSlaveList[rmCnt].enableOSDP = 0;
+				rmCnt++;
+			}
+
+			for(uint32_t idx = 0; idx < rmCnt; idx++)
+			{				
+				TRACE("SlaveList to be removed");
+				TRACE("- ch:%d idx[%d] deviceID: %u, deviceType: %s", ch, idx,
+				rmSlaveList[idx].deviceID, Utility::getStringOfDeviceType(rmSlaveList[idx].deviceType).c_str());
+			}
+
+			TRACE("BS2_SetSlaveExDevice start, rmCnt[%d]", rmCnt);
+			BS2_SetSlaveExDevice(context, id,  0, rmSlaveList, rmCnt);
+			TRACE("BS2_SetSlaveExDevice end, rmCnt[%d]",rmCnt);
+}
+
+		//deallocating memory
+		for(uint32_t ch = 0; ch <  config.numOfChannels; ch++)
+		{
+			auto& channel = config.channels[ch];
+			if (channel.slaveDevices != nullptr)
+			{
+				BS2_ReleaseObject(channel.slaveDevices);
+			}
+		}
+	}
+
+	return sdkResult;
+}
+
 int setRS485Config(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
@@ -2055,7 +2115,7 @@ int setRS485ConfigExDynamic(void* context, const DeviceInfo& device)
 		return sdkResult;
 
 	TRACE("deviceType : %s(0x%02X)",  Utility::getStringOfDeviceType(info.type).c_str(), info.type);
-
+#if 0
 	// get channel count from BS2DeviceCapabilities.maxRS485Channels
 	switch (info.type)
 	{
@@ -2090,8 +2150,14 @@ int setRS485ConfigExDynamic(void* context, const DeviceInfo& device)
 		msg = "Please insert baud rate (Default: 115200)";
 		config.channels[ch].baudRate = Utility::getInput<uint32_t>(msg);
 	}
+#endif
+	sdkResult =	cc.getRS485ConfigExDynamic(id, config);
+	if (BS_SDK_SUCCESS == sdkResult) {
+		ConfigControl::print(config);
 
-	return cc.setRS485ConfigExDynamic(id, config);
+		return cc.setRS485ConfigExDynamic(id, config);
+	}
+	return sdkResult;
 }
 
 int getDeviceCapabilities(void* context, const DeviceInfo& device)
@@ -3019,6 +3085,190 @@ int setOsdpStandardActionConfig(void* context, const DeviceInfo& device)
 	return cc.setOsdpStandardActionConfig(id, config);
 }
 
+int getCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	sdkResult = cc.getCardConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+	else
+		return sdkResult;
+
+	if (Utility::isYes("Do you want to scan card test?"))
+	{
+		UserControl uc(context);
+		BS2Card cardID;
+
+		sdkResult = uc.scanCard(id, &cardID);
+		if (BS_SDK_SUCCESS == sdkResult)
+			UserControl::print(cardID);
+	}
+
+	return sdkResult;
+}
+
+int setCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CardConfig config = { 0, };
+	BS2MifareCardConfigEx mfConfig = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	sdkResult = cc.getCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Please enter a data type of cards. (0: Binary, 1: ASCII, 2: UTF16, 3: BCS)";
+	config.dataType = (BS2_CARD_DATA_TYPE)Utility::getInput<uint32_t>(msg);
+	
+	config.useSecondaryKey = Utility::isYes("Do you want to use secondary key?");
+
+	ostringstream oss;
+
+	msg = "Please enter the encryption type of mifare card (0:CRYPTO1, 1:AES128).";
+	config.mifareEncType = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+
+	
+	if (Utility::isYes("Do you want to change mifare card settings?"))
+	{
+		memset(&config.mifare.primaryKey, 0x0, sizeof(config.mifare.primaryKey));
+		oss << "Please enter the hexadecimal " << sizeof(config.mifare.primaryKey) << "-bytes primary key for mifare card." << endl;
+		oss << " [Like 12 34 56 ... EF]" << endl;
+		Utility::getLineHexaString<uint8_t>(oss.str(), config.mifare.primaryKey, sizeof(config.mifare.primaryKey));
+
+		if (config.useSecondaryKey)
+		{
+			memset(&config.mifare.secondaryKey, 0x0, sizeof(config.mifare.secondaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.mifare.secondaryKey) << "-bytes secondary key for mifare card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.mifare.secondaryKey, sizeof(config.mifare.secondaryKey));
+		}
+
+		msg = "Please enter the start block index of mifare card.";
+		config.mifare.startBlockIndex = (uint16_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	if (Utility::isYes("Do you want to change desfire card settings?"))
+	{
+		msg = "Please enter a operation mode for desfire card. (0: Legacy, 1: Advanced(AppLevelKey))";
+		config.desfire.operationMode = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		if (DESFIRECARD_OPERATION_MODE_LEGACY == config.desfire.operationMode)
+		{
+			memset(&config.desfire.primaryKey, 0x0, sizeof(config.desfire.primaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.desfire.primaryKey) << "-bytes primary key for desfire card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.primaryKey, sizeof(config.desfire.primaryKey));
+
+			if (config.useSecondaryKey)
+			{
+				memset(&config.desfire.secondaryKey, 0x0, sizeof(config.desfire.secondaryKey));
+				oss.str("");
+				oss << "Please enter the hexadecimal " << sizeof(config.desfire.secondaryKey) << "-bytes secondary key for desfire card." << endl;
+				oss << " [Like 12 34 56 ... EF]" << endl;
+				Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.secondaryKey, sizeof(config.desfire.secondaryKey));
+			}
+		}
+
+	}
+
+	msg = "Please enter a smart card byte order. (0: MSB, 1: LSB)";
+	config.smartCardByteOrder = (BS2_CARD_BYTE_ORDER)Utility::getInput<uint32_t>(msg);
+	msg = "Please enter a formatID.";
+	config.formatID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+	sdkResult = cc.setCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+
+	// MifareCardConfigEx
+	if (config.mifareEncType == MIFARE_ENCRYPTION_AES128)
+	{
+		if (Utility::isYes("Do you want to change mifare card Extention settings?"))
+		{
+			sdkResult = cc.getCardConfig(id, config);
+			if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+			memset(&mfConfig.mifareEx.primaryKey, 0x0, sizeof(mfConfig.mifareEx.primaryKey));
+			oss << "Please enter the hexadecimal " << sizeof(mfConfig.mifareEx.primaryKey) << "-bytes primary key for mifare card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), mfConfig.mifareEx.primaryKey, sizeof(mfConfig.mifareEx.primaryKey));
+
+			if (config.useSecondaryKey)
+			{
+				memset(&mfConfig.mifareEx.secondaryKey, 0x0, sizeof(mfConfig.mifareEx.secondaryKey));
+				oss.str("");
+				oss << "Please enter the hexadecimal " << sizeof(mfConfig.mifareEx.secondaryKey) << "-bytes secondary key for mifare card." << endl;
+				oss << " [Like 12 34 56 ... EF]" << endl;
+				Utility::getLineHexaString<uint8_t>(oss.str(), mfConfig.mifareEx.secondaryKey, sizeof(mfConfig.mifareEx.secondaryKey));
+			}
+
+			msg = "Please enter the start block index of mifare card.";
+			mfConfig.mifareEx.startBlockIndex = (uint16_t)Utility::getInput<uint32_t>(msg);
+		}
+	}
+	
+	// SystemConfig
+	oss.str("");
+	oss << "Do you want to change the card operation mode?";
+	if (Utility::isYes(oss.str()))
+	{
+		BS2SystemConfig sysConfig = { 0, };
+		sdkResult = cc.getSystemConfig(id, sysConfig);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		uint32_t preMask = sysConfig.useCardOperationMask;
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_MASK_CLASSIC_PLUS;
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_MASK_DESFIRE_EV1;
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_SR_SE;
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_SEOS;
+
+		// Apply
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_USE;
+
+		sdkResult = cc.setSystemConfig(id, sysConfig);
+		if (BS_SDK_SUCCESS == sdkResult)
+			TRACE("Card operation mode was changed 0x08d => 0x08d", preMask, sysConfig.useCardOperationMask);
+	}
+
+	return sdkResult;
+}
+
 int getCustomCardConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
@@ -3080,11 +3330,15 @@ int setCustomCardConfig(void* context, const DeviceInfo& device)
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
+	std::cout << "Current dataType:" << config.dataType << std::endl;
 	string msg = "Please enter a data type of cards. (0: Binary, 1: ASCII, 2: UTF16, 3: BCS)";
 	config.dataType = (BS2_CARD_DATA_TYPE)Utility::getInput<uint32_t>(msg);
 	config.useSecondaryKey = Utility::isYes("Do you want to use secondary key?");
 
 	ostringstream oss;
+
+	msg = "Please enter the encryption type of mifare card (0:CRYPTO1, 1:AES128).";
+	config.mifareEncType = (uint16_t)Utility::getInput<uint32_t>(msg);
 
 	if (Utility::isYes("Do you want to change mifare custom card settings?"))
 	{
@@ -3108,6 +3362,30 @@ int setCustomCardConfig(void* context, const DeviceInfo& device)
 		config.mifare.dataSize = (uint8_t)Utility::getInput<uint32_t>(msg);
 		msg = "Please enter the skip bytes of mifare card.";
 		config.mifare.skipBytes = (uint8_t)Utility::getInput<uint32_t>(msg);
+	}
+	
+	if (Utility::isYes("Do you want to change mifare custom card Extention settings?"))
+	{
+		memset(&config.mifareEx.primaryKey, 0x0, sizeof(config.mifareEx.primaryKey));
+		oss << "Please enter the hexadecimal " << sizeof(config.mifareEx.primaryKey) << "-bytes primary key for mifare card." << endl;
+		oss << " [Like 12 34 56 ... EF]" << endl;
+		Utility::getLineHexaString<uint8_t>(oss.str(), config.mifareEx.primaryKey, sizeof(config.mifareEx.primaryKey));
+
+		if (config.useSecondaryKey)
+		{
+			memset(&config.mifareEx.secondaryKey, 0x0, sizeof(config.mifareEx.secondaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.mifareEx.secondaryKey) << "-bytes secondary key for mifare card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.mifareEx.secondaryKey, sizeof(config.mifareEx.secondaryKey));
+		}
+
+		msg = "Please enter the start block index of mifare card.";
+		config.mifareEx.startBlockIndex = (uint16_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the card data size of mifare card.";
+		config.mifareEx.dataSize = (uint8_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the skip bytes of mifare card.";
+		config.mifareEx.skipBytes = (uint8_t)Utility::getInput<uint32_t>(msg);
 	}
 
 	if (Utility::isYes("Do you want to change desfire custom card settings?"))

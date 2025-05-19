@@ -1560,6 +1560,7 @@ void ConfigControl::print(const BS2CardConfig& config)
 	TRACE("|--cipher : %u", config.cipher);
 	TRACE("|--formatID : %u", config.formatID);
 	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
+	TRACE("|--mifareEncType : %u", config.mifareEncType);
 }
 
 void ConfigControl::print(const BS2WiegandConfig& config)
@@ -1761,6 +1762,15 @@ void ConfigControl::print(const BS2CustomDesFireCard& card)
 	print(card.desfireAppKey);
 }
 
+void ConfigControl::print(const BS2CustomMifareCardEx& card)
+{
+	TRACE("+--mifareEx.primaryKey : %s", Utility::getHexaString(card.primaryKey, sizeof(card.primaryKey)).c_str());
+	TRACE("+--mifareEx.secondaryKey : %s", Utility::getHexaString(card.secondaryKey, sizeof(card.secondaryKey)).c_str());
+	TRACE("+--mifareEx.startBlockIndex : %u", card.startBlockIndex);
+	TRACE("+--mifareEx.dataSize : %u", card.dataSize);
+	TRACE("+--mifareEx.skipBytes : %u", card.skipBytes);
+}
+
 void ConfigControl::print(const BS2DesFireAppLevelKey& key)
 {
 	TRACE("+--desfire.desfireAppKey.appMasterKey:%s", Utility::getHexaString(key.appMasterKey, 16).c_str());	// maybe 0
@@ -1777,6 +1787,8 @@ void ConfigControl::print(const BS2CustomCardConfig& config)
 	TRACE("|--useSecondaryKey : %u", config.useSecondaryKey);
 	print(config.mifare);
 	print(config.desfire);
+	TRACE("|--mifareEncType : %u", config.mifareEncType);
+	print(config.mifareEx);
 	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
 	TRACE("+--formatID : %u", config.formatID);
 }

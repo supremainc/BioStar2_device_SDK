@@ -142,6 +142,7 @@ public:
 	static void print(const BS2OsdpStandardConfig& config);
 	static void print(const BS2OsdpStandardActionConfig& config);
 	static void print(const BS2CustomMifareCard& card);
+	static void print(const BS2CustomMifareCardEx& card);
 	static void print(const BS2CustomDesFireCard& card);
 	static void print(const BS2DesFireAppLevelKey& key);
 	static void print(const BS2CustomCardConfig& config);
