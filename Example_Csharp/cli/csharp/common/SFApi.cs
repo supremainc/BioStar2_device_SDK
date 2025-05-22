@@ -510,6 +510,12 @@ namespace Suprema
         extern public static int BS2_SetCustomCardConfig(IntPtr context, UInt32 deviceId, ref BS2CustomCardConfig config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetMifareCardConfigEx(IntPtr context, UInt32 deviceId, out BS2MifareCardConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetMifareCardConfigEx(IntPtr context, UInt32 deviceId, ref BS2MifareCardConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetRS485ConfigEx(IntPtr context, UInt32 deviceId, out BS2Rs485ConfigEX config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]

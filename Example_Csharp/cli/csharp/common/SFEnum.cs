@@ -1995,6 +1995,7 @@ namespace Suprema
     public enum BS2CapabilityFunctionSupport4
     {
         FUNCTION4_SUPPORT_AUTHDENYMASK                = 0x01,  // [V2.9.8]
+        FUNCTION4_SUPPORT_MIFARECARDCONFIGEX          = 0x02,  // [V2.9.9]
     }
 
     [Flags]

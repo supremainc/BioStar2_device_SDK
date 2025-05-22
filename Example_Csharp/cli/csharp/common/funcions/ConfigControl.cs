@@ -51,8 +51,6 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
 
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get Card1xConfig", getCard1xConfig));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Card1xConfig", setCard1xConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get SystemExtConfig", getSystemExtConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set SystemExtConfig", setSystemExtConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get VoipConfig", getVoipConfig));
@@ -66,13 +64,9 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485Config", setRS485Config));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigEx", getRS485ConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigEx", setRS485ConfigEx));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfigEx", getCardConfigEx));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfigEx", setCardConfigEx));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DstConfig", getDstConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DstConfig", setDstConfig));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get SystemConfig", getSystemConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set SystemConfig", setSystemConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get InputConfig", getInputConfig));
@@ -110,7 +104,19 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set OsdpStandardActionConfig", setOsdpStandardActionConfig));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get Card1xConfig", getCard1xConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Card1xConfig", setCard1xConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfig", getCardConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfig", setCardConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get MifareCardConfigEx", getMifareCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set MifareCardConfigEx", setMifareCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfigEx - BS2SeosCard", getCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfigEx - BS2SeosCard", setCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CustomCardConfig", getCustomCardConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CustomCardConfig", setCustomCardConfig));
 
@@ -1706,25 +1712,6 @@ namespace Suprema
             {
                 print(config);
             }
-
-	        Console.WriteLine("Do you want to scan card test? [Y/n]");
-	        if (Util.IsYes())
-	        {
-                BS2Card card;
-
-                cbCardOnReadyToScan = new API.OnReadyToScan(ReadyToScanForCard);
-                Console.WriteLine("Trying to scan card.");
-                result = (BS2ErrorCode)API.BS2_ScanCard(sdkContext, deviceID, out card, cbCardOnReadyToScan);
-                if (BS2ErrorCode.BS_SDK_SUCCESS != result)
-                {
-                    Console.WriteLine("Got error({0}).", result);
-                    return;
-                }
-
-                CommonControl.print(ref card);
- 
-                cbCardOnReadyToScan = null;
-            }
         }
 
         void setCustomCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -1745,24 +1732,30 @@ namespace Suprema
             if (BS2ErrorCode.BS_SDK_SUCCESS != result)
                 return;
 
-            Util.HighlightLine("Please enter a data type of cards. (0: Binary, 1: ASCII, 2: UTF16, 3: BCS)", "data type");
+            Util.HighlightLine("Please enter a data type of cards. (0: Binary(default), 1: ASCII, 2: UTF16, 3: BCS)", "data type");
             Console.Write(">>>> ");
             config.dataType = Util.GetInput((byte)0);
 
-            Util.HighlightLine("Do you want to use secondary key?", "use secondary key");
+            Util.HighlightLine("Do you want to use secondary key? [y/N]", "use secondary key");
             Console.Write(">>>> ");
             bool useSecondaryKey = Util.IsYes();
             config.useSecondaryKey = Convert.ToByte(useSecondaryKey);
 
-            Util.HighlightLine("Do you want to change mifare custom card settings? [Y/n]", "mifare custom card");
+            Console.WriteLine("Enter the mifare encryption type [0:CRYPTO1(Default), 1:AES128]");
+            Console.Write(">>>> ");
+            config.mifareEncType = Util.GetInput((byte)0);
+
+            Util.HighlightLine("Do you want to change mifare custom card(CRYPTO1) settings? [Y/n]", "mifare custom card(CRYPTO1)");
             Console.Write(">>>> ");
             if (Util.IsYes())
         	{
                 int sizeOfKey = config.mifare.primaryKey.Length;
 	            Array.Clear(config.mifare.primaryKey, 0, sizeOfKey);
-                string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card. [KEY1-KEY2-...-KEY6]", sizeOfKey);
-                Util.HighlightLineMulti(tempStr, "primary key", "mifare card");
+                string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card(CRYPTO1). [KEY1-KEY2-...-KEY6]", sizeOfKey);
+                Util.HighlightLineMulti(tempStr, "primary key", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
+
+
                 enterSmartcardKey(config.mifare.primaryKey);
 
 		        if (useSecondaryKey)
@@ -1775,17 +1768,53 @@ namespace Suprema
                     enterSmartcardKey(config.mifare.secondaryKey);
 		        }
 
-                Util.HighlightLineMulti("Please enter the start block index of mifare card.", "start block index", "mifare card");
+                Util.HighlightLineMulti("Please enter the start block index of mifare card(CRYPTO1).", "start block index", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
                 config.mifare.startBlockIndex = Util.GetInput((UInt16)0);
 
-                Util.HighlightLineMulti("Please enter the card data size of mifare card.", "card data size", "mifare card");
+                Util.HighlightLineMulti("Please enter the card data size of mifare card(CRYPTO1).", "card data size", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
                 config.mifare.dataSize = Util.GetInput((byte)0);
 
-                Util.HighlightLineMulti("Please enter the skip bytes of mifare card.", "skip bytes", "mifare card");
+                Util.HighlightLineMulti("Please enter the skip bytes of mifare card(CRYPTO1).", "skip bytes", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
                 config.mifare.skipBytes = Util.GetInput((byte)0);
+            }
+
+            Util.HighlightLine("Do you want to change mifare custom card(AES128) settings? [Y/n]", "mifare custom card(AES128)");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                int sizeOfKey = config.mifareEx.primaryKey.Length;
+                Array.Clear(config.mifareEx.primaryKey, 0, sizeOfKey);
+                string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+                Util.HighlightLineMulti(tempStr, "primary key", "mifare card(AES128)");
+                Console.Write(">>>> ");
+
+                enterSmartcardKey(config.mifareEx.primaryKey);
+
+                if (useSecondaryKey)
+                {
+                    sizeOfKey = config.mifareEx.secondaryKey.Length;
+                    Array.Clear(config.mifareEx.secondaryKey, 0, sizeOfKey);
+                    tempStr = String.Format("Please enter the hexadecimal {0}-bytes secondary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+                    Util.HighlightLineMulti(tempStr, "secondary key", "mifare card(AES128)");
+                    Console.Write(">>>> ");
+                    enterSmartcardKey(config.mifareEx.secondaryKey);
+                }
+
+
+                Util.HighlightLineMulti("Please enter the start block index of mifare card(AES128).", "start block index", "mifare card(AES128)");
+                Console.Write(">>>> ");
+                config.mifareEx.startBlockIndex = Util.GetInput((UInt16)0);
+
+                Util.HighlightLineMulti("Please enter the card data size of mifare card(AES128).", "card data size", "mifare card(AES128)");
+                Console.Write(">>>> ");
+                config.mifareEx.dataSize = Util.GetInput((byte)0);
+
+                Util.HighlightLineMulti("Please enter the skip bytes of mifare card(AES128).", "skip bytes", "mifare card(AES128)");
+                Console.Write(">>>> ");
+                config.mifareEx.skipBytes = Util.GetInput((byte)0);
             }
 
             Util.HighlightLine("Do you want to change desfire custom card settings? [Y/n]", "desfire custom card");
@@ -1923,6 +1952,79 @@ namespace Suprema
                 else
                     Console.WriteLine("Card operation mode was changed 0x{0:x8} => 0x{1:x8}", preMask, sysConfig.useCardOperationMask);
             }
+        }        
+
+        void getMifareCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2DeviceCapabilities capa;
+            if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
+                return;
+
+            if (!Convert.ToBoolean(capa.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX))
+            {
+                Console.WriteLine("Not supported function.");
+                return;
+            }
+
+            BS2MifareCardConfigEx config;
+            Console.WriteLine("Trying to get MifareCardConfigEx");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetMifareCardConfigEx(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+            else
+            {
+                print(config);
+            }
+
+        }
+
+        void setMifareCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {            
+            BS2DeviceCapabilities capa;
+            if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
+                return;
+
+            if (!Convert.ToBoolean(capa.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX))
+            {
+                Console.WriteLine("Not supported function.");
+                return;
+            }
+
+            BS2MifareCardConfigEx config;
+
+            Console.WriteLine("Try to get MifareCardConfigEx");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetMifareCardConfigEx(sdkContext, deviceID, out config);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                return;
+            
+            int sizeOfKey = config.mifareEx.primaryKey.Length;
+            Array.Clear(config.mifareEx.primaryKey, 0, sizeOfKey);
+            string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+            Util.HighlightLineMulti(tempStr, "primary key", "mifare card(AES128)");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.mifareEx.primaryKey);
+
+            sizeOfKey = config.mifareEx.secondaryKey.Length;
+            Array.Clear(config.mifareEx.secondaryKey, 0, sizeOfKey);
+            tempStr = String.Format("Please enter the hexadecimal {0}-bytes secondary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+            Util.HighlightLineMulti(tempStr, "secondary key", "mifare card(AES128)");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.mifareEx.secondaryKey);
+
+
+            Util.HighlightLineMulti("Please enter the start block index of mifare card(AES128).", "start block index", "mifare card(AES128)");
+            Console.Write(">>>> ");
+            config.mifareEx.startBlockIndex = Util.GetInput((UInt16)0);
+
+            result = (BS2ErrorCode)API.BS2_SetMifareCardConfigEx(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
         }
 
         public void getDstConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -2021,6 +2123,186 @@ namespace Suprema
             }
         }
 
+        public void getCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2CardConfig cardConfig;
+
+            Console.WriteLine("Trying to get card configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetCardConfig(sdkContext, deviceID, out cardConfig);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(cardConfig);                
+            }
+        }
+
+        public void setCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FactoryConfig factoryConfig;
+
+            Console.WriteLine("Trying to get factory config");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFactoryConfig(sdkContext, deviceID, out factoryConfig);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            UInt16 cardModel = 0;
+            IntPtr ptrModel = Marshal.StringToHGlobalAnsi(Encoding.UTF8.GetString(factoryConfig.modelName).TrimEnd('\0'));
+            result = (BS2ErrorCode)API.BS2_GetCardModel(ptrModel, out cardModel);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            BS2CardConfig cardConfig = Util.AllocateStructure<BS2CardConfig>();
+
+            Console.WriteLine("Choose byte order: [0: MSB(default), 1: LSB]");
+            Console.Write(">>>> ");
+            cardConfig.byteOrder = Util.GetInput((byte)BS2CardByteOrderEnum.MSB);
+            Console.WriteLine("Do you want to use wiegand format? [y/N]");
+            Console.Write(">>>> ");
+            if (Util.IsNo())
+            {
+                cardConfig.useWiegandFormat = 0;
+            }
+            else
+            {
+                cardConfig.useWiegandFormat = 1;
+            }
+
+            BS2CardModelEnum cardModelEnum = (BS2CardModelEnum)cardModel;
+            switch (cardModelEnum)
+            {
+                case BS2CardModelEnum.OMPW:
+                case BS2CardModelEnum.OIPW:
+                case BS2CardModelEnum.OAPW:
+                case BS2CardModelEnum.ODPW:
+                    {
+                        Console.WriteLine("Enter the card format id [0(default)]");
+                        Console.Write(">>>> ");
+                        cardConfig.formatID = Util.GetInput((UInt32)0);
+
+                        Console.WriteLine("Choose card data type: [0: Binary(default), 1: ASCII, 2: UTF16, 3: BCD]");
+                        Console.Write(">>>> ");
+                        cardConfig.dataType = Util.GetInput((byte)BS2CardDataTypeEnum.BINARY);
+                        Console.WriteLine("Do you want to use secondary key? [y/N]");
+                        Console.Write(">>>> ");
+                        if (Util.IsNo())
+                        {
+                            cardConfig.useSecondaryKey = 0;
+                        }
+                        else
+                        {
+                            cardConfig.useSecondaryKey = 1;
+                        }
+
+                        if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OAPW || cardModelEnum == BS2CardModelEnum.ODPW) // mifare card
+                        {
+                            Console.WriteLine("Enter the mifare encryption type [0:CRYPTO1(Default), 1:AES128]");
+                            Console.Write(">>>> ");
+                            cardConfig.mifareEncType = Util.GetInput((byte)0);
+
+                            Console.WriteLine("Enter the start block index for mifare card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.mifare.startBlockIndex = Util.GetInput((UInt16)0);
+                            Console.WriteLine("Enter the hexadecimal primary key for mifare card. [KEY1-KEY2-...-KEY6]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.mifare.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for mifare card. [KEY1-KEY2-...-KEY6]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.mifare.secondaryKey);
+
+                            Console.WriteLine("Enter the app id for desfire card. [ID1-ID2-ID3]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.appID);
+                            Console.WriteLine("Enter the file id for desfire card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.fileID = Util.GetInput((byte)0);
+
+#if true
+                            Console.WriteLine("Enter the encryption type for desfire card [0: DES/3DES(default), 1: AES]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.encryptionType = Util.GetInput((byte)0);
+#else
+                            cardConfig.desfire.encryptionType = 0;
+#endif
+                            Console.WriteLine("Enter the operation mode for desfire card [0: Legacy, 1: Advanced]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.operationMode = Util.GetInput((byte)0);
+
+                            Console.WriteLine("Enter the hexadecimal primary key for desfire card. [KEY1-KEY2-...-KEY16]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for desfire card. [KEY1-KEY2-...-KEY16]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.secondaryKey);
+                        }
+
+                        //else // iclass card
+                        if (cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
+                        {
+                            Console.WriteLine("Enter the start block index for iclass card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.iclass.startBlockIndex = Util.GetInput((UInt16)0);
+                            Console.WriteLine("Enter the hexadecimal primary key for iclass card. [KEY1-KEY2-...-KEY8]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.iclass.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for iclass card. [KEY1-KEY2-...-KEY8]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.iclass.secondaryKey);
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            Console.WriteLine("Trying to set card configuration.");
+            result = (BS2ErrorCode)API.BS2_SetCardConfig(sdkContext, deviceID, ref cardConfig);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            Console.WriteLine("To use the Smart card function, you must turn on the Suprema smart card function. Do you want to change the card operation mode? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                BS2SystemConfig sysConfig;
+                result = (BS2ErrorCode)API.BS2_GetSystemConfig(sdkContext, deviceID, out sysConfig);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                }
+
+                UInt32 preMask = sysConfig.useCardOperationMask;
+
+                // Turn on Suprema smart card
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CLASSIC_PLUS;
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_DESFIRE_EV1;
+
+                // Turn off Custom smart card
+                sysConfig.useCardOperationMask &= ~(UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CUSTOM_CLASSIC_PLUS;
+                sysConfig.useCardOperationMask &= ~(UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CUSTOM_DESFIRE_EV1;
+
+                // Apply
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_USE;
+
+                result = (BS2ErrorCode)API.BS2_SetSystemConfig(sdkContext, deviceID, ref sysConfig);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                    Console.WriteLine("Card operation mode update failed ({0}).", result);
+                else
+                    Console.WriteLine("Card operation mode was changed 0x{0:x8} => 0x{1:x8}", preMask, sysConfig.useCardOperationMask);
+            }
+        }
+
         public void getDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2DesFireCardConfigEx config;
@@ -2038,13 +2320,18 @@ namespace Suprema
         void enterSmartcardKey(byte[] dst)
         {
             int index = 0;
-            string[] keys = Console.ReadLine().Split('-');
-            foreach (string key in keys)
+            string inputStr = Console.ReadLine();
+
+            if (inputStr.Length > 0)
             {
-                dst[index++] = Convert.ToByte(key, 16);
-                if (index > dst.Length)
+                string[] keys = inputStr.Split('-');
+                foreach (string key in keys)
                 {
-                    return;
+                    dst[index++] = Convert.ToByte(key, 16);
+                    if (index > dst.Length)
+                    {
+                        return;
+                    }
                 }
             }
 
@@ -3577,11 +3864,21 @@ namespace Suprema
             Console.WriteLine(">>>> BS2CustomCardConfig configuration ");
             Console.WriteLine("     |--dataType : {0}", config.dataType);
             Console.WriteLine("     |--useSecondaryKey : {0}", config.useSecondaryKey);
+
+            Console.WriteLine("     |--mifareEncType : {0}", config.mifareEncType);
+
             Console.WriteLine("     |--mifare.primaryKey : {0}", BitConverter.ToString(config.mifare.primaryKey));
             Console.WriteLine("     |--mifare.secondaryKey : {0}", BitConverter.ToString(config.mifare.secondaryKey));
             Console.WriteLine("     |--mifare.startBlockIndex : {0}", config.mifare.startBlockIndex);
             Console.WriteLine("     |--mifare.dataSize : {0}", config.mifare.dataSize);
             Console.WriteLine("     |--mifare.skipBytes : {0}", config.mifare.skipBytes);
+
+            Console.WriteLine("     |--mifareEx.primaryKey : {0}", BitConverter.ToString(config.mifareEx.primaryKey));
+            Console.WriteLine("     |--mifareEX.secondaryKey : {0}", BitConverter.ToString(config.mifareEx.secondaryKey));
+            Console.WriteLine("     |--mifareEx.startBlockIndex : {0}", config.mifareEx.startBlockIndex);
+            Console.WriteLine("     |--mifareEx.dataSize : {0}", config.mifareEx.dataSize);
+            Console.WriteLine("     |--mifareEx.skipBytes : {0}", config.mifareEx.skipBytes);            
+
             Console.WriteLine("     |--desfire.primaryKey : {0}", BitConverter.ToString(config.desfire.primaryKey));
             Console.WriteLine("     |--desfire.secondaryKey : {0}", BitConverter.ToString(config.desfire.secondaryKey));
             Console.WriteLine("     |--desfire.appID : {0}", BitConverter.ToString(config.desfire.appID));
@@ -3598,6 +3895,38 @@ namespace Suprema
             Console.WriteLine("     |--smartCardByteOrder : {0}", config.smartCardByteOrder);
             Console.WriteLine("     |--formatID : {0}", config.formatID);
             Console.WriteLine("<<<< ");
+        }
+
+        void print(BS2MifareCardConfigEx config)
+        {
+            Console.WriteLine(">>>> BS2MifareCardConfigEx configuration ");
+            Console.WriteLine("     |--mifareEx.primaryKey : {0}", BitConverter.ToString(config.mifareEx.primaryKey));
+            Console.WriteLine("     |--mifareEX.secondaryKey : {0}", BitConverter.ToString(config.mifareEx.secondaryKey));
+            Console.WriteLine("     |--mifareEx.startBlockIndex : {0}", config.mifareEx.startBlockIndex);
+        }
+
+        void print(BS2CardConfig cardConfig)
+        {
+            Console.WriteLine(">>>> Card configuration formatID[{0}]", cardConfig.formatID);
+            Console.WriteLine("     |--byteOrder[{0}]", (BS2CardByteOrderEnum)cardConfig.byteOrder);
+            Console.WriteLine("     |--useWiegandFormat[{0}]", Convert.ToBoolean(cardConfig.useWiegandFormat));
+            Console.WriteLine("     |--dataType[{0}]", (BS2CardDataTypeEnum)cardConfig.dataType);
+            Console.WriteLine("     |--useSecondaryKey[{0}]", Convert.ToBoolean(cardConfig.useSecondaryKey));
+            Console.WriteLine("     |--mifareEncType [{0}]", cardConfig.mifareEncType);
+            Console.WriteLine("     |--mifare");
+            Console.WriteLine("     |  |--primaryKey[{0}]", BitConverter.ToString(cardConfig.mifare.primaryKey));
+            Console.WriteLine("     |  |--secondaryKey[{0}]", BitConverter.ToString(cardConfig.mifare.secondaryKey));
+            Console.WriteLine("     |  |--startBlockIndex[{0}]", cardConfig.mifare.startBlockIndex);
+            Console.WriteLine("     |--iclass");
+            Console.WriteLine("     |  |--primaryKey[{0}]", BitConverter.ToString(cardConfig.iclass.primaryKey));
+            Console.WriteLine("     |  |--secondaryKey[{0}]", BitConverter.ToString(cardConfig.iclass.secondaryKey));
+            Console.WriteLine("     |  |--startBlockIndex[{0}]", cardConfig.iclass.startBlockIndex);
+            Console.WriteLine("     |--desfire");
+            Console.WriteLine("     |  |--primaryKey[{0}]", BitConverter.ToString(cardConfig.desfire.primaryKey));
+            Console.WriteLine("     |  |--secondaryKey[{0}]", BitConverter.ToString(cardConfig.desfire.secondaryKey));
+            Console.WriteLine("     |  |--appID[{0}]", BitConverter.ToString(cardConfig.desfire.appID));
+            Console.WriteLine("     |  |--fileID[{0}]", cardConfig.desfire.fileID);
+            Console.WriteLine("     |  |--encryptionType[{0}]", cardConfig.desfire.encryptionType);
         }
     }
 }

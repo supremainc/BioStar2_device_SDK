@@ -243,6 +243,10 @@ namespace Suprema
         public const int BS2_OSDP_STANDARD_ACTION_MAX_LED = 2;
         public const int BS2_OSDP_STANDARD_KEY_SIZE = 16;
         public const int BS2_OSDP_STANDARD_MAX_DEVICE_PER_CHANNEL = 8;
+
+        // Mifare Card EncryptionType
+        public const int BS2_MIFARE_ENCRYPTION_CRYPTO1 = 0;
+        public const int BS2_MIFARE_ENCRYPTION_AES128 = 1;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -651,6 +655,30 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2MifareCardEx
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] primaryKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] secondaryKey;
+
+        public UInt16 startBlockIndex;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public byte[] reserved1;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved2;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2MifareCardConfigEx
+    {
+        public BS2MifareCardEx mifareEx;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2DesFireCardConfigEx
     {
         public BS2DesFireAppLevelKey desfireAppKey;
@@ -676,8 +704,10 @@ namespace Suprema
         public byte cipher;     // 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
 
         public byte smartCardByteOrder;             // [+ V2.8.2.7]
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 22)]
-        public byte[] reserved;
+        public byte reserved1;
+        public byte mifareEncType;                  // [+ V2.9.9]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+        public byte[] reserved2;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -3037,6 +3067,7 @@ namespace Suprema
 
         public byte functionSupported4;             // [+ 2.9.8]
         //authDenyMaskSupported: 1;
+        //MifareExSupported: 1;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 430)]
 	    public byte[] reserved;
@@ -3432,6 +3463,24 @@ namespace Suprema
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2CustomMifareCardEx
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] primaryKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] secondaryKey;
+
+        public UInt16 startBlockIndex;
+        public byte dataSize;
+        public byte skipBytes;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved1;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+        public byte[] reserved2;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2CustomCardConfig
     {
         public byte dataType;
@@ -3441,6 +3490,8 @@ namespace Suprema
 
         public BS2CustomMifareCard mifare;
         public BS2CustomDesFireCard desfire;
+        public BS2CustomMifareCardEx mifareEx;
+        public byte mifareEncType;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
         public byte[] reserved2;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 96)]

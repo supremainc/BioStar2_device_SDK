@@ -1256,6 +1256,7 @@ namespace Suprema
             Console.WriteLine("     |--visualFaceTemplateVersion : {0}", info.visualFaceTemplateVersion);
 
             Console.WriteLine("     |--authDenyMaskSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_AUTHDENYMASK));
+            Console.WriteLine("     |--mifareCardConfigExSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX));
         }
 
         public static void print(ref BS2DesFireCardConfigEx config)
