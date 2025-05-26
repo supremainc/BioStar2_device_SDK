@@ -71,6 +71,8 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set SystemConfig", setSystemConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get InputConfig", getInputConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set InputConfig", setInputConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get InputConfigEx", getInputConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set InputConfigEx", setInputConfigEx));
 
             //[IPv6] 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get IPConfig", getIPConfig));
@@ -119,8 +121,79 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CustomCardConfig", getCustomCardConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CustomCardConfig", setCustomCardConfig));
-
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FacilityCodeConfig", getFacilityCodeConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FacilityCodeConfig", setFacilityCodeConfig));
             return functionList;
+        }
+
+
+        void getFacilityCodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FacilityCodeConfig config;
+
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Trying to get FacilityCodeConfig");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFacilityCodeConfig(sdkContext, selectedID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(sdkContext, config);
+            }
+        }
+
+        void print(IntPtr sdkContext, BS2FacilityCodeConfig config)
+        {
+            Console.WriteLine(">>>> BS2FacilityCodeConfig");
+            Console.WriteLine("numFacilityCode : {0} ", config.numFacilityCode);
+            for (int idx = 0; idx < config.numFacilityCode; ++idx)
+            {
+                Console.WriteLine("     |--connectionMode : {0}", BitConverter.ToString(config.facilityCodes[idx].code));
+            }
+
+            Console.WriteLine("<<<< ");
+
+        }
+        public void setFacilityCodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FacilityCodeConfig config = Util.AllocateStructure<BS2FacilityCodeConfig>();
+
+            Console.WriteLine("Set FacilityCodeConfig.");
+
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("How many facilityCode do you want to set? [1-16]");
+            Console.Write(">>>> ");
+            config.numFacilityCode = Util.GetInput((byte)0);
+            if (config.numFacilityCode > BS2Environment.BS2_MAX_NUMBER_FACILITY_CODE)
+                config.numFacilityCode = BS2Environment.BS2_MAX_NUMBER_FACILITY_CODE;
+
+            for (int idx = 0; idx < config.numFacilityCode; ++idx)
+            {
+                Console.WriteLine("Enter 4 hexa code(ex: AA BB CC DD");
+                Console.Write(">>>> ");
+
+                string input = Console.ReadLine();
+                config.facilityCodes[idx].code = input
+                    .Split(new[] { ' ', ',', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(hex => Convert.ToByte(hex, 16))
+                    .ToArray();
+              
+            }
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetFacilityCodeConfig(sdkContext, selectedID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+            Console.WriteLine("Set completed.");
         }
 
         public void getSlaveDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -310,7 +383,7 @@ namespace Suprema
 
                 foreach (BS2Rs485SlaveDeviceEX slaveExDevice in slaveDeviceList)
                 {
-                    //print(sdkContext, slaveExDevice);
+                    print(sdkContext, slaveExDevice);
                 }
 
                 slaveExControl(sdkContext, slaveDeviceList);
@@ -319,6 +392,16 @@ namespace Suprema
             {
                 Console.WriteLine(">>> There is no slave device in the device.");
             }
+        }
+        void print(IntPtr sdkContext, BS2Rs485SlaveDeviceEX slaveExDevice)
+        {
+            Console.WriteLine(">>>> SlaveDevice id[{0, 10}] channel[{1}] type[{2, 3}] model[{3, 16}] enable[{4}], connected[{5}]",
+                                slaveExDevice.deviceID,
+                                slaveExDevice.channelInfo,
+                                slaveExDevice.deviceType,
+                                API.productNameDictionary[(BS2DeviceTypeEnum)slaveExDevice.deviceType],
+                                Convert.ToBoolean(slaveExDevice.enableOSDP),
+                                Convert.ToBoolean(slaveExDevice.connected));
         }
 
         public void setSlaveExDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -2446,6 +2529,7 @@ namespace Suprema
         public void setInputConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2InputConfig config = Util.AllocateStructure<BS2InputConfig>();
+            const int STOP_N_SET = -1;
 
             Console.WriteLine("Trying to get input configuration.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfig(sdkContext, deviceID, out config);
@@ -2479,8 +2563,13 @@ namespace Suprema
                     return;
                 }
 
-                for (int idx = 0; idx < BS2Environment.BS2_MAX_INPUT_NUM; ++idx)
+                while (true)
                 {
+                    Console.WriteLine("What input port would you like to set? [-1(Exit), 0, ..., {0}]", config.numSupervised - 1);
+                    int idx = Util.GetInput();
+                    if (STOP_N_SET == idx)
+                        break;
+
                     if (idx < config.numSupervised)
                     {
                         Console.WriteLine(">>>> supervised_inputs[{0}]", idx);
@@ -2490,10 +2579,12 @@ namespace Suprema
                         Console.Write("    Please enter enabled (0, 1) : ");
                         config.supervised_inputs[idx].enabled = (byte)Util.GetInput();
 
-                        Console.Write("    Please enter superviced_index : ");
+                        Console.WriteLine("Please enter the type of resistance value for supervised input.");
+                        Console.WriteLine("[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised, 255: custom]");
+                        Console.Write(">>>> ");
                         config.supervised_inputs[idx].supervised_index = (byte)Util.GetInput();
 
-                        if (255 == config.supervised_inputs[idx].supervised_index)
+                        if ((byte)BS2SupervisedResistor.SUPERVISED_RESISTOR_CUSTOM == config.supervised_inputs[idx].supervised_index)
                         {
                             Console.Write("    Please enter shortInput.minValue : ");
                             config.supervised_inputs[idx].config.shortInput.minValue = (UInt16)Util.GetInput();
@@ -2515,39 +2606,80 @@ namespace Suprema
                             Console.Write("    Please enter offInput.maxValue : ");
                             config.supervised_inputs[idx].config.offInput.maxValue = (UInt16)Util.GetInput();
                         }
-                        else
+
+                        Console.WriteLine("Please enter the switch type. (N/O: 0(default), N/C: 1)");
+                        Console.Write(">>>> ");
+                        config.supervised_inputs[idx].switchType = Util.GetInput((byte)BS2SwitchTypeEnum.NORMAL_OPEN);
+                        if (config.aux.aux0Type > 1)
                         {
-                            config.supervised_inputs[idx].config.shortInput.minValue = 0;
-                            config.supervised_inputs[idx].config.shortInput.maxValue = 0;
-                            config.supervised_inputs[idx].config.openInput.minValue = 0;
-                            config.supervised_inputs[idx].config.openInput.maxValue = 0;
-                            config.supervised_inputs[idx].config.onInput.minValue = 0;
-                            config.supervised_inputs[idx].config.onInput.maxValue = 0;
-                            config.supervised_inputs[idx].config.offInput.minValue = 0;
-                            config.supervised_inputs[idx].config.offInput.maxValue = 0;
+                            Console.WriteLine("Invalid parameter");
+                            return;
                         }
+
+                        Console.Write("    Please enter the duration");
+                        Console.Write(">>>> ");
+                        config.supervised_inputs[idx].duration = Util.GetInput((UInt16)50);
+                        if (config.aux.aux0Type > 1)
+                        {
+                            Console.WriteLine("Invalid parameter");
+                            return;
+                        }
+
                     }
                     else
                     {
-                        config.supervised_inputs[idx].portIndex = (byte)idx;
-                        config.supervised_inputs[idx].enabled = 0;
-                        config.supervised_inputs[idx].supervised_index = 1;
-                        config.supervised_inputs[idx].config.shortInput.minValue = 0;
-                        config.supervised_inputs[idx].config.shortInput.maxValue = 0;
-                        config.supervised_inputs[idx].config.openInput.minValue = 0;
-                        config.supervised_inputs[idx].config.openInput.maxValue = 0;
-                        config.supervised_inputs[idx].config.onInput.minValue = 0;
-                        config.supervised_inputs[idx].config.onInput.maxValue = 0;
-                        config.supervised_inputs[idx].config.offInput.minValue = 0;
-                        config.supervised_inputs[idx].config.offInput.maxValue = 0;
+                        Console.WriteLine("Invalid parameter");
+                        return;
                     }
                 }
             }
 
-            config.aux.acFailAuxIndex = BS2Environment.BS2_INPUT_AUX1;
-            config.aux.tamperAuxIndex = BS2Environment.BS2_INPUT_AUX0;
-            config.aux.aux0Type = BS2Environment.BS2_INPUT_AUXTYPENO;
-            config.aux.aux1Type = BS2Environment.BS2_INPUT_AUXTYPENO;
+            //aux index
+            Console.Write("    Please enter acFailAuxIndex (1~3) : ");
+            config.aux.acFailAuxIndex = (byte)Util.GetInput();
+            if (config.aux.acFailAuxIndex < 1 || config.aux.acFailAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter tamperAuxIndex (1~3) : ");
+            config.aux.tamperAuxIndex = (byte)Util.GetInput();
+            if (config.aux.tamperAuxIndex < 1 || config.aux.tamperAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter fireAuxIndex (1~3) : ");
+            config.aux.fireAuxIndex = (byte)Util.GetInput();
+            if (config.aux.fireAuxIndex < 1 || config.aux.fireAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            //aux switch type
+            Console.Write("    Please enter aux0 switchType (0:NO, 1:NC) : ");
+            config.aux.aux0Type = (byte)Util.GetInput();
+            if (config.aux.aux0Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            Console.Write("    Please enter aux1 switchType (0:NO, 1:NC) : ");
+            config.aux.aux1Type = (byte)Util.GetInput();
+            if (config.aux.aux1Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter aux2 switchType (0:NO, 1:NC) : ");
+            config.aux.aux2Type = (byte)Util.GetInput();
+            if (config.aux.aux2Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
 
             Console.WriteLine("Trying to set input configuration.");
             result = (BS2ErrorCode)API.BS2_SetInputConfig(sdkContext, deviceID, ref config);
@@ -2559,6 +2691,144 @@ namespace Suprema
             else
             {
                 Console.WriteLine("Set InputConfig Succeeded");
+            }
+        }
+        public void getInputConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2InputConfigEx config;
+            Console.WriteLine("Trying to get InputConfigEx configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setInputConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            // As of 2021.08.03, only IM-120 is supported
+            BS2InputConfigEx config = Util.AllocateStructure<BS2InputConfigEx>();
+
+            const int STOP_N_SET = -1;
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Please enter number of inputs.");
+            Console.Write(">>>> ");
+            config.numInputs = Convert.ToByte(Util.GetInput());
+
+            Console.WriteLine("Please enter number of supervised inputs.");
+            Console.Write(">>>> ");
+            config.numSupervised = Convert.ToByte(Util.GetInput());
+
+            while (true)
+            {
+                Console.WriteLine("What input port would you like to set? [-1(Exit), 0, ..., {0}]", config.numSupervised - 1);
+                Console.Write(">>>> ");
+                int idx = Util.GetInput();
+                if (STOP_N_SET == idx)
+                    break;
+
+                config.inputs[idx].portIndex = Convert.ToByte(idx);
+
+                Console.WriteLine("Please enter the switch type. (N/O: 0(default), N/C: 1)");
+                Console.Write(">>>> ");
+                config.inputs[idx].switchType = Util.GetInput((byte)BS2SwitchTypeEnum.NORMAL_OPEN);
+
+                Console.WriteLine("Please enter the duration.");
+                Console.Write(">>>> ");
+                config.inputs[idx].duration = Util.GetInput((UInt16)50);
+
+                Console.WriteLine("Please enter the type of resistance value for supervised input.");
+                Console.WriteLine("[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised, 255: custom]");
+                Console.Write(">>>> ");
+                config.inputs[idx].supervisedResistor = Util.GetInput((byte)BS2SupervisedResistor.SUPERVISED_RESISTOR_UNUSED);
+
+                if ((byte)BS2SupervisedResistor.SUPERVISED_RESISTOR_CUSTOM == config.inputs[idx].supervisedResistor)
+                {
+                    Console.Write("    Please enter shortInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.shortInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter shortInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.shortInput.maxValue = (UInt16)Util.GetInput();
+
+                    Console.Write("    Please enter openInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.openInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter openInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.openInput.maxValue = (UInt16)Util.GetInput();
+
+                    Console.Write("    Please enter onInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.onInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter onInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.onInput.maxValue = (UInt16)Util.GetInput();
+
+                    Console.Write("    Please enter offInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.offInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter offInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.offInput.maxValue = (UInt16)Util.GetInput();
+                }
+            }
+
+            //aux index
+            Console.Write("    Please enter acFailAuxIndex (1~3) : ");
+            config.aux.acFailAuxIndex = (byte)Util.GetInput();
+            if (config.aux.acFailAuxIndex < 1 || config.aux.acFailAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter tamperAuxIndex (1~3) : ");
+            config.aux.tamperAuxIndex = (byte)Util.GetInput();
+            if (config.aux.tamperAuxIndex < 1 || config.aux.tamperAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter fireAuxIndex (1~3) : ");
+            config.aux.fireAuxIndex = (byte)Util.GetInput();
+            if (config.aux.fireAuxIndex < 1 || config.aux.fireAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            //aux switch type
+            Console.Write("    Please enter aux0 switchType (0:NO, 1:NC) : ");
+            config.aux.aux0Type = (byte)Util.GetInput();
+            if (config.aux.aux0Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            Console.Write("    Please enter aux1 switchType (0:NO, 1:NC) : ");
+            config.aux.aux1Type = (byte)Util.GetInput();
+            if (config.aux.aux1Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter aux2 switchType (0:NO, 1:NC) : ");
+            config.aux.aux2Type = (byte)Util.GetInput();
+            if (config.aux.aux2Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+
+            Console.WriteLine("Trying to set InputConfigEx configuration");
+            result = (BS2ErrorCode)API.BS2_SetInputConfigEx(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
             }
         }
 
@@ -3456,17 +3726,21 @@ namespace Suprema
             Console.WriteLine(">>>> Input configuration ");
             Console.WriteLine("     |--numInputs     : {0}", config.numInputs);
             Console.WriteLine("     +--Aux");
-            Console.WriteLine("     |--aux index of Tamper     : {0}", config.aux.tamperAuxIndex==BS2Environment.BS2_INPUT_AUX0 ? "Aux0":"Aux1");
-            Console.WriteLine("     |--aux index of ACFail     : {0}", config.aux.acFailAuxIndex==BS2Environment.BS2_INPUT_AUX0 ? "Aux0":"Aux1");
-            Console.WriteLine("     |--aux index of Aux0Type:  : {0}", config.aux.aux0Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
-            Console.WriteLine("     |--aux index of Aux1Type:  : {0}", config.aux.aux1Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
-            Console.WriteLine("     |--numSupervised : {0}", config.numSupervised);
-            for (int idx = 0; idx < BS2Environment.BS2_MAX_INPUT_NUM; idx++)
+            Console.WriteLine("     |--    aux index of ACFail     : Aux{0}", config.aux.acFailAuxIndex);
+            Console.WriteLine("     |--    aux index of Tamper     : Aux{0}", config.aux.tamperAuxIndex);
+            Console.WriteLine("     |--    aux index of Fire       : Aux{0}", config.aux.fireAuxIndex);
+            Console.WriteLine("     |--    aux index of Aux0Type:  : {0}", config.aux.aux0Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
+            Console.WriteLine("     |--    aux index of Aux1Type:  : {0}", config.aux.aux1Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
+            Console.WriteLine("     |--    aux index of Aux2Type:  : {0}", config.aux.aux2Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
+            Console.WriteLine("     |--    numSupervised : {0}", config.numSupervised);
+            for (int idx = 0; idx < config.numSupervised; idx++)
             {
                 Console.WriteLine("     +--supervised_inputs[{0}]", idx);
                 Console.WriteLine("     |--    portIndex        : {0}", config.supervised_inputs[idx].portIndex);
                 Console.WriteLine("     |--    enabled          : {0}", config.supervised_inputs[idx].enabled);
-                Console.WriteLine("     |--    supervised_index : {0}", config.supervised_inputs[idx].supervised_index);
+                Console.WriteLine("     |--    supervised resistance index : {0}", config.supervised_inputs[idx].supervised_index);
+                Console.WriteLine("     |--    switchType : {0}", config.supervised_inputs[idx].switchType);
+                Console.WriteLine("     |--    duration : {0}", config.supervised_inputs[idx].duration);
                 Console.WriteLine("     |--    config.shortInput.minValue : {0}", config.supervised_inputs[idx].config.shortInput.minValue);
                 Console.WriteLine("     |--    config.shortInput.maxValue : {0}", config.supervised_inputs[idx].config.shortInput.maxValue);
                 Console.WriteLine("     |--    config.openInput.minValue  : {0}", config.supervised_inputs[idx].config.openInput.minValue);
@@ -3477,6 +3751,36 @@ namespace Suprema
                 Console.WriteLine("     +--    config.offInput.maxValue   : {0}", config.supervised_inputs[idx].config.offInput.maxValue);
             }
             Console.WriteLine("<<<< ");
+        }
+        void print(BS2InputConfigEx config)
+        {
+            Console.WriteLine(">>>> InputConfigEx configuration");
+            Console.WriteLine("     +--numInputs : {0}", config.numInputs);
+            Console.WriteLine("     +--Aux");
+            Console.WriteLine("     |--    aux index of ACFail     : Aux{0}", config.aux.acFailAuxIndex);
+            Console.WriteLine("     |--    aux index of Tamper     : Aux{0}", config.aux.tamperAuxIndex);
+            Console.WriteLine("     |--    aux index of Fire       : Aux{0}", config.aux.fireAuxIndex);
+            Console.WriteLine("     |--    aux index of Aux0Type:  : {0}", config.aux.aux0Type == BS2Environment.BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+            Console.WriteLine("     |--    aux index of Aux1Type:  : {0}", config.aux.aux1Type == BS2Environment.BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+            Console.WriteLine("     |--    aux index of Aux2Type:  : {0}", config.aux.aux2Type == BS2Environment.BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+            Console.WriteLine("     |--numSupervised : {0}", config.numSupervised);
+
+            for (byte idx = 0; idx < config.numSupervised; idx++)
+            {
+                Console.WriteLine("     +--Supervised inputs[{0}]", idx);
+                Console.WriteLine("     |--    portIndex : {0}", config.inputs[idx].portIndex);
+                Console.WriteLine("     |--    switchType : {0}", config.inputs[idx].switchType);
+                Console.WriteLine("     |--    duration : {0}", config.inputs[idx].duration);
+                Console.WriteLine("     |--    supervisedResistor : {0}", config.inputs[idx].supervisedResistor);
+                Console.WriteLine("     |--    shortInput.minValue : {0}", config.inputs[idx].supervisedConfig.shortInput.minValue);
+                Console.WriteLine("     |--    shortInput.maxValue : {0}", config.inputs[idx].supervisedConfig.shortInput.maxValue);
+                Console.WriteLine("     |--    openInput.minValue : {0}", config.inputs[idx].supervisedConfig.openInput.minValue);
+                Console.WriteLine("     |--    openInput.maxValue : {0}", config.inputs[idx].supervisedConfig.openInput.maxValue);
+                Console.WriteLine("     |--    onInput.minValue : {0}", config.inputs[idx].supervisedConfig.onInput.minValue);
+                Console.WriteLine("     |--    onInput.maxValue : {0}", config.inputs[idx].supervisedConfig.onInput.maxValue);
+                Console.WriteLine("     |--    offInput.minValue : {0}", config.inputs[idx].supervisedConfig.offInput.minValue);
+                Console.WriteLine("     +--    offInput.maxValue : {0}", config.inputs[idx].supervisedConfig.offInput.maxValue);
+            }
         }
 
         void print(IntPtr sdkContext, BS1CardConfig config)

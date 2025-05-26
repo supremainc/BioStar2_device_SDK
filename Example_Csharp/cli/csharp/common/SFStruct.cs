@@ -172,6 +172,7 @@ namespace Suprema
         public const int BS2_INPUT_NONE = 0;
         public const int BS2_INPUT_AUX0 = 1;
         public const int BS2_INPUT_AUX1 = 2;
+        public const int BS2_INPUT_AUX2 = 3;
         public const int BS2_INPUT_AUXTYPENO = 0;
         public const int BS2_INPUT_AUXTYPENC = 1;
 
@@ -247,6 +248,10 @@ namespace Suprema
         // Mifare Card EncryptionType
         public const int BS2_MIFARE_ENCRYPTION_CRYPTO1 = 0;
         public const int BS2_MIFARE_ENCRYPTION_AES128 = 1;
+
+        // FacilityCode
+        public const int BS2_FACILITY_CODE_SIZE = 4;
+        public const int BS2_MAX_NUMBER_FACILITY_CODE = 16;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -889,7 +894,9 @@ namespace Suprema
         public byte portIndex;
         public byte enabled;
         public byte supervised_index;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
+        public byte switchType;
+        public UInt16 duration;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public byte[] reserved;
         public BS2SupervisedInputConfig config;
     }
@@ -901,13 +908,13 @@ namespace Suprema
 
         public UInt16 tamperAuxIndex
         {
-            get { return (UInt16)(_value & 0x03); }
-            set { _value = (UInt16)((_value & ~0x03) | (value & 0x03)); }
+            get { return (UInt16)(_value & 0x0F); }
+            set { _value = (UInt16)((_value & ~0x0F) | (value & 0x0F)); }
         }
         public UInt16 acFailAuxIndex
         {
-            get { return (UInt16)((_value & 0x30) >> 4); }
-            set { _value = (UInt16)((_value & ~0x30) | ((value << 4) & 0x30)); }
+            get { return (UInt16)((_value & 0xF0) >> 4); }
+            set { _value = (UInt16)((_value & ~0xF0) | ((value << 4) & 0xF0)); }
         }
         public UInt16 aux0Type
         {
@@ -918,6 +925,16 @@ namespace Suprema
         {
             get { return (UInt16)((_value & 0x200) >> 9); }
             set { _value = (UInt16)((_value & ~0x200) | ((value << 9) & 0x200)); }
+        }
+        public UInt16 aux2Type
+        {
+            get { return (UInt16)((_value & 0x400) >> 10); }
+            set { _value = (UInt16)((_value & ~0x400) | ((value << 10) & 0x400)); }
+        }
+        public UInt16 fireAuxIndex
+        {
+            get { return (UInt16)((_value & 0xF000) >> 12); }
+            set { _value = (UInt16)((_value & ~0xF000) | ((value << 12) & 0xF000)); }
         }
     }
 
@@ -2831,8 +2848,7 @@ namespace Suprema
 		
 		public byte reserved;
 		public byte supervisedResistor;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-		public byte[] reserved1;
+        public BS2SupervisedInputConfig supervisedConfig;
 		
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 26)]
 		public byte[] reserved2;
@@ -2843,7 +2859,8 @@ namespace Suprema
     {
         public byte numInputs;
         public byte numSupervised;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
+        public BSAuxConfig aux;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public byte[] reserved;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_INPUT_NUM_EX)]
@@ -3503,5 +3520,26 @@ namespace Suprema
         public UInt32 formatID;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public byte[] reserved5;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2FacilityCode
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_FACILITY_CODE_SIZE)]
+        public byte[] code;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2FacilityCodeConfig
+    {
+        public byte numFacilityCode;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved0;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_NUMBER_FACILITY_CODE)]
+        public BS2FacilityCode[] facilityCodes;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+        public byte[] reserved1;
     }
 }
