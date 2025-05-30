@@ -16,6 +16,7 @@ namespace Suprema
         private API.OnBarcodeScanned cbOnBarcodeScanned = null;
         private API.OnReadyToScan cbCardOnReadyToScan = null;
         private List<Tuple<UInt32, UInt16>> searchedSlave = new List<Tuple<UInt32, UInt16>>();
+        private Dictionary<UInt32, Tuple<UInt32, UInt16>> searchedGrandSlaves = new Dictionary<UInt32, Tuple<UInt32, UInt16>>();
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> functionList = new List<KeyValuePair<string, Action<IntPtr, uint, bool>>>();
@@ -26,6 +27,7 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get slaveEx device", getSlaveExDevice));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slaveEx device", setSlaveExDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("print slaveEx device", printSlavesEx));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
 
@@ -64,6 +66,8 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485Config", setRS485Config));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigEx", getRS485ConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigEx", setRS485ConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigExDynamic", getRS485ConfigExDynamic));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigExDynamic", setRS485ConfigExDynamic));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DstConfig", getDstConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DstConfig", setDstConfig));
@@ -127,10 +131,26 @@ namespace Suprema
             return functionList;
         }
 
+        void printSlavesEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            Console.WriteLine("Master - {0}", deviceID);
+            foreach (Tuple<UInt32, UInt16> s in searchedSlave)
+            {
+                Console.WriteLine("  Slave - [{0}][{1}]", s.Item1, API.productNameDictionary[(BS2DeviceTypeEnum)s.Item2]);
+
+                Tuple<UInt32, UInt16> gSlave;
+                if (searchedGrandSlaves.TryGetValue(s.Item1, out gSlave))
+                {
+                    Console.WriteLine("    grand Slave - [{0}][{1}]", gSlave.Item1, API.productNameDictionary[(BS2DeviceTypeEnum)gSlave.Item2]);
+                }
+            }
+        }
 
         void getFacilityCodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2FacilityCodeConfig config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
 
             Console.WriteLine("Please enter the device ID:");
             UInt32 selectedID = (UInt32)Util.GetInput();
@@ -150,7 +170,7 @@ namespace Suprema
         void print(IntPtr sdkContext, BS2FacilityCodeConfig config)
         {
             Console.WriteLine(">>>> BS2FacilityCodeConfig");
-            Console.WriteLine("numFacilityCode : {0} ", config.numFacilityCode);
+            Console.WriteLine("     |--numFacilityCode : {0} ", config.numFacilityCode);
             for (int idx = 0; idx < config.numFacilityCode; ++idx)
             {
                 Console.WriteLine("     |--connectionMode : {0}", BitConverter.ToString(config.facilityCodes[idx].code));
@@ -163,7 +183,7 @@ namespace Suprema
         {
             BS2FacilityCodeConfig config = Util.AllocateStructure<BS2FacilityCodeConfig>();
 
-            Console.WriteLine("Set FacilityCodeConfig.");
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
 
             Console.WriteLine("Please enter the device ID:");
             UInt32 selectedID = (UInt32)Util.GetInput();
@@ -357,8 +377,20 @@ namespace Suprema
             UInt32 slaveDeviceCount = 0;
             UInt32 outchannelport = 0;
 
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+            bool isSlave = searchedSlave.Any(t => t.Item1 == selectedID);
+
+            if (!isSlave && deviceID!=selectedID) // is grand slave
+            {
+                Console.WriteLine("invalid slave searching");
+                return;
+            }
+
             Console.WriteLine("Trying to get the slave devices.");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, deviceID, 0xFF, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, selectedID, 0xFF, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
 
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
@@ -366,7 +398,14 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
-                searchedSlave.Clear();
+                if (isSlave)
+                {
+                    searchedGrandSlaves.Clear();
+                }
+                else
+                {
+                    searchedSlave.Clear();
+                }
                 List<BS2Rs485SlaveDeviceEX> slaveDeviceList = new List<BS2Rs485SlaveDeviceEX>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
@@ -376,7 +415,16 @@ namespace Suprema
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
-                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    if (isSlave)
+                    {
+                        if (item.enableOSDP == 1)
+                            searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
+                    else
+                    {
+                        if (item.enableOSDP == 1)
+                            searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
                 }
 
                 API.BS2_ReleaseObject(slaveDeviceObj);
@@ -395,13 +443,15 @@ namespace Suprema
         }
         void print(IntPtr sdkContext, BS2Rs485SlaveDeviceEX slaveExDevice)
         {
-            Console.WriteLine(">>>> SlaveDevice id[{0, 10}] channel[{1}] type[{2, 3}] model[{3, 16}] enable[{4}], connected[{5}]",
+            bool isGrandSlave = (slaveExDevice.info.parentID > 255);
+            Console.Write(">>>> SlaveDevice id[{0, 10}] type[{1, 3}] model[{2, 16}] enable[{3}], connected[{4}] ",
                                 slaveExDevice.deviceID,
-                                slaveExDevice.channelInfo,
                                 slaveExDevice.deviceType,
                                 API.productNameDictionary[(BS2DeviceTypeEnum)slaveExDevice.deviceType],
                                 Convert.ToBoolean(slaveExDevice.enableOSDP),
                                 Convert.ToBoolean(slaveExDevice.connected));
+            if (isGrandSlave) Console.WriteLine("MasterID[{0, 10}]", slaveExDevice.info.parentID);
+            else Console.WriteLine("channel [{0, 10}]", slaveExDevice.info.channelInfo);
         }
 
         public void setSlaveExDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -410,12 +460,25 @@ namespace Suprema
             UInt32 slaveDeviceCount = 0;
             UInt32 outchannelport = 0;
 
-            Console.WriteLine("Choose the RS485 port where the device is connected. [0(default), 1, 2, 3, 4]");
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+            bool isSlave = searchedSlave.Any(t => t.Item1 == selectedID);
+
+            if (!isSlave && deviceID != selectedID) // is grand slave
+            {
+                Console.WriteLine("invalid slave searching");
+                return;
+            }
+
+            Console.WriteLine("Choose the RS485 port where the device is connected. [0(default), 1, 2, 3, 4(all)]");
             Console.Write(">>>> ");
             int selchannel = Util.GetInput(0);
+            if (selchannel == 4) selchannel = 0xFF;
 
             Console.WriteLine("Trying to get the slave devices.");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, deviceID, (uint)selchannel, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, selectedID, (uint)selchannel, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
 
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
@@ -423,7 +486,15 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
-                searchedSlave.Clear();
+                if (isSlave)
+                {
+                    searchedGrandSlaves.Clear();
+                }
+                else
+                {
+                    searchedSlave.Clear();
+                }
+
                 List<BS2Rs485SlaveDeviceEX> slaveDeviceList = new List<BS2Rs485SlaveDeviceEX>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
@@ -433,7 +504,14 @@ namespace Suprema
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
-                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    if (isSlave)
+                    {
+                        searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
+                    else
+                    {
+                        searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
                 }
 
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
@@ -443,7 +521,7 @@ namespace Suprema
                     Console.WriteLine("[{0:000}] ==> SlaveDevice id[{1, 10}] channel[{2}] type[{3, 3}] model[{4, 16}] enable[{5}], connected[{6}]",
                                 idx,
                                 slaveDevice.deviceID,
-                                slaveDevice.channelInfo,
+                                slaveDevice.info.channelInfo,
                                 slaveDevice.deviceType,
                                 API.productNameDictionary[(BS2DeviceTypeEnum)slaveDevice.deviceType],
                                 Convert.ToBoolean(slaveDevice.enableOSDP),
@@ -480,6 +558,7 @@ namespace Suprema
 
                 curSlaveDeviceObj = slaveDeviceObj;
                 UInt32 slaveID = 0;
+                ushort slaveDevType = 0;
                 for (int idx = 0; idx < slaveDeviceCount; ++idx)
                 {
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
@@ -492,6 +571,7 @@ namespace Suprema
                             Marshal.StructureToPtr(item, curSlaveDeviceObj, false);
                         }
                         slaveID = item.deviceID;
+                        slaveDevType = item.deviceType;
                     }
                     else
                     {
@@ -506,7 +586,7 @@ namespace Suprema
                 }
 
                 Console.WriteLine("Trying to set the slave devices.");
-                result = (BS2ErrorCode)API.BS2_SetSlaveExDevice(sdkContext, deviceID, (uint)selchannel, slaveDeviceObj, slaveDeviceCount);
+                result = (BS2ErrorCode)API.BS2_SetSlaveExDevice(sdkContext, selectedID, (uint)selchannel, slaveDeviceObj, slaveDeviceCount);
 
                 API.BS2_ReleaseObject(slaveDeviceObj);
 
@@ -516,7 +596,19 @@ namespace Suprema
                 }
                 else
                 {
-                    slaveExControl(sdkContext, slaveDeviceList);
+                    if (isSlave)
+                    {
+                        bool isExist = searchedGrandSlaves.Values.Any(t => t.Item1 == slaveID);
+                        if (!isExist)
+                            searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(slaveID, slaveDevType));
+                    }
+                    else
+                    {
+                        bool isExist = searchedSlave.Any(t => t.Item1 == slaveID);
+                        if (!isExist)
+                            searchedSlave.Add(new Tuple<UInt32, UInt16>(slaveID, slaveDevType));
+                    }
+                    //slaveExControl(sdkContext, slaveDeviceList);
                 }
 
                 IntPtr wiegandDeviceObj = IntPtr.Zero;
@@ -559,14 +651,9 @@ namespace Suprema
             BS2DeviceCapabilities capa;
             UInt32 id = 0;
 
-                        
-            Console.WriteLine("Master - {0}", deviceID);    
-            foreach (Tuple<UInt32, UInt16> s in searchedSlave)
-            {
-                Console.WriteLine("Slave - {0}", s.Item1);
-            }
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
             Console.WriteLine("Please enter the device ID:");
-            UInt32 selectedID = (UInt32)Util.GetInput();
+            UInt32 selectedID = (UInt32)Util.GetInput(deviceID);
 
             if (CommonControl.getDeviceCapabilities(sdkContext, selectedID, out capa))
             {
@@ -865,8 +952,12 @@ namespace Suprema
         {
             BS2_CONFIG_MASK configMask = 0;
 
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput(deviceID);
+
             Console.WriteLine("Trying to get supported config mask");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSupportedConfigMask(sdkContext, deviceID, out configMask);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSupportedConfigMask(sdkContext, selectedID, out configMask);
             if (result == BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("Supported config Mask: 0x{0:X}", configMask);
@@ -881,13 +972,17 @@ namespace Suprema
         void getAllConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Configs configs = Util.AllocateStructure<BS2Configs>();
-            configs.configMask = (uint)BS2ConfigMaskEnum.ALL;
-            Console.WriteLine("Trying to get AllConfig");
 
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput(deviceID);
+
+            Console.WriteLine("Trying to get AllConfig");
+            configs.configMask = (uint)BS2ConfigMaskEnum.ALL;
             Type structureType = typeof(BS2Configs);
             int structSize = Marshal.SizeOf(structureType);
 
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetConfig(sdkContext, deviceID, ref configs);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetConfig(sdkContext, selectedID, ref configs);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("BS2_GetConfig failed. Error : {0}", result);
@@ -1550,6 +1645,7 @@ namespace Suprema
         public void getRS485Config(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Rs485Config config;
+
             Console.WriteLine("Trying to get RS485Config");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485Config(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -1664,6 +1760,7 @@ namespace Suprema
         void getRS485ConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Rs485ConfigEX config;
+
             Console.WriteLine("Trying to get RS485ConfigEx");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485ConfigEx(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -1710,7 +1807,7 @@ namespace Suprema
                 config.channels[0].slaveDevices[0].deviceType = 9;
                 config.channels[0].slaveDevices[0].enableOSDP = 0;
                 config.channels[0].slaveDevices[0].connected = 1;
-                config.channels[0].slaveDevices[0].channelInfo = 0;
+                config.channels[0].slaveDevices[0].info.channelInfo = 0;
             }
 
             Console.WriteLine("Trying to set RS485ConfigEx configuration.");
@@ -1719,6 +1816,68 @@ namespace Suprema
             {
                 Console.WriteLine("Got error({0}).", result);
             }
+
+        }
+
+        void getRS485ConfigExDynamic(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2Rs485ConfigEXDynamic config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Trying to get BS2Rs485ConfigEXDynamic");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485ConfigExDynamic(sdkContext, selectedID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(sdkContext, config);
+            }
+
+        }
+
+        public void setRS485ConfigExDynamic(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            BS2Rs485ConfigEXDynamic config = Util.AllocateStructure<BS2Rs485ConfigEXDynamic>();
+             Console.WriteLine("Trying to get RS485ConfigExDynamic");
+             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485ConfigExDynamic(sdkContext, selectedID, out config);
+             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+             {
+                 Console.WriteLine("Got error({0}).", result);
+             }
+             else
+             {
+                 print(sdkContext, config);
+             }
+
+            // the device only cares about baudrates and ignores the rest.
+            // Use BS2_GetSlaveDevice()/BS2_SetSlaveDevice() to control slave device connection.
+            Console.WriteLine("Do you want to change baudRate of device? [Y/n]");
+             Console.Write(">>>> ");
+             if (Util.IsYes())
+             {
+                for (int i = 0; i < config.numOfChannels; i++)
+                {
+                    config.channels[i].baudRate = (UInt32)Util.GetBaudRate();
+                }
+ 
+             }
+
+             Console.WriteLine("Trying to set RS485ConfigExDynamic configuration.");
+             result = (BS2ErrorCode)API.BS2_SetRS485ConfigExDynamic(sdkContext, deviceID, ref config);
+             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+             {
+                 Console.WriteLine("Got error({0}).", result);
+             }
 
         }
 
@@ -2696,8 +2855,13 @@ namespace Suprema
         public void getInputConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2InputConfigEx config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
             Console.WriteLine("Trying to get InputConfigEx configuration");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, deviceID, out config);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, selectedID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("Got error({0}).", result);
@@ -2713,6 +2877,10 @@ namespace Suprema
             BS2InputConfigEx config = Util.AllocateStructure<BS2InputConfigEx>();
 
             const int STOP_N_SET = -1;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
 
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -3932,7 +4100,43 @@ namespace Suprema
                     Console.WriteLine("                  |--deviceType : {0}", config.channels[idx].slaveDevices[idx2].deviceType);
                     Console.WriteLine("                  |--enableOSDP : {0}", config.channels[idx].slaveDevices[idx2].enableOSDP);
                     Console.WriteLine("                  |--connected : {0}", config.channels[idx].slaveDevices[idx2].connected);
-                    Console.WriteLine("                  |--channelInfo : {0}", config.channels[idx].slaveDevices[idx2].channelInfo);
+                    Console.WriteLine("                  |--channelInfo : {0}", config.channels[idx].slaveDevices[idx2].info.channelInfo);
+                }
+            }
+
+            Console.WriteLine("<<<< ");
+        }
+
+        void print(IntPtr sdkContext, BS2Rs485ConfigEXDynamic config)
+        {
+            Console.WriteLine(">>>> BS2Rs485ConfigEXDynamic configuration ");
+            Console.WriteLine("     |--mode : {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}", config.mode[0], config.mode[1], config.mode[2], config.mode[3], config.mode[4], config.mode[5], config.mode[6], config.mode[7]);
+            Console.WriteLine("     |--numOfChannels : {0}", config.numOfChannels);
+
+            for (int idx = 0; idx < config.numOfChannels; ++idx)
+            {
+                Console.WriteLine("     |++channels[{0}]", idx);
+                Console.WriteLine("         |--baudRate : {0}", config.channels[idx].baudRate);
+                Console.WriteLine("         |--channelIndex : {0}", config.channels[idx].channelIndex);
+                Console.WriteLine("         |--useRegistance : {0}", config.channels[idx].useRegistance);
+                Console.WriteLine("         |--numOfDevices : {0}", config.channels[idx].numOfDevices);
+                Console.WriteLine("         |--channelType : {0}", config.channels[idx].channelType);
+
+                BS2Rs485SlaveDeviceEX[] slaveDevices = new BS2Rs485SlaveDeviceEX[config.channels[idx].numOfDevices];
+                int objectSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
+
+                for (int idx2 = 0; idx2 < config.channels[idx].numOfDevices; ++idx2)
+                {
+                    IntPtr slaveObj = IntPtr.Add(config.channels[idx].slaveDevices, idx2 * objectSize);
+                    slaveDevices[idx2] = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(slaveObj, typeof(BS2Rs485SlaveDeviceEX));
+
+                    Console.WriteLine("         |++slaveDevices[{0}]", idx2);
+                    Console.WriteLine("                  |--deviceID : {0}", slaveDevices[idx2].deviceID);
+                    Console.WriteLine("                  |--deviceType : {0}", slaveDevices[idx2].deviceType);
+                    Console.WriteLine("                  |--enableOSDP : {0}", slaveDevices[idx2].enableOSDP);
+                    Console.WriteLine("                  |--connected : {0}", slaveDevices[idx2].connected);
+                    Console.WriteLine("                  |--channelInfo : {0}",slaveDevices[idx2].info.channelInfo);
+                    Console.WriteLine("                  |--parentID : {0}", slaveDevices[idx2].info.parentID);
                 }
             }
 

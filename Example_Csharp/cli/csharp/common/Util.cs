@@ -936,7 +936,48 @@ namespace Suprema
             return str.Substring(0, nullIdx);
         }
 
+        public static UInt32 GetBaudRate()
+        {
+            var baudRates = new Dictionary<UInt32, UInt32>
+            {
+                { 1, 9600 },
+                { 2, 19200 },
+                { 3, 38400 },
+                { 4, 57600 },
+                { 5, 115200 },
+                { 6, 230400 },
+                { 7, 460800 },
+                { 8, 576000 }
+            };
+
+            while (true)
+            {
+                Console.WriteLine(">>>> Select the baudrate:");
+
+                foreach (var item in baudRates)
+                {
+                    Console.WriteLine($"{item.Key}: {item.Value}");
+                }
+
+                Console.Write(">>>> ");
+                string input = Console.ReadLine();
+
+                UInt32 indexNum, selectedBaud;
+                if (UInt32.TryParse(input, out indexNum))
+                {
+                    if (baudRates.TryGetValue(indexNum, out selectedBaud)) return selectedBaud;
+                    else Console.WriteLine("Invalid selection. Please choose a number from the list.");
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input. Please enter a number.");
+                }
+            }
+        }
+
+
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
         public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
     }
+
 }

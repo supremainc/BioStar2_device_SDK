@@ -524,6 +524,12 @@ namespace Suprema
         extern public static int BS2_SetRS485ConfigEx(IntPtr context, UInt32 deviceId, ref BS2Rs485ConfigEX config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetRS485ConfigExDynamic(IntPtr context, UInt32 deviceId, out BS2Rs485ConfigEXDynamic config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetRS485ConfigExDynamic(IntPtr context, UInt32 deviceId, ref BS2Rs485ConfigEXDynamic config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetDstConfig(IntPtr context, UInt32 deviceId, out BS2DstConfig config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]

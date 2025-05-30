@@ -1302,6 +1302,13 @@ namespace Suprema
         public byte[] reserved;
     }
 
+    [StructLayout(LayoutKind.Explicit, Pack = 1)]
+    public struct BS2Rs485SlaveDeviceInfo   //// [+ 2.9.9]
+    {
+        [FieldOffset(0)] public byte channelInfo;
+        [FieldOffset(0)] public UInt32 parentID;
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BS2Rs485SlaveDeviceEX
     {
@@ -1309,9 +1316,7 @@ namespace Suprema
         public UInt16 deviceType;
         public byte enableOSDP;
         public byte connected;
-        public byte channelInfo;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public byte[] reseverd;
+        public BS2Rs485SlaveDeviceInfo info;    //// [+ 2.9.9]
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1338,6 +1343,31 @@ namespace Suprema
         public byte[] reserved1;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_CHANNELS_EX)]
         public BS2Rs485ChannelEX[] channels;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2Rs485ChannelEXDynamic /// [+ 2.9.9]
+    {
+        public UInt32 baudRate;
+        public byte channelIndex;
+        public byte useRegistance;
+        public byte numOfDevices;
+        public byte channelType;
+        public IntPtr slaveDevices;     // BS2Rs485SlaveDeviceEX x numOfDevices
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2Rs485ConfigEXDynamic /// [+ 2.9.9]
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public byte[] mode;
+        public UInt16 numOfChannels;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public byte[] reseverd;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] reserved1;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_RS485_MAX_CHANNELS_EX)]
+        public BS2Rs485ChannelEXDynamic[] channels;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

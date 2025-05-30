@@ -52,12 +52,12 @@ typedef struct {
 
 	union {
 		struct {
-			uint8_t			channelInfo;	///< 1byte
-			uint8_t			osdpID;			///< 1 byte	: Deprecated in v2.x.x.x
-			uint8_t			reserved;		///< 1 byte (packing) : Deprecated in v2.x.x.x
-			uint8_t			useSecureSession; ///< 1 byte : Deprecated in v2.x.x.x
+			uint8_t			channelInfo;	///< 1byte : channel Index
+			uint8_t			osdpID;			///< 1 byte : Deprecated in v2.9.9
+			uint8_t			reserved;		///< 1 byte : Deprecated in v2.9.9
+			uint8_t			useSecureSession; ///< 1 byte : Deprecated in v2.9.9
 		};
-		BS2_DEVICE_ID 	parentID;
+		BS2_DEVICE_ID 	parentID;   /// [+2.9.9]
 	};
 } BS2Rs485SlaveDeviceEX;			///< 12 bytes
 
@@ -80,7 +80,7 @@ typedef struct {
 	uint8_t					numOfDevices;		///< 1 byte
 	BS2_OSDP_CHANNEL_TYPE 	channelType;		///< 1 bytes
 	BS2Rs485SlaveDeviceEX  *slaveDevices;
-} BS2Rs485ChannelEXDynamic;
+} BS2Rs485ChannelEXDynamic;		/// [+2.9.9]
 
 /**
  *	BS2Rs485SlaveDevice
