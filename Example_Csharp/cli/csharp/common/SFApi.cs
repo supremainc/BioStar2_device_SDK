@@ -707,7 +707,7 @@ namespace Suprema
         extern public static int BS2_GetDeviceCapabilities(IntPtr context, UInt32 deviceId, out BS2DeviceCapabilities info);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int BS2_RunAction(IntPtr context, UInt32 deviceId, out BS2Action action);
+        extern public static int BS2_RunAction(IntPtr context, UInt32 deviceId, ref BS2Action action);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void BS2_SetKeepAliveTimeout(IntPtr context, long ms);
