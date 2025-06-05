@@ -151,12 +151,11 @@ namespace Suprema
             BS2FacilityCodeConfig config;
 
             printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
-
             Console.WriteLine("Please enter the device ID:");
-            UInt32 selectedID = (UInt32)Util.GetInput();
+            deviceID = (UInt32)Util.GetInput();
 
             Console.WriteLine("Trying to get FacilityCodeConfig");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFacilityCodeConfig(sdkContext, selectedID, out config);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFacilityCodeConfig(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("Got error({0}).", result);
@@ -184,9 +183,8 @@ namespace Suprema
             BS2FacilityCodeConfig config = Util.AllocateStructure<BS2FacilityCodeConfig>();
 
             printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
-
             Console.WriteLine("Please enter the device ID:");
-            UInt32 selectedID = (UInt32)Util.GetInput();
+            deviceID = (UInt32)Util.GetInput();
 
             Console.WriteLine("How many facilityCode do you want to set? [1-16]");
             Console.Write(">>>> ");
@@ -207,7 +205,7 @@ namespace Suprema
               
             }
 
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetFacilityCodeConfig(sdkContext, selectedID, ref config);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetFacilityCodeConfig(sdkContext, deviceID, ref config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("Got error({0}).", result);
@@ -1883,6 +1881,10 @@ namespace Suprema
 
         void getCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2CardConfigEx config;
             Console.WriteLine("Trying to get CardConfigEx");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetCardConfigEx(sdkContext, deviceID, out config);
@@ -1898,6 +1900,10 @@ namespace Suprema
 
         public void setCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2CardConfigEx config = Util.AllocateStructure<BS2CardConfigEx>();
 
             config.seos.oid_ADF[0] = 0x01;
@@ -1932,6 +1938,10 @@ namespace Suprema
 
         void getCustomCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2DeviceCapabilities capa;
             if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
                 return;
@@ -1958,6 +1968,10 @@ namespace Suprema
 
         void setCustomCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2DeviceCapabilities capa;
             if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
                 return;
@@ -2198,6 +2212,10 @@ namespace Suprema
 
         void getMifareCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2DeviceCapabilities capa;
             if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
                 return;
@@ -2224,7 +2242,11 @@ namespace Suprema
         }
 
         void setMifareCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
-        {            
+        {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2DeviceCapabilities capa;
             if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
                 return;
@@ -2369,6 +2391,10 @@ namespace Suprema
         {
             BS2CardConfig cardConfig;
 
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             Console.WriteLine("Trying to get card configuration.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetCardConfig(sdkContext, deviceID, out cardConfig);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -2384,6 +2410,10 @@ namespace Suprema
         public void setCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2FactoryConfig factoryConfig;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
 
             Console.WriteLine("Trying to get factory config");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFactoryConfig(sdkContext, deviceID, out factoryConfig);
@@ -2548,6 +2578,11 @@ namespace Suprema
         public void getDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2DesFireCardConfigEx config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             if (CommonControl.getDesFireCardConfigEx(sdkContext, deviceID, out config))
                 CommonControl.print(ref config);
         }
@@ -2555,6 +2590,10 @@ namespace Suprema
         public void setDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2DesFireCardConfigEx config = Util.AllocateStructure<BS2DesFireCardConfigEx>();
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
 
             CommonControl.setDesFireCardConfigEx(sdkContext, deviceID, ref config);
         }
