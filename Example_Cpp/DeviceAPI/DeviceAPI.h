@@ -110,6 +110,7 @@ enum EN_MENU_DEV
 	MENU_DEV_SET_CUSTOMCARDCONFIG,
 
 	MENU_DEV_UPD_DEVICE_VOLUME,
+	MENU_DEV_RUN_ACTION,
 
 	MENU_DEV_TURNON_QRBYPASS,
 	MENU_DEV_TURNOFF_QRBYPASS,
@@ -211,6 +212,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_CUSTOMCARDCONFIG,		"BS2_SetCustomCardConfig"},
 
 	{MENU_DEV_UPD_DEVICE_VOLUME,		"Update device volume"},
+	{MENU_DEV_RUN_ACTION,				"Run action"},
 
 	{MENU_DEV_TURNON_QRBYPASS,			"Turn On QR Bypass"},
 	{MENU_DEV_TURNOFF_QRBYPASS,			"Turn Off QR Bypass"},
@@ -286,3 +288,4 @@ void setDisplayAction(BS2DisplayAction& displayAction);
 void setBuzzerAction(BS2BuzzerAction& buzzerAction);
 void setLedAction(BS2LedAction& ledAction);
 void setLiftAction(BS2LiftAction& liftAction);
+int runAction(void* context, const DeviceInfo& device);

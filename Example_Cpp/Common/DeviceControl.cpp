@@ -365,6 +365,15 @@ int DeviceControl::queryDeviceLicense(BS2_DEVICE_ID id, BS2_LICENSE_TYPE license
 	return sdkResult;
 }
 
+int DeviceControl::runAction(BS2_DEVICE_ID id, const BS2Action& action)
+{
+	int sdkResult = BS2_RunAction(context_, id, &action);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_RunAction call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 void DeviceControl::print(const BS2SimpleDeviceInfo& info)
 {
 	TRACE("==[BS2SimpleDeviceInfo]==");

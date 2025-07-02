@@ -339,6 +339,9 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_UPD_DEVICE_VOLUME:
 			sdkResult = updateDeviceVolume(context, device);
 			break;
+		case MENU_DEV_RUN_ACTION:
+			sdkResult = runAction(context, device);
+			break;
 		case MENU_DEV_TURNON_QRBYPASS:
 			sdkResult = turnOnQRBypass(context, device);
 			break;
@@ -1219,8 +1222,10 @@ int getInputConfig(void* context, const DeviceInfo& device)
 	switch (info.type)
 	{
 	case BS2_DEVICE_TYPE_CORESTATION_40:
-	case BS2_DEVICE_TYPE_IM_120:
+	case BS2_DEVICE_TYPE_DOOR_MODULE_20:
 		break;
+	case BS2_DEVICE_TYPE_IM_120:
+		//break;
 	default:
 		return BS_SDK_ERROR_NOT_SUPPORTED;
 	}
@@ -2844,4 +2849,33 @@ int setCustomCardConfig(void* context, const DeviceInfo& device)
 	}
 
 	return sdkResult;
+}
+
+int runAction(void* context, const DeviceInfo& device)
+{
+	DeviceControl dc(context);
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	BS2Action action = { 0, };
+	action.deviceID = id;
+	action.type = BS2_ACTION_SOUND;
+	action.stopFlag = BS2_STOP_NONE;
+	action.sound.count = 1;
+	action.sound.soundIndex = 0;
+	action.sound.delay = 50;
+
+	uint8_t buf[32] = { 0, };
+	memcpy(buf, &action, 32);
+	//action.type = BS2_ACTION_RELAY;
+	//action.stopFlag = 0;
+	//action.relay.relayIndex = 1;
+	//action.relay.signal.signalID = 1;
+	//action.relay.signal.count = 10;
+	//action.relay.signal.onDuration = 200;
+	//action.relay.signal.offDuration = 100;
+	//action.relay.signal.delay = 50;
+	//action.delay = 100;
+
+	return dc.runAction(id, action);
 }

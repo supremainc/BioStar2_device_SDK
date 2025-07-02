@@ -32,6 +32,7 @@ public:
 	int enableDeviceLicense(BS2_DEVICE_ID id, const BS2LicenseBlob* licenseBlob, std::vector<BS2LicenseResult>& licenseResult);
 	int disableDeviceLicense(BS2_DEVICE_ID id, const BS2LicenseBlob* licenseBlob, std::vector<BS2LicenseResult>& licenseResult);
 	int queryDeviceLicense(BS2_DEVICE_ID id, BS2_LICENSE_TYPE licenseType, std::vector<BS2LicenseResult>& licenseResult);
+	int runAction(BS2_DEVICE_ID id, const BS2Action& action);
 
 	static void print(const BS2SimpleDeviceInfo& info);
 	static void print(const BS2SimpleDeviceInfoEx& info);
