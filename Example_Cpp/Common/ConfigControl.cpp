@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <iostream>
 #include <map>
+#include <iomanip>
 #include "ConfigControl.h"
 #include "BS_Errno.h"
 #include "Utility.h"
@@ -365,6 +366,33 @@ int ConfigControl::getRS485ConfigEx(BS2_DEVICE_ID id, BS2Rs485ConfigEX& config)
 	return sdkResult;
 }
 
+int ConfigControl::setRS485ConfigEx(BS2_DEVICE_ID id, const BS2Rs485ConfigEX& config)
+{
+	int sdkResult = BS2_SetRS485ConfigEx(context_, id, const_cast<BS2Rs485ConfigEX*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getRS485ConfigExDynamic(BS2_DEVICE_ID id, BS2Rs485ConfigEXDynamic& config)
+{
+	int sdkResult = BS2_GetRS485ConfigExDynamic(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetRS485ConfigEx call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setRS485ConfigExDynamic(BS2_DEVICE_ID id, const BS2Rs485ConfigEXDynamic& config)
+{
+	int sdkResult = BS2_SetRS485ConfigExDynamic(context_, id, const_cast<BS2Rs485ConfigEXDynamic*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetRS485Config call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int ConfigControl::getInputConfigEx(BS2_DEVICE_ID id, BS2InputConfigEx& config)
 {
 	int sdkResult = BS2_GetInputConfigEx(context_, id, &config);
@@ -559,6 +587,24 @@ int ConfigControl::setCustomCardConfig(BS2_DEVICE_ID id, const BS2CustomCardConf
 	int sdkResult = BS2_SetCustomCardConfig(context_, id, const_cast<BS2CustomCardConfig*>(&config));
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_SetCustomCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::getFacilityCodeConfig(BS2_DEVICE_ID id, BS2FacilityCodeConfig& config) const
+{
+	int sdkResult = BS2_GetFacilityCodeConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetFacilityCodeConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setFacilityCodeConfig(BS2_DEVICE_ID id, const BS2FacilityCodeConfig& config) const
+{
+	int sdkResult = BS2_SetFacilityCodeConfig(context_, id, const_cast<BS2FacilityCodeConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetFacilityCodeConfig call failed: %d", sdkResult);
 
 	return sdkResult;
 }
@@ -992,6 +1038,12 @@ void ConfigControl::print(const BS2AuthConfigExt& config)
 	TRACE("|--matchTimeout : %u", config.matchTimeout);
 	TRACE("|--authTimeout : %u", config.authTimeout);
 	TRACE("+--numOperators : %u", config.numOperators);
+	for (uint32_t idx = 0; idx < config.numOperators; idx++)
+	{
+		TRACE("   +--operator[%u]", idx);
+		TRACE("   |--userID : %s", config.operators[idx].userID);
+		TRACE("   |--level : %u", config.operators[idx].level);
+	}
 }
 
 void ConfigControl::print(const BS2FaceConfigExt& config)
@@ -1228,6 +1280,33 @@ void ConfigControl::print(const BS2Rs485Config& config)
 	TRACE("+  +--osdpID : %u", config.intelligentInfo.osdpID);
 }
 
+
+void ConfigControl::print(const BS2Rs485ConfigEX& config)
+{
+	TRACE("==[BS2Rs485ConfigEX]==");	
+	TRACE("|--numOfChannels : %u", config.numOfChannels);
+	for (int index = 0; index < config.numOfChannels; index++)
+	{
+		TRACE("+--channels[%u]", index);
+		TRACE("|--mode : %u", config.mode[index]);
+		print(config.channels[index]);
+	}
+
+}
+
+void ConfigControl::print(const BS2Rs485ConfigEXDynamic& config)
+{
+	TRACE("==[BS2Rs485ConfigEXDynamic]==");
+	
+	TRACE("|--numOfChannels : %u", config.numOfChannels);
+	for (int index = 0; index < config.numOfChannels; index++)
+	{
+		TRACE("+--channels[%u]", index);
+		TRACE("|--mode : %u", config.mode[index]);
+		print(config.channels[index]);
+	}
+}
+
 void ConfigControl::print(const BS2Rs485Channel& channel)
 {
 	TRACE("|  |--baudRate : %u", channel.baudRate);
@@ -1241,12 +1320,52 @@ void ConfigControl::print(const BS2Rs485Channel& channel)
 	}
 }
 
+void ConfigControl::print(const BS2Rs485ChannelEX& channel)
+{
+	TRACE("|  |--baudRate : %u", channel.baudRate);
+	TRACE("|  |--channelIndex : %u", channel.channelIndex);
+	TRACE("|  |--useRegistance : %u", channel.useRegistance);
+	TRACE("|  |--numOfDevices : %u", channel.numOfDevices);
+	TRACE("|  |--channelType : %u", channel.channelType);
+	for (int index = 0; index < channel.numOfDevices; index++)
+	{
+		TRACE("|  +--slaveDevices[%u]", index);
+		print(channel.slaveDevices[index]);
+	}
+}
+
+void ConfigControl::print(const BS2Rs485ChannelEXDynamic& channel)
+{
+	TRACE("|  |--baudRate : %u", channel.baudRate);
+	TRACE("|  |--channelIndex : %u", channel.channelIndex);
+	TRACE("|  |--useRegistance : %u", channel.useRegistance);
+	TRACE("|  |--numOfDevices : %u", channel.numOfDevices);
+	TRACE("|  |--channelType : %u", channel.channelType);
+	for (int index = 0; index < channel.numOfDevices; index++)
+	{
+		TRACE("|  +--slaveDevices[%u]", index);
+		print(channel.slaveDevices[index]);
+	}
+}
+
 void ConfigControl::print(const BS2Rs485SlaveDevice& device)
 {
 	TRACE("|  |  |--deviceID : %u", device.deviceID);
 	TRACE("|  |  |--deviceType : %u", device.deviceType);
 	TRACE("|  |  |--enableOSDP : %u", device.enableOSDP);
 	TRACE("|  |  |--connected : %u", device.connected);
+}
+
+void ConfigControl::print(const BS2Rs485SlaveDeviceEX& device)
+{
+	TRACE("|  |  |--deviceID : %u", device.deviceID);
+	TRACE("|  |  |--deviceType : %u", device.deviceType);
+	TRACE("|  |  |--enableOSDP : %u", device.enableOSDP);
+	TRACE("|  |  |--connected : %u", device.connected);
+	TRACE("|  |  |--channelInfo : %u", device.channelInfo);
+	TRACE("|  |  |--osdpID : %u", device.osdpID);
+	TRACE("|  |  |--useSecureSession : %u", device.useSecureSession);
+	TRACE("|  |  |--parentID : %u", device.parentID);
 }
 
 void ConfigControl::printRS485Status(const BS2Rs485Config& config)
@@ -1287,16 +1406,33 @@ void ConfigControl::printRS485Status(const BS2Rs485ConfigEX& config)
 void ConfigControl::print(const BS2InputConfigEx& config)
 {
 	TRACE("==[BS2InputConfigEx]==");
-	TRACE("+--numInputs : %u", config.numInputs);
+	TRACE("|--numInputs : %u", config.numInputs);
+	TRACE("+--Aux");
+	TRACE("   |--aux index of ACFail     : Aux%u", config.aux.field.acFailAuxIndex - 1);
+	TRACE("   |--aux index of Tamper     : Aux%u", config.aux.field.tamperAuxIndex - 1);
+	TRACE("   |--aux index of Fire       : Aux%u", config.aux.field.fireAuxIndex - 1);
+	TRACE("   |--aux index of Aux0Type:  : %s", config.aux.field.aux0Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+	TRACE("   |--aux index of Aux1Type:  : %s", config.aux.field.aux1Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+	TRACE("   |--aux index of Aux2Type:  : %s", config.aux.field.aux2Type == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
 	TRACE("|--numSupervised : %u", config.numSupervised);
-
 	for (uint8_t idx = 0; idx < config.numSupervised; idx++)
 	{
 		TRACE("+--inputs (%u)", idx);
 		TRACE("   |--portIndex : %u", config.inputs[idx].portIndex);
-		TRACE("   |--switchType : %u", config.inputs[idx].switchType);
+		TRACE("   |--switchType : %s", config.inputs[idx].switchType == BS2_INPUT_AUXTYPENO ? "NO" : "NC");
 		TRACE("   |--duration : %u", config.inputs[idx].duration);
 		TRACE("   |--supervisedResistor : %u", config.inputs[idx].supervisedResistor);
+		if (config.inputs[idx].supervisedResistor == SUPERVISED_REG_CUSTOM)
+		{
+			TRACE("   |--shortInput.minValue : %u", config.inputs[idx].supervisedConfig.shortInput.minValue);
+			TRACE("   |--shortInput.maxValue : %u", config.inputs[idx].supervisedConfig.shortInput.maxValue);
+			TRACE("   |--openInput.minValue : %u", config.inputs[idx].supervisedConfig.openInput.minValue);
+			TRACE("   |--openInput.maxValue : %u", config.inputs[idx].supervisedConfig.openInput.maxValue);
+			TRACE("   |--onInput.minValue : %u", config.inputs[idx].supervisedConfig.onInput.minValue);
+			TRACE("   |--onInput.maxValue : %u", config.inputs[idx].supervisedConfig.onInput.maxValue);
+			TRACE("   |--offInput.minValue : %u", config.inputs[idx].supervisedConfig.offInput.minValue);
+			TRACE("   |--offInput.maxValue : %u", config.inputs[idx].supervisedConfig.offInput.maxValue);
+		}
 	}
 }
 
@@ -1340,6 +1476,7 @@ void ConfigControl::print(const std::vector<BS2AuthOperatorLevel>& list)
 	{
 		ostringstream str;
 		str << "userID: " << list[idx].userID;
+
 		switch (list[idx].level)
 		{
 		case BS2_OPERATOR_LEVEL_ADMIN:
@@ -1354,6 +1491,14 @@ void ConfigControl::print(const std::vector<BS2AuthOperatorLevel>& list)
 		}
 
 		TRACE("[%d] %s", idx, str.str().c_str());
+
+		TRACE("---------------------------------");
+		str.str("userID(hex):");
+		for (uint32_t i = 0; i < BS2_USER_ID_SIZE; i++) {		
+			str << std::hex << std::setw(2) << std::setfill('0') << (int)list[idx].userID[i] << " ";
+		}
+		TRACE("%s", str.str().c_str());
+		TRACE("\n---------------------------------");
 	}
 }
 
@@ -1415,6 +1560,7 @@ void ConfigControl::print(const BS2CardConfig& config)
 	TRACE("|--cipher : %u", config.cipher);
 	TRACE("|--formatID : %u", config.formatID);
 	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
+	TRACE("|--mifareEncType : %u", config.mifareEncType);
 }
 
 void ConfigControl::print(const BS2WiegandConfig& config)
@@ -1616,6 +1762,15 @@ void ConfigControl::print(const BS2CustomDesFireCard& card)
 	print(card.desfireAppKey);
 }
 
+void ConfigControl::print(const BS2CustomMifareCardEx& card)
+{
+	TRACE("+--mifareEx.primaryKey : %s", Utility::getHexaString(card.primaryKey, sizeof(card.primaryKey)).c_str());
+	TRACE("+--mifareEx.secondaryKey : %s", Utility::getHexaString(card.secondaryKey, sizeof(card.secondaryKey)).c_str());
+	TRACE("+--mifareEx.startBlockIndex : %u", card.startBlockIndex);
+	TRACE("+--mifareEx.dataSize : %u", card.dataSize);
+	TRACE("+--mifareEx.skipBytes : %u", card.skipBytes);
+}
+
 void ConfigControl::print(const BS2DesFireAppLevelKey& key)
 {
 	TRACE("+--desfire.desfireAppKey.appMasterKey:%s", Utility::getHexaString(key.appMasterKey, 16).c_str());	// maybe 0
@@ -1632,8 +1787,22 @@ void ConfigControl::print(const BS2CustomCardConfig& config)
 	TRACE("|--useSecondaryKey : %u", config.useSecondaryKey);
 	print(config.mifare);
 	print(config.desfire);
+	TRACE("|--mifareEncType : %u", config.mifareEncType);
+	print(config.mifareEx);
 	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
 	TRACE("+--formatID : %u", config.formatID);
+}
+
+void ConfigControl::print(const BS2FacilityCodeConfig& config)
+{
+	TRACE("==[BS2FacilityCodeConfig]==");
+	TRACE("+--numFacilityCode : %u", config.numFacilityCode);
+	for (uint32_t idx = 0; idx < config.numFacilityCode; idx++)
+	{
+		TRACE("+--facilityCode[%u] : %x:%x:%x:%x", idx, config.facilityCodes[idx].code[0],
+		config.facilityCodes[idx].code[1], config.facilityCodes[idx].code[2],
+		config.facilityCodes[idx].code[3]);
+	}
 }
 
 uint32_t ConfigControl::printOSDPDeviceID(const BS2OsdpStandardConfig& config)

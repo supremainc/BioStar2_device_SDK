@@ -791,7 +791,7 @@ namespace Suprema
                     Console.WriteLine("[{0:000}] ==> SlaveDevice id[{1, 10}] channel[{2}] type[{3, 3}] model[{4, 16}] enable[{5}], connected[{6}]",
                                 idx,
                                 slaveDevice.deviceID,
-                                slaveDevice.channelInfo,
+                                slaveDevice.info.channelInfo,
                                 slaveDevice.deviceType,
                                 API.productNameDictionary[(BS2DeviceTypeEnum)slaveDevice.deviceType],
                                 Convert.ToBoolean(slaveDevice.enableOSDP),
@@ -1642,7 +1642,7 @@ namespace Suprema
         {
             Console.WriteLine(">>>> SlaveDevice id[{0, 10}] channel[{1}] type[{2, 3}] model[{3, 16}] enable[{4}], connected[{5}]",
                                 slaveExDevice.deviceID,
-                                slaveExDevice.channelInfo,
+                                slaveExDevice.info.channelInfo,
                                 slaveExDevice.deviceType,
                                 API.productNameDictionary[(BS2DeviceTypeEnum)slaveExDevice.deviceType],
                                 Convert.ToBoolean(slaveExDevice.enableOSDP),

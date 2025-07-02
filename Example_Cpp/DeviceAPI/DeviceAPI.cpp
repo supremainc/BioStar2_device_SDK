@@ -15,6 +15,7 @@ using namespace std;
 static void* sdkContext = NULL;
 static BS2_DEVICE_ID connectedID = 0;
 static DeviceInfo deviceInfo = { 0, 0, 0, 51211, 0 };
+static DeviceList deviceList;
 
 // Wiegand format preset
 enum
@@ -75,7 +76,7 @@ void onDeviceDisconnected(BS2_DEVICE_ID id)
 int main(int argc, char* argv[])
 {
 	// Set debugging SDK log (to current working directory)
-	BS2Context::setDebugFileLog(DEBUG_LOG_OPERATION_ALL, DEBUG_MODULE_ALL, ".", 100);
+	BS2Context::setDebugFileLog(DEBUG_LOG_ALL, DEBUG_MODULE_ALL, ".", 100);
 
 	TRACE("Version: %s", BS2_Version());
 
@@ -98,10 +99,23 @@ int main(int argc, char* argv[])
 
 void connectTestDevice(void* context)
 {
-	memset(&deviceInfo, 0x0, sizeof(DeviceInfo));
-	int sdkResult = Utility::connectViaIP(context, deviceInfo);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return;
+	bool isDirectConnect = false;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (isDirectConnect)
+	{
+		memset(&deviceInfo, 0x0, sizeof(DeviceInfo));
+		sdkResult = Utility::connectViaIP(context, deviceInfo);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return;
+	}
+	else 
+	{		
+		sdkResult = Utility::searchAndConnect(sdkContext, deviceList);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return;
+		deviceInfo = *deviceList.getAllDevices().begin()->second.get();
+	}
 
 	// Retrieve bulk logs.
 	CommControl cm(context);
@@ -123,12 +137,13 @@ void connectTestDevice(void* context)
 
 	Utility::connectSlave(context, deviceInfo);
 	Utility::connectWiegand(context, deviceInfo);
+	
 
 	runAPIs(context, deviceInfo);
 }
 
 
-int runAPIs(void* context, const DeviceInfo& device)
+int runAPIs(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	int selectedTop(0);
@@ -279,6 +294,21 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_RS485CONFIG:
 			sdkResult = setRS485Config(context, device);
 			break;
+		case MENU_DEV_GET_RS485CONFIGEX:
+			sdkResult = getRS485ConfigEx(context, device);
+			break;
+		case MENU_DEV_SET_RS485CONFIGEX:
+			sdkResult = setRS485ConfigEx(context, device);
+			break;
+		case MENU_DEV_GET_RS485CONFIGEXDYNAMIC:
+			sdkResult = getRS485ConfigExDynamic(context, device);
+			break;
+		case MENU_DEV_SET_RS485CONFIGEXDYNAMIC:
+			sdkResult = setRS485ConfigExDynamic(context, device);
+			break;
+		case MENU_DEV_GET_RS485CONFIGEXDYNAMICREMOVE:
+			sdkResult = getRS485ConfigExDynamicAndRemove(context, device);
+			break;
 		case MENU_DEV_GET_INPUTCONFIGEX:
 			sdkResult = getInputConfigEx(context, device);
 			break;
@@ -330,6 +360,12 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG:
 			sdkResult = setOsdpStandardActionConfig(context, device);
 			break;
+		case MENU_DEV_GET_CARDCONFIG:
+			sdkResult = getCardConfig(context, device);
+			break;
+		case MENU_DEV_SET_CARDCONFIG:
+			sdkResult = setCardConfig(context, device);
+			break;		
 		case MENU_DEV_GET_CUSTOMCARDCONFIG:
 			sdkResult = getCustomCardConfig(context, device);
 			break;
@@ -348,6 +384,18 @@ int runAPIs(void* context, const DeviceInfo& device)
 		case MENU_DEV_TURNOFF_QRBYPASS:
 			sdkResult = turnOffQRBypass(context, device);
 			break;
+		case MENU_DEV_SEARCH_SLAVE:
+			sdkResult = searchSlave(context, device);
+			break;
+		case MENU_DEV_DISPLAY_SLAVE:
+			displaySlave(context, device);
+			break;
+		case MENU_DEV_GET_FACILITYCODECONFIG:
+			sdkResult = getFacilityCodeConfig(context, device);
+			break;
+		case MENU_DEV_SET_FACILITYCODECONFIG:
+			sdkResult = setFacilityCodeConfig(context, device);
+			break;
 		default:
 			break;
 		}
@@ -355,6 +403,81 @@ int runAPIs(void* context, const DeviceInfo& device)
 
 	return sdkResult;
 }
+
+int searchSlave(void* context, DeviceInfo& device)
+{
+	bool isSlave = false;
+	bool found = false;
+	int sdkResult = BS_SDK_ERROR_CANNOT_FIND_DEVICE;
+
+	BS2_DEVICE_ID selected = Utility::getSelectedDeviceID(device);
+	if (device.id_ == selected) {
+		isSlave = false;
+		found = true;
+	}
+	else {
+		auto& slaveList = device.slaveDevices_;
+		auto it = find_if(slaveList.begin(), slaveList.end(), [selected](const BS2_DEVICE_ID_TYPE idType) { return idType.id == selected; });
+		if (it != slaveList.end()) {
+			isSlave = true;
+			found = true;
+		}
+	}
+
+	if (found) sdkResult = Utility::connectSlave(context, device, isSlave, selected);
+
+	return sdkResult;
+}
+
+ void displaySlave(void* context, const DeviceInfo& device)
+ {
+	Utility::displayConnectedSlaves(device);
+ }
+
+
+ int getFacilityCodeConfig(void* context, const DeviceInfo& device)
+ {
+	 ConfigControl cc(context);
+	 BS2FacilityCodeConfig cofig;
+	 
+	 BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	 int sdkResult = cc.getFacilityCodeConfig(id, cofig);
+	 if (BS_SDK_SUCCESS == sdkResult)
+		 ConfigControl::print(cofig);
+	 return sdkResult;
+ }
+ 
+ int setFacilityCodeConfig(void* context, const DeviceInfo& device)
+ {
+	 ConfigControl cc(context);
+	 BS2FacilityCodeConfig config;
+	 
+	 BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	 int sdkResult = cc.getFacilityCodeConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Enter the number of facility code";
+	config.numFacilityCode = Utility::getInput<uint32_t>(msg);
+	if (config.numFacilityCode > BS2_MAX_NUMBER_FACILITY_CODE)
+		config.numFacilityCode = BS2_MAX_NUMBER_FACILITY_CODE;
+
+	for (uint8_t i = 0; i < config.numFacilityCode; i++)
+	{
+		msg = "Enter the facility code";
+		uint32_t inputValue = Utility::getInput<uint32_t>(msg);
+		if (Utility::isBigEndianSystem())
+			*(uint32_t*)config.facilityCodes[i].code = inputValue;
+		else
+			*(uint32_t*)config.facilityCodes[i].code = ((inputValue & 0xFF000000) >> 24) |
+										   ((inputValue & 0x00FF0000) >> 8) |
+										   ((inputValue & 0x0000FF00) << 8) |
+										   ((inputValue & 0x000000FF) << 24);
+	}	
+	sdkResult = cc.setFacilityCodeConfig(id, config);
+
+	 return sdkResult;
+ }
 
 int getDeviceInfo(void* context, const DeviceInfo& device)
 {
@@ -1049,7 +1172,28 @@ int setAuthConfigEx(void* context, const DeviceInfo& device)
 	msg = "Insert authentication timeout in seconds";
 	config.authTimeout = (uint8_t)Utility::getInput<uint32_t>(msg);
 
-	config.numOperators = 0;
+	msg = "How many Operator ID do you want to register?";
+	config.numOperators = (uint8_t)Utility::getInput<uint32_t>(msg);
+	if (config.numOperators > BS2_MAX_OPERATORS)
+	{
+		TRACE("Exceed the maximum number of operators.");
+		config.numOperators = BS2_MAX_OPERATORS;
+	}
+
+	for (size_t i = 0; i < config.numOperators; i++)
+	{
+		msg = "Insert Operator ID";
+		string userID = Utility::getInput<string>(msg);
+		if (BS2_USER_NAME_SIZE < userID.size())
+		{
+			TRACE("User ID is too long.");
+			return BS_SDK_ERROR_INVALID_PARAM;
+		}
+		strcpy(reinterpret_cast<char*>(config.operators[i].userID), userID.c_str());
+
+		msg = "Insert Operator Level. (0: none, 1: Admin, 2:Config, 3:User)";
+		config.operators[i].level = (BS2_OPERATOR_LEVEL)Utility::getInput<uint32_t>(msg);
+	}
 
 	return cc.setAuthConfigEx(id, config);
 }
@@ -1722,6 +1866,93 @@ int getRS485Config(void* context, const DeviceInfo& device)
 	return sdkResult;
 }
 
+int getRS485ConfigEx(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2Rs485ConfigEX config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getRS485ConfigEx(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int getRS485ConfigExDynamic(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2Rs485ConfigEXDynamic config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getRS485ConfigExDynamic(id, config);
+	if (BS_SDK_SUCCESS == sdkResult) {
+		ConfigControl::print(config);
+
+		//deallocating memory
+		for(auto& channel: config.channels)
+		{
+			if (channel.slaveDevices != nullptr)
+			{
+				BS2_ReleaseObject(channel.slaveDevices);				
+			}
+		}
+	}
+
+	return sdkResult;
+}
+
+int getRS485ConfigExDynamicAndRemove(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	BS2Rs485ConfigEXDynamic config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	int sdkResult = cc.getRS485ConfigExDynamic(id, config);
+	if (BS_SDK_SUCCESS == sdkResult) {
+		ConfigControl::print(config);
+
+		BS2Rs485SlaveDeviceEX rmSlaveList[BS2_RS485_MAX_SLAVES_PER_CHANNEL] = { 0, };
+		uint32_t rmCnt = 0;
+
+		for(uint32_t ch = 0; ch <  config.numOfChannels; ch++)
+		{
+			auto& channel = config.channels[ch];
+			rmCnt = 0;
+
+			for(uint32_t idx = 0; idx <  channel.numOfDevices; idx++)
+			{
+				rmSlaveList[rmCnt] = channel.slaveDevices[idx];
+				rmSlaveList[rmCnt].enableOSDP = 0;
+				rmCnt++;
+			}
+
+			for(uint32_t idx = 0; idx < rmCnt; idx++)
+			{				
+				TRACE("SlaveList to be removed");
+				TRACE("- ch:%d idx[%d] deviceID: %u, deviceType: %s", ch, idx,
+				rmSlaveList[idx].deviceID, Utility::getStringOfDeviceType(rmSlaveList[idx].deviceType).c_str());
+			}
+
+			TRACE("BS2_SetSlaveExDevice start, rmCnt[%d]", rmCnt);
+			BS2_SetSlaveExDevice(context, id,  0, rmSlaveList, rmCnt);
+			TRACE("BS2_SetSlaveExDevice end, rmCnt[%d]",rmCnt);
+}
+
+		//deallocating memory
+		for(uint32_t ch = 0; ch <  config.numOfChannels; ch++)
+		{
+			auto& channel = config.channels[ch];
+			if (channel.slaveDevices != nullptr)
+			{
+				BS2_ReleaseObject(channel.slaveDevices);
+			}
+		}
+	}
+
+	return sdkResult;
+}
+
 int setRS485Config(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
@@ -1745,6 +1976,7 @@ int setRS485Config(void* context, const DeviceInfo& device)
 	msg = "How many RS485 channels do you want to set up? (0 ~ %u)";
 	config.numOfChannels = (uint8_t)Utility::getInput<uint32_t>(msg, numOfChannels);
 
+	// The device applies only baudRate.
 	for (uint8_t idx = 0; idx < config.numOfChannels; idx++)
 	{
 		msg = "Please insert baud rate. (Default: 115200)";
@@ -1803,6 +2035,136 @@ int setRS485Config(void* context, const DeviceInfo& device)
 	}
 
 	return cc.setRS485Config(id, config);
+}
+
+int setRS485ConfigEx(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2Rs485ConfigEX config = { 0, };
+	string msg;
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	BS2SimpleDeviceInfo info = {0,};
+	int sdkResult = dc.getDeviceInfo(id, info);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	uint32_t numOfChannels =
+		(BS2_DEVICE_TYPE_CORESTATION_40 == info.type) ? BS2_RS485_MAX_CHANNELS : 1;
+
+	msg = "How many RS485 channels do you want to set up? (0 ~ %u)";
+	config.numOfChannels = (uint8_t)Utility::getInput<uint32_t>(msg, numOfChannels);
+
+
+	// numOfChannels and mode are fixed base on the device type.
+	// Use BS2_GetSlaveDevice()/BS2_SetSlaveDevice() for slave device control.
+
+	for (uint8_t idx = 0; idx < config.numOfChannels; idx++)
+	{
+		msg = "Please insert baud rate. (Default: 115200)";
+		config.channels[idx].baudRate = Utility::getInput<uint32_t>(msg);
+	
+		config.mode[idx] = BS2_RS485_MODE_MASTER;
+#if 0
+		msg = "Please insert channel index.";
+		config.channels[idx].channelIndex = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Please insert useRegistance.";
+		config.channels[idx].useRegistance = (uint8_t)Utility::getInput<uint32_t>(msg);
+		
+		msg = "Please insert channelType.";
+		config.channels[idx].channelType = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		msg = "Please insert number of devices.";
+		config.channels[idx].numOfDevices = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		for (uint8_t slaveIdx = 0; slaveIdx < config.channels[idx].numOfDevices; slaveIdx++)
+		{
+			BS2Rs485SlaveDeviceEX& slaveDevice = config.channels[idx].slaveDevices[slaveIdx];
+
+			msg = "Please insert #%u deviceID.";
+			slaveDevice.deviceID = Utility::getInput<BS2_DEVICE_ID>(msg, slaveIdx);
+
+			msg = "Please insert #%u deviceType.";
+			slaveDevice.deviceType = (uint16_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+
+			msg = "Please insert #%u enableOSDP.";
+			slaveDevice.enableOSDP = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+
+			msg = "Please insert #%u connected.";
+			slaveDevice.connected = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+			
+			msg = "Please insert #%u connected.";
+			slaveDevice.connected = (uint8_t)Utility::getInput<uint32_t>(msg, slaveIdx);
+		}
+#endif
+	}
+
+	return cc.setRS485ConfigEx(id, config);
+}
+
+int setRS485ConfigExDynamic(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2Rs485ConfigEXDynamic config = { 0, };
+	string msg;
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	BS2SimpleDeviceInfo info = {0,};
+	int sdkResult = dc.getDeviceInfo(id, info);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	TRACE("deviceType : %s(0x%02X)",  Utility::getStringOfDeviceType(info.type).c_str(), info.type);
+
+	sdkResult =	cc.getRS485ConfigExDynamic(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+	ConfigControl::print(config);
+
+	// the device only cares about baudrates and ignores the rest.
+	// Use BS2_GetSlaveDevice()/BS2_SetSlaveDevice() to control slave device connection.
+#if 0
+	// get channel count from BS2DeviceCapabilities.maxRS485Channels
+	switch (info.type)
+	{
+	case BS2_DEVICE_TYPE_CORESTATION_20:
+	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
+		config.numOfChannels = 3;
+		break;
+	default:
+		config.numOfChannels = 1;
+		break;
+	}
+#endif
+
+	for (uint8_t ch = 0; ch < config.numOfChannels; ch++)
+	{
+#if 0
+		if (info.type == BS2_DEVICE_TYPE_DOOR_INTERFACE_24)
+		{			
+			if (ch < (config.numOfChannels - 1)) config.mode[ch] = BS2_RS485_MODE_MASTER;
+			else config.mode[ch] = BS2_RS485_MODE_SLAVE;
+		}
+		else if (info.type == BS2_DEVICE_TYPE_CORESTATION_20)
+		{			
+			config.mode[ch] = BS2_RS485_MODE_MASTER;
+		}
+		TRACE("channel %u mode: %u", ch, config.mode[ch]);
+
+		config.channels[ch].channelIndex = (uint8_t)ch;		
+		config.channels[ch].numOfDevices = 0;
+		config.channels[ch].slaveDevices = nullptr;	
+#endif
+		msg = "Please insert baud rate (Default: 115200)";
+		config.channels[ch].baudRate = Utility::getInput<uint32_t>(msg);
+	}
+
+	return cc.setRS485ConfigExDynamic(id, config);
 }
 
 int getDeviceCapabilities(void* context, const DeviceInfo& device)
@@ -1871,6 +2233,85 @@ int setInputConfigEx(void* context, const DeviceInfo& device)
 		strmMsg << "Please enter the type of resistance value for supervised input." << endl;
 		strmMsg << "[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised]";
 		config.inputs[idx].supervisedResistor = (uint8_t)Utility::getInput<uint32_t>(strmMsg.str());
+
+		if (config.inputs[idx].supervisedResistor == SUPERVISED_REG_CUSTOM)
+		{
+			msg = "Please enter shortInput.minValue.";
+			config.inputs[idx].supervisedConfig.shortInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter shortInput.maxValue.";
+			config.inputs[idx].supervisedConfig.shortInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			msg = "Please enter openInput.minValue.";
+			config.inputs[idx].supervisedConfig.openInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter openInput.maxValue.";
+			config.inputs[idx].supervisedConfig.openInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			msg = "Please enter onInput.minValue.";
+			config.inputs[idx].supervisedConfig.onInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter onInput.maxValue.";
+			config.inputs[idx].supervisedConfig.onInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+			msg = "Please enter offInput.minValue.";
+			config.inputs[idx].supervisedConfig.offInput.minValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+			msg = "Please enter offInput.maxValue.";
+			config.inputs[idx].supervisedConfig.offInput.maxValue = (uint16_t)Utility::getInput<uint32_t>(msg);
+		}
+	}
+
+	//Aux index
+	msg = "Please enter acFailAuxIndex (0~2) : ";
+	uint16_t value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	if (value > 2)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	config.aux.field.acFailAuxIndex = value + 1;
+
+	msg = "Please enter TamperAuxIndex (0~2) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	if (value > 2)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	config.aux.field.tamperAuxIndex = value + 1;
+
+	msg = "Please enter FireAuxIndex (0~2) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	if (value > 2)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	config.aux.field.fireAuxIndex = value + 1;
+
+	//Aux Type
+	msg = "Please enter aux0 switchType (0:NO, 1:NC) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.aux.field.aux0Type = value;
+	if (value > 1)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+	
+	msg = "Please enter aux1 switchType (0:NO, 1:NC) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.aux.field.aux1Type = value;
+	if (value > 1)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
+	}
+
+	msg = "Please enter aux2 switchType (0:NO, 1:NC) : ";
+	value = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.aux.field.aux2Type = value;
+	if (value > 1)
+	{
+		cout << "Invalid parameter" << endl;
+		return BS_SDK_ERROR_INVALID_CONFIG;
 	}
 
 	return cc.setInputConfigEx(id, config);
@@ -2651,6 +3092,190 @@ int setOsdpStandardActionConfig(void* context, const DeviceInfo& device)
 	return cc.setOsdpStandardActionConfig(id, config);
 }
 
+int getCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	sdkResult = cc.getCardConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+	else
+		return sdkResult;
+
+	if (Utility::isYes("Do you want to scan card test?"))
+	{
+		UserControl uc(context);
+		BS2Card cardID;
+
+		sdkResult = uc.scanCard(id, &cardID);
+		if (BS_SDK_SUCCESS == sdkResult)
+			UserControl::print(cardID);
+	}
+
+	return sdkResult;
+}
+
+int setCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CardConfig config = { 0, };
+	BS2MifareCardConfigEx mfConfig = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	sdkResult = cc.getCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	string msg = "Please enter a data type of cards. (0: Binary, 1: ASCII, 2: UTF16, 3: BCS)";
+	config.dataType = (BS2_CARD_DATA_TYPE)Utility::getInput<uint32_t>(msg);
+	
+	config.useSecondaryKey = Utility::isYes("Do you want to use secondary key?");
+
+	ostringstream oss;
+
+	msg = "Please enter the encryption type of mifare card (0:CRYPTO1, 1:AES128).";
+	config.mifareEncType = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+
+	
+	if (Utility::isYes("Do you want to change mifare card settings?"))
+	{
+		memset(&config.mifare.primaryKey, 0x0, sizeof(config.mifare.primaryKey));
+		oss << "Please enter the hexadecimal " << sizeof(config.mifare.primaryKey) << "-bytes primary key for mifare card." << endl;
+		oss << " [Like 12 34 56 ... EF]" << endl;
+		Utility::getLineHexaString<uint8_t>(oss.str(), config.mifare.primaryKey, sizeof(config.mifare.primaryKey));
+
+		if (config.useSecondaryKey)
+		{
+			memset(&config.mifare.secondaryKey, 0x0, sizeof(config.mifare.secondaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.mifare.secondaryKey) << "-bytes secondary key for mifare card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.mifare.secondaryKey, sizeof(config.mifare.secondaryKey));
+		}
+
+		msg = "Please enter the start block index of mifare card.";
+		config.mifare.startBlockIndex = (uint16_t)Utility::getInput<uint32_t>(msg);
+	}
+
+	if (Utility::isYes("Do you want to change desfire card settings?"))
+	{
+		msg = "Please enter a operation mode for desfire card. (0: Legacy, 1: Advanced(AppLevelKey))";
+		config.desfire.operationMode = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+		if (DESFIRECARD_OPERATION_MODE_LEGACY == config.desfire.operationMode)
+		{
+			memset(&config.desfire.primaryKey, 0x0, sizeof(config.desfire.primaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.desfire.primaryKey) << "-bytes primary key for desfire card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.primaryKey, sizeof(config.desfire.primaryKey));
+
+			if (config.useSecondaryKey)
+			{
+				memset(&config.desfire.secondaryKey, 0x0, sizeof(config.desfire.secondaryKey));
+				oss.str("");
+				oss << "Please enter the hexadecimal " << sizeof(config.desfire.secondaryKey) << "-bytes secondary key for desfire card." << endl;
+				oss << " [Like 12 34 56 ... EF]" << endl;
+				Utility::getLineHexaString<uint8_t>(oss.str(), config.desfire.secondaryKey, sizeof(config.desfire.secondaryKey));
+			}
+		}
+
+	}
+
+	msg = "Please enter a smart card byte order. (0: MSB, 1: LSB)";
+	config.smartCardByteOrder = (BS2_CARD_BYTE_ORDER)Utility::getInput<uint32_t>(msg);
+	msg = "Please enter a formatID.";
+	config.formatID = (BS2_UID)Utility::getInput<uint32_t>(msg);
+
+	sdkResult = cc.setCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+
+	// MifareCardConfigEx
+	if (config.mifareEncType == MIFARE_ENCRYPTION_AES128)
+	{
+		if (Utility::isYes("Do you want to change mifare card Extention settings?"))
+		{
+			sdkResult = cc.getCardConfig(id, config);
+			if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+			memset(&mfConfig.mifareEx.primaryKey, 0x0, sizeof(mfConfig.mifareEx.primaryKey));
+			oss << "Please enter the hexadecimal " << sizeof(mfConfig.mifareEx.primaryKey) << "-bytes primary key for mifare card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), mfConfig.mifareEx.primaryKey, sizeof(mfConfig.mifareEx.primaryKey));
+
+			if (config.useSecondaryKey)
+			{
+				memset(&mfConfig.mifareEx.secondaryKey, 0x0, sizeof(mfConfig.mifareEx.secondaryKey));
+				oss.str("");
+				oss << "Please enter the hexadecimal " << sizeof(mfConfig.mifareEx.secondaryKey) << "-bytes secondary key for mifare card." << endl;
+				oss << " [Like 12 34 56 ... EF]" << endl;
+				Utility::getLineHexaString<uint8_t>(oss.str(), mfConfig.mifareEx.secondaryKey, sizeof(mfConfig.mifareEx.secondaryKey));
+			}
+
+			msg = "Please enter the start block index of mifare card.";
+			mfConfig.mifareEx.startBlockIndex = (uint16_t)Utility::getInput<uint32_t>(msg);
+		}
+	}
+	
+	// SystemConfig
+	oss.str("");
+	oss << "Do you want to change the card operation mode?";
+	if (Utility::isYes(oss.str()))
+	{
+		BS2SystemConfig sysConfig = { 0, };
+		sdkResult = cc.getSystemConfig(id, sysConfig);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		uint32_t preMask = sysConfig.useCardOperationMask;
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_MASK_CLASSIC_PLUS;
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_MASK_DESFIRE_EV1;
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_SR_SE;
+		sysConfig.useCardOperationMask &= ~(uint32_t)CARD_OPERATION_MASK_SEOS;
+
+		// Apply
+		sysConfig.useCardOperationMask |= (uint32_t)CARD_OPERATION_USE;
+
+		sdkResult = cc.setSystemConfig(id, sysConfig);
+		if (BS_SDK_SUCCESS == sdkResult)
+			TRACE("Card operation mode was changed 0x08d => 0x08d", preMask, sysConfig.useCardOperationMask);
+	}
+
+	return sdkResult;
+}
+
 int getCustomCardConfig(void* context, const DeviceInfo& device)
 {
 	ConfigControl cc(context);
@@ -2712,11 +3337,15 @@ int setCustomCardConfig(void* context, const DeviceInfo& device)
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
+	std::cout << "Current dataType:" << config.dataType << std::endl;
 	string msg = "Please enter a data type of cards. (0: Binary, 1: ASCII, 2: UTF16, 3: BCS)";
 	config.dataType = (BS2_CARD_DATA_TYPE)Utility::getInput<uint32_t>(msg);
 	config.useSecondaryKey = Utility::isYes("Do you want to use secondary key?");
 
 	ostringstream oss;
+
+	msg = "Please enter the encryption type of mifare card (0:CRYPTO1, 1:AES128).";
+	config.mifareEncType = (uint16_t)Utility::getInput<uint32_t>(msg);
 
 	if (Utility::isYes("Do you want to change mifare custom card settings?"))
 	{
@@ -2740,6 +3369,30 @@ int setCustomCardConfig(void* context, const DeviceInfo& device)
 		config.mifare.dataSize = (uint8_t)Utility::getInput<uint32_t>(msg);
 		msg = "Please enter the skip bytes of mifare card.";
 		config.mifare.skipBytes = (uint8_t)Utility::getInput<uint32_t>(msg);
+	}
+	
+	if (Utility::isYes("Do you want to change mifare custom card Extention settings?"))
+	{
+		memset(&config.mifareEx.primaryKey, 0x0, sizeof(config.mifareEx.primaryKey));
+		oss << "Please enter the hexadecimal " << sizeof(config.mifareEx.primaryKey) << "-bytes primary key for mifare card." << endl;
+		oss << " [Like 12 34 56 ... EF]" << endl;
+		Utility::getLineHexaString<uint8_t>(oss.str(), config.mifareEx.primaryKey, sizeof(config.mifareEx.primaryKey));
+
+		if (config.useSecondaryKey)
+		{
+			memset(&config.mifareEx.secondaryKey, 0x0, sizeof(config.mifareEx.secondaryKey));
+			oss.str("");
+			oss << "Please enter the hexadecimal " << sizeof(config.mifareEx.secondaryKey) << "-bytes secondary key for mifare card." << endl;
+			oss << " [Like 12 34 56 ... EF]" << endl;
+			Utility::getLineHexaString<uint8_t>(oss.str(), config.mifareEx.secondaryKey, sizeof(config.mifareEx.secondaryKey));
+		}
+
+		msg = "Please enter the start block index of mifare card.";
+		config.mifareEx.startBlockIndex = (uint16_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the card data size of mifare card.";
+		config.mifareEx.dataSize = (uint8_t)Utility::getInput<uint32_t>(msg);
+		msg = "Please enter the skip bytes of mifare card.";
+		config.mifareEx.skipBytes = (uint8_t)Utility::getInput<uint32_t>(msg);
 	}
 
 	if (Utility::isYes("Do you want to change desfire custom card settings?"))

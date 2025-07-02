@@ -729,9 +729,10 @@ namespace Suprema
         THIRD_OSDP_IO_DEVICE = 0x25,   // [+2.9.1]
         BIOSTATION_2A   = 0x26,     // [+2.9.4]
         BIOENTRY_W3     = 0x2A,     // [+2.9.6]
+        CORESTATION_20 = 0x2B,      // [+2.9.9]
+        DOOR_INTERFACE_24 = 0x2C,   // [+2.9.9]
 
-
-        TYPE_MAX        = BIOENTRY_W3,
+        TYPE_MAX        = DOOR_INTERFACE_24,
         //UNKNOWN         = 0xFF,
     }
 
@@ -1995,6 +1996,7 @@ namespace Suprema
     public enum BS2CapabilityFunctionSupport4
     {
         FUNCTION4_SUPPORT_AUTHDENYMASK                = 0x01,  // [V2.9.8]
+        FUNCTION4_SUPPORT_MIFARECARDCONFIGEX          = 0x02,  // [V2.9.9]
     }
 
     [Flags]
@@ -2006,6 +2008,7 @@ namespace Suprema
         SUPERVISED_RESISTOR_10K     = 3,
 
         SUPERVISED_RESISTOR_UNUSED  = 254,
+        SUPERVISED_RESISTOR_CUSTOM = 255,
     }
 
     [Flags]

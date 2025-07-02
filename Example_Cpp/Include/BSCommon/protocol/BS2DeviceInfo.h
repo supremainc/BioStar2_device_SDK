@@ -461,7 +461,7 @@ typedef struct {
 	/*
 	 * OSDP Slave - show auth result from osdp_LED
 	 */
-	uint8_t showOsdpResultbyLED: 1;		// BDP-805 
+	uint8_t showOsdpResultbyLED: 1;		// BDP-805
 
 	//-------------------------------------------------------------------------------- 1byte
 

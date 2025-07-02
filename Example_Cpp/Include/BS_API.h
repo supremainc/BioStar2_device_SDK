@@ -83,6 +83,8 @@
 #include "BSCommon/config/BS2OsdpStandardActionConfig.h"
 #include "BSCommon/config/BS2OsdpStandardConfig.h"
 #include "BSCommon/config/BS2LicenseConfig.h"
+#include "BSCommon/config/BS2FaceConfigExt.h"
+#include "BSCommon/config/BS2FacilityCodeConfig.h"
 #include "BS_Deprecated.h"
 
 #ifdef BS_SDK_V2_DLL
@@ -737,6 +739,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCardConfigEx(void* context, BS2_D
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetCardConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2CardConfigEx* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetRS485ConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2Rs485ConfigEX* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRS485ConfigEx(void* context, BS2_DEVICE_ID deviceId, BS2Rs485ConfigEX* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetRS485ConfigExDynamic(void* context, BS2_DEVICE_ID deviceId, BS2Rs485ConfigEXDynamic* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetRS485ConfigExDynamic(void* context, BS2_DEVICE_ID deviceId, BS2Rs485ConfigEXDynamic* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSupportedConfigMask(void* context, BS2_DEVICE_ID deviceId, BS2_CONFIG_MASK* configMask);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDstConfig(void* context, BS2_DEVICE_ID deviceId, BS2DstConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDstConfig(void* context, BS2_DEVICE_ID deviceId, BS2DstConfig* config);
@@ -764,6 +768,10 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardActionConfig(void* co
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLicenseConfig(void* const, BS2_DEVICE_ID deviceId, BS2LicenseConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCustomCardConfig(void* const, BS2_DEVICE_ID deviceId, BS2CustomCardConfig* config);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetCustomCardConfig(void* const, BS2_DEVICE_ID deviceId, const BS2CustomCardConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetFacilityCodeConfig(void* const, BS2_DEVICE_ID deviceId, BS2FacilityCodeConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetFacilityCodeConfig(void* const, BS2_DEVICE_ID deviceId, const BS2FacilityCodeConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetMifareCardConfigEx(void* const, BS2_DEVICE_ID deviceId, BS2MifareCardConfigEx* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetMifareCardConfigEx(void* const, BS2_DEVICE_ID deviceId, const BS2MifareCardConfigEx* config);
 
 // Door api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2Door** doorObj, uint32_t* numDoor);
@@ -850,7 +858,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RunAction(void* context, BS2_DEVICE_
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice** slaveDeviceObj, uint32_t* slaveDeviceCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice* slaveDevices, uint32_t slaveDeviceCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveSlaveDevice(void* context, BS2_DEVICE_ID deviceId);
-BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSlaveBaudrate(void* context, BS2_DEVICE_ID deviceId, BS2_DEVICE_ID slaveDeviceId, uint32_t baudrate);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetSlaveBaudrate(void* context, BS2_DEVICE_ID deviceId, BS2_DEVICE_ID slaveId, uint32_t baudrate);
 
 // Server Matching api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetServerMatchingHandler(void* context, OnVerifyUser ptrVerifyUser, OnIdentifyUser ptrIdentifyUser);

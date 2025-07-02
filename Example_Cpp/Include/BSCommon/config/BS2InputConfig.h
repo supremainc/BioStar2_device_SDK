@@ -61,12 +61,44 @@ enum {
 	BS2_INPUT_NONE = 0,
 	BS2_INPUT_AUX0 = 1,
 	BS2_INPUT_AUX1 = 2,
+	BS2_INPUT_AUX2 = 3,
 	BS2_INPUT_AUXTYPENO = 0,
 	BS2_INPUT_AUXTYPENC = 1,
 };
 
 /**
  *	BS2InputConfig
+ */
+typedef struct{
+	uint8_t		numInputs;		///< 1 byte
+	uint8_t		numSupervised;	///< 1 byte
+	union {
+		uint16_t value;			///< 2 byte
+		struct {
+			uint16_t tamperAuxIndex : 4;
+			uint16_t acFailAuxIndex : 4;
+			uint16_t aux0Type : 1;
+			uint16_t aux1Type : 1;
+			uint16_t aux2Type : 1;
+			uint16_t reserved : 1;
+			uint16_t fireAuxIndex : 4;
+		} field;
+	} aux;
+
+	struct {
+		uint8_t		portIndex;				///< 1 byte
+		BS2_BOOL	enabled;				///< 1 byte
+		uint8_t		supervised_index;		///< 1 byte
+		uint8_t		switchType;				///< 1 byte
+		uint16_t	duration;				///< 2 byte
+		uint8_t		reserved[2];			///< 2 byte
+
+		BS2SupervisedInputConfig	config; ///< 16 byte
+	} supervised_inputs[BS2_MAX_INPUT_NUM]; ///< 192 byte
+} BS2InputConfig;
+
+/**
+ *	BS2InputConfigEx
  */
 typedef struct{
 	uint8_t		numInputs;		///< 1 byte
@@ -79,38 +111,22 @@ typedef struct{
 			uint16_t acFailAuxIndex : 4;
 			uint16_t aux0Type : 1;
 			uint16_t aux1Type : 1;
-			uint16_t reserved : 6;
+			uint16_t aux2Type : 1;
+			uint16_t reserved : 1;
+			uint16_t fireAuxIndex : 4;
 		} field;
 	} aux;
-
-	struct {
-		uint8_t		portIndex;				///< 1 byte
-		BS2_BOOL	enabled;				///< 1 byte
-		uint8_t		supervised_index;		///< 1 byte
-
-		uint8_t		reserved[5];			///< 5 byte
-
-		BS2SupervisedInputConfig	config; ///< 16 byte
-	} supervised_inputs[BS2_MAX_INPUT_NUM]; ///<
-} BS2InputConfig;
-
-/**
- *	BS2InputConfigEx
- */
-typedef struct{
-	uint8_t		numInputs;		///< 1 byte
-	uint8_t		numSupervised;	///< 1 byte
-	uint8_t		reserved[18];	///< 18 bytes
+	uint8_t		reserved[16];	///< 16 bytes
 	
 	struct {
 		uint8_t						portIndex;				///< 1 byte
 		BS2_SWITCH_TYPE				switchType;				///< 1 byte
 		uint16_t					duration;				///< 2 bytes
 		
-		uint8_t						reserved;				///< 1 byte
+		uint8_t						reserved;			///< 1 byte
 		uint8_t						supervisedResistor;		///< 1 byte
-		uint8_t						reserved1[16];			///< 16 bytes
-		
+		BS2SupervisedInputConfig	supervisedConfig;		///< 16 bytes
+
 		uint8_t						reserved2[26];			///< 26 bytes
 	} inputs[BS2_MAX_INPUT_NUM_EX]; 						///< 768 bytes
 

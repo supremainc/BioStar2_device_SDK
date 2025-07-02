@@ -58,6 +58,8 @@ namespace Suprema
             {BS2DeviceTypeEnum.THIRD_OSDP_IO_DEVICE, "3rd party OSDP IO"},
             {BS2DeviceTypeEnum.BIOSTATION_2A,   "BioStation 2A"},
             {BS2DeviceTypeEnum.BIOENTRY_W3,     "BioEntry W3"},
+            {BS2DeviceTypeEnum.CORESTATION_20,     "CoreStation20"},
+            {BS2DeviceTypeEnum.DOOR_INTERFACE_24,     "Door Interface 24"},
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -510,10 +512,22 @@ namespace Suprema
         extern public static int BS2_SetCustomCardConfig(IntPtr context, UInt32 deviceId, ref BS2CustomCardConfig config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetMifareCardConfigEx(IntPtr context, UInt32 deviceId, out BS2MifareCardConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetMifareCardConfigEx(IntPtr context, UInt32 deviceId, ref BS2MifareCardConfigEx config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetRS485ConfigEx(IntPtr context, UInt32 deviceId, out BS2Rs485ConfigEX config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetRS485ConfigEx(IntPtr context, UInt32 deviceId, ref BS2Rs485ConfigEX config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetRS485ConfigExDynamic(IntPtr context, UInt32 deviceId, out BS2Rs485ConfigEXDynamic config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetRS485ConfigExDynamic(IntPtr context, UInt32 deviceId, ref BS2Rs485ConfigEXDynamic config);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetDstConfig(IntPtr context, UInt32 deviceId, out BS2DstConfig config);
@@ -693,7 +707,7 @@ namespace Suprema
         extern public static int BS2_GetDeviceCapabilities(IntPtr context, UInt32 deviceId, out BS2DeviceCapabilities info);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int BS2_RunAction(IntPtr context, UInt32 deviceId, out BS2Action action);
+        extern public static int BS2_RunAction(IntPtr context, UInt32 deviceId, ref BS2Action action);
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void BS2_SetKeepAliveTimeout(IntPtr context, long ms);
@@ -1394,6 +1408,12 @@ namespace Suprema
         extern public static int BS2_GetDefaultResponseTimeout(IntPtr context, out Int32 poMs);
         //<=
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetFacilityCodeConfig(IntPtr context, UInt32 deviceId, ref BS2FacilityCodeConfig config);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetFacilityCodeConfig(IntPtr context, UInt32 deviceId, out BS2FacilityCodeConfig config);
+
         //UserSmall
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_VerifyUserSmall(IntPtr context, UInt32 deviceId, UInt16 seq, int handleResult, ref BS2UserSmallBlob userBlob);
@@ -1478,5 +1498,7 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetUserStatistic(IntPtr context, UInt32 deviceId, out BS2UserStatistic statistic);
+
+
     }
 }

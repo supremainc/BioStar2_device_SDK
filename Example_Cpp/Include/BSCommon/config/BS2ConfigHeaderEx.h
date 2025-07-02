@@ -38,6 +38,7 @@ enum {
 	BS2_CONFIG_MASK_EX_OSDP_ACTION 	= 0x00000400,	///< OSDP Standard ACTION configuration
 	BS2_CONFIG_MASK_EX_LICENSE		= 0x00000800,	///< License configuration
 	BS2_CONFIG_MASK_EX_CUSTOM_CARD	= 0x00001000,	///< 3rd party custom smartcard configuration
+	BS2_CONFIG_MASK_EX_FACILITY_CODE= 0x00004000,
 };
 
 #define BS2_CONFIG_MASK_EX_ALL			0xFFFFFFFF	///< 4 bytes

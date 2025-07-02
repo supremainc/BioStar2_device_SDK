@@ -62,6 +62,12 @@ enum {
 	DESFIRECARD_OPERATION_MODE_APPLEVELKEY = 1,
 };
 
+enum {
+	MIFARE_ENCRYPTION_CRYPTO1 = 0,
+	MIFARE_ENCRYPTION_AES128 = 1,
+};
+typedef uint8_t BS2_MIFARE_ENCRYPTION;
+
 /**
  *  BS2MifareCard
  */
@@ -126,10 +132,12 @@ typedef struct {
 
 	BS2_UID formatID;                          ///< 4 bytes (card format ID / use only application)
 
-	BS2_BOOL cipher;						   ///< 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
-	BS2_CARD_BYTE_ORDER smartCardByteOrder;    ///< 1 byte (0: MSB, 1: LSB)
-	uint8_t reserved[22];                      ///< 22 bytes (packing)
-} BS2CardConfig;                             ///< 120 bytes
+	BS2_BOOL cipher;						   	///< 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
+	BS2_CARD_BYTE_ORDER smartCardByteOrder;    	///< 1 byte (0: MSB, 1: LSB)
+	uint8_t reserved[1];      					///< 1 byte (0: MSB, 1: LSB)
+	BS2_MIFARE_ENCRYPTION mifareEncType;		///< 1 byte
+	uint8_t reserved1[20];                      	///< 20 bytes (packing)
+} BS2CardConfig;                             	///< 120 bytes
 
 /**
  *	BS2CardConfigEx
@@ -158,6 +166,34 @@ typedef struct {
 	BS2DesFireAppLevelKey desfireAppKey;    ///< 52 bytes
 	uint8_t reserved[16];
 } BS2DesFireCardConfigEx;                   ///< 68 bytes
+
+/**
+ *	BS2MifareCardPlus
+ */
+typedef struct {
+	uint8_t primaryKey[16];
+	uint8_t secondaryKey[16];
+	uint16_t startBlockIndex;
+	uint8_t reserved[14];
+} BS2MifareCardEx;                       //48 Bytes
+
+
+typedef struct {
+	BS2MifareCardEx mifareEx;	///< 48 bytes
+	uint8_t reserved[16];
+} BS2MifareCardConfigEx;		///< 64 bytes
+
+/**
+ *	BS2CustomMifareCardPlus
+ */
+typedef struct {
+	uint8_t primaryKey[16];
+	uint8_t secondaryKey[16];
+	uint16_t startBlockIndex;
+	uint8_t dataSize;
+	uint8_t skipBytes;
+	uint8_t reserved[16];
+} BS2CustomMifareCardEx;                //52 Bytes
 
 /**
  *  BS2CustomMifareCard
@@ -201,8 +237,9 @@ typedef struct {
 
 	BS2CustomMifareCard mifare;                      ///< 24 bytes
 	BS2CustomDesFireCard desfire;                    ///< 96 bytes
-	uint8_t reserved2[24];
-	uint8_t reserved3[96];
+	BS2CustomMifareCardEx mifareEx;				     ///< 52 bytes
+	BS2_MIFARE_ENCRYPTION mifareEncType;	         ///< 1 byte
+	uint8_t reserved3[67];
 
 	BS2_CARD_BYTE_ORDER smartCardByteOrder;    ///< 1 byte (0: MSB, 1: LSB)
 	uint8_t reserved4[3];                     ///< 11 bytes (packing)

@@ -1100,10 +1100,12 @@ namespace Suprema
 
         public static void print(ref BS2SmartCardData smartCard)
         {
+            UInt32 offset_count = 0;
+            if ((BS2CardTypeEnum)smartCard.header.cardType == BS2CardTypeEnum.SECURE) offset_count = 8;
             byte[] cardIDArray = new byte[8];
             for (int idx = 0; idx < 8; ++idx)
             {
-                cardIDArray[idx] = smartCard.cardID[BS2Environment.BS2_CARD_DATA_SIZE - idx - 1];
+                cardIDArray[idx] = smartCard.cardID[BS2Environment.BS2_CARD_DATA_SIZE - offset_count - idx - 1];
             }
 
             if (!BitConverter.IsLittleEndian)
@@ -1256,6 +1258,7 @@ namespace Suprema
             Console.WriteLine("     |--visualFaceTemplateVersion : {0}", info.visualFaceTemplateVersion);
 
             Console.WriteLine("     |--authDenyMaskSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_AUTHDENYMASK));
+            Console.WriteLine("     |--mifareCardConfigExSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX));
         }
 
         public static void print(ref BS2DesFireCardConfigEx config)

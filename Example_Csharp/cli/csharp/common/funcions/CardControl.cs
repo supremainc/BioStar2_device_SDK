@@ -290,6 +290,7 @@ namespace Suprema
             Console.Write(">>>> ");
             smartCard.header.cardType = Util.GetInput((byte)BS2CardTypeEnum.SECURE);
 
+
             if(Convert.ToBoolean(deviceInfo.pinSupported))
             {
                 Console.WriteLine("Do you want to set pin code? [y/N]");
@@ -402,15 +403,38 @@ namespace Suprema
 
                 Array.Clear(smartCard.cardID, 0, BS2Environment.BS2_CARD_DATA_SIZE);
 
+                UInt32 offset = 0;
+                if ((BS2CardTypeEnum)smartCard.header.cardType == BS2CardTypeEnum.SECURE) offset = 8;
+
                 for (int idx = 0; idx < cardIDArray.Length; ++idx)
                 {
-                    smartCard.cardID[BS2Environment.BS2_CARD_DATA_SIZE - idx - 1] = cardIDArray[idx];
+                    smartCard.cardID[BS2Environment.BS2_CARD_DATA_SIZE - offset - idx - 1] = cardIDArray[idx];
                 }
+
+                if ((BS2CardTypeEnum)smartCard.header.cardType == BS2CardTypeEnum.SECURE)
+                {
+                    //issue count
+                    UInt32 issueCount = smartCard.header.issueCount;
+                    byte[] issueBytes = BitConverter.GetBytes(issueCount);
+                    if (!BitConverter.IsLittleEndian) Array.Reverse(issueBytes);
+
+                    offset = BS2Environment.BS2_CARD_DATA_SIZE - 8;
+                    Array.Copy(issueBytes, 0, smartCard.cardID, offset, 4);
+
+                    //timestamp
+                    UInt32 timestamp = Convert.ToUInt32(Util.ConvertToUnixTimestamp(DateTime.Now));
+                    byte[] stampBytes = BitConverter.GetBytes(timestamp);
+                    if (!BitConverter.IsLittleEndian) Array.Reverse(stampBytes);
+
+                    offset = BS2Environment.BS2_CARD_DATA_SIZE - 4;
+                    Array.Copy(stampBytes, 0, smartCard.cardID, offset, 4);
+                }
+
             }
 
             if ((BS2CardTypeEnum)smartCard.header.cardType == BS2CardTypeEnum.ACCESS)
             {
-                Console.WriteLine("Enter the ID of the access group which you want to remove: [ID_1,ID_2 ...]");
+                Console.WriteLine("Enter the ID of the access group which you want to add: [ID_1,ID_2 ...]");
                 Console.Write(">>>> ");
                 char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
                 string[] accessGroupIDs = Console.ReadLine().Split(delimiterChars);

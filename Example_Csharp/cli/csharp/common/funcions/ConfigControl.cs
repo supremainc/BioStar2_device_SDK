@@ -16,6 +16,7 @@ namespace Suprema
         private API.OnBarcodeScanned cbOnBarcodeScanned = null;
         private API.OnReadyToScan cbCardOnReadyToScan = null;
         private List<Tuple<UInt32, UInt16>> searchedSlave = new List<Tuple<UInt32, UInt16>>();
+        private Dictionary<UInt32, Tuple<UInt32, UInt16>> searchedGrandSlaves = new Dictionary<UInt32, Tuple<UInt32, UInt16>>();
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> functionList = new List<KeyValuePair<string, Action<IntPtr, uint, bool>>>();
@@ -26,6 +27,7 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get slaveEx device", getSlaveExDevice));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set slaveEx device", setSlaveExDevice));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("print slaveEx device", printSlavesEx));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
 
@@ -51,8 +53,6 @@ namespace Suprema
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
 
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get Card1xConfig", getCard1xConfig));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Card1xConfig", setCard1xConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get SystemExtConfig", getSystemExtConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set SystemExtConfig", setSystemExtConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get VoipConfig", getVoipConfig));
@@ -66,17 +66,17 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485Config", setRS485Config));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigEx", getRS485ConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigEx", setRS485ConfigEx));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfigEx", getCardConfigEx));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfigEx", setCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get RS485ConfigExDynamic", getRS485ConfigExDynamic));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set RS485ConfigExDynamic", setRS485ConfigExDynamic));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DstConfig", getDstConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DstConfig", setDstConfig));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
-            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get SystemConfig", getSystemConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set SystemConfig", setSystemConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get InputConfig", getInputConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set InputConfig", setInputConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get InputConfigEx", getInputConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set InputConfigEx", setInputConfigEx));
 
             //[IPv6] 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get IPConfig", getIPConfig));
@@ -110,11 +110,108 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set OsdpStandardActionConfig", setOsdpStandardActionConfig));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get Card1xConfig", getCard1xConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Card1xConfig", setCard1xConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfig", getCardConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfig", setCardConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get MifareCardConfigEx", getMifareCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set MifareCardConfigEx", setMifareCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CardConfigEx - BS2SeosCard", getCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CardConfigEx - BS2SeosCard", setCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get DesFireCardConfigEx", getDesFireCardConfigEx));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set DesFireCardConfigEx", setDesFireCardConfigEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get CustomCardConfig", getCustomCardConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set CustomCardConfig", setCustomCardConfig));
-
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FacilityCodeConfig", getFacilityCodeConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FacilityCodeConfig", setFacilityCodeConfig));
             return functionList;
+        }
+
+        void printSlavesEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            Console.WriteLine("Master - {0}", deviceID);
+            foreach (Tuple<UInt32, UInt16> s in searchedSlave)
+            {
+                Console.WriteLine("  Slave - [{0}][{1}]", s.Item1, API.productNameDictionary[(BS2DeviceTypeEnum)s.Item2]);
+
+                Tuple<UInt32, UInt16> gSlave;
+                if (searchedGrandSlaves.TryGetValue(s.Item1, out gSlave))
+                {
+                    Console.WriteLine("    grand Slave - [{0}][{1}]", gSlave.Item1, API.productNameDictionary[(BS2DeviceTypeEnum)gSlave.Item2]);
+                }
+            }
+        }
+
+        void getFacilityCodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FacilityCodeConfig config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Trying to get FacilityCodeConfig");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFacilityCodeConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(sdkContext, config);
+            }
+        }
+
+        void print(IntPtr sdkContext, BS2FacilityCodeConfig config)
+        {
+            Console.WriteLine(">>>> BS2FacilityCodeConfig");
+            Console.WriteLine("     |--numFacilityCode : {0} ", config.numFacilityCode);
+            for (int idx = 0; idx < config.numFacilityCode; ++idx)
+            {
+                Console.WriteLine("     |--connectionMode : {0}", BitConverter.ToString(config.facilityCodes[idx].code));
+            }
+
+            Console.WriteLine("<<<< ");
+
+        }
+        public void setFacilityCodeConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FacilityCodeConfig config = Util.AllocateStructure<BS2FacilityCodeConfig>();
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("How many facilityCode do you want to set? [1-16]");
+            Console.Write(">>>> ");
+            config.numFacilityCode = Util.GetInput((byte)0);
+            if (config.numFacilityCode > BS2Environment.BS2_MAX_NUMBER_FACILITY_CODE)
+                config.numFacilityCode = BS2Environment.BS2_MAX_NUMBER_FACILITY_CODE;
+
+            for (int idx = 0; idx < config.numFacilityCode; ++idx)
+            {
+                Console.WriteLine("Enter 4 hexa code(ex: AA BB CC DD");
+                Console.Write(">>>> ");
+
+                string input = Console.ReadLine();
+                config.facilityCodes[idx].code = input
+                    .Split(new[] { ' ', ',', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(hex => Convert.ToByte(hex, 16))
+                    .ToArray();
+              
+            }
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetFacilityCodeConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+            Console.WriteLine("Set completed.");
         }
 
         public void getSlaveDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -278,8 +375,20 @@ namespace Suprema
             UInt32 slaveDeviceCount = 0;
             UInt32 outchannelport = 0;
 
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+            bool isSlave = searchedSlave.Any(t => t.Item1 == selectedID);
+
+            if (!isSlave && deviceID!=selectedID) // is grand slave
+            {
+                Console.WriteLine("invalid slave searching");
+                return;
+            }
+
             Console.WriteLine("Trying to get the slave devices.");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, deviceID, 0xFF, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, selectedID, 0xFF, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
 
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
@@ -287,7 +396,14 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
-                searchedSlave.Clear();
+                if (isSlave)
+                {
+                    searchedGrandSlaves.Clear();
+                }
+                else
+                {
+                    searchedSlave.Clear();
+                }
                 List<BS2Rs485SlaveDeviceEX> slaveDeviceList = new List<BS2Rs485SlaveDeviceEX>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
@@ -297,14 +413,23 @@ namespace Suprema
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
-                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    if (isSlave)
+                    {
+                        if (item.enableOSDP == 1)
+                            searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
+                    else
+                    {
+                        if (item.enableOSDP == 1)
+                            searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
                 }
 
                 API.BS2_ReleaseObject(slaveDeviceObj);
 
                 foreach (BS2Rs485SlaveDeviceEX slaveExDevice in slaveDeviceList)
                 {
-                    //print(sdkContext, slaveExDevice);
+                    print(sdkContext, slaveExDevice);
                 }
 
                 slaveExControl(sdkContext, slaveDeviceList);
@@ -314,6 +439,18 @@ namespace Suprema
                 Console.WriteLine(">>> There is no slave device in the device.");
             }
         }
+        void print(IntPtr sdkContext, BS2Rs485SlaveDeviceEX slaveExDevice)
+        {
+            bool isGrandSlave = (slaveExDevice.info.parentID > 255);
+            Console.Write(">>>> SlaveDevice id[{0, 10}] type[{1, 3}] model[{2, 16}] enable[{3}], connected[{4}] ",
+                                slaveExDevice.deviceID,
+                                slaveExDevice.deviceType,
+                                API.productNameDictionary[(BS2DeviceTypeEnum)slaveExDevice.deviceType],
+                                Convert.ToBoolean(slaveExDevice.enableOSDP),
+                                Convert.ToBoolean(slaveExDevice.connected));
+            if (isGrandSlave) Console.WriteLine("MasterID[{0, 10}]", slaveExDevice.info.parentID);
+            else Console.WriteLine("channel [{0, 10}]", slaveExDevice.info.channelInfo);
+        }
 
         public void setSlaveExDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
@@ -321,12 +458,25 @@ namespace Suprema
             UInt32 slaveDeviceCount = 0;
             UInt32 outchannelport = 0;
 
-            Console.WriteLine("Choose the RS485 port where the device is connected. [0(default), 1, 2, 3, 4]");
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+            bool isSlave = searchedSlave.Any(t => t.Item1 == selectedID);
+
+            if (!isSlave && deviceID != selectedID) // is grand slave
+            {
+                Console.WriteLine("invalid slave searching");
+                return;
+            }
+
+            Console.WriteLine("Choose the RS485 port where the device is connected. [0(default), 1, 2, 3, 4(all)]");
             Console.Write(">>>> ");
             int selchannel = Util.GetInput(0);
+            if (selchannel == 4) selchannel = 0xFF;
 
             Console.WriteLine("Trying to get the slave devices.");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, deviceID, (uint)selchannel, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSlaveExDevice(sdkContext, selectedID, (uint)selchannel, out slaveDeviceObj, out outchannelport, out slaveDeviceCount);
 
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
@@ -334,7 +484,15 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
-                searchedSlave.Clear();
+                if (isSlave)
+                {
+                    searchedGrandSlaves.Clear();
+                }
+                else
+                {
+                    searchedSlave.Clear();
+                }
+
                 List<BS2Rs485SlaveDeviceEX> slaveDeviceList = new List<BS2Rs485SlaveDeviceEX>();
                 IntPtr curSlaveDeviceObj = slaveDeviceObj;
                 int structSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
@@ -344,7 +502,14 @@ namespace Suprema
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
-                    searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    if (isSlave)
+                    {
+                        searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
+                    else
+                    {
+                        searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                    }
                 }
 
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
@@ -354,7 +519,7 @@ namespace Suprema
                     Console.WriteLine("[{0:000}] ==> SlaveDevice id[{1, 10}] channel[{2}] type[{3, 3}] model[{4, 16}] enable[{5}], connected[{6}]",
                                 idx,
                                 slaveDevice.deviceID,
-                                slaveDevice.channelInfo,
+                                slaveDevice.info.channelInfo,
                                 slaveDevice.deviceType,
                                 API.productNameDictionary[(BS2DeviceTypeEnum)slaveDevice.deviceType],
                                 Convert.ToBoolean(slaveDevice.enableOSDP),
@@ -391,6 +556,7 @@ namespace Suprema
 
                 curSlaveDeviceObj = slaveDeviceObj;
                 UInt32 slaveID = 0;
+                ushort slaveDevType = 0;
                 for (int idx = 0; idx < slaveDeviceCount; ++idx)
                 {
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
@@ -403,6 +569,7 @@ namespace Suprema
                             Marshal.StructureToPtr(item, curSlaveDeviceObj, false);
                         }
                         slaveID = item.deviceID;
+                        slaveDevType = item.deviceType;
                     }
                     else
                     {
@@ -417,7 +584,7 @@ namespace Suprema
                 }
 
                 Console.WriteLine("Trying to set the slave devices.");
-                result = (BS2ErrorCode)API.BS2_SetSlaveExDevice(sdkContext, deviceID, (uint)selchannel, slaveDeviceObj, slaveDeviceCount);
+                result = (BS2ErrorCode)API.BS2_SetSlaveExDevice(sdkContext, selectedID, (uint)selchannel, slaveDeviceObj, slaveDeviceCount);
 
                 API.BS2_ReleaseObject(slaveDeviceObj);
 
@@ -427,7 +594,19 @@ namespace Suprema
                 }
                 else
                 {
-                    slaveExControl(sdkContext, slaveDeviceList);
+                    if (isSlave)
+                    {
+                        bool isExist = searchedGrandSlaves.Values.Any(t => t.Item1 == slaveID);
+                        if (!isExist)
+                            searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(slaveID, slaveDevType));
+                    }
+                    else
+                    {
+                        bool isExist = searchedSlave.Any(t => t.Item1 == slaveID);
+                        if (!isExist)
+                            searchedSlave.Add(new Tuple<UInt32, UInt16>(slaveID, slaveDevType));
+                    }
+                    //slaveExControl(sdkContext, slaveDeviceList);
                 }
 
                 IntPtr wiegandDeviceObj = IntPtr.Zero;
@@ -470,14 +649,9 @@ namespace Suprema
             BS2DeviceCapabilities capa;
             UInt32 id = 0;
 
-                        
-            Console.WriteLine("Master - {0}", deviceID);    
-            foreach (Tuple<UInt32, UInt16> s in searchedSlave)
-            {
-                Console.WriteLine("Slave - {0}", s.Item1);
-            }
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
             Console.WriteLine("Please enter the device ID:");
-            UInt32 selectedID = (UInt32)Util.GetInput();
+            UInt32 selectedID = (UInt32)Util.GetInput(deviceID);
 
             if (CommonControl.getDeviceCapabilities(sdkContext, selectedID, out capa))
             {
@@ -776,8 +950,12 @@ namespace Suprema
         {
             BS2_CONFIG_MASK configMask = 0;
 
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput(deviceID);
+
             Console.WriteLine("Trying to get supported config mask");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSupportedConfigMask(sdkContext, deviceID, out configMask);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetSupportedConfigMask(sdkContext, selectedID, out configMask);
             if (result == BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("Supported config Mask: 0x{0:X}", configMask);
@@ -792,13 +970,17 @@ namespace Suprema
         void getAllConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Configs configs = Util.AllocateStructure<BS2Configs>();
-            configs.configMask = (uint)BS2ConfigMaskEnum.ALL;
-            Console.WriteLine("Trying to get AllConfig");
 
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput(deviceID);
+
+            Console.WriteLine("Trying to get AllConfig");
+            configs.configMask = (uint)BS2ConfigMaskEnum.ALL;
             Type structureType = typeof(BS2Configs);
             int structSize = Marshal.SizeOf(structureType);
 
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetConfig(sdkContext, deviceID, ref configs);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetConfig(sdkContext, selectedID, ref configs);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
             {
                 Console.WriteLine("BS2_GetConfig failed. Error : {0}", result);
@@ -1461,6 +1643,7 @@ namespace Suprema
         public void getRS485Config(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Rs485Config config;
+
             Console.WriteLine("Trying to get RS485Config");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485Config(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -1575,6 +1758,7 @@ namespace Suprema
         void getRS485ConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2Rs485ConfigEX config;
+
             Console.WriteLine("Trying to get RS485ConfigEx");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485ConfigEx(sdkContext, deviceID, out config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -1621,7 +1805,7 @@ namespace Suprema
                 config.channels[0].slaveDevices[0].deviceType = 9;
                 config.channels[0].slaveDevices[0].enableOSDP = 0;
                 config.channels[0].slaveDevices[0].connected = 1;
-                config.channels[0].slaveDevices[0].channelInfo = 0;
+                config.channels[0].slaveDevices[0].info.channelInfo = 0;
             }
 
             Console.WriteLine("Trying to set RS485ConfigEx configuration.");
@@ -1633,8 +1817,74 @@ namespace Suprema
 
         }
 
+        void getRS485ConfigExDynamic(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2Rs485ConfigEXDynamic config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Trying to get BS2Rs485ConfigEXDynamic");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485ConfigExDynamic(sdkContext, selectedID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(sdkContext, config);
+            }
+
+        }
+
+        public void setRS485ConfigExDynamic(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            BS2Rs485ConfigEXDynamic config = Util.AllocateStructure<BS2Rs485ConfigEXDynamic>();
+             Console.WriteLine("Trying to get RS485ConfigExDynamic");
+             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetRS485ConfigExDynamic(sdkContext, selectedID, out config);
+             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+             {
+                 Console.WriteLine("Got error({0}).", result);
+             }
+             else
+             {
+                 print(sdkContext, config);
+             }
+
+            // the device only cares about baudrates and ignores the rest.
+            // Use BS2_GetSlaveDevice()/BS2_SetSlaveDevice() to control slave device connection.
+            Console.WriteLine("Do you want to change baudRate of device? [Y/n]");
+             Console.Write(">>>> ");
+             if (Util.IsYes())
+             {
+                for (int i = 0; i < config.numOfChannels; i++)
+                {
+                    config.channels[i].baudRate = (UInt32)Util.GetBaudRate();
+                }
+ 
+             }
+
+             Console.WriteLine("Trying to set RS485ConfigExDynamic configuration.");
+             result = (BS2ErrorCode)API.BS2_SetRS485ConfigExDynamic(sdkContext, deviceID, ref config);
+             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+             {
+                 Console.WriteLine("Got error({0}).", result);
+             }
+
+        }
+
         void getCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2CardConfigEx config;
             Console.WriteLine("Trying to get CardConfigEx");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetCardConfigEx(sdkContext, deviceID, out config);
@@ -1650,6 +1900,10 @@ namespace Suprema
 
         public void setCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2CardConfigEx config = Util.AllocateStructure<BS2CardConfigEx>();
 
             config.seos.oid_ADF[0] = 0x01;
@@ -1684,6 +1938,10 @@ namespace Suprema
 
         void getCustomCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2DeviceCapabilities capa;
             if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
                 return;
@@ -1706,29 +1964,14 @@ namespace Suprema
             {
                 print(config);
             }
-
-	        Console.WriteLine("Do you want to scan card test? [Y/n]");
-	        if (Util.IsYes())
-	        {
-                BS2Card card;
-
-                cbCardOnReadyToScan = new API.OnReadyToScan(ReadyToScanForCard);
-                Console.WriteLine("Trying to scan card.");
-                result = (BS2ErrorCode)API.BS2_ScanCard(sdkContext, deviceID, out card, cbCardOnReadyToScan);
-                if (BS2ErrorCode.BS_SDK_SUCCESS != result)
-                {
-                    Console.WriteLine("Got error({0}).", result);
-                    return;
-                }
-
-                CommonControl.print(ref card);
- 
-                cbCardOnReadyToScan = null;
-            }
         }
 
         void setCustomCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             BS2DeviceCapabilities capa;
             if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
                 return;
@@ -1745,24 +1988,30 @@ namespace Suprema
             if (BS2ErrorCode.BS_SDK_SUCCESS != result)
                 return;
 
-            Util.HighlightLine("Please enter a data type of cards. (0: Binary, 1: ASCII, 2: UTF16, 3: BCS)", "data type");
+            Util.HighlightLine("Please enter a data type of cards. (0: Binary(default), 1: ASCII, 2: UTF16, 3: BCS)", "data type");
             Console.Write(">>>> ");
             config.dataType = Util.GetInput((byte)0);
 
-            Util.HighlightLine("Do you want to use secondary key?", "use secondary key");
+            Util.HighlightLine("Do you want to use secondary key? [y/N]", "use secondary key");
             Console.Write(">>>> ");
             bool useSecondaryKey = Util.IsYes();
             config.useSecondaryKey = Convert.ToByte(useSecondaryKey);
 
-            Util.HighlightLine("Do you want to change mifare custom card settings? [Y/n]", "mifare custom card");
+            Console.WriteLine("Enter the mifare encryption type [0:CRYPTO1(Default), 1:AES128]");
+            Console.Write(">>>> ");
+            config.mifareEncType = Util.GetInput((byte)0);
+
+            Util.HighlightLine("Do you want to change mifare custom card(CRYPTO1) settings? [Y/n]", "mifare custom card(CRYPTO1)");
             Console.Write(">>>> ");
             if (Util.IsYes())
         	{
                 int sizeOfKey = config.mifare.primaryKey.Length;
 	            Array.Clear(config.mifare.primaryKey, 0, sizeOfKey);
-                string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card. [KEY1-KEY2-...-KEY6]", sizeOfKey);
-                Util.HighlightLineMulti(tempStr, "primary key", "mifare card");
+                string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card(CRYPTO1). [KEY1-KEY2-...-KEY6]", sizeOfKey);
+                Util.HighlightLineMulti(tempStr, "primary key", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
+
+
                 enterSmartcardKey(config.mifare.primaryKey);
 
 		        if (useSecondaryKey)
@@ -1775,17 +2024,53 @@ namespace Suprema
                     enterSmartcardKey(config.mifare.secondaryKey);
 		        }
 
-                Util.HighlightLineMulti("Please enter the start block index of mifare card.", "start block index", "mifare card");
+                Util.HighlightLineMulti("Please enter the start block index of mifare card(CRYPTO1).", "start block index", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
                 config.mifare.startBlockIndex = Util.GetInput((UInt16)0);
 
-                Util.HighlightLineMulti("Please enter the card data size of mifare card.", "card data size", "mifare card");
+                Util.HighlightLineMulti("Please enter the card data size of mifare card(CRYPTO1).", "card data size", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
                 config.mifare.dataSize = Util.GetInput((byte)0);
 
-                Util.HighlightLineMulti("Please enter the skip bytes of mifare card.", "skip bytes", "mifare card");
+                Util.HighlightLineMulti("Please enter the skip bytes of mifare card(CRYPTO1).", "skip bytes", "mifare card(CRYPTO1)");
                 Console.Write(">>>> ");
                 config.mifare.skipBytes = Util.GetInput((byte)0);
+            }
+
+            Util.HighlightLine("Do you want to change mifare custom card(AES128) settings? [Y/n]", "mifare custom card(AES128)");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                int sizeOfKey = config.mifareEx.primaryKey.Length;
+                Array.Clear(config.mifareEx.primaryKey, 0, sizeOfKey);
+                string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+                Util.HighlightLineMulti(tempStr, "primary key", "mifare card(AES128)");
+                Console.Write(">>>> ");
+
+                enterSmartcardKey(config.mifareEx.primaryKey);
+
+                if (useSecondaryKey)
+                {
+                    sizeOfKey = config.mifareEx.secondaryKey.Length;
+                    Array.Clear(config.mifareEx.secondaryKey, 0, sizeOfKey);
+                    tempStr = String.Format("Please enter the hexadecimal {0}-bytes secondary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+                    Util.HighlightLineMulti(tempStr, "secondary key", "mifare card(AES128)");
+                    Console.Write(">>>> ");
+                    enterSmartcardKey(config.mifareEx.secondaryKey);
+                }
+
+
+                Util.HighlightLineMulti("Please enter the start block index of mifare card(AES128).", "start block index", "mifare card(AES128)");
+                Console.Write(">>>> ");
+                config.mifareEx.startBlockIndex = Util.GetInput((UInt16)0);
+
+                Util.HighlightLineMulti("Please enter the card data size of mifare card(AES128).", "card data size", "mifare card(AES128)");
+                Console.Write(">>>> ");
+                config.mifareEx.dataSize = Util.GetInput((byte)0);
+
+                Util.HighlightLineMulti("Please enter the skip bytes of mifare card(AES128).", "skip bytes", "mifare card(AES128)");
+                Console.Write(">>>> ");
+                config.mifareEx.skipBytes = Util.GetInput((byte)0);
             }
 
             Util.HighlightLine("Do you want to change desfire custom card settings? [Y/n]", "desfire custom card");
@@ -1923,6 +2208,87 @@ namespace Suprema
                 else
                     Console.WriteLine("Card operation mode was changed 0x{0:x8} => 0x{1:x8}", preMask, sysConfig.useCardOperationMask);
             }
+        }        
+
+        void getMifareCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
+            BS2DeviceCapabilities capa;
+            if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
+                return;
+
+            if (!Convert.ToBoolean(capa.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX))
+            {
+                Console.WriteLine("Not supported function.");
+                return;
+            }
+
+            BS2MifareCardConfigEx config;
+            Console.WriteLine("Trying to get MifareCardConfigEx");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetMifareCardConfigEx(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+            else
+            {
+                print(config);
+            }
+
+        }
+
+        void setMifareCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
+            BS2DeviceCapabilities capa;
+            if (!CommonControl.getDeviceCapabilities(sdkContext, deviceID, out capa))
+                return;
+
+            if (!Convert.ToBoolean(capa.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX))
+            {
+                Console.WriteLine("Not supported function.");
+                return;
+            }
+
+            BS2MifareCardConfigEx config;
+
+            Console.WriteLine("Try to get MifareCardConfigEx");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetMifareCardConfigEx(sdkContext, deviceID, out config);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != result)
+                return;
+            
+            int sizeOfKey = config.mifareEx.primaryKey.Length;
+            Array.Clear(config.mifareEx.primaryKey, 0, sizeOfKey);
+            string tempStr = String.Format("Please enter the hexadecimal {0}-bytes primary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+            Util.HighlightLineMulti(tempStr, "primary key", "mifare card(AES128)");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.mifareEx.primaryKey);
+
+            sizeOfKey = config.mifareEx.secondaryKey.Length;
+            Array.Clear(config.mifareEx.secondaryKey, 0, sizeOfKey);
+            tempStr = String.Format("Please enter the hexadecimal {0}-bytes secondary key for mifare card(AES128). [KEY1-KEY2-...-KEY16]", sizeOfKey);
+            Util.HighlightLineMulti(tempStr, "secondary key", "mifare card(AES128)");
+            Console.Write(">>>> ");
+            enterSmartcardKey(config.mifareEx.secondaryKey);
+
+
+            Util.HighlightLineMulti("Please enter the start block index of mifare card(AES128).", "start block index", "mifare card(AES128)");
+            Console.Write(">>>> ");
+            config.mifareEx.startBlockIndex = Util.GetInput((UInt16)0);
+
+            result = (BS2ErrorCode)API.BS2_SetMifareCardConfigEx(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
         }
 
         public void getDstConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -2021,9 +2387,202 @@ namespace Suprema
             }
         }
 
+        public void getCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2CardConfig cardConfig;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Trying to get card configuration.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetCardConfig(sdkContext, deviceID, out cardConfig);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+            else
+            {
+                print(cardConfig);                
+            }
+        }
+
+        public void setCardConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FactoryConfig factoryConfig;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Trying to get factory config");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFactoryConfig(sdkContext, deviceID, out factoryConfig);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            UInt16 cardModel = 0;
+            IntPtr ptrModel = Marshal.StringToHGlobalAnsi(Encoding.UTF8.GetString(factoryConfig.modelName).TrimEnd('\0'));
+            result = (BS2ErrorCode)API.BS2_GetCardModel(ptrModel, out cardModel);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            BS2CardConfig cardConfig = Util.AllocateStructure<BS2CardConfig>();
+
+            Console.WriteLine("Choose byte order: [0: MSB(default), 1: LSB]");
+            Console.Write(">>>> ");
+            cardConfig.byteOrder = Util.GetInput((byte)BS2CardByteOrderEnum.MSB);
+            Console.WriteLine("Do you want to use wiegand format? [y/N]");
+            Console.Write(">>>> ");
+            if (Util.IsNo())
+            {
+                cardConfig.useWiegandFormat = 0;
+            }
+            else
+            {
+                cardConfig.useWiegandFormat = 1;
+            }
+
+            BS2CardModelEnum cardModelEnum = (BS2CardModelEnum)cardModel;
+            switch (cardModelEnum)
+            {
+                case BS2CardModelEnum.OMPW:
+                case BS2CardModelEnum.OIPW:
+                case BS2CardModelEnum.OAPW:
+                case BS2CardModelEnum.ODPW:
+                    {
+                        Console.WriteLine("Enter the card format id [0(default)]");
+                        Console.Write(">>>> ");
+                        cardConfig.formatID = Util.GetInput((UInt32)0);
+
+                        Console.WriteLine("Choose card data type: [0: Binary(default), 1: ASCII, 2: UTF16, 3: BCD]");
+                        Console.Write(">>>> ");
+                        cardConfig.dataType = Util.GetInput((byte)BS2CardDataTypeEnum.BINARY);
+                        Console.WriteLine("Do you want to use secondary key? [y/N]");
+                        Console.Write(">>>> ");
+                        if (Util.IsNo())
+                        {
+                            cardConfig.useSecondaryKey = 0;
+                        }
+                        else
+                        {
+                            cardConfig.useSecondaryKey = 1;
+                        }
+
+                        if (cardModelEnum == BS2CardModelEnum.OMPW || cardModelEnum == BS2CardModelEnum.OAPW || cardModelEnum == BS2CardModelEnum.ODPW) // mifare card
+                        {
+                            Console.WriteLine("Enter the mifare encryption type [0:CRYPTO1(Default), 1:AES128]");
+                            Console.Write(">>>> ");
+                            cardConfig.mifareEncType = Util.GetInput((byte)0);
+
+                            Console.WriteLine("Enter the start block index for mifare card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.mifare.startBlockIndex = Util.GetInput((UInt16)0);
+                            Console.WriteLine("Enter the hexadecimal primary key for mifare card. [KEY1-KEY2-...-KEY6]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.mifare.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for mifare card. [KEY1-KEY2-...-KEY6]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.mifare.secondaryKey);
+
+                            Console.WriteLine("Enter the app id for desfire card. [ID1-ID2-ID3]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.appID);
+                            Console.WriteLine("Enter the file id for desfire card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.fileID = Util.GetInput((byte)0);
+
+#if true
+                            Console.WriteLine("Enter the encryption type for desfire card [0: DES/3DES(default), 1: AES]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.encryptionType = Util.GetInput((byte)0);
+#else
+                            cardConfig.desfire.encryptionType = 0;
+#endif
+                            Console.WriteLine("Enter the operation mode for desfire card [0: Legacy, 1: Advanced]");
+                            Console.Write(">>>> ");
+                            cardConfig.desfire.operationMode = Util.GetInput((byte)0);
+
+                            Console.WriteLine("Enter the hexadecimal primary key for desfire card. [KEY1-KEY2-...-KEY16]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for desfire card. [KEY1-KEY2-...-KEY16]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.desfire.secondaryKey);
+                        }
+
+                        //else // iclass card
+                        if (cardModelEnum == BS2CardModelEnum.OIPW || cardModelEnum == BS2CardModelEnum.OAPW)
+                        {
+                            Console.WriteLine("Enter the start block index for iclass card [0(default)]");
+                            Console.Write(">>>> ");
+                            cardConfig.iclass.startBlockIndex = Util.GetInput((UInt16)0);
+                            Console.WriteLine("Enter the hexadecimal primary key for iclass card. [KEY1-KEY2-...-KEY8]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.iclass.primaryKey);
+                            Console.WriteLine("Enter the hexadecimal secondary key for iclass card. [KEY1-KEY2-...-KEY8]");
+                            Console.Write(">>>> ");
+                            enterSmartcardKey(cardConfig.iclass.secondaryKey);
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            Console.WriteLine("Trying to set card configuration.");
+            result = (BS2ErrorCode)API.BS2_SetCardConfig(sdkContext, deviceID, ref cardConfig);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            Console.WriteLine("To use the Smart card function, you must turn on the Suprema smart card function. Do you want to change the card operation mode? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+            {
+                BS2SystemConfig sysConfig;
+                result = (BS2ErrorCode)API.BS2_GetSystemConfig(sdkContext, deviceID, out sysConfig);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                {
+                    Console.WriteLine("Got error({0}).", result);
+                }
+
+                UInt32 preMask = sysConfig.useCardOperationMask;
+
+                // Turn on Suprema smart card
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CLASSIC_PLUS;
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_DESFIRE_EV1;
+
+                // Turn off Custom smart card
+                sysConfig.useCardOperationMask &= ~(UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CUSTOM_CLASSIC_PLUS;
+                sysConfig.useCardOperationMask &= ~(UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_CUSTOM_DESFIRE_EV1;
+
+                // Apply
+                sysConfig.useCardOperationMask |= (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_USE;
+
+                result = (BS2ErrorCode)API.BS2_SetSystemConfig(sdkContext, deviceID, ref sysConfig);
+                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                    Console.WriteLine("Card operation mode update failed ({0}).", result);
+                else
+                    Console.WriteLine("Card operation mode was changed 0x{0:x8} => 0x{1:x8}", preMask, sysConfig.useCardOperationMask);
+            }
+        }
+
         public void getDesFireCardConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2DesFireCardConfigEx config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             if (CommonControl.getDesFireCardConfigEx(sdkContext, deviceID, out config))
                 CommonControl.print(ref config);
         }
@@ -2032,19 +2591,28 @@ namespace Suprema
         {
             BS2DesFireCardConfigEx config = Util.AllocateStructure<BS2DesFireCardConfigEx>();
 
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput();
+
             CommonControl.setDesFireCardConfigEx(sdkContext, deviceID, ref config);
         }
 
         void enterSmartcardKey(byte[] dst)
         {
             int index = 0;
-            string[] keys = Console.ReadLine().Split('-');
-            foreach (string key in keys)
+            string inputStr = Console.ReadLine();
+
+            if (inputStr.Length > 0)
             {
-                dst[index++] = Convert.ToByte(key, 16);
-                if (index > dst.Length)
+                string[] keys = inputStr.Split('-');
+                foreach (string key in keys)
                 {
-                    return;
+                    dst[index++] = Convert.ToByte(key, 16);
+                    if (index > dst.Length)
+                    {
+                        return;
+                    }
                 }
             }
 
@@ -2159,6 +2727,7 @@ namespace Suprema
         public void setInputConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2InputConfig config = Util.AllocateStructure<BS2InputConfig>();
+            const int STOP_N_SET = -1;
 
             Console.WriteLine("Trying to get input configuration.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfig(sdkContext, deviceID, out config);
@@ -2192,8 +2761,13 @@ namespace Suprema
                     return;
                 }
 
-                for (int idx = 0; idx < BS2Environment.BS2_MAX_INPUT_NUM; ++idx)
+                while (true)
                 {
+                    Console.WriteLine("What input port would you like to set? [-1(Exit), 0, ..., {0}]", config.numSupervised - 1);
+                    int idx = Util.GetInput();
+                    if (STOP_N_SET == idx)
+                        break;
+
                     if (idx < config.numSupervised)
                     {
                         Console.WriteLine(">>>> supervised_inputs[{0}]", idx);
@@ -2203,10 +2777,12 @@ namespace Suprema
                         Console.Write("    Please enter enabled (0, 1) : ");
                         config.supervised_inputs[idx].enabled = (byte)Util.GetInput();
 
-                        Console.Write("    Please enter superviced_index : ");
+                        Console.WriteLine("Please enter the type of resistance value for supervised input.");
+                        Console.WriteLine("[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised, 255: custom]");
+                        Console.Write(">>>> ");
                         config.supervised_inputs[idx].supervised_index = (byte)Util.GetInput();
 
-                        if (255 == config.supervised_inputs[idx].supervised_index)
+                        if ((byte)BS2SupervisedResistor.SUPERVISED_RESISTOR_CUSTOM == config.supervised_inputs[idx].supervised_index)
                         {
                             Console.Write("    Please enter shortInput.minValue : ");
                             config.supervised_inputs[idx].config.shortInput.minValue = (UInt16)Util.GetInput();
@@ -2228,39 +2804,80 @@ namespace Suprema
                             Console.Write("    Please enter offInput.maxValue : ");
                             config.supervised_inputs[idx].config.offInput.maxValue = (UInt16)Util.GetInput();
                         }
-                        else
+
+                        Console.WriteLine("Please enter the switch type. (N/O: 0(default), N/C: 1)");
+                        Console.Write(">>>> ");
+                        config.supervised_inputs[idx].switchType = Util.GetInput((byte)BS2SwitchTypeEnum.NORMAL_OPEN);
+                        if (config.aux.aux0Type > 1)
                         {
-                            config.supervised_inputs[idx].config.shortInput.minValue = 0;
-                            config.supervised_inputs[idx].config.shortInput.maxValue = 0;
-                            config.supervised_inputs[idx].config.openInput.minValue = 0;
-                            config.supervised_inputs[idx].config.openInput.maxValue = 0;
-                            config.supervised_inputs[idx].config.onInput.minValue = 0;
-                            config.supervised_inputs[idx].config.onInput.maxValue = 0;
-                            config.supervised_inputs[idx].config.offInput.minValue = 0;
-                            config.supervised_inputs[idx].config.offInput.maxValue = 0;
+                            Console.WriteLine("Invalid parameter");
+                            return;
                         }
+
+                        Console.Write("    Please enter the duration");
+                        Console.Write(">>>> ");
+                        config.supervised_inputs[idx].duration = Util.GetInput((UInt16)50);
+                        if (config.aux.aux0Type > 1)
+                        {
+                            Console.WriteLine("Invalid parameter");
+                            return;
+                        }
+
                     }
                     else
                     {
-                        config.supervised_inputs[idx].portIndex = (byte)idx;
-                        config.supervised_inputs[idx].enabled = 0;
-                        config.supervised_inputs[idx].supervised_index = 1;
-                        config.supervised_inputs[idx].config.shortInput.minValue = 0;
-                        config.supervised_inputs[idx].config.shortInput.maxValue = 0;
-                        config.supervised_inputs[idx].config.openInput.minValue = 0;
-                        config.supervised_inputs[idx].config.openInput.maxValue = 0;
-                        config.supervised_inputs[idx].config.onInput.minValue = 0;
-                        config.supervised_inputs[idx].config.onInput.maxValue = 0;
-                        config.supervised_inputs[idx].config.offInput.minValue = 0;
-                        config.supervised_inputs[idx].config.offInput.maxValue = 0;
+                        Console.WriteLine("Invalid parameter");
+                        return;
                     }
                 }
             }
 
-            config.aux.acFailAuxIndex = BS2Environment.BS2_INPUT_AUX1;
-            config.aux.tamperAuxIndex = BS2Environment.BS2_INPUT_AUX0;
-            config.aux.aux0Type = BS2Environment.BS2_INPUT_AUXTYPENO;
-            config.aux.aux1Type = BS2Environment.BS2_INPUT_AUXTYPENO;
+            //aux index
+            Console.Write("    Please enter acFailAuxIndex (1~3) : ");
+            config.aux.acFailAuxIndex = (byte)Util.GetInput();
+            if (config.aux.acFailAuxIndex < 1 || config.aux.acFailAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter tamperAuxIndex (1~3) : ");
+            config.aux.tamperAuxIndex = (byte)Util.GetInput();
+            if (config.aux.tamperAuxIndex < 1 || config.aux.tamperAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter fireAuxIndex (1~3) : ");
+            config.aux.fireAuxIndex = (byte)Util.GetInput();
+            if (config.aux.fireAuxIndex < 1 || config.aux.fireAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            //aux switch type
+            Console.Write("    Please enter aux0 switchType (0:NO, 1:NC) : ");
+            config.aux.aux0Type = (byte)Util.GetInput();
+            if (config.aux.aux0Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            Console.Write("    Please enter aux1 switchType (0:NO, 1:NC) : ");
+            config.aux.aux1Type = (byte)Util.GetInput();
+            if (config.aux.aux1Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter aux2 switchType (0:NO, 1:NC) : ");
+            config.aux.aux2Type = (byte)Util.GetInput();
+            if (config.aux.aux2Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
 
             Console.WriteLine("Trying to set input configuration.");
             result = (BS2ErrorCode)API.BS2_SetInputConfig(sdkContext, deviceID, ref config);
@@ -2272,6 +2889,153 @@ namespace Suprema
             else
             {
                 Console.WriteLine("Set InputConfig Succeeded");
+            }
+        }
+        public void getInputConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2InputConfigEx config;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            Console.WriteLine("Trying to get InputConfigEx configuration");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, selectedID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            print(config);
+        }
+
+        public void setInputConfigEx(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            // As of 2021.08.03, only IM-120 is supported
+            BS2InputConfigEx config = Util.AllocateStructure<BS2InputConfigEx>();
+
+            const int STOP_N_SET = -1;
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            UInt32 selectedID = (UInt32)Util.GetInput();
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetInputConfigEx(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            Console.WriteLine("Please enter number of inputs.");
+            Console.Write(">>>> ");
+            config.numInputs = Convert.ToByte(Util.GetInput());
+
+            Console.WriteLine("Please enter number of supervised inputs.");
+            Console.Write(">>>> ");
+            config.numSupervised = Convert.ToByte(Util.GetInput());
+
+            while (true)
+            {
+                Console.WriteLine("What input port would you like to set? [-1(Exit), 0, ..., {0}]", config.numSupervised - 1);
+                Console.Write(">>>> ");
+                int idx = Util.GetInput();
+                if (STOP_N_SET == idx)
+                    break;
+
+                config.inputs[idx].portIndex = Convert.ToByte(idx);
+
+                Console.WriteLine("Please enter the switch type. (N/O: 0(default), N/C: 1)");
+                Console.Write(">>>> ");
+                config.inputs[idx].switchType = Util.GetInput((byte)BS2SwitchTypeEnum.NORMAL_OPEN);
+
+                Console.WriteLine("Please enter the duration.");
+                Console.Write(">>>> ");
+                config.inputs[idx].duration = Util.GetInput((UInt16)50);
+
+                Console.WriteLine("Please enter the type of resistance value for supervised input.");
+                Console.WriteLine("[0: 1K, 1: 2.2K, 2: 4.7K, 3: 10K, 254: Unsupervised, 255: custom]");
+                Console.Write(">>>> ");
+                config.inputs[idx].supervisedResistor = Util.GetInput((byte)BS2SupervisedResistor.SUPERVISED_RESISTOR_UNUSED);
+
+                if ((byte)BS2SupervisedResistor.SUPERVISED_RESISTOR_CUSTOM == config.inputs[idx].supervisedResistor)
+                {
+                    Console.Write("    Please enter shortInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.shortInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter shortInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.shortInput.maxValue = (UInt16)Util.GetInput();
+
+                    Console.Write("    Please enter openInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.openInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter openInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.openInput.maxValue = (UInt16)Util.GetInput();
+
+                    Console.Write("    Please enter onInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.onInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter onInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.onInput.maxValue = (UInt16)Util.GetInput();
+
+                    Console.Write("    Please enter offInput.minValue : ");
+                    config.inputs[idx].supervisedConfig.offInput.minValue = (UInt16)Util.GetInput();
+                    Console.Write("    Please enter offInput.maxValue : ");
+                    config.inputs[idx].supervisedConfig.offInput.maxValue = (UInt16)Util.GetInput();
+                }
+            }
+
+            //aux index
+            Console.Write("    Please enter acFailAuxIndex (1~3) : ");
+            config.aux.acFailAuxIndex = (byte)Util.GetInput();
+            if (config.aux.acFailAuxIndex < 1 || config.aux.acFailAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter tamperAuxIndex (1~3) : ");
+            config.aux.tamperAuxIndex = (byte)Util.GetInput();
+            if (config.aux.tamperAuxIndex < 1 || config.aux.tamperAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter fireAuxIndex (1~3) : ");
+            config.aux.fireAuxIndex = (byte)Util.GetInput();
+            if (config.aux.fireAuxIndex < 1 || config.aux.fireAuxIndex > 3)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            //aux switch type
+            Console.Write("    Please enter aux0 switchType (0:NO, 1:NC) : ");
+            config.aux.aux0Type = (byte)Util.GetInput();
+            if (config.aux.aux0Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+            Console.Write("    Please enter aux1 switchType (0:NO, 1:NC) : ");
+            config.aux.aux1Type = (byte)Util.GetInput();
+            if (config.aux.aux1Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+            Console.Write("    Please enter aux2 switchType (0:NO, 1:NC) : ");
+            config.aux.aux2Type = (byte)Util.GetInput();
+            if (config.aux.aux2Type > 1)
+            {
+                Console.WriteLine("Invalid parameter");
+                return;
+            }
+
+
+            Console.WriteLine("Trying to set InputConfigEx configuration");
+            result = (BS2ErrorCode)API.BS2_SetInputConfigEx(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
             }
         }
 
@@ -3169,17 +3933,21 @@ namespace Suprema
             Console.WriteLine(">>>> Input configuration ");
             Console.WriteLine("     |--numInputs     : {0}", config.numInputs);
             Console.WriteLine("     +--Aux");
-            Console.WriteLine("     |--aux index of Tamper     : {0}", config.aux.tamperAuxIndex==BS2Environment.BS2_INPUT_AUX0 ? "Aux0":"Aux1");
-            Console.WriteLine("     |--aux index of ACFail     : {0}", config.aux.acFailAuxIndex==BS2Environment.BS2_INPUT_AUX0 ? "Aux0":"Aux1");
-            Console.WriteLine("     |--aux index of Aux0Type:  : {0}", config.aux.aux0Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
-            Console.WriteLine("     |--aux index of Aux1Type:  : {0}", config.aux.aux1Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
-            Console.WriteLine("     |--numSupervised : {0}", config.numSupervised);
-            for (int idx = 0; idx < BS2Environment.BS2_MAX_INPUT_NUM; idx++)
+            Console.WriteLine("     |--    aux index of ACFail     : Aux{0}", config.aux.acFailAuxIndex);
+            Console.WriteLine("     |--    aux index of Tamper     : Aux{0}", config.aux.tamperAuxIndex);
+            Console.WriteLine("     |--    aux index of Fire       : Aux{0}", config.aux.fireAuxIndex);
+            Console.WriteLine("     |--    aux index of Aux0Type:  : {0}", config.aux.aux0Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
+            Console.WriteLine("     |--    aux index of Aux1Type:  : {0}", config.aux.aux1Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
+            Console.WriteLine("     |--    aux index of Aux2Type:  : {0}", config.aux.aux2Type==BS2Environment.BS2_INPUT_AUXTYPENO?"NO":"NC");
+            Console.WriteLine("     |--    numSupervised : {0}", config.numSupervised);
+            for (int idx = 0; idx < config.numSupervised; idx++)
             {
                 Console.WriteLine("     +--supervised_inputs[{0}]", idx);
                 Console.WriteLine("     |--    portIndex        : {0}", config.supervised_inputs[idx].portIndex);
                 Console.WriteLine("     |--    enabled          : {0}", config.supervised_inputs[idx].enabled);
-                Console.WriteLine("     |--    supervised_index : {0}", config.supervised_inputs[idx].supervised_index);
+                Console.WriteLine("     |--    supervised resistance index : {0}", config.supervised_inputs[idx].supervised_index);
+                Console.WriteLine("     |--    switchType : {0}", config.supervised_inputs[idx].switchType);
+                Console.WriteLine("     |--    duration : {0}", config.supervised_inputs[idx].duration);
                 Console.WriteLine("     |--    config.shortInput.minValue : {0}", config.supervised_inputs[idx].config.shortInput.minValue);
                 Console.WriteLine("     |--    config.shortInput.maxValue : {0}", config.supervised_inputs[idx].config.shortInput.maxValue);
                 Console.WriteLine("     |--    config.openInput.minValue  : {0}", config.supervised_inputs[idx].config.openInput.minValue);
@@ -3190,6 +3958,36 @@ namespace Suprema
                 Console.WriteLine("     +--    config.offInput.maxValue   : {0}", config.supervised_inputs[idx].config.offInput.maxValue);
             }
             Console.WriteLine("<<<< ");
+        }
+        void print(BS2InputConfigEx config)
+        {
+            Console.WriteLine(">>>> InputConfigEx configuration");
+            Console.WriteLine("     +--numInputs : {0}", config.numInputs);
+            Console.WriteLine("     +--Aux");
+            Console.WriteLine("     |--    aux index of ACFail     : Aux{0}", config.aux.acFailAuxIndex);
+            Console.WriteLine("     |--    aux index of Tamper     : Aux{0}", config.aux.tamperAuxIndex);
+            Console.WriteLine("     |--    aux index of Fire       : Aux{0}", config.aux.fireAuxIndex);
+            Console.WriteLine("     |--    aux index of Aux0Type:  : {0}", config.aux.aux0Type == BS2Environment.BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+            Console.WriteLine("     |--    aux index of Aux1Type:  : {0}", config.aux.aux1Type == BS2Environment.BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+            Console.WriteLine("     |--    aux index of Aux2Type:  : {0}", config.aux.aux2Type == BS2Environment.BS2_INPUT_AUXTYPENO ? "NO" : "NC");
+            Console.WriteLine("     |--numSupervised : {0}", config.numSupervised);
+
+            for (byte idx = 0; idx < config.numSupervised; idx++)
+            {
+                Console.WriteLine("     +--Supervised inputs[{0}]", idx);
+                Console.WriteLine("     |--    portIndex : {0}", config.inputs[idx].portIndex);
+                Console.WriteLine("     |--    switchType : {0}", config.inputs[idx].switchType);
+                Console.WriteLine("     |--    duration : {0}", config.inputs[idx].duration);
+                Console.WriteLine("     |--    supervisedResistor : {0}", config.inputs[idx].supervisedResistor);
+                Console.WriteLine("     |--    shortInput.minValue : {0}", config.inputs[idx].supervisedConfig.shortInput.minValue);
+                Console.WriteLine("     |--    shortInput.maxValue : {0}", config.inputs[idx].supervisedConfig.shortInput.maxValue);
+                Console.WriteLine("     |--    openInput.minValue : {0}", config.inputs[idx].supervisedConfig.openInput.minValue);
+                Console.WriteLine("     |--    openInput.maxValue : {0}", config.inputs[idx].supervisedConfig.openInput.maxValue);
+                Console.WriteLine("     |--    onInput.minValue : {0}", config.inputs[idx].supervisedConfig.onInput.minValue);
+                Console.WriteLine("     |--    onInput.maxValue : {0}", config.inputs[idx].supervisedConfig.onInput.maxValue);
+                Console.WriteLine("     |--    offInput.minValue : {0}", config.inputs[idx].supervisedConfig.offInput.minValue);
+                Console.WriteLine("     +--    offInput.maxValue : {0}", config.inputs[idx].supervisedConfig.offInput.maxValue);
+            }
         }
 
         void print(IntPtr sdkContext, BS1CardConfig config)
@@ -3341,7 +4139,43 @@ namespace Suprema
                     Console.WriteLine("                  |--deviceType : {0}", config.channels[idx].slaveDevices[idx2].deviceType);
                     Console.WriteLine("                  |--enableOSDP : {0}", config.channels[idx].slaveDevices[idx2].enableOSDP);
                     Console.WriteLine("                  |--connected : {0}", config.channels[idx].slaveDevices[idx2].connected);
-                    Console.WriteLine("                  |--channelInfo : {0}", config.channels[idx].slaveDevices[idx2].channelInfo);
+                    Console.WriteLine("                  |--channelInfo : {0}", config.channels[idx].slaveDevices[idx2].info.channelInfo);
+                }
+            }
+
+            Console.WriteLine("<<<< ");
+        }
+
+        void print(IntPtr sdkContext, BS2Rs485ConfigEXDynamic config)
+        {
+            Console.WriteLine(">>>> BS2Rs485ConfigEXDynamic configuration ");
+            Console.WriteLine("     |--mode : {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}", config.mode[0], config.mode[1], config.mode[2], config.mode[3], config.mode[4], config.mode[5], config.mode[6], config.mode[7]);
+            Console.WriteLine("     |--numOfChannels : {0}", config.numOfChannels);
+
+            for (int idx = 0; idx < config.numOfChannels; ++idx)
+            {
+                Console.WriteLine("     |++channels[{0}]", idx);
+                Console.WriteLine("         |--baudRate : {0}", config.channels[idx].baudRate);
+                Console.WriteLine("         |--channelIndex : {0}", config.channels[idx].channelIndex);
+                Console.WriteLine("         |--useRegistance : {0}", config.channels[idx].useRegistance);
+                Console.WriteLine("         |--numOfDevices : {0}", config.channels[idx].numOfDevices);
+                Console.WriteLine("         |--channelType : {0}", config.channels[idx].channelType);
+
+                BS2Rs485SlaveDeviceEX[] slaveDevices = new BS2Rs485SlaveDeviceEX[config.channels[idx].numOfDevices];
+                int objectSize = Marshal.SizeOf(typeof(BS2Rs485SlaveDeviceEX));
+
+                for (int idx2 = 0; idx2 < config.channels[idx].numOfDevices; ++idx2)
+                {
+                    IntPtr slaveObj = IntPtr.Add(config.channels[idx].slaveDevices, idx2 * objectSize);
+                    slaveDevices[idx2] = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(slaveObj, typeof(BS2Rs485SlaveDeviceEX));
+
+                    Console.WriteLine("         |++slaveDevices[{0}]", idx2);
+                    Console.WriteLine("                  |--deviceID : {0}", slaveDevices[idx2].deviceID);
+                    Console.WriteLine("                  |--deviceType : {0}", slaveDevices[idx2].deviceType);
+                    Console.WriteLine("                  |--enableOSDP : {0}", slaveDevices[idx2].enableOSDP);
+                    Console.WriteLine("                  |--connected : {0}", slaveDevices[idx2].connected);
+                    Console.WriteLine("                  |--channelInfo : {0}",slaveDevices[idx2].info.channelInfo);
+                    Console.WriteLine("                  |--parentID : {0}", slaveDevices[idx2].info.parentID);
                 }
             }
 
@@ -3577,11 +4411,21 @@ namespace Suprema
             Console.WriteLine(">>>> BS2CustomCardConfig configuration ");
             Console.WriteLine("     |--dataType : {0}", config.dataType);
             Console.WriteLine("     |--useSecondaryKey : {0}", config.useSecondaryKey);
+
+            Console.WriteLine("     |--mifareEncType : {0}", config.mifareEncType);
+
             Console.WriteLine("     |--mifare.primaryKey : {0}", BitConverter.ToString(config.mifare.primaryKey));
             Console.WriteLine("     |--mifare.secondaryKey : {0}", BitConverter.ToString(config.mifare.secondaryKey));
             Console.WriteLine("     |--mifare.startBlockIndex : {0}", config.mifare.startBlockIndex);
             Console.WriteLine("     |--mifare.dataSize : {0}", config.mifare.dataSize);
             Console.WriteLine("     |--mifare.skipBytes : {0}", config.mifare.skipBytes);
+
+            Console.WriteLine("     |--mifareEx.primaryKey : {0}", BitConverter.ToString(config.mifareEx.primaryKey));
+            Console.WriteLine("     |--mifareEX.secondaryKey : {0}", BitConverter.ToString(config.mifareEx.secondaryKey));
+            Console.WriteLine("     |--mifareEx.startBlockIndex : {0}", config.mifareEx.startBlockIndex);
+            Console.WriteLine("     |--mifareEx.dataSize : {0}", config.mifareEx.dataSize);
+            Console.WriteLine("     |--mifareEx.skipBytes : {0}", config.mifareEx.skipBytes);            
+
             Console.WriteLine("     |--desfire.primaryKey : {0}", BitConverter.ToString(config.desfire.primaryKey));
             Console.WriteLine("     |--desfire.secondaryKey : {0}", BitConverter.ToString(config.desfire.secondaryKey));
             Console.WriteLine("     |--desfire.appID : {0}", BitConverter.ToString(config.desfire.appID));
@@ -3598,6 +4442,38 @@ namespace Suprema
             Console.WriteLine("     |--smartCardByteOrder : {0}", config.smartCardByteOrder);
             Console.WriteLine("     |--formatID : {0}", config.formatID);
             Console.WriteLine("<<<< ");
+        }
+
+        void print(BS2MifareCardConfigEx config)
+        {
+            Console.WriteLine(">>>> BS2MifareCardConfigEx configuration ");
+            Console.WriteLine("     |--mifareEx.primaryKey : {0}", BitConverter.ToString(config.mifareEx.primaryKey));
+            Console.WriteLine("     |--mifareEX.secondaryKey : {0}", BitConverter.ToString(config.mifareEx.secondaryKey));
+            Console.WriteLine("     |--mifareEx.startBlockIndex : {0}", config.mifareEx.startBlockIndex);
+        }
+
+        void print(BS2CardConfig cardConfig)
+        {
+            Console.WriteLine(">>>> Card configuration formatID[{0}]", cardConfig.formatID);
+            Console.WriteLine("     |--byteOrder[{0}]", (BS2CardByteOrderEnum)cardConfig.byteOrder);
+            Console.WriteLine("     |--useWiegandFormat[{0}]", Convert.ToBoolean(cardConfig.useWiegandFormat));
+            Console.WriteLine("     |--dataType[{0}]", (BS2CardDataTypeEnum)cardConfig.dataType);
+            Console.WriteLine("     |--useSecondaryKey[{0}]", Convert.ToBoolean(cardConfig.useSecondaryKey));
+            Console.WriteLine("     |--mifareEncType [{0}]", cardConfig.mifareEncType);
+            Console.WriteLine("     |--mifare");
+            Console.WriteLine("     |  |--primaryKey[{0}]", BitConverter.ToString(cardConfig.mifare.primaryKey));
+            Console.WriteLine("     |  |--secondaryKey[{0}]", BitConverter.ToString(cardConfig.mifare.secondaryKey));
+            Console.WriteLine("     |  |--startBlockIndex[{0}]", cardConfig.mifare.startBlockIndex);
+            Console.WriteLine("     |--iclass");
+            Console.WriteLine("     |  |--primaryKey[{0}]", BitConverter.ToString(cardConfig.iclass.primaryKey));
+            Console.WriteLine("     |  |--secondaryKey[{0}]", BitConverter.ToString(cardConfig.iclass.secondaryKey));
+            Console.WriteLine("     |  |--startBlockIndex[{0}]", cardConfig.iclass.startBlockIndex);
+            Console.WriteLine("     |--desfire");
+            Console.WriteLine("     |  |--primaryKey[{0}]", BitConverter.ToString(cardConfig.desfire.primaryKey));
+            Console.WriteLine("     |  |--secondaryKey[{0}]", BitConverter.ToString(cardConfig.desfire.secondaryKey));
+            Console.WriteLine("     |  |--appID[{0}]", BitConverter.ToString(cardConfig.desfire.appID));
+            Console.WriteLine("     |  |--fileID[{0}]", cardConfig.desfire.fileID);
+            Console.WriteLine("     |  |--encryptionType[{0}]", cardConfig.desfire.encryptionType);
         }
     }
 }

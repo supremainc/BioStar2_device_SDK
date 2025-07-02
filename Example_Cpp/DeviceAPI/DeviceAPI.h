@@ -79,6 +79,11 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_RS485CONFIG,
 	MENU_DEV_SET_RS485CONFIG,
+	MENU_DEV_GET_RS485CONFIGEX,
+	MENU_DEV_SET_RS485CONFIGEX,
+	MENU_DEV_GET_RS485CONFIGEXDYNAMIC,
+	MENU_DEV_SET_RS485CONFIGEXDYNAMIC,
+	MENU_DEV_GET_RS485CONFIGEXDYNAMICREMOVE,
 
 	MENU_DEV_GET_INPUTCONFIGEX,
 	MENU_DEV_SET_INPUTCONFIGEX,
@@ -106,6 +111,9 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,
 	MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,
 
+	MENU_DEV_GET_CARDCONFIG,
+	MENU_DEV_SET_CARDCONFIG,
+	
 	MENU_DEV_GET_CUSTOMCARDCONFIG,
 	MENU_DEV_SET_CUSTOMCARDCONFIG,
 
@@ -114,6 +122,12 @@ enum EN_MENU_DEV
 
 	MENU_DEV_TURNON_QRBYPASS,
 	MENU_DEV_TURNOFF_QRBYPASS,
+
+	MENU_DEV_SEARCH_SLAVE,
+	MENU_DEV_DISPLAY_SLAVE,
+
+	MENU_DEV_GET_FACILITYCODECONFIG,
+	MENU_DEV_SET_FACILITYCODECONFIG,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -181,6 +195,11 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_RS485CONFIG,			"BS2_GetRS485Config"},
 	{MENU_DEV_SET_RS485CONFIG,			"BS2_SetRS485Config"},
+	{MENU_DEV_GET_RS485CONFIGEX,		"BS2_GetRS485ConfigEx"},
+	{MENU_DEV_SET_RS485CONFIGEX,		"BS2_SetRS485ConfigEx"},
+	{MENU_DEV_GET_RS485CONFIGEXDYNAMIC,		"BS2_GetRS485ConfigExDynamic"},
+	{MENU_DEV_SET_RS485CONFIGEXDYNAMIC,		"BS2_SetRS485ConfigExDynamic"},
+	{MENU_DEV_GET_RS485CONFIGEXDYNAMICREMOVE,	"BS2_GetRS485ConfigExDynamicRemove"},
 
 	{MENU_DEV_GET_INPUTCONFIGEX,		"BS2_GetInputConfigEx"},
 	{MENU_DEV_SET_INPUTCONFIGEX,		"BS2_SetInputConfigEx"},
@@ -208,6 +227,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_GET_OSDPSTANDARDACTIONCONFIG,	"BS2_GetOsdpStandardActionConfig"},
 	{MENU_DEV_SET_OSDPSTANDARDACTIONCONFIG,	"BS2_SetOsdpStandardActionConfig"},
 
+	{MENU_DEV_GET_CARDCONFIG,		"BS2_GetCardConfig"},
+	{MENU_DEV_SET_CARDCONFIG,		"BS2_SetCardConfig"},
+
 	{MENU_DEV_GET_CUSTOMCARDCONFIG,		"BS2_GetCustomCardConfig"},
 	{MENU_DEV_SET_CUSTOMCARDCONFIG,		"BS2_SetCustomCardConfig"},
 
@@ -216,11 +238,17 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_TURNON_QRBYPASS,			"Turn On QR Bypass"},
 	{MENU_DEV_TURNOFF_QRBYPASS,			"Turn Off QR Bypass"},
+
+	{MENU_DEV_SEARCH_SLAVE,				"Search Slave"},
+	{MENU_DEV_DISPLAY_SLAVE,			"Display Slave"},
+
+	{MENU_DEV_GET_FACILITYCODECONFIG,	"BS2_GetFacilityCodeConfig" },
+	{MENU_DEV_SET_FACILITYCODECONFIG,	"BS2_SetFacilityCodeConfig" },
 };
 
 
 void connectTestDevice(void* context);
-int runAPIs(void* context, const DeviceInfo& device);
+int runAPIs(void* context, DeviceInfo& device);
 int getDeviceInfo(void* context, const DeviceInfo& device);
 int getDeviceInfoEx(void* context, const DeviceInfo& device);
 int getFingerprintConfig(void* context, const DeviceInfo& device);
@@ -254,6 +282,11 @@ int turnOnQRBypass(void* context, const DeviceInfo& device);
 int turnOffQRBypass(void* context, const DeviceInfo& device);
 int getRS485Config(void* context, const DeviceInfo& device);
 int setRS485Config(void* context, const DeviceInfo& device);
+int getRS485ConfigEx(void* context, const DeviceInfo& device);
+int setRS485ConfigEx(void* context, const DeviceInfo& device);
+int getRS485ConfigExDynamic(void* context, const DeviceInfo& device);
+int setRS485ConfigExDynamic(void* context, const DeviceInfo& device);
+int getRS485ConfigExDynamicAndRemove(void* context, const DeviceInfo& device);
 int getDeviceCapabilities(void* context, const DeviceInfo& device);
 int getInputConfigEx(void* context, const DeviceInfo& device);
 int setInputConfigEx(void* context, const DeviceInfo& device);
@@ -273,6 +306,8 @@ int getLicenseConfig(void* context, const DeviceInfo& device);
 int getOsdpStandardConfig(void* context, const DeviceInfo& device);
 int getOsdpStandardActionConfig(void* context, const DeviceInfo& device);
 int setOsdpStandardActionConfig(void* context, const DeviceInfo& device);
+int getCardConfig(void* context, const DeviceInfo& device);
+int setCardConfig(void* context, const DeviceInfo& device);
 int getCustomCardConfig(void* context, const DeviceInfo& device);
 int setCustomCardConfig(void* context, const DeviceInfo& device);
 void setTriggerAction(const DeviceInfo& device, BS2TriggerAction& triggerAction);
@@ -289,3 +324,7 @@ void setBuzzerAction(BS2BuzzerAction& buzzerAction);
 void setLedAction(BS2LedAction& ledAction);
 void setLiftAction(BS2LiftAction& liftAction);
 int runAction(void* context, const DeviceInfo& device);
+int searchSlave(void* context, DeviceInfo& device);
+void displaySlave(void* context, const DeviceInfo& device);
+int getFacilityCodeConfig(void* context, const DeviceInfo& device);
+int setFacilityCodeConfig(void* context, const DeviceInfo& device);

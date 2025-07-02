@@ -207,7 +207,7 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 		DeviceControl dc(context);
 		ConfigControl cc(context);
 		CommControl cm(context);
-		string ip = "192.168.40.139";
+		string ip = "192.168.42.37";
 		BS2_PORT port = 51211;
 		BS2_DEVICE_ID id = 0;
 

@@ -82,6 +82,7 @@ public:
 	template <typename T>
 	static std::vector<T> getLineNumbers(std::string msg, const char delimiter = ',');
 	static void displayConnectedDevices(const DeviceList& devices, bool includeSlave = false, bool includeWiegand = false);
+	static void displayConnectedSlaves(const DeviceInfo& device, bool includeSlave = true, bool includeWiegand = true);
 
 	static std::string getLocalTime(bool milliSec = true);
 	static std::string getIPAddress(uint32_t ip);
@@ -119,6 +120,7 @@ public:
 	static std::string convertArrayToString(const T* data, int numOfData, char delimiter);
 
 	// Solution common functions
+	static 	bool isBigEndianSystem();
 	static uint32_t showMenu(std::vector<MENU_ITEM>& info);
 	static uint32_t getSelectedIndex();
 	static std::vector<uint32_t> getSelectedIndexes();
@@ -132,14 +134,15 @@ public:
 	static int searchAndConnect(void* context, DeviceList& deviceList);
 	static int connectViaIP(void* context, DeviceInfo& device);
 	static int connectViaIP(void* context, DeviceList& deviceList);
-	static int connectSlave(void* context, DeviceInfo& device);
+	static int connectSlave(void* context, DeviceInfo& device, bool isSlave=false, BS2_DEVICE_ID slaveID=0);
 	static int connectWiegand(void* context, DeviceInfo& device);
 	static int connectWiegand(void* context, DeviceList& deviceList);
 	static int searchAndAddSlave(void* context, DeviceList& deviceList);
+	//static int searchAndAddgSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID slaveID);
 	static int searchSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
 	static int searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
-	static int searchCSTSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID);
-	static int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID);
+	static int searchCSTSlave(void* context, std::vector<BS2_DEVICE_ID_TYPE>& deviceList, BS2_DEVICE_ID& masterID, bool isSlave=false);
+	static int searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& masterID, bool isSlave = false);
 	static int searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID& wiegandID);
 	static int getSlaveConnectionStatus(void* context, BS2_DEVICE_ID id, BS2_DEVICE_TYPE type);
 	static void displayDeviceList(const std::vector<BS2SimpleDeviceInfo>& devices);
