@@ -213,7 +213,7 @@ int BS2Context::initSDK(BS2_PORT port)
 		ostringstream msg;
 		msg << "Would you like to specify a network ?" << endl;
 		msg << "This way, when discovering devices, they will search in the specified subnetwork.";
-		bool selectNetwork = Utility::isYes(msg.str());
+		bool selectNetwork = !Utility::isNo(msg.str());
 #endif
 		if (selectNetwork)
 		{

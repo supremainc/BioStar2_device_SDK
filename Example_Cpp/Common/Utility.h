@@ -73,8 +73,12 @@ public:
 	template <typename T>
 	static T getInput(std::string msgFormat, ...);
 	template <typename T>
+	static T getDefaultInput(std::string msgFormat, T defaultValue, ...);
+	template <typename T>
 	static T getInputHexaChar(std::string msgFormat, ...);
 	static std::string getLine(std::string msg);
+	template <typename T>
+	static T getLine(std::string msg, T defaultValue);
 	template <typename T>
 	static bool getLineWiegandBits(std::string msg, T* data, uint32_t size);
 	template <typename T>
@@ -156,6 +160,7 @@ public:
 
 private:
 	static void writeBMPSign(unsigned char* buf, unsigned short type, unsigned long size, unsigned long off_bits);
+	static BS2_DEVICE_ID selectedID_;
 };
 
 template <typename T>
@@ -167,10 +172,53 @@ inline T Utility::getInput(std::string msgFormat, ...)
 	vsprintf(buf, msgFormat.c_str(), ap);
 	va_end(ap);
 
+	std::string input;
 	std::cout << buf << std::endl;
-	std::cout << "==> ";
+	while (true)
+	{
+		std::cout << "==> ";
+		input = "";
+		std::getline(std::cin, input);
+
+		if (!input.empty())
+			break;
+	}
+
+	std::stringstream ss(input);
 	T value;
-	std::cin >> value;
+	ss >> value;
+
+	return value;
+}
+
+template <typename T>
+inline T Utility::getDefaultInput(std::string msgFormat, T defaultValue, ...)
+{
+	va_list ap;
+	va_start(ap, defaultValue);
+	char buf[MAX_BUFFER_SIZE] = { 0, };
+	vsprintf(buf, msgFormat.c_str(), ap);
+	va_end(ap);
+
+	std::cout << buf << "(Default: " << defaultValue << ") " << std::endl;
+	std::cout << "==> ";
+	std::string input;
+	std::getline(std::cin, input);
+
+	if (input.empty())
+	{
+		return defaultValue;
+	}
+
+	std::stringstream ss(input);
+	T value;
+	ss >> value;
+
+	if (ss.fail())
+	{
+		std::cerr << "Invalid input. Returning default value." << std::endl;
+		return defaultValue;
+	}
 
 	return value;
 }
@@ -197,10 +245,37 @@ inline T Utility::getInputHexaChar(std::string msgFormat, ...)
 }
 
 template <typename T>
+inline T Utility::getLine(std::string msg, T defaultValue)
+{
+	std::cout << msg << "(Default: " << defaultValue << ") " << std::endl;
+	std::cout << "==> ";
+
+	std::string input;
+	std::getline(std::cin, input);
+
+	if (input.empty())
+	{
+		return defaultValue;
+	}
+
+	std::stringstream ss(input);
+	T value;
+	ss >> value;
+
+	if (ss.fail())
+	{
+		std::cerr << "Invalid input. Returning default value." << std::endl;
+		return defaultValue;
+	}
+
+	return value;
+}
+
+template <typename T>
 inline bool Utility::getLineWiegandBits(std::string msg, T* data, uint32_t size)
 {
 	auto result = Utility::tokenizeHexaString<T>(Utility::getLine(msg));
-	uint32_t startIdx = size - result.size();
+	uint32_t startIdx = size - (uint32_t)result.size();
 	for (uint32_t idx = startIdx, dataIdx = 0; idx < size; idx++, dataIdx++)
 		data[idx] = result[dataIdx];
 
@@ -211,7 +286,7 @@ template <typename T>
 inline bool Utility::getLineHexaString(std::string msg, T* data, uint32_t size)
 {
 	auto result = Utility::tokenizeHexaString<T>(Utility::getLine(msg));
-	uint32_t count = min(size, result.size());
+	uint32_t count = min(size, (uint32_t)result.size());
 	for (uint32_t idx = 0; idx < count; idx++)
 		data[idx] = result[idx];
 

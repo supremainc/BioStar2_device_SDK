@@ -79,7 +79,7 @@ typedef struct {
 #pragma pack(push, 4)
 typedef struct {
 	BS2_RS485_MODE mode[BS2_RS485_MAX_CHANNELS_EX];		///< 8 byte
-	uint16_t numOfChannels;		///< 2 byte		
+	uint16_t numOfChannels;		///< 2 byte
 	uint8_t reserved[2];		///< 2 bytes (packing)
 
 	uint8_t reserved1[32];		///< 32 bytes (reserved)
@@ -97,8 +97,8 @@ typedef struct {
 
 	uint8_t reserved1[32];		///< 32 bytes (reserved)
 
-	BS2Rs485ChannelEXDynamic channels[BS2_RS485_MAX_CHANNELS_EX]; ///< 12 byte
-} BS2Rs485ConfigEXDynamic;
+	BS2Rs485ChannelEXDynamic channels[BS2_RS485_MAX_CHANNELS_EX];
+} BS2Rs485ConfigEXDynamic;		// 32bit:140 bytes, 64bit:172 bytes	 [+ 2.9.9]
 #pragma pack(pop)
 
 #endif	// __BS2_RS485_CONFIG_H__

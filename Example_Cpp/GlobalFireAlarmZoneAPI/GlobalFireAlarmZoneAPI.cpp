@@ -553,7 +553,7 @@ DWORD WINAPI onPostUnlockDoor(LPVOID lpParam)
 		vector<BS2_DOOR_ID> vecDoorIDs;
 		if (findDoor(id, vecDoorIDs))
 		{
-			int sdkResult = BS2_UnlockDoor(sdkContext, id, BS2_DOOR_FLAG_EMERGENCY, vecDoorIDs.data(), vecDoorIDs.size());
+			int sdkResult = BS2_UnlockDoor(sdkContext, id, BS2_DOOR_FLAG_EMERGENCY, vecDoorIDs.data(), (uint32_t)vecDoorIDs.size());
 			if (BS_SDK_SUCCESS != sdkResult)
 			{
 				TRACE("BS2_UnlockDoor call failed: [%u, %d]", id, sdkResult);

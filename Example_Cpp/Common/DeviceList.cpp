@@ -138,7 +138,8 @@ shared_ptr<DeviceInfo>& DeviceList::getMasterDevice(BS2_DEVICE_ID id)
 	}
 	
 	// failed to find master device.
-	return shared_ptr<DeviceInfo>();
+	static shared_ptr<DeviceInfo> emptyDevice;
+	return emptyDevice;
 }
 
 void DeviceList::clearDevices()
@@ -165,7 +166,7 @@ bool DeviceList::removeSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, bool i
 			return false;
 
 		gSlaveList->erase(it);
-		printf("OK, grand gslave %d is removed, gSlaveList.size:%d\n", slaveID, gSlaveList->size());
+		printf("OK, grand gslave %d is removed, gSlaveList.size:%zu\n", slaveID, gSlaveList->size());
 	}
 	else
 	{
@@ -230,7 +231,7 @@ bool DeviceList::appendSlave(BS2_DEVICE_ID hostID, BS2_DEVICE_ID slaveID, BS2_DE
 		gSlave.id = slaveID;
 		gSlave.slaveType = SLAVETYPE_OSDP;
 		gSlaveList->push_back(gSlave);
-		printf("OK, grand slave %d is inserted, gSlaveList.size:%d\n", slaveID, gSlaveList->size());
+		printf("OK, grand slave %d is inserted, gSlaveList.size:%zu\n", slaveID, gSlaveList->size());
 	}
 	else
 	{
@@ -293,7 +294,7 @@ bool DeviceList::appendWiegand(BS2_DEVICE_ID hostID, BS2_DEVICE_ID wiegandID, bo
 		wdevice.id = wiegandID;
 		wdevice.slaveType = SLAVETYPE_WIEGAND;
 		gSlaveList->push_back(wdevice);
-		printf("OK, grand slave %d is inserted, gSlaveList.size:%d\n", wiegandID, gSlaveList->size());		
+		printf("OK, grand slave %d is inserted, gSlaveList.size:%zu\n", wiegandID, gSlaveList->size());		
 	}
 	else
 	{

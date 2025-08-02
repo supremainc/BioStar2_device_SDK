@@ -781,7 +781,7 @@ int ConfigControl::getAllAuthOperatorLevelEx(BS2_DEVICE_ID id, vector<BS2AuthOpe
 
 int ConfigControl::setAuthOperatorLevelEx(BS2_DEVICE_ID id, const vector<BS2AuthOperatorLevel>& oprList)
 {
-	int sdkResult = BS2_SetAuthOperatorLevelEx(context_, id, const_cast<BS2AuthOperatorLevel*>(oprList.data()), oprList.size());
+	int sdkResult = BS2_SetAuthOperatorLevelEx(context_, id, const_cast<BS2AuthOperatorLevel*>(oprList.data()), (uint32_t)oprList.size());
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_SetAuthOperatorLevelEx call failed: %d", sdkResult);
 

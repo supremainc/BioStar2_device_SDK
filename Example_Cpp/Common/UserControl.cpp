@@ -1016,7 +1016,7 @@ int UserControl::getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, 
 
 int UserControl::getUserDatas(BS2_DEVICE_ID id, vector<string>& uidList, BS2_USER_MASK userMask, vector<BS2UserBlob>& userList)
 {
-	uint32_t userCount = uidList.size();
+	uint32_t userCount = (uint32_t)uidList.size();
 	shared_ptr<BS2UserBlob> userBlob(new BS2UserBlob[userCount], ArrayDeleter<BS2UserBlob>());
 
 	int sdkResult = BS2_GetUserDatas(context_, id, reinterpret_cast<char*>(uidList.data()), userCount, userBlob.get(), userMask);
@@ -1036,7 +1036,7 @@ int UserControl::getUserDatas(BS2_DEVICE_ID id, vector<string>& uidList, BS2_USE
 
 int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserBlob>& userList)
 {
-	uint32_t userCount = userList.size();
+	uint32_t userCount = (uint32_t)userList.size();
 
 	int sdkResult = BS2_PartialUpdateUser(context_, id, mask, (BS2UserBlob*)(userList.data()), userCount);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -1050,7 +1050,7 @@ int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<B
 
 int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserBlobEx>& userList)
 {
-	uint32_t userCount = userList.size();
+	uint32_t userCount = (uint32_t)userList.size();
 
 	int sdkResult = BS2_PartialUpdateUserEx(context_, id, mask, (BS2UserBlobEx*)(userList.data()), userCount);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -1064,7 +1064,7 @@ int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<B
 
 int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserSmallBlob>& userList)
 {
-	uint32_t userCount = userList.size();
+	uint32_t userCount = (uint32_t)userList.size();
 
 	int sdkResult = BS2_PartialUpdateUserSmall(context_, id, mask, (BS2UserSmallBlob*)(userList.data()), userCount);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -1078,7 +1078,7 @@ int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<B
 
 int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserSmallBlobEx>& userList)
 {
-	uint32_t userCount = userList.size();
+	uint32_t userCount = (uint32_t)userList.size();
 
 	int sdkResult = BS2_PartialUpdateUserSmallEx(context_, id, mask, (BS2UserSmallBlobEx*)(userList.data()), userCount);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -1092,7 +1092,7 @@ int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<B
 
 int UserControl::updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const vector<BS2UserFaceExBlob>& userList)
 {
-	uint32_t userCount = userList.size();
+	uint32_t userCount = (uint32_t)userList.size();
 
 	int sdkResult = BS2_PartialUpdateUserFaceEx(context_, id, mask, (BS2UserFaceExBlob*)(userList.data()), userCount);
 	if (BS_SDK_SUCCESS != sdkResult)
@@ -1273,11 +1273,11 @@ int UserControl::getUserBlobUserName(BS2_USER_NAME userName, const BS2SimpleDevi
 
 int UserControl::getUserBlobExpiryDate(BS2UserSetting& setting)
 {
-	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
+	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?", string("2000-01-01 00:00:00"));
 	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
 	setting.startTime = startTime;
 
-	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
+	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?", string("2030-12-31 23:59:59"));
 	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
 	setting.endTime = endTime;
 
@@ -1314,94 +1314,94 @@ int UserControl::getUserBlobPrivateAuthMode(BS2UserSetting& setting, const BS2Si
 	bool faceScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_SCAN;
 
 	stringstream msg;
-	if (Utility::isYes("Do you want to register private auth mode?"))
+	if (Utility::isNo("Do you want to register private auth mode?"))
+		return BS_SDK_SUCCESS;
+
+	if (fingerScanSupported || faceScanSupported)
 	{
-		if (fingerScanSupported || faceScanSupported)
+		msg.str("");
+		msg << "Enter the biometric authentication mode" << endl;
+		msg << " 0: Not use" << endl;
+		msg << " 1: Biometric only" << endl;
+		msg << " 2: Biometric+PIN" << endl;
+		msg << " >>";
+		int fingerAuthMode = Utility::getInput<int>(msg.str());
+		switch (fingerAuthMode)
 		{
-			msg.str("");
-			msg << "Enter the biometric authentication mode" << endl;
-			msg << " 0: Not use" << endl;
-			msg << " 1: Biometric only" << endl;
-			msg << " 2: Biometric+PIN" << endl;
-			msg << " >>";
-			int fingerAuthMode = Utility::getInput<int>(msg.str());
-			switch (fingerAuthMode)
-			{
-			case 1:
-				setting.fingerAuthMode = BS2_AUTH_MODE_BIOMETRIC_ONLY;
-				break;
-			case 2:
-				setting.fingerAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_BIOMETRIC_PIN : BS2_AUTH_MODE_BIOMETRIC_ONLY;
-				break;
-			default:
-				setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
-				break;
-			}
+		case 1:
+			setting.fingerAuthMode = BS2_AUTH_MODE_BIOMETRIC_ONLY;
+			break;
+		case 2:
+			setting.fingerAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_BIOMETRIC_PIN : BS2_AUTH_MODE_BIOMETRIC_ONLY;
+			break;
+		default:
+			setting.fingerAuthMode = BS2_AUTH_MODE_NONE;
+			break;
 		}
+	}
 
-		if (deviceInfo.cardSupported)
+	if (deviceInfo.cardSupported)
+	{
+		msg.str("");
+		msg << "Enter the card authentication mode" << endl;
+		msg << " 0: Not use" << endl;
+		msg << " 1: Card only" << endl;
+		msg << " 2: Card+Biometric" << endl;
+		msg << " 3: Card+PIN" << endl;
+		msg << " 4: Card+(Biometric/PIN)" << endl;
+		msg << " 5: Card+Biometric+PIN" << endl;
+		msg << " >>";
+		int cardAuthMode = Utility::getInput<int>(msg.str());
+		switch (cardAuthMode)
 		{
-			msg.str("");
-			msg << "Enter the card authentication mode" << endl;
-			msg << " 0: Not use" << endl;
-			msg << " 1: Card only" << endl;
-			msg << " 2: Card+Biometric" << endl;
-			msg << " 3: Card+PIN" << endl;
-			msg << " 4: Card+(Biometric/PIN)" << endl;
-			msg << " 5: Card+Biometric+PIN" << endl;
-			msg << " >>";
-			int cardAuthMode = Utility::getInput<int>(msg.str());
-			switch (cardAuthMode)
-			{
-			case 1:
-				setting.cardAuthMode = BS2_AUTH_MODE_CARD_ONLY;
-				break;
-			case 2:
-				setting.cardAuthMode = (fingerScanSupported || faceScanSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC : BS2_AUTH_MODE_CARD_ONLY;
-				break;
-			case 3:
-				setting.cardAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_CARD_PIN : BS2_AUTH_MODE_CARD_ONLY;
-				break;
-			case 4:
-				setting.cardAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC_OR_PIN : BS2_AUTH_MODE_CARD_ONLY;
-				break;
-			case 5:
-				setting.cardAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC_PIN : BS2_AUTH_MODE_CARD_ONLY;
-				break;
-			default:
-				setting.cardAuthMode = BS2_AUTH_MODE_NONE;
-				break;
-			}
+		case 1:
+			setting.cardAuthMode = BS2_AUTH_MODE_CARD_ONLY;
+			break;
+		case 2:
+			setting.cardAuthMode = (fingerScanSupported || faceScanSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC : BS2_AUTH_MODE_CARD_ONLY;
+			break;
+		case 3:
+			setting.cardAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_CARD_PIN : BS2_AUTH_MODE_CARD_ONLY;
+			break;
+		case 4:
+			setting.cardAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC_OR_PIN : BS2_AUTH_MODE_CARD_ONLY;
+			break;
+		case 5:
+			setting.cardAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_CARD_BIOMETRIC_PIN : BS2_AUTH_MODE_CARD_ONLY;
+			break;
+		default:
+			setting.cardAuthMode = BS2_AUTH_MODE_NONE;
+			break;
 		}
+	}
 
+	{
+		msg.str("");
+		msg << "Enter the ID authentication mode" << endl;
+		msg << " 0: Not use" << endl;
+		msg << " 1: ID+Biometric" << endl;
+		msg << " 2: ID+PIN" << endl;
+		msg << " 3: ID+(Biometric/PIN)" << endl;
+		msg << " 4: ID+Biometric+PIN" << endl;
+		msg << " >>";
+		int idAuthMode = Utility::getInput<int>(msg.str());
+		switch (idAuthMode)
 		{
-			msg.str("");
-			msg << "Enter the ID authentication mode" << endl;
-			msg << " 0: Not use" << endl;
-			msg << " 1: ID+Biometric" << endl;
-			msg << " 2: ID+PIN" << endl;
-			msg << " 3: ID+(Biometric/PIN)" << endl;
-			msg << " 4: ID+Biometric+PIN" << endl;
-			msg << " >>";
-			int idAuthMode = Utility::getInput<int>(msg.str());
-			switch (idAuthMode)
-			{
-			case 1:
-				setting.idAuthMode = (fingerScanSupported || faceScanSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC : BS2_AUTH_MODE_NONE;
-				break;
-			case 2:
-				setting.idAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_ID_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 3:
-				setting.idAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 4:
-				setting.idAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			default:
-				setting.idAuthMode = BS2_AUTH_MODE_NONE;
-				break;
-			}
+		case 1:
+			setting.idAuthMode = (fingerScanSupported || faceScanSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC : BS2_AUTH_MODE_NONE;
+			break;
+		case 2:
+			setting.idAuthMode = deviceInfo.pinSupported ? BS2_AUTH_MODE_ID_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 3:
+			setting.idAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 4:
+			setting.idAuthMode = (fingerScanSupported || faceScanSupported || deviceInfo.pinSupported) ? BS2_AUTH_MODE_ID_BIOMETRIC_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		default:
+			setting.idAuthMode = BS2_AUTH_MODE_NONE;
+			break;
 		}
 	}
 
@@ -1414,222 +1414,222 @@ int UserControl::getUserBlobPrivateAuthModeEx(BS2UserSettingEx& settingEx, const
 	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
 
 	stringstream msg;
-	if (Utility::isYes("Do you want to register private auth-ex mode?"))
+	if (Utility::isNo("Do you want to register private auth-ex mode?"))
+		return BS_SDK_SUCCESS;
+
+	if (faceExScanSupported)
 	{
-		if (faceExScanSupported)
+		msg.str("");
+		msg << "Enter the FaceEx authentication mode" << endl;
+		msg << " 0: Not use" << endl;
+		msg << " 1: Face" << endl;
+		msg << " 2: Face + Fingerprint" << endl;
+		msg << " 3: Face + PIN" << endl;
+		msg << " 4: Face + Fingerprint / PIN" << endl;
+		msg << " 5: Face + Fingerprint + PIN" << endl;
+		msg << " >>";
+		int faceAuthMode = Utility::getInput<int>(msg.str());
+		switch (faceAuthMode)
 		{
-			msg.str("");
-			msg << "Enter the FaceEx authentication mode" << endl;
-			msg << " 0: Not use" << endl;
-			msg << " 1: Face" << endl;
-			msg << " 2: Face + Fingerprint" << endl;
-			msg << " 3: Face + PIN" << endl;
-			msg << " 4: Face + Fingerprint / PIN" << endl;
-			msg << " 5: Face + Fingerprint + PIN" << endl;
-			msg << " >>";
-			int faceAuthMode = Utility::getInput<int>(msg.str());
-			switch (faceAuthMode)
-			{
-			case 1:
-				settingEx.faceAuthMode = BS2_EXT_AUTH_MODE_FACE_ONLY;
-				break;
-			case 2:
-				settingEx.faceAuthMode = fingerScanSupported ? BS2_EXT_AUTH_MODE_FACE_FINGERPRINT : BS2_AUTH_MODE_NONE;
-				break;
-			case 3:
-				settingEx.faceAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_FACE_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 4:
-				settingEx.faceAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FACE_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 5:
-				settingEx.faceAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FACE_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			default:
-				settingEx.faceAuthMode = BS2_AUTH_MODE_NONE;
-				break;
-			}
+		case 1:
+			settingEx.faceAuthMode = BS2_EXT_AUTH_MODE_FACE_ONLY;
+			break;
+		case 2:
+			settingEx.faceAuthMode = fingerScanSupported ? BS2_EXT_AUTH_MODE_FACE_FINGERPRINT : BS2_AUTH_MODE_NONE;
+			break;
+		case 3:
+			settingEx.faceAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_FACE_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 4:
+			settingEx.faceAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FACE_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 5:
+			settingEx.faceAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FACE_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		default:
+			settingEx.faceAuthMode = BS2_AUTH_MODE_NONE;
+			break;
 		}
-
-		if (fingerScanSupported)
-		{
-			msg.str("");
-			msg << "Enter the Fingerprint authentication mode\n";
-			msg << " 0: Not use" << endl;
-			msg << " 1: Fingerprint" << endl;
-			msg << " 2: Fingerprint + Face" << endl;
-			msg << " 3: Fingerprint + PIN" << endl;
-			msg << " 4: Fingerprint + Face/PIN" << endl;
-			msg << " 5: Fingerprint + Face + PIN" << endl;
-			msg << " >>";
-			int fingerAuthMode = Utility::getInput<int>(msg.str());
-			switch (fingerAuthMode)
-			{
-			case 1:
-				settingEx.fingerprintAuthMode = BS2_EXT_AUTH_MODE_FINGERPRINT_ONLY;
-				break;
-			case 2:
-				settingEx.fingerprintAuthMode = faceExScanSupported ? BS2_EXT_AUTH_MODE_FINGERPRINT_FACE : BS2_AUTH_MODE_NONE;
-				break;
-			case 3:
-				settingEx.fingerprintAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 4:
-				settingEx.fingerprintAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FINGERPRINT_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 5:
-				settingEx.fingerprintAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FINGERPRINT_FACE_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			default:
-				settingEx.fingerprintAuthMode = BS2_AUTH_MODE_NONE;
-				break;
-			}
-		}
-
-		if (deviceInfo.cardSupported)
-		{
-			msg.str("");
-			msg << "Enter the Card authentication mode\n";
-			msg << " 0: Not use" << endl;
-			msg << " 1: Card" << endl;
-			msg << " 2: Card + Face" << endl;
-			msg << " 3: Card + Fingerprint" << endl;
-			msg << " 4: Card + PIN" << endl;
-			msg << " 5: Card + Face/Fingerprint" << endl;
-			msg << " 6: Card + Face/PIN" << endl;
-			msg << " 7: Card + Fingerprint/PIN" << endl;
-			msg << " 8: Card + Face/Fingerprint/PIN" << endl;
-			msg << " 9: Card + Face + Fingerprint" << endl;
-			msg << "10: Card + Face + PIN" << endl;
-			msg << "11: Card + Fingerprint + Face" << endl;
-			msg << "12: Card + Fingerprint + PIN" << endl;
-			msg << "13: Card + Face/Fingerprint + PIN" << endl;
-			msg << "14: Card + Face + Fingerprint/PIN" << endl;
-			msg << "15: Card + Fingerprint + Face/PIN" << endl;
-			msg << " >>";
-			int cardAuthMode = Utility::getInput<int>(msg.str());
-			switch (cardAuthMode)
-			{
-			case 1:
-				settingEx.cardAuthMode = BS2_EXT_AUTH_MODE_CARD_ONLY;
-				break;
-			case 2:
-				settingEx.cardAuthMode = faceExScanSupported ? BS2_EXT_AUTH_MODE_CARD_FACE : BS2_AUTH_MODE_NONE;
-				break;
-			case 3:
-				settingEx.cardAuthMode = fingerScanSupported ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT : BS2_AUTH_MODE_NONE;
-				break;
-			case 4:
-				settingEx.cardAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_CARD_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 5:
-				settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT : BS2_AUTH_MODE_NONE;
-				break;
-			case 6:
-				settingEx.cardAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 7:
-				settingEx.cardAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 8:
-				settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 9:
-				settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_FINGERPRINT : BS2_AUTH_MODE_NONE;
-				break;
-			case 10:
-				settingEx.cardAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 11:
-				settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_FACE : BS2_AUTH_MODE_NONE;
-				break;
-			case 12:
-				settingEx.cardAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 13:
-				settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 14:
-				settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 15:
-				settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			default:
-				settingEx.cardAuthMode = BS2_AUTH_MODE_NONE;
-			}
-		}	// cardAuthMode
-
-		{
-			msg.str("");
-			msg << "Enter the ID authentication mode\n";
-			msg << " 0: Not use" << endl;
-			msg << " 1: ID + Face" << endl;
-			msg << " 2: ID + Fingerprint" << endl;
-			msg << " 3: ID + PIN" << endl;
-			msg << " 4: ID + Face/Fingerprint" << endl;
-			msg << " 5: ID + Face/PIN" << endl;
-			msg << " 6: ID + Fingerprint/PIN" << endl;
-			msg << " 7: ID + Face/Fingerprint/PIN" << endl;
-			msg << " 8: ID + Face + Fingerprint" << endl;
-			msg << " 9: ID + Face + PIN" << endl;
-			msg << "10: ID + Fingerprint + Face" << endl;
-			msg << "11: ID + Fingerprint + PIN" << endl;
-			msg << "12: ID + Face/Fingerprint + PIN" << endl;
-			msg << "13: ID + Face + Fingerprint/PIN" << endl;
-			msg << "14: ID + Fingerprint + Face/PIN" << endl;
-			msg << " >>";
-			int idAuthMode = Utility::getInput<int>(msg.str());
-			switch (idAuthMode)
-			{
-			case 1:
-				settingEx.idAuthMode = faceExScanSupported ? BS2_EXT_AUTH_MODE_ID_FACE : BS2_AUTH_MODE_NONE;
-				break;
-			case 2:
-				settingEx.idAuthMode = fingerScanSupported ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT : BS2_AUTH_MODE_NONE;
-				break;
-			case 3:
-				settingEx.idAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_ID_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 4:
-				settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT : BS2_AUTH_MODE_NONE;
-				break;
-			case 5:
-				settingEx.idAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 6:
-				settingEx.idAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 7:
-				settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 8:
-				settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_FINGERPRINT : BS2_AUTH_MODE_NONE;
-				break;
-			case 9:
-				settingEx.idAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 10:
-				settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_FACE : BS2_AUTH_MODE_NONE;
-				break;
-			case 11:
-				settingEx.idAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 12:
-				settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 13:
-				settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			case 14:
-				settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
-				break;
-			default:
-				settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
-				break;
-			}
-		}	// idAuthMode
 	}
+
+	if (fingerScanSupported)
+	{
+		msg.str("");
+		msg << "Enter the Fingerprint authentication mode\n";
+		msg << " 0: Not use" << endl;
+		msg << " 1: Fingerprint" << endl;
+		msg << " 2: Fingerprint + Face" << endl;
+		msg << " 3: Fingerprint + PIN" << endl;
+		msg << " 4: Fingerprint + Face/PIN" << endl;
+		msg << " 5: Fingerprint + Face + PIN" << endl;
+		msg << " >>";
+		int fingerAuthMode = Utility::getInput<int>(msg.str());
+		switch (fingerAuthMode)
+		{
+		case 1:
+			settingEx.fingerprintAuthMode = BS2_EXT_AUTH_MODE_FINGERPRINT_ONLY;
+			break;
+		case 2:
+			settingEx.fingerprintAuthMode = faceExScanSupported ? BS2_EXT_AUTH_MODE_FINGERPRINT_FACE : BS2_AUTH_MODE_NONE;
+			break;
+		case 3:
+			settingEx.fingerprintAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 4:
+			settingEx.fingerprintAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FINGERPRINT_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 5:
+			settingEx.fingerprintAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_FINGERPRINT_FACE_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		default:
+			settingEx.fingerprintAuthMode = BS2_AUTH_MODE_NONE;
+			break;
+		}
+	}
+
+	if (deviceInfo.cardSupported)
+	{
+		msg.str("");
+		msg << "Enter the Card authentication mode\n";
+		msg << " 0: Not use" << endl;
+		msg << " 1: Card" << endl;
+		msg << " 2: Card + Face" << endl;
+		msg << " 3: Card + Fingerprint" << endl;
+		msg << " 4: Card + PIN" << endl;
+		msg << " 5: Card + Face/Fingerprint" << endl;
+		msg << " 6: Card + Face/PIN" << endl;
+		msg << " 7: Card + Fingerprint/PIN" << endl;
+		msg << " 8: Card + Face/Fingerprint/PIN" << endl;
+		msg << " 9: Card + Face + Fingerprint" << endl;
+		msg << "10: Card + Face + PIN" << endl;
+		msg << "11: Card + Fingerprint + Face" << endl;
+		msg << "12: Card + Fingerprint + PIN" << endl;
+		msg << "13: Card + Face/Fingerprint + PIN" << endl;
+		msg << "14: Card + Face + Fingerprint/PIN" << endl;
+		msg << "15: Card + Fingerprint + Face/PIN" << endl;
+		msg << " >>";
+		int cardAuthMode = Utility::getInput<int>(msg.str());
+		switch (cardAuthMode)
+		{
+		case 1:
+			settingEx.cardAuthMode = BS2_EXT_AUTH_MODE_CARD_ONLY;
+			break;
+		case 2:
+			settingEx.cardAuthMode = faceExScanSupported ? BS2_EXT_AUTH_MODE_CARD_FACE : BS2_AUTH_MODE_NONE;
+			break;
+		case 3:
+			settingEx.cardAuthMode = fingerScanSupported ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT : BS2_AUTH_MODE_NONE;
+			break;
+		case 4:
+			settingEx.cardAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_CARD_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 5:
+			settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT : BS2_AUTH_MODE_NONE;
+			break;
+		case 6:
+			settingEx.cardAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 7:
+			settingEx.cardAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 8:
+			settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 9:
+			settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_FINGERPRINT : BS2_AUTH_MODE_NONE;
+			break;
+		case 10:
+			settingEx.cardAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 11:
+			settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_FACE : BS2_AUTH_MODE_NONE;
+			break;
+		case 12:
+			settingEx.cardAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 13:
+			settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_OR_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 14:
+			settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FACE_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 15:
+			settingEx.cardAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_CARD_FINGERPRINT_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		default:
+			settingEx.cardAuthMode = BS2_AUTH_MODE_NONE;
+		}
+	}	// cardAuthMode
+
+	{
+		msg.str("");
+		msg << "Enter the ID authentication mode\n";
+		msg << " 0: Not use" << endl;
+		msg << " 1: ID + Face" << endl;
+		msg << " 2: ID + Fingerprint" << endl;
+		msg << " 3: ID + PIN" << endl;
+		msg << " 4: ID + Face/Fingerprint" << endl;
+		msg << " 5: ID + Face/PIN" << endl;
+		msg << " 6: ID + Fingerprint/PIN" << endl;
+		msg << " 7: ID + Face/Fingerprint/PIN" << endl;
+		msg << " 8: ID + Face + Fingerprint" << endl;
+		msg << " 9: ID + Face + PIN" << endl;
+		msg << "10: ID + Fingerprint + Face" << endl;
+		msg << "11: ID + Fingerprint + PIN" << endl;
+		msg << "12: ID + Face/Fingerprint + PIN" << endl;
+		msg << "13: ID + Face + Fingerprint/PIN" << endl;
+		msg << "14: ID + Fingerprint + Face/PIN" << endl;
+		msg << " >>";
+		int idAuthMode = Utility::getInput<int>(msg.str());
+		switch (idAuthMode)
+		{
+		case 1:
+			settingEx.idAuthMode = faceExScanSupported ? BS2_EXT_AUTH_MODE_ID_FACE : BS2_AUTH_MODE_NONE;
+			break;
+		case 2:
+			settingEx.idAuthMode = fingerScanSupported ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT : BS2_AUTH_MODE_NONE;
+			break;
+		case 3:
+			settingEx.idAuthMode = deviceInfo.pinSupported ? BS2_EXT_AUTH_MODE_ID_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 4:
+			settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT : BS2_AUTH_MODE_NONE;
+			break;
+		case 5:
+			settingEx.idAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 6:
+			settingEx.idAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 7:
+			settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 8:
+			settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_FINGERPRINT : BS2_AUTH_MODE_NONE;
+			break;
+		case 9:
+			settingEx.idAuthMode = (faceExScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 10:
+			settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_FACE : BS2_AUTH_MODE_NONE;
+			break;
+		case 11:
+			settingEx.idAuthMode = (fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 12:
+			settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_OR_FINGERPRINT_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 13:
+			settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FACE_FINGERPRINT_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		case 14:
+			settingEx.idAuthMode = (faceExScanSupported && fingerScanSupported && deviceInfo.pinSupported) ? BS2_EXT_AUTH_MODE_ID_FINGERPRINT_FACE_OR_PIN : BS2_AUTH_MODE_NONE;
+			break;
+		default:
+			settingEx.idAuthMode = BS2_AUTH_MODE_NONE;
+			break;
+		}
+	}	// idAuthMode
 
 	return BS_SDK_SUCCESS;
 }
@@ -1639,7 +1639,7 @@ int UserControl::getUserBlobSecurityLevel(BS2UserSetting& setting)
 	stringstream msg;
 	msg << "Enter the security level for this user" << endl;
 	msg << "[0: Default, 1: Lower, 2: Low, 3: Normal, 4: High, 5, Higher]";
-	int securityLevel = Utility::getInput<int>(msg.str());
+	int securityLevel = Utility::getDefaultInput<int>(msg.str(), 3);
 	switch (securityLevel)
 	{
 	case BS2_USER_SECURITY_LEVEL_DEFAULT:
@@ -1679,27 +1679,27 @@ int UserControl::getProfileImage(BS2UserPhoto** photo, const BS2SimpleDeviceInfo
 
 	if (deviceInfo.userPhotoSupported)
 	{
-		if (Utility::isYes("Do you want to register a profile image?"))
+		if (Utility::isNo("Do you want to register a profile image?"))
+			return BS_SDK_SUCCESS;
+
+		string imagePath = Utility::getInput<string>("Enter the profile image path and name:");
+		uint32_t size = Utility::getResourceSize(imagePath);
+		shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
+
+		while (BS2_USER_PHOTO_SIZE < size)
 		{
-			string imagePath = Utility::getInput<string>("Enter the profile image path and name:");
-			uint32_t size = Utility::getResourceSize(imagePath);
-			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
+			msg.str("");
+			msg << "Image is to big.\n";
+			msg << "Re-enter an image smaller than 16384 byte:";
+			imagePath = Utility::getInput<string>(msg.str());
+			size = Utility::getResourceSize(imagePath);
+		}
 
-			while (BS2_USER_PHOTO_SIZE < size)
-			{
-				msg.str("");
-				msg << "Image is to big.\n";
-				msg << "Re-enter an image smaller than 16384 byte:";
-				imagePath = Utility::getInput<string>(msg.str());
-				size = Utility::getResourceSize(imagePath);
-			}
-
-			if (Utility::getResourceFromFile(imagePath, buffer, size))
-			{
-				*photo = new BS2UserPhoto;
-				(*photo)->size = size;
-				memcpy((*photo)->data, buffer.get(), size);
-			}
+		if (Utility::getResourceFromFile(imagePath, buffer, size))
+		{
+			*photo = new BS2UserPhoto;
+			(*photo)->size = size;
+			memcpy((*photo)->data, buffer.get(), size);
 		}
 	}
 
@@ -1708,23 +1708,23 @@ int UserControl::getProfileImage(BS2UserPhoto** photo, const BS2SimpleDeviceInfo
 
 int UserControl::getUserBlobAccessGroupID(BS2_ACCESS_GROUP_ID* accessGroupId)
 {
-	if (Utility::isYes("Do you want to register access group ID?"))
-	{
-		stringstream msg;
-		msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
-		string inStrAGID = Utility::getLine(msg.str());
-		if (0 == inStrAGID.size())
-			return BS_SDK_ERROR_CANNOT_FIND_ACCESS_GROUP;
+	if (Utility::isNo("Do you want to register access group ID?"))
+		return BS_SDK_SUCCESS;
 
-		vector<string> listID = Utility::tokenizeString(inStrAGID);
-		if (listID.size() < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER)
+	stringstream msg;
+	msg << "Please enter access group IDs. ex)ID1 ID2 ID3 ...\n";
+	string inStrAGID = Utility::getLine(msg.str());
+	if (0 == inStrAGID.size())
+		return BS_SDK_ERROR_CANNOT_FIND_ACCESS_GROUP;
+
+	vector<string> listID = Utility::tokenizeString(inStrAGID);
+	if (listID.size() < BS2_MAX_NUM_OF_ACCESS_GROUP_PER_USER)
+	{
+		uint32_t index(0);
+		for (auto groupID : listID)
 		{
-			uint32_t index(0);
-			for (auto groupID : listID)
-			{
-				BS2_ACCESS_GROUP_ID gid = atoi(groupID.c_str());
-				accessGroupId[index++] = gid;
-			}
+			BS2_ACCESS_GROUP_ID gid = atoi(groupID.c_str());
+			accessGroupId[index++] = gid;
 		}
 	}
 
@@ -1736,7 +1736,7 @@ int UserControl::getUserBlobFaceAuthGroupID(BS2User& user)
 	stringstream msg;
 	msg << "Please enter a authentication group ID.\n";
 	msg << "This is used for face authentication. [0: Not using]";
-	uint32_t authGroupID = Utility::getInput<uint32_t>(msg.str());
+	uint32_t authGroupID = Utility::getDefaultInput<uint32_t>(msg.str(), 0);
 	user.authGroupID = authGroupID;
 
 	return BS_SDK_SUCCESS;
@@ -1753,7 +1753,7 @@ int UserControl::getUserBlobJobCode(BS2Job& job)
 	{
 		ostringstream msg;
 		msg << idx << ") Code:";
-		code = Utility::getInput<uint32_t>(msg.str());
+		code = Utility::getDefaultInput<uint32_t>(msg.str(), STOP_N_EXIT);
 		if (STOP_N_EXIT == code)
 			break;
 
@@ -1930,6 +1930,58 @@ int UserControl::getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces
 
 	if (faceExScanSupported)
 	{
+		sdkResult = getUserBlobFaceInfoTemplateOnly(faceExObjs, numOfFaces, id, deviceInfoEx);
+		if (BS_SDK_ERROR_CANCELED != sdkResult)
+		{
+			return sdkResult;
+		}
+		else if (Utility::isYes("Do you want to scan faceEx from device?"))
+		{
+			uint32_t numFace = Utility::getInput<uint32_t>("How many faceEx would you like to register?");
+			BS2FaceEx* ptrFace = new BS2FaceEx[numFace];
+			if (ptrFace)
+			{
+				*faceExObjs = ptrFace;
+				for (uint32_t index = 0; index < numFace; index++)
+				{
+					sdkResult = scanFaceEx(id, &ptrFace[index], numOfFaces);
+					if (BS_SDK_SUCCESS != sdkResult)
+						return sdkResult;
+				}
+			}
+		}
+		else if (Utility::isYes("Do you want to register from file image? (Send the image to the device and the device automatically extracts the template.)"))
+		{
+			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
+			uint32_t size = Utility::getResourceSize(imagePath);
+			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
+
+			size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
+			size_t faceSize = dataOffset + size;
+			if (Utility::getResourceFromFile(imagePath, buffer, size))
+			{
+				uint8_t* ptrFace = new uint8_t[faceSize];
+				memset(ptrFace, 0x0, faceSize);
+				*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrFace);
+				(*faceExObjs)->flag = BS2_FACE_EX_FLAG_NONE;
+				(*faceExObjs)->imageLen = size;
+				memcpy(ptrFace + dataOffset, buffer.get(), size);
+
+				numOfFaces = 1;
+			}
+		}
+	}
+
+	return BS_SDK_SUCCESS;
+}
+
+int UserControl::getUserBlobFaceInfoTemplateOnly(BS2FaceEx** faceExObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx)
+{
+	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (faceExScanSupported)
+	{
 		if (Utility::isYes("Do you want to extract the template directly and register with this template only?"))
 		{
 			// Template only
@@ -1969,41 +2021,8 @@ int UserControl::getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces
 				numOfFaces = 1;
 			}
 		}
-		else if (Utility::isYes("Do you want to scan faceEx from device?"))
-		{
-			uint32_t numFace = Utility::getInput<uint32_t>("How many faceEx would you like to register?");
-			BS2FaceEx* ptrFace = new BS2FaceEx[numFace];
-			if (ptrFace)
-			{
-				*faceExObjs = ptrFace;
-				for (uint32_t index = 0; index < numFace; index++)
-				{
-					sdkResult = scanFaceEx(id, &ptrFace[index], numOfFaces);
-					if (BS_SDK_SUCCESS != sdkResult)
-						return sdkResult;
-				}
-			}
-		}
-		else if (Utility::isYes("Do you want to register from file image? (Send the image to the device and the device automatically extracts the template.)"))
-		{
-			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
-			uint32_t size = Utility::getResourceSize(imagePath);
-			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
-
-			size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
-			size_t faceSize = dataOffset + size;
-			if (Utility::getResourceFromFile(imagePath, buffer, size))
-			{
-				uint8_t* ptrFace = new uint8_t[faceSize];
-				memset(ptrFace, 0x0, faceSize);
-				*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrFace);
-				(*faceExObjs)->flag = BS2_FACE_EX_FLAG_NONE;
-				(*faceExObjs)->imageLen = size;
-				memcpy(ptrFace + dataOffset, buffer.get(), size);
-
-				numOfFaces = 1;
-			}
-		}
+		else
+			return BS_SDK_ERROR_CANCELED;
 	}
 
 	return BS_SDK_SUCCESS;
@@ -2247,6 +2266,78 @@ int UserControl::getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic)
 	int sdkResult = BS2_GetUserStatistic(context_, id, &statistic);
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_GetUserStatistic call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int UserControl::getMasterAdmin(BS2_DEVICE_ID id)
+{
+	BS2UserFaceExBlob masterAdmin;
+	memset(&masterAdmin, 0x0, sizeof(masterAdmin));
+	int sdkResult = BS2_GetMasterAdmin(context_, id, &masterAdmin);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetMasterAdmin call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	print(masterAdmin);
+
+	if (masterAdmin.cardObjs && 0 < masterAdmin.user.numCards)
+		BS2_ReleaseObject(masterAdmin.cardObjs);
+
+	if (masterAdmin.fingerObjs && 0 < masterAdmin.user.numFingers)
+		BS2_ReleaseObject(masterAdmin.fingerObjs);
+
+	if (0 < masterAdmin.user.numFaces)
+	{
+		if (masterAdmin.faceObjs)
+			BS2_ReleaseObject(masterAdmin.faceObjs);
+		else if (masterAdmin.faceExObjs)
+			BS2_ReleaseObject(masterAdmin.faceExObjs);
+	}
+
+	return sdkResult;
+}
+
+int UserControl::setMasterAdmin(BS2_DEVICE_ID id)
+{
+	BS2SimpleDeviceInfo deviceInfo = { 0, };
+	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+
+	int sdkResult = BS2_GetDeviceInfoEx(context_, id, &deviceInfo, &deviceInfoEx);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
+
+	BS2UserFaceExBlob userBlob = { 0, };
+	BS2User& user = userBlob.user;
+
+	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob.pin, deviceInfo)))
+		return sdkResult;
+
+	user.numFingers = 0;
+	user.numCards = 0;
+	user.numFaces = 0;
+
+	if (faceExScanSupported)
+	{
+		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfoTemplateOnly(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
+			return sdkResult;
+	}
+
+	sdkResult = BS2_SetMasterAdmin(context_, id, &userBlob);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetMasterAdmin call failed: %d", sdkResult);
+
+	if (userBlob.faceExObjs)
+	{
+		delete[] userBlob.faceExObjs;
+	}
 
 	return sdkResult;
 }

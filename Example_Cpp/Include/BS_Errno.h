@@ -187,7 +187,10 @@
 #define BS_SDK_ERROR_NO_FINGERPRINT_CREDENTIAL              -760
 #define BS_SDK_ERROR_NO_FACE_PIN_CREDENTIAL                 -761
 #define BS_SDK_ERROR_NO_FINGERPRINT_PIN_CREDENTIAL          -762
-#define BS_SDK_ERROR_USER_IMAGE_EX_FULL                     -763
+#define BS_SDK_ERROR_USER_IMAGE_EX_FULL                     (DEPRECATED_MAC)-763
+#define BS_SDK_ERROR_SQL_ERROR                              -763
+#define BS_SDK_ERROR_ADMIN_INVALID_CREDENTIAL               -767
+#define BS_SDK_ERROR_ADMIN_USER_NO_CREDENTIAL               -768
 
 //Config errors
 #define BS_SDK_ERROR_INVALID_CONFIG                         -800

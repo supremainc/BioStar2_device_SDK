@@ -1210,7 +1210,7 @@ int getUserListFromDir()
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
 		uint32_t count(0);
-		uint32_t total(userIDs.size());
+		size_t total(userIDs.size());
 		for (auto uid : userIDs)
 		{
 			cout << "User(" << ++count << "/" << total << "): " << uid << endl;
@@ -1479,14 +1479,14 @@ int getFilteredLogFromDir()
 //	BS2_TIMESTAMP startTime = 0;
 //	BS2_TIMESTAMP endTime = 0;
 //#else
-	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
+	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?", string("2000-01-01 00:00:00"));
 	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
 
-	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
+	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?", string("2030-12-31 23:59:59"));
 	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
 //#endif
 	
-	uint8_t tnaKey = (uint8_t)Utility::getInput<uint32_t>("Which tnaKey do you want to get? [0: All, 1-16]");
+	uint8_t tnaKey = (uint8_t)Utility::getDefaultInput<uint32_t>("Which tnaKey do you want to get? [0: All, 1-16]", 0);
 	if (BS2_MAX_TNA_KEY < tnaKey)
 	{
 		TRACE("Invalid tnaKey: %u", tnaKey);

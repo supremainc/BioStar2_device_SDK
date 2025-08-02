@@ -153,7 +153,7 @@ int CommControl::searchSlaveDevice(BS2_DEVICE_ID id, vector<BS2Rs485SlaveDevice>
 
 int CommControl::addSlaveDevice(BS2_DEVICE_ID id, const vector<BS2Rs485SlaveDevice>& slaveList)
 {
-	int sdkResult = BS2_SetSlaveDevice(context_, id, const_cast<BS2Rs485SlaveDevice*>(slaveList.data()), slaveList.size());
+	int sdkResult = BS2_SetSlaveDevice(context_, id, const_cast<BS2Rs485SlaveDevice*>(slaveList.data()), (uint32_t)slaveList.size());
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_SetSlaveDevice call failed: %d", sdkResult);
@@ -202,7 +202,7 @@ int CommControl::searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, ve
 
 int CommControl::addCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, const vector<BS2Rs485SlaveDeviceEX>& slaveList)
 {
-	int sdkResult = BS2_SetSlaveExDevice(context_, id, channelPort, const_cast<BS2Rs485SlaveDeviceEX*>(slaveList.data()), slaveList.size());
+	int sdkResult = BS2_SetSlaveExDevice(context_, id, channelPort, const_cast<BS2Rs485SlaveDeviceEX*>(slaveList.data()), (uint32_t)slaveList.size());
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_SetSlaveExDevice call failed: %d", sdkResult);
@@ -248,7 +248,7 @@ int CommControl::updateOsdpStandardDevice(BS2_DEVICE_ID id, const vector<BS2Osdp
 {
 	BS2OsdpStandardDeviceResult* outResultObj = NULL;
 	uint32_t outNumOfResult(0);
-	int sdkResult = BS2_UpdateOsdpStandardDevice(context_, id, const_cast<BS2OsdpStandardDeviceUpdate*>(osdpDevices.data()), osdpDevices.size(), &outResultObj, &outNumOfResult);
+	int sdkResult = BS2_UpdateOsdpStandardDevice(context_, id, const_cast<BS2OsdpStandardDeviceUpdate*>(osdpDevices.data()), (uint32_t)osdpDevices.size(), &outResultObj, &outNumOfResult);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_UpdateOsdpStandardDevice call failed: %d", sdkResult);
@@ -272,7 +272,7 @@ int CommControl::removeOsdpStandardDevice(BS2_DEVICE_ID id, const vector<BS2_DEV
 {
 	BS2OsdpStandardDeviceResult* outResultObj = NULL;
 	uint32_t outNumOfResult(0);
-	int sdkResult = BS2_RemoveOsdpStandardDevice(context_, id, const_cast<BS2_DEVICE_ID*>(osdpDeviceIDs.data()), osdpDeviceIDs.size(), &outResultObj, &outNumOfResult);
+	int sdkResult = BS2_RemoveOsdpStandardDevice(context_, id, const_cast<BS2_DEVICE_ID*>(osdpDeviceIDs.data()), (uint32_t)osdpDeviceIDs.size(), &outResultObj, &outNumOfResult);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_RemoveOsdpStandardDevice call failed: %d", sdkResult);

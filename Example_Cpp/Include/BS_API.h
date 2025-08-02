@@ -1115,6 +1115,9 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAuthOperatorLevelEx(void* cont
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllAuthOperatorLevelEx(void* context, BS2_DEVICE_ID deviceId);
 
 
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetMasterAdmin(void* context, BS2_DEVICE_ID deviceId, BS2UserFaceExBlob* masterAdmin);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetMasterAdmin(void* context, BS2_DEVICE_ID deviceId, const BS2UserFaceExBlob* masterAdmin);
+
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlob(void* context, BS2_DEVICE_ID deviceId, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobFromDir(void* context, const char* szDir, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlob** logsObj, uint32_t* numLog);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLogSmallBlobEx(void* context, BS2_DEVICE_ID deviceId, uint16_t eventMask, BS2_EVENT_ID eventId, uint32_t amount, BS2EventSmallBlobEx** logsObj, uint32_t* numLog);

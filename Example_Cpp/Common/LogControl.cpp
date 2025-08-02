@@ -150,9 +150,9 @@ void LogControl::print(const BS2Event& log)
 		log.id, Utility::convertTimeUTC2String(log.dateTime).c_str(), log.deviceID, log.userID, log.code, log.param, log.image);
 }
 
-void LogControl::print(const BS2Event* logs, uint32_t numLog)
+void LogControl::print(const BS2Event* logs, size_t numLog)
 {
-	for (uint32_t index = 0; index < numLog; index++)
+	for (size_t index = 0; index < numLog; index++)
 		print(logs[index]);
 }
 
@@ -164,9 +164,9 @@ void LogControl::print(const BS2EventBlob& log)
 		log.info.deviceID, log.info.mainCode, log.info.subCode, log.userID, log.tnaKey, log.jobCode, log.imageSize);
 }
 
-void LogControl::print(const BS2EventBlob* logs, uint32_t numLog)
+void LogControl::print(const BS2EventBlob* logs, size_t numLog)
 {
-	for (uint32_t index = 0; index < numLog; index++)
+	for (size_t index = 0; index < numLog; index++)
 		print(logs[index]);
 }
 
@@ -205,9 +205,9 @@ void LogControl::print(const BS2EventSmallBlob& log)
 }
 #endif
 
-void LogControl::print(const BS2EventSmallBlob* logs, uint32_t numLog)
+void LogControl::print(const BS2EventSmallBlob* logs, size_t numLog)
 {
-	for (uint32_t index = 0; index < numLog; index++)
+	for (size_t index = 0; index < numLog; index++)
 		print(logs[index]);
 }
 
@@ -249,9 +249,9 @@ void LogControl::print(const BS2EventSmallBlobEx& log)
 }
 #endif
 
-void LogControl::print(const BS2EventSmallBlobEx* logs, uint32_t numLog)
+void LogControl::print(const BS2EventSmallBlobEx* logs, size_t numLog)
 {
-	for (uint32_t index = 0; index < numLog; index++)
+	for (size_t index = 0; index < numLog; index++)
 		print(logs[index]);
 }
 

@@ -43,6 +43,9 @@ enum EN_MENU_DEV
 	MENU_USR_SET_OPERATOR,
 	MENU_USR_REM_OPERATOR,
 
+	MENU_USR_GET_MASTER_ADMIN,
+	MENU_USR_SET_MASTER_ADMIN,
+
 	MENU_USR_SMARTCARD_SCAN,
 	MENU_USR_SMARTCARD_WRITE,
 	MENU_USR_SMARTCARD_ERASE,
@@ -71,6 +74,9 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_GET_OPERATOR,					"Get operators from device"},
 	{MENU_USR_SET_OPERATOR,					"Set operators to device"},
 	{MENU_USR_REM_OPERATOR,					"Remove operators in device"},
+
+	{MENU_USR_GET_MASTER_ADMIN,				"Get master admin from device"},
+	{MENU_USR_SET_MASTER_ADMIN,				"Set master admin to device"},
 
 	{MENU_USR_SMARTCARD_SCAN,				"Smartcard scan"},
 	{MENU_USR_SMARTCARD_WRITE,				"Smartcard write"},

@@ -529,9 +529,9 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("uzWirelessLockDoorSupported : %u", info.uzWirelessLockDoorSupported);
 	TRACE("customSmartCardSupported : %u", info.customSmartCardSupported);
 	TRACE("tomSupported : %u", info.tomSupported);
-
 	TRACE("tomEnrollSupported : %u", info.tomEnrollSupported);
 	TRACE("showOsdpResultbyLED : %u", info.showOsdpResultbyLED);
+
 	TRACE("customSmartCardFelicaSupported : %u", info.customSmartCardFelicaSupported);
 	TRACE("ignoreInputAfterWiegandOut : %u", info.ignoreInputAfterWiegandOut);
 	TRACE("setSlaveBaudrateSupported : %u", info.setSlaveBaudrateSupported);
@@ -540,9 +540,14 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("voipTransportChangeSupported : %u", info.voipTransportChangeSupported);
 	TRACE("authMsgUserInfoSupported : %u", info.authMsgUserInfoSupported);
 	TRACE("scrambleKeyboardModeSupported : %u", info.scrambleKeyboardModeSupported);
-	TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
-	TRACE("authOnlyNoMaskSupported : %u", info.authDenyMaskSupported);
 
+	TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
+
+	TRACE("authOnlyNoMaskSupported : %u", info.authDenyMaskSupported);
+	TRACE("MifareExSupported : %u",	info.MifareExSupported);
+
+	TRACE("masterAdminSupported : %u", info.masterAdminSupported);
+	TRACE("adminTwoStepAuthSupported : %u", info.adminTwoStepAuthSupported);
 }
 
 #if 0

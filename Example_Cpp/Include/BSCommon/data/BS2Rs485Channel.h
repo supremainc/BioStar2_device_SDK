@@ -41,6 +41,7 @@ enum {
 
 typedef uint8_t 	BS2_OSDP_CHANNEL_TYPE;
 
+#pragma pack(push, 4)
 /**
  *	BS2Rs485SlaveDeviceEX
  */
@@ -52,12 +53,12 @@ typedef struct {
 
 	union {
 		struct {
-			uint8_t			channelInfo;	///< 1byte : channel Index
-			uint8_t			osdpID;			///< 1 byte : Deprecated in v2.9.9
-			uint8_t			reserved;		///< 1 byte : Deprecated in v2.9.9
-			uint8_t			useSecureSession; ///< 1 byte : Deprecated in v2.9.9
+			uint8_t			channelInfo;	///< 1byte
+			uint8_t			osdpID;			///< 1 byte	: Deprecated in v2.9.9.0
+			uint8_t			reserved;		///< 1 byte (packing) : Deprecated in v2.9.9.0
+			uint8_t			useSecureSession; ///< 1 byte : Deprecated in v2.9.9.0
 		};
-		BS2_DEVICE_ID 	parentID;   /// [+2.9.9]
+		BS2_DEVICE_ID 	parentID;	/// [+ 2.9.9]
 	};
 } BS2Rs485SlaveDeviceEX;			///< 12 bytes
 
@@ -70,17 +71,17 @@ typedef struct {
 	uint8_t					useRegistance;		///< 1 byte
 	uint8_t					numOfDevices;		///< 1 byte
 	BS2_OSDP_CHANNEL_TYPE	channelType;		///< 1 byte
-	BS2Rs485SlaveDeviceEX 	slaveDevices[BS2_RS485_MAX_SLAVES_PER_CHANNEL];	///< 8 * 12 = 96 bytes
+	BS2Rs485SlaveDeviceEX 	slaveDevices[BS2_RS485_MAX_SLAVES_PER_CHANNEL];	///< 32 * 12 = 384 bytes
 } BS2Rs485ChannelEX;
 
 typedef struct {
-	uint32_t				baudRate;		///< 4 bytes
+	uint32_t				baudRate;			///< 4 bytes
 	uint8_t					channelIndex;		///< 1 byte
 	uint8_t					useRegistance;		///< 1 byte
 	uint8_t					numOfDevices;		///< 1 byte
 	BS2_OSDP_CHANNEL_TYPE 	channelType;		///< 1 bytes
-	BS2Rs485SlaveDeviceEX  *slaveDevices;
-} BS2Rs485ChannelEXDynamic;		/// [+2.9.9]
+	BS2Rs485SlaveDeviceEX  *slaveDevices;		///< 32bit:4 bytes, 64bit:8 bytes
+} BS2Rs485ChannelEXDynamic;						///< 32bit:12 bytes, 64bit:16 bytes  [+ 2.9.9]
 
 /**
  *	BS2Rs485SlaveDevice
@@ -103,5 +104,5 @@ typedef struct {
 	uint8_t		reserved[1];		///< 1 bytes (packing)
 	BS2Rs485SlaveDevice slaveDevices[BS2_RS485_MAX_SLAVES_PER_CHANNEL];	///< 8 * 8 = 64 bytes
 } BS2Rs485Channel;					///< 72 bytes
-
+#pragma pack(pop)
 #endif	// __BS2_RS485_CHANNEL_H__

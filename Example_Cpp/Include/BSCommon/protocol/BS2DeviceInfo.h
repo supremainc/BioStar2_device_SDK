@@ -495,9 +495,15 @@ typedef struct {
 	//-------------------------------------------------------------------------------- 2byte
 
 	uint8_t authDenyMaskSupported: 1;	// BDP-938
-	uint8_t unused: 7;
+	uint8_t MifareExSupported: 1; 		//BDP-1067
 
-	uint8_t unused2;
+	uint8_t unused: 6;
+
+	//-------------------------------------------------------------------------------- 1byte
+	uint8_t unused1: 3;
+	uint8_t masterAdminSupported: 1;			// BDP-788
+	uint8_t adminTwoStepAuthSupported: 1;		// BDP-788
+	uint8_t unused2: 3;
 
 	uint8_t reserved[424];		///< 424 bytes
 

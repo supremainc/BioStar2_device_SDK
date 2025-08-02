@@ -79,7 +79,7 @@ typedef struct {
 
 	BS2_BOOL syncTime;                                   ///< 1 byte (sync time with server)
 	BS2_BOOL serverSync;                                 ///< 1 byte
-	BS2_BOOL deviceLocked;                               /// 1 byte
+	BS2_BOOL deviceLocked;                               ///< 1 byte
 	BS2_BOOL useInterphone;                              ///< 1 byte
 
 	BS2_BOOL useUSBConnection;                           ///< 1 byte
@@ -92,8 +92,10 @@ typedef struct {
 	BS2_BOOL secureTamper;                               ///< 1 byte
 	BS2_BOOL reserved0;                                  ///< 1 byte   (write protected)
 	uint8_t reserved[2];                                 ///< 2 bytes
-	uint32_t useCardOperationMask;			   			 ///< 4 Bytes (bitmask , no use 0 postion bit - 0~30 bit, valid data- 31 bit)
-	uint8_t reserved2[16];                               ///< 16 bytes (reserved)
+	uint32_t useCardOperationMask;                       ///< 4 bytes (bitmask , no use 0 position bit - 0~30 bit, valid data - 31 bit)
+	uint8_t reserved1[6];                                ///< 6 bytes
+	BS2_BOOL adminTwoStepAuth;						 	 ///< 1 byte , BDP-788
+	uint8_t reserved2[9];                                ///< 8 bytes (reserved)
 } BS2SystemConfig;
 
 #endif	// __BS2_SYSTEM_CONFIG_H__

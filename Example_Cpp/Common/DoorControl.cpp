@@ -59,7 +59,7 @@ int DoorControl::setDoor(BS2_DEVICE_ID id, std::vector<BS2Door>& doors)
 		return BS_SDK_SUCCESS;
 
 	BS2Door* ptrDoor = doors.data();
-	int sdkResult = BS2_SetDoor(context_, id, ptrDoor, doors.size());
+	int sdkResult = BS2_SetDoor(context_, id, ptrDoor, (uint32_t)doors.size());
 	if (BS_SDK_SUCCESS != sdkResult)
 		TRACE("BS2_SetDoor call failed: %d", sdkResult);
 

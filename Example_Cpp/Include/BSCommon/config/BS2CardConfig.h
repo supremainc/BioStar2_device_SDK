@@ -134,9 +134,9 @@ typedef struct {
 
 	BS2_BOOL cipher;						   	///< 1 byte (true : make card data from key) for XPASS - D2 KEYPAD
 	BS2_CARD_BYTE_ORDER smartCardByteOrder;    	///< 1 byte (0: MSB, 1: LSB)
-	uint8_t reserved[1];      					///< 1 byte (0: MSB, 1: LSB)
+	uint8_t reserved[1];
 	BS2_MIFARE_ENCRYPTION mifareEncType;		///< 1 byte
-	uint8_t reserved1[20];                      	///< 20 bytes (packing)
+	uint8_t reserved1[20];                      	///< 22 bytes (packing)
 } BS2CardConfig;                             	///< 120 bytes
 
 /**
@@ -160,14 +160,6 @@ typedef struct {
 } BS2DesFireAppLevelKey;                 ///< 52 bytes
 
 /**
- *	BS2DesFireCardConfigEx
- */
-typedef struct {
-	BS2DesFireAppLevelKey desfireAppKey;    ///< 52 bytes
-	uint8_t reserved[16];
-} BS2DesFireCardConfigEx;                   ///< 68 bytes
-
-/**
  *	BS2MifareCardPlus
  */
 typedef struct {
@@ -176,7 +168,6 @@ typedef struct {
 	uint16_t startBlockIndex;
 	uint8_t reserved[14];
 } BS2MifareCardEx;                       //48 Bytes
-
 
 typedef struct {
 	BS2MifareCardEx mifareEx;	///< 48 bytes
@@ -194,6 +185,14 @@ typedef struct {
 	uint8_t skipBytes;
 	uint8_t reserved[16];
 } BS2CustomMifareCardEx;                //52 Bytes
+
+/**
+ *	BS2DesFireCardConfigEx
+ */
+typedef struct {
+	BS2DesFireAppLevelKey desfireAppKey;    ///< 52 bytes
+	uint8_t reserved[16];
+} BS2DesFireCardConfigEx;                   ///< 68 bytes
 
 /**
  *  BS2CustomMifareCard

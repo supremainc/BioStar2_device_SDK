@@ -81,6 +81,9 @@ public:
 	int updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const std::vector<BS2UserSmallBlobEx>& userList);
 	int updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const std::vector<BS2UserFaceExBlob>& userList);
 
+	int getMasterAdmin(BS2_DEVICE_ID id);
+	int setMasterAdmin(BS2_DEVICE_ID id);
+
 	int updateCardTypeCRC(BS2SmartCardData& card);
 	int updateCardCRC(BS2SmartCardData& card);
 	int getPinCode(std::string plainText, uint8_t* cipherText);
@@ -110,6 +113,7 @@ public:
 	int getUserBlobFingerprintInfo(BS2Fingerprint** fingerObjs, uint8_t& numOfFingers, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int getUserBlobFaceInfo(BS2Face** faceObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
+	int getUserBlobFaceInfoTemplateOnly(BS2FaceEx** faceExObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 	int getUserBlobFaceInfoEx(BS2FaceEx** faceExObjs, uint8_t& numOfFaces, BS2_DEVICE_ID id, const BS2SimpleDeviceInfoEx& deviceInfoEx);
 
 	int getProfileImage(BS2UserPhoto** photo, const BS2SimpleDeviceInfo& deviceInfo);

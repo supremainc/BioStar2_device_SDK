@@ -196,6 +196,13 @@ int runAPIs(void* context, const DeviceInfo& device)
 			sdkResult = removeOperators(context, id);
 			break;
 
+		case MENU_USR_GET_MASTER_ADMIN:
+			sdkResult = uc.getMasterAdmin(id);
+			break;
+		case MENU_USR_SET_MASTER_ADMIN:
+			sdkResult = uc.setMasterAdmin(id);
+			break;
+
 		case MENU_USR_SMARTCARD_SCAN:
 			sdkResult = scanCard(uc, id);
 			break;
@@ -490,11 +497,11 @@ int writeCard(UserControl& uc, BS2_DEVICE_ID id)
 		}
 	}
 
-	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?");
+	string inputTime = Utility::getLine("Please enter start time [YYYY-MM-DD HH:MM:SS] ?", string("2000-01-01 00:00:00"));
 	BS2_TIMESTAMP startTime = Utility::convertTimeString2UTC(inputTime);
 	card.accessOnData.startTime = startTime;
 
-	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?");
+	inputTime = Utility::getLine("Please enter end time [YYYY-MM-DD HH:MM:SS] ?", string("2030-12-31 23:59:59"));
 	BS2_TIMESTAMP endTime = Utility::convertTimeString2UTC(inputTime);
 	card.accessOnData.endTime = endTime;
 

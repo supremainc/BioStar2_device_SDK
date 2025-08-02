@@ -96,7 +96,7 @@ int BS2UsbContext::getUserListFromDir(IsAcceptableUserID cbAcceptableUID, vector
 
 int BS2UsbContext::getUserInfosFromDir(const vector<string>& userIDs, vector<BS2UserBlob>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -130,7 +130,7 @@ int BS2UsbContext::getUserInfosFromDir(const vector<string>& userIDs, vector<BS2
 
 int BS2UsbContext::getUserDatasFromDir(const vector<string>& userIDs, BS2_USER_MASK userMask, vector<BS2UserBlob>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -164,7 +164,7 @@ int BS2UsbContext::getUserDatasFromDir(const vector<string>& userIDs, BS2_USER_M
 
 int BS2UsbContext::getUserInfosExFromDir(const vector<string>& userIDs, vector<BS2UserBlobEx>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -198,7 +198,7 @@ int BS2UsbContext::getUserInfosExFromDir(const vector<string>& userIDs, vector<B
 
 int BS2UsbContext::getUserDatasExFromDir(const vector<string>& userIDs, BS2_USER_MASK userMask, vector<BS2UserBlobEx>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -232,7 +232,7 @@ int BS2UsbContext::getUserDatasExFromDir(const vector<string>& userIDs, BS2_USER
 
 int BS2UsbContext::getUserSmallInfosFromDir(const vector<string>& userIDs, vector<BS2UserSmallBlob>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -266,7 +266,7 @@ int BS2UsbContext::getUserSmallInfosFromDir(const vector<string>& userIDs, vecto
 
 int BS2UsbContext::getUserSmallDatasFromDir(const vector<string>& userIDs, BS2_USER_MASK userMask, vector<BS2UserSmallBlob>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -300,7 +300,7 @@ int BS2UsbContext::getUserSmallDatasFromDir(const vector<string>& userIDs, BS2_U
 
 int BS2UsbContext::getUserSmallInfosExFromDir(const vector<string>& userIDs, vector<BS2UserSmallBlobEx>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -334,7 +334,7 @@ int BS2UsbContext::getUserSmallInfosExFromDir(const vector<string>& userIDs, vec
 
 int BS2UsbContext::getUserSmallDatasExFromDir(const vector<string>& userIDs, BS2_USER_MASK userMask, vector<BS2UserSmallBlobEx>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -368,7 +368,7 @@ int BS2UsbContext::getUserSmallDatasExFromDir(const vector<string>& userIDs, BS2
 
 int BS2UsbContext::getUserInfosFaceExFromDir(const vector<string>& userIDs, vector<BS2UserFaceExBlob>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 
@@ -402,7 +402,7 @@ int BS2UsbContext::getUserInfosFaceExFromDir(const vector<string>& userIDs, vect
 
 int BS2UsbContext::getUserDatasFaceExFromDir(const vector<string>& userIDs, BS2_USER_MASK userMask, vector<BS2UserFaceExBlob>& userBlob)
 {
-	uint32_t numOfUID = userIDs.size();
+	uint32_t numOfUID = (uint32_t)userIDs.size();
 	vector<char> buffer;
 	buffer.resize(BS2_USER_ID_SIZE * numOfUID);
 

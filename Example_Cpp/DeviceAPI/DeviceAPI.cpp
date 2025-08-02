@@ -2890,10 +2890,10 @@ int setVoipConfigExt(void* context, const DeviceInfo& device)
 		}
 
 		msg = "Select video resolution (0:360x640, 1: 720x480, default:0)";
-		config.resolution = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+		config.resolution = (uint8_t)Utility::getInput<uint32_t>(msg);
 
 		msg = "Select the transport (0:UDP, 1:TCP, 2:TLS, default:0)";
-		config.transport = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+		config.transport = (uint8_t)Utility::getInput<uint32_t>(msg);
 	}
 	else
 	{
@@ -2951,7 +2951,7 @@ int setRtspConfig(void* context, const DeviceInfo& device)
 		config.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
 
 		msg = "Select video resolution (0:180x320, 1:720x480, default:0)";
-		config.resolution = (BS2_PORT)Utility::getInput<uint32_t>(msg);
+		config.resolution = (uint8_t)Utility::getInput<uint32_t>(msg);
 	}
 	else
 	{
@@ -3162,7 +3162,7 @@ int setCardConfig(void* context, const DeviceInfo& device)
 	ostringstream oss;
 
 	msg = "Please enter the encryption type of mifare card (0:CRYPTO1, 1:AES128).";
-	config.mifareEncType = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.mifareEncType = (BS2_MIFARE_ENCRYPTION)Utility::getInput<uint32_t>(msg);
 
 
 	
@@ -3345,7 +3345,7 @@ int setCustomCardConfig(void* context, const DeviceInfo& device)
 	ostringstream oss;
 
 	msg = "Please enter the encryption type of mifare card (0:CRYPTO1, 1:AES128).";
-	config.mifareEncType = (uint16_t)Utility::getInput<uint32_t>(msg);
+	config.mifareEncType = (BS2_MIFARE_ENCRYPTION)Utility::getInput<uint32_t>(msg);
 
 	if (Utility::isYes("Do you want to change mifare custom card settings?"))
 	{

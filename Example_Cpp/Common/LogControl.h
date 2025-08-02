@@ -19,13 +19,13 @@ public:
 
 //private:
 	static void print(const BS2Event& log);
-	static void print(const BS2Event* logs, uint32_t numLog);
+	static void print(const BS2Event* logs, size_t numLog);
 	static void print(const BS2EventBlob& log);
-	static void print(const BS2EventBlob* logs, uint32_t numLog);
+	static void print(const BS2EventBlob* logs, size_t numLog);
 	static void print(const BS2EventSmallBlob& log);
-	static void print(const BS2EventSmallBlob* logs, uint32_t numLog);
+	static void print(const BS2EventSmallBlob* logs, size_t numLog);
 	static void print(const BS2EventSmallBlobEx& log);
-	static void print(const BS2EventSmallBlobEx* logs, uint32_t numLog);
+	static void print(const BS2EventSmallBlobEx* logs, size_t numLog);
 	static void print(const BS2EventExtInfo& info);
 
 
