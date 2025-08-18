@@ -15,8 +15,8 @@ namespace Suprema
     {
         private API.OnBarcodeScanned cbOnBarcodeScanned = null;
         private API.OnReadyToScan cbCardOnReadyToScan = null;
-        private List<Tuple<UInt32, UInt16>> searchedSlave = new List<Tuple<UInt32, UInt16>>();
-        private Dictionary<UInt32, Tuple<UInt32, UInt16>> searchedGrandSlaves = new Dictionary<UInt32, Tuple<UInt32, UInt16>>();
+        private List<Tuple<UInt32, UInt16>> searchedSlave = new List<Tuple<UInt32, UInt16>>();                              //slaveID-slaveType
+        private List<Tuple<UInt32, UInt32, UInt16>> searchedGrandSlaves = new List<Tuple<UInt32, UInt32, UInt16>>();        //slaveID-gslaveID-gslaveType
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> functionList = new List<KeyValuePair<string, Action<IntPtr, uint, bool>>>();
@@ -138,10 +138,10 @@ namespace Suprema
             {
                 Console.WriteLine("  Slave - [{0}][{1}]", s.Item1, API.productNameDictionary[(BS2DeviceTypeEnum)s.Item2]);
 
-                Tuple<UInt32, UInt16> gSlave;
-                if (searchedGrandSlaves.TryGetValue(s.Item1, out gSlave))
+                foreach (Tuple<UInt32, UInt32, UInt16> gs in searchedGrandSlaves)
                 {
-                    Console.WriteLine("    grand Slave - [{0}][{1}]", gSlave.Item1, API.productNameDictionary[(BS2DeviceTypeEnum)gSlave.Item2]);
+                    if (gs.Item1 == s.Item1)
+                        Console.WriteLine("    grand Slave - [{0}][{1}]", gs.Item2, API.productNameDictionary[(BS2DeviceTypeEnum)gs.Item3]);
                 }
             }
         }
@@ -398,7 +398,8 @@ namespace Suprema
             {
                 if (isSlave)
                 {
-                    searchedGrandSlaves.Clear();
+                    int removedCount = searchedGrandSlaves.RemoveAll(t => t.Item2== selectedID);
+                    Console.WriteLine($"{removedCount} item(s) removed.");
                 }
                 else
                 {
@@ -416,7 +417,7 @@ namespace Suprema
                     if (isSlave)
                     {
                         if (item.enableOSDP == 1)
-                            searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
+                            searchedGrandSlaves.Add(new Tuple<UInt32, UInt32, UInt16>(selectedID, item.deviceID, item.deviceType));
                     }
                     else
                     {
@@ -484,9 +485,11 @@ namespace Suprema
             }
             else if (slaveDeviceCount > 0)
             {
+                // clear connected slave list
                 if (isSlave)
                 {
-                    searchedGrandSlaves.Clear();
+                    int removedCount = searchedGrandSlaves.RemoveAll(t => t.Item1 == selectedID);
+                    Console.WriteLine($"{removedCount} item(s) removed.");
                 }
                 else
                 {
@@ -502,14 +505,6 @@ namespace Suprema
                     BS2Rs485SlaveDeviceEX item = (BS2Rs485SlaveDeviceEX)Marshal.PtrToStructure(curSlaveDeviceObj, typeof(BS2Rs485SlaveDeviceEX));
                     slaveDeviceList.Add(item);
                     curSlaveDeviceObj = (IntPtr)((long)curSlaveDeviceObj + structSize);
-                    if (isSlave)
-                    {
-                        searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
-                    }
-                    else
-                    {
-                        searchedSlave.Add(new Tuple<UInt32, UInt16>(item.deviceID, item.deviceType));
-                    }
                 }
 
                 Console.WriteLine("+----------------------------------------------------------------------------------------------------------+");
@@ -585,49 +580,36 @@ namespace Suprema
 
                 Console.WriteLine("Trying to set the slave devices.");
                 result = (BS2ErrorCode)API.BS2_SetSlaveExDevice(sdkContext, selectedID, (uint)selchannel, slaveDeviceObj, slaveDeviceCount);
-
                 API.BS2_ReleaseObject(slaveDeviceObj);
 
                 if (result != BS2ErrorCode.BS_SDK_SUCCESS)
                 {
                     Console.WriteLine("Got error({0}).", result);
                 }
-                else
+                else // Updates connected slave list
                 {
-                    if (isSlave)
+                    for (UInt32 idx = 0; idx < slaveDeviceCount; ++idx)
                     {
-                        bool isExist = searchedGrandSlaves.Values.Any(t => t.Item1 == slaveID);
-                        if (!isExist)
-                            searchedGrandSlaves.Add(selectedID, new Tuple<UInt32, UInt16>(slaveID, slaveDevType));
+                        BS2Rs485SlaveDeviceEX slaveDevice = slaveDeviceList[(int)idx];
+                        if (connectSlaveDevice.Contains(slaveDevice.deviceID))
+                        {
+                            if (isSlave)
+                            {
+                                bool isExist = searchedGrandSlaves.Any(t => t.Item2 == slaveDevice.deviceID);
+                                if (!isExist)
+                                    searchedGrandSlaves.Add(new Tuple<UInt32, UInt32, UInt16>(selectedID, slaveDevice.deviceID, slaveDevice.deviceType));
+                            }
+                            else
+                            {
+                                bool isExist = searchedSlave.Any(t => t.Item1 == slaveDevice.deviceID);
+                                if (!isExist)
+                                    searchedSlave.Add(new Tuple<UInt32, UInt16>(slaveDevice.deviceID, slaveDevice.deviceType));
+                            }
+
+                        }
+
                     }
-                    else
-                    {
-                        bool isExist = searchedSlave.Any(t => t.Item1 == slaveID);
-                        if (!isExist)
-                            searchedSlave.Add(new Tuple<UInt32, UInt16>(slaveID, slaveDevType));
-                    }
-                    //slaveExControl(sdkContext, slaveDeviceList);
                 }
-
-                IntPtr wiegandDeviceObj = IntPtr.Zero;
-                UInt32 wiegandDeviceCount = 0;
-                Console.WriteLine("Trying to get the wiegand devices under the {0}", slaveID);
-                result = (BS2ErrorCode)API.BS2_SearchWiegandDevices(sdkContext, slaveID, out wiegandDeviceObj, out wiegandDeviceCount);
-                if (result != BS2ErrorCode.BS_SDK_SUCCESS)
-                {
-                    Console.WriteLine("Got error({0}).", result);
-                    return;
-                }
-
-                IntPtr tempPtr = wiegandDeviceObj;
-                for (UInt32 idx = 0; idx < wiegandDeviceCount; idx++)
-                {
-                    UInt32 wiegandID = (UInt32)Marshal.PtrToStructure(tempPtr, typeof(UInt32));
-                    Console.WriteLine(" *[{0}] {1}", idx, wiegandID);
-                    tempPtr = (IntPtr)((long)tempPtr + sizeof(UInt32));
-                }
-
-                API.BS2_ReleaseObject(wiegandDeviceObj);
             }
             else
             {
