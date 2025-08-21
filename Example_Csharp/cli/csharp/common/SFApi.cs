@@ -1398,8 +1398,13 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_RemoveAllAuthOperatorLevelEx(IntPtr context, UInt32 deviceId);
-		//<=
-        
+        //<=
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetMasterAdmin(IntPtr context, UInt32 deviceId, out BS2UserFaceExBlob userBlob);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetMasterAdmin(IntPtr context, UInt32 deviceId, ref BS2UserFaceExBlob userBlob);
+
         //=> [Set/Get default response wait timeout]
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_SetDefaultResponseTimeout(IntPtr context, Int32 ms);

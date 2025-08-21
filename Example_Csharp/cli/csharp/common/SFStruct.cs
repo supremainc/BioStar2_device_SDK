@@ -306,7 +306,10 @@ namespace Suprema
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public byte[] reserved;
         public UInt32 useCardOperationMask;     // [+2.6.4]
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public byte[] reserved1;
+        public byte adminTwoStepAuth;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
         public byte[] reserved2;
     }
 
@@ -3115,8 +3118,15 @@ namespace Suprema
         public byte functionSupported4;             // [+ 2.9.8]
         //authDenyMaskSupported: 1;
         //MifareExSupported: 1;
+       	//unused: 6;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 430)]
+        public byte functionSupported5;             // [+ 2.9.9.1]
+	    //unused1: 3;
+	    //masterAdminSupported: 1;
+	    //adminTwoStepAuthSupported: 1;
+	    //unused2: 3;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 424)]
 	    public byte[] reserved;
     }
 

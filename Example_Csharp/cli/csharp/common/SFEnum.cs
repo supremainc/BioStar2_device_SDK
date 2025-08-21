@@ -188,7 +188,9 @@ namespace Suprema
         BS_SDK_ERROR_NO_FINGERPRINT_CREDENTIAL              = -760,
         BS_SDK_ERROR_NO_FACE_PIN_CREDENTIAL                 = -761,
         BS_SDK_ERROR_NO_FINGERPRINT_PIN_CREDENTIAL          = -762,
-        BS_SDK_ERROR_USER_IMAGE_EX_FULL                     = -763,
+        BS_SDK_ERROR_SQL_ERROR                              = -763,
+        BS_SDK_ERROR_ADMIN_INVALID_CREDENTIAL               = -767,
+        BS_SDK_ERROR_ADMIN_USER_NO_CREDENTIAL               = -768,
 
         //Config errors
         BS_SDK_ERROR_INVALID_CONFIG                         = -800,
@@ -1363,6 +1365,8 @@ namespace Suprema
         DEVICE_LINK_DISCONNECTED = 0x3400,
         DEVICE_DHCP_SUCCESS = 0x3500,
         DEVICE_ADMIN_MENU = 0x3600,
+        DEVICE_ADMIN_LOGIN_FAIL = 0x3601,
+        DEVICE_ADMIN_LOGIN_FAIL_NOCREDENTIAL = 0x3602,
         DEVICE_UI_LOCKED = 0x3700,
         DEVICE_UI_UNLOCKED = 0x3800,
         DEVICE_COMM_LOCKED = 0x3900,
@@ -1997,6 +2001,13 @@ namespace Suprema
     {
         FUNCTION4_SUPPORT_AUTHDENYMASK                = 0x01,  // [V2.9.8]
         FUNCTION4_SUPPORT_MIFARECARDCONFIGEX          = 0x02,  // [V2.9.9]
+    }
+
+    [Flags]
+    public enum BS2CapabilityFunctionSupport5
+    {
+        FUNCTION5_SUPPORT_MASTERADMIN           = 0x08,     // [V2.9.9.1]
+        FUNCTION5_SUPPORT_ADMINTWOSTEPAUTH      = 0x10,     // [V2.9.9.1]
     }
 
     [Flags]

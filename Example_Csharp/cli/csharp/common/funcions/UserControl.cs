@@ -1232,7 +1232,10 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set Auth Operator Level Ex", setAuthOperatorLevelEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Del Auth Operator Level Ex", delAuthOperatorLevelEx));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Del All Auth Operator Level Ex", delAllAuthOperatorLevelEx));
-			//<=
+            //<=
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get master admin from device", getMasterAdmin));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set master admin to device", setMasterAdmin));
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Activate user phrase", activateUserPhrase));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Deactivate user phrase", deactivateUserPhrase));
@@ -3319,7 +3322,61 @@ namespace Suprema
                 Console.WriteLine("Got error({0}).", result);
             }
         }
-		//<=    
+        //<=    
+
+        public void getMasterAdmin(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2UserFaceExBlob userBlob;
+            Console.WriteLine("Trying to get master admin");
+            BS2ErrorCode sdkResult = (BS2ErrorCode)API.BS2_GetMasterAdmin(sdkContext, deviceID, out userBlob);
+            if (sdkResult != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0})." , sdkResult);
+                return;
+            }
+
+            print(userBlob);
+
+            if (userBlob.cardObjs != IntPtr.Zero)
+                API.BS2_ReleaseObject(userBlob.cardObjs);
+            if (userBlob.fingerObjs != IntPtr.Zero)
+                API.BS2_ReleaseObject(userBlob.fingerObjs);
+            if (userBlob.faceObjs != IntPtr.Zero)
+                API.BS2_ReleaseObject(userBlob.faceObjs);
+            if (userBlob.faceExObjs != IntPtr.Zero)
+                API.BS2_ReleaseObject(userBlob.faceExObjs);
+        }
+
+        public void setMasterAdmin(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2ErrorCode sdkResult = BS2ErrorCode.BS_SDK_SUCCESS;
+
+            BS2UserFaceExBlob userBlob = Util.AllocateStructure<BS2UserFaceExBlob>();
+            userBlob.user.numCards = 0;
+            userBlob.user.numFingers = 0;
+            userBlob.user.numFaces = 0;
+
+            userBlob.cardObjs = IntPtr.Zero;
+            userBlob.fingerObjs = IntPtr.Zero;
+            userBlob.faceObjs = IntPtr.Zero;
+            userBlob.faceExObjs = IntPtr.Zero;
+
+            if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(sdkContext, ref userBlob.pin)))
+                return;
+
+            if (BS2ErrorCode.BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceExInfoTemplateOnly(sdkContext, deviceID, ref userBlob.faceExObjs, ref userBlob.user.numFaces)))
+                return;
+
+            Console.WriteLine("Trying to set master admin");
+            sdkResult = (BS2ErrorCode)API.BS2_SetMasterAdmin(sdkContext, deviceID, ref userBlob);
+            if (BS2ErrorCode.BS_SDK_SUCCESS != sdkResult)
+                Console.WriteLine("BS2_SetMasterAdmin call failed {0}", sdkResult);
+
+            if (userBlob.faceExObjs != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(userBlob.faceExObjs);
+            }
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //Ex
@@ -5157,6 +5214,71 @@ namespace Suprema
                                 Marshal.FreeHGlobal(imageData);
                             }
                         }
+                    }
+                }
+            }
+
+            return sdkResult;
+        }
+
+        BS2ErrorCode getUserBlobFaceExInfoTemplateOnly(IntPtr sdkContext, UInt32 deviceID, ref IntPtr faceExObjs, ref byte numFaces)
+        {
+            bool faceExScanSupported = (deviceInfoEx.supported & (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN) == (UInt32)BS2SupportedInfoMask.BS2_SUPPORT_FACE_EX_SCAN;
+            BS2ErrorCode sdkResult = BS2ErrorCode.BS_SDK_SUCCESS;
+
+            if (faceExScanSupported)
+            {
+                Console.WriteLine("Do you want to extract the template directly and register with this template only? [Y/n]");
+                Console.Write(">> ");
+                if (Util.IsYes())
+                {
+                    // Template only
+                    Console.WriteLine("How many images do you want to extract?");
+                    Console.Write(">> ");
+                    int numImage = Util.GetInput(1);
+                    BS2TemplateEx[] templates = Util.AllocateStructureArray<BS2TemplateEx>(numImage);
+
+                    for (int idx = 0; idx < numImage; idx++)
+                    {
+                        IntPtr warpedImagePtr = Marshal.AllocHGlobal(BS2Environment.BS2_MAX_WARPED_IMAGE_LENGTH);
+                        UInt32 warpedImageLen = 0;
+
+                        try
+                        {
+                            if (!getNormalizedImage(sdkContext, deviceID, warpedImagePtr, ref warpedImageLen))
+                                break;
+
+                            if (!extractTemplate(sdkContext, deviceID, warpedImagePtr, warpedImageLen, ref templates[idx]))
+                                break;
+                        }
+                        finally
+                        {
+                            Marshal.FreeHGlobal(warpedImagePtr);
+                        }
+                    }
+
+                    if (0 < numImage && numImage == templates.Length)
+                    {
+                        int structHeaderSize = Marshal.SizeOf(typeof(BS2FaceExTemplateOnly));
+                        int templateSize = Marshal.SizeOf(typeof(BS2TemplateEx));
+                        faceExObjs = Marshal.AllocHGlobal(structHeaderSize + numImage * templateSize);
+
+                        IntPtr curFaceExObjs = faceExObjs;
+
+                        BS2FaceExTemplateOnly templateOnly = Util.AllocateStructure<BS2FaceExTemplateOnly>();
+                        templateOnly.flag = Convert.ToByte(BS2FaceExFlag.TEMPLATE_ONLY);
+                        templateOnly.numOfTemplate = Convert.ToByte(numImage);
+
+                        Marshal.StructureToPtr(templateOnly, curFaceExObjs, false);
+                        curFaceExObjs += structHeaderSize;
+
+                        for (int templateIdx = 0; templateIdx < templates.Length; templateIdx++)
+                        {
+                            Marshal.StructureToPtr(templates[templateIdx], curFaceExObjs, false);
+                            curFaceExObjs += templateSize;
+                        }
+
+                        numFaces = 1;
                     }
                 }
             }

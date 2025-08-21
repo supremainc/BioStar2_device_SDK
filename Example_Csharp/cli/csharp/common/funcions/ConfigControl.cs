@@ -128,6 +128,8 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("-------------------------------", null));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FacilityCodeConfig", getFacilityCodeConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set FacilityCodeConfig", setFacilityCodeConfig));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get FactoryConfig", getFactoryConfig));
             return functionList;
         }
 
@@ -212,6 +214,21 @@ namespace Suprema
                 return;
             }
             Console.WriteLine("Set completed.");
+        }
+
+        public void getFactoryConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2FactoryConfig factoryConfig;
+
+            Console.WriteLine("Trying to get factory config");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetFactoryConfig(sdkContext, deviceID, out factoryConfig);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return;
+            }
+
+            CommonControl.print(ref factoryConfig);
         }
 
         public void getSlaveDevice(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -2683,6 +2700,10 @@ namespace Suprema
                 config.useCardOperationMask = (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_DEFAULT;
             }
 
+            Console.WriteLine("Do you want to use 2-step admin auth? [Y/n]");
+            Console.Write(">>>> ");
+            config.adminTwoStepAuth = Util.IsYes() ? (byte)1 : (byte)0;
+
             Console.WriteLine("Trying to set System configuration.");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetSystemConfig(sdkContext, deviceID, ref config);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -3907,6 +3928,7 @@ namespace Suprema
             Console.WriteLine("        |--MIFARE_FELICA : {0}", Convert.ToBoolean(config.useCardOperationMask & (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_MIFARE_FELICA));
             Console.WriteLine("        |--HIDPROX : {0}", Convert.ToBoolean(config.useCardOperationMask & (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_HIDPROX));
             Console.WriteLine("        +--EM : {0}", Convert.ToBoolean(config.useCardOperationMask & (UInt32)BS2SystemConfigCardOperationMask.CARD_OPERATION_MASK_EM));
+            Console.WriteLine("     +--adminTwoStepAuth : {0}", config.adminTwoStepAuth);
             Console.WriteLine("<<<< ");
         }
 

@@ -1259,6 +1259,9 @@ namespace Suprema
 
             Console.WriteLine("     |--authDenyMaskSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_AUTHDENYMASK));
             Console.WriteLine("     |--mifareCardConfigExSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX));
+
+            Console.WriteLine("     |--masterAdminSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_MASTERADMIN));
+            Console.WriteLine("     |--adminTwoStepAuthSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_ADMINTWOSTEPAUTH));
         }
 
         public static void print(ref BS2DesFireCardConfigEx config)
@@ -1269,6 +1272,21 @@ namespace Suprema
             Console.WriteLine("     |--fileWriteKey : {0}", config.desfireAppKey.fileWriteKey);
             Console.WriteLine("     |--fileReadKeyNumber : {0}", config.desfireAppKey.fileReadKeyNumber);
             Console.WriteLine("     +--fileWriteKeyNumber : {0}", config.desfireAppKey.fileWriteKeyNumber);
+            Console.WriteLine("<<<< ");
+        }
+
+        public static void print(ref BS2FactoryConfig config)
+        {
+            string macStr = string.Join(":", config.macAddr.Select(b => b.ToString("X2")));
+
+            Console.WriteLine(">>>> Factory configuration");
+            Console.WriteLine("     |--deviceID : {0}", config.deviceID);
+            Console.WriteLine("     |--macAddr : {0}", macStr);
+            Console.WriteLine("     |--modelName : {0}", Encoding.UTF8.GetString(config.modelName).TrimEnd('\0'));
+            Console.WriteLine($"     |--boardVer : {config.boardVer.major}.{config.boardVer.minor}.{config.boardVer.ext}");
+            Console.WriteLine($"     |--kernelVer : {config.kernelVer.major}.{config.kernelVer.minor}.{config.kernelVer.ext}");
+            Console.WriteLine($"     |--bscoreVer : {config.bscoreVer.major}.{config.bscoreVer.minor}.{config.bscoreVer.ext}");
+            Console.WriteLine($"     |--firmwareVer : {config.firmwareVer.major}.{config.firmwareVer.minor}.{config.firmwareVer.ext}");
             Console.WriteLine("<<<< ");
         }
     }

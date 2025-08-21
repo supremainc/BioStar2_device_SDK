@@ -838,6 +838,7 @@ void ConfigControl::print(const BS2SystemConfig& config)
 	TRACE("   |--MIFARE_FELICA : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_MIFARE_FELICA) == CARD_OPERATION_MASK_MIFARE_FELICA);
 	TRACE("   |--HIDPROX : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_HIDPROX) == CARD_OPERATION_MASK_HIDPROX);
 	TRACE("   +--EM : %u", (config.useCardOperationMask & CARD_OPERATION_MASK_EM) == CARD_OPERATION_MASK_EM);
+	TRACE("adminTwoStepAuth:%d", config.adminTwoStepAuth);
 }
 
 void ConfigControl::print(const BS2DisplayConfig& config)
