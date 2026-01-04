@@ -102,6 +102,7 @@ public:
 	static void print(const BS2FingerprintConfig& config);
 	static void print(const BS2FaceConfig& config);
 	static void print(const BS2DesFireCardConfigEx& config);
+	static void print(const BS2AuthConfig& config);
 	static void print(const BS2AuthConfigExt& config);
 	static void print(const BS2FaceConfigExt& config);
 	static void print(const BS2ThermalCameraConfig& config);

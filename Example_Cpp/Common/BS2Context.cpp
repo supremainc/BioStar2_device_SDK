@@ -324,3 +324,25 @@ int BS2Context::setBarcodeScanListener(OnBarcodeScanned fpBarcodeScan)
 
 	return sdkResult;
 }
+
+int BS2Context::setGlobalAPBViolationHandler(OnCheckGlobalAPBViolation fpCheckAPB)
+{
+	int sdkResult = BS2_SetCheckGlobalAPBViolationHandler(context_, fpCheckAPB);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetCheckGlobalAPBViolationHandler call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int BS2Context::checkGlobalAPBViolation(BS2_DEVICE_ID deviceID, BS2_PACKET_SEQ seq, int handleResult, BS2_ZONE_ID zoneID)
+{
+	int sdkResult = BS2_CheckGlobalAPBViolation(context_, deviceID, seq, handleResult, zoneID);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_CheckGlobalAPBViolation call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}

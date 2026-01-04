@@ -99,8 +99,8 @@ int main(int argc, char* argv[])
 
 void connectTestDevice(void* context)
 {
-	bool isDirectConnect = false;
 	int sdkResult = BS_SDK_SUCCESS;
+	bool isDirectConnect = Utility::isNo("Would you like to search for devices?");
 
 	if (isDirectConnect)
 	{

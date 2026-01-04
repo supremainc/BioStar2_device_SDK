@@ -913,7 +913,7 @@ int Utility::connectViaIP(void* context, DeviceList& deviceList)
 int Utility::connectSlave(void* context, DeviceInfo& device, bool isSlave, BS2_DEVICE_ID slaveID)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	if (Utility::isNo("Do you want to find slave devices?"))
+	if (!Utility::isYes("Do you want to find slave devices?"))
 		return sdkResult;
 
 	// BS2_DEVICE_ID slaveID = 0;
@@ -1104,14 +1104,18 @@ int Utility::searchSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID& m
 {
 	CommControl cm(context);
 	vector<BS2Rs485SlaveDevice> searchedList;
-	int sdkResult = cm.searchSlaveDevice(masterID, searchedList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
+	int sdkResult = BS_SDK_SUCCESS;
+	do
+	{
+		sdkResult = cm.searchSlaveDevice(masterID, searchedList);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
 
-	Utility::displaySlaveList(searchedList);
+		Utility::displaySlaveList(searchedList);
+	} while (!Utility::isNo("Search again?"));
 
 	if (0 == searchedList.size())
-		return BS_SDK_SUCCESS;
+		return sdkResult;
 
 	bool connectAll = false;
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
@@ -1152,7 +1156,7 @@ int Utility::searchCSTSlave(void* context, vector<BS2_DEVICE_ID_TYPE>& deviceLis
 {
 	stringstream msg;
 	msg << "Please select a channel to search. [0, 1, 2, 3, 4(All)]";
-	uint32_t chSelected = Utility::getInput<uint32_t>(msg.str());
+	uint32_t chSelected = Utility::getDefaultInput<uint32_t>(msg.str(), 4);
 	switch (chSelected)
 	{
 	case RS485_HOST_CH_0:
@@ -1168,11 +1172,18 @@ int Utility::searchCSTSlave(void* context, vector<BS2_DEVICE_ID_TYPE>& deviceLis
 
 	CommControl cm(context);
 	vector<BS2Rs485SlaveDeviceEX> slaveList;
-	int sdkResult = cm.searchCSTSlaveDevice(searchDeviceID, chSelected, slaveList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
+	int sdkResult = BS_SDK_SUCCESS;
+	do
+	{
+		sdkResult = cm.searchCSTSlaveDevice(searchDeviceID, chSelected, slaveList);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
 
-	Utility::displayCSTSlaveList(slaveList);
+		Utility::displayCSTSlaveList(slaveList);
+	} while (!Utility::isNo("Search again?"));
+
+	if (0 == slaveList.size())
+		return sdkResult;
 
 	bool connectAll = false;
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
@@ -1252,11 +1263,18 @@ int Utility::searchCSTSlave(void* context, DeviceList& deviceList, BS2_DEVICE_ID
 
 	CommControl cm(context);
 	vector<BS2Rs485SlaveDeviceEX> searchedList;
-	int sdkResult = cm.searchCSTSlaveDevice(hostID, chSelected, searchedList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
+	int sdkResult = BS_SDK_SUCCESS;
+	do
+	{
+		sdkResult = cm.searchCSTSlaveDevice(hostID, chSelected, searchedList);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
 
-	Utility::displayCSTSlaveList(searchedList);
+		Utility::displayCSTSlaveList(searchedList);
+	} while (!Utility::isNo("Search again?"));
+
+	if (0 == searchedList.size())
+		return sdkResult;
 
 	bool connectAll = false;
 	if (Utility::isYes("Do you want to add all discovered slave devices?"))
@@ -1296,11 +1314,18 @@ int Utility::searchWiegand(void* context, BS2_DEVICE_ID& masterID, BS2_DEVICE_ID
 {
 	CommControl cm(context);
 	vector<BS2_DEVICE_ID> wiegandList;
-	int sdkResult = cm.searchWiegandDevice(masterID, wiegandList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
+	int sdkResult = BS_SDK_SUCCESS;
+	do
+	{
+		sdkResult = cm.searchWiegandDevice(masterID, wiegandList);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
 
-	Utility::displayWiegandList(wiegandList);
+		Utility::displayWiegandList(wiegandList);
+	} while (!Utility::isNo("Search again?"));
+
+	if (0 == wiegandList.size())
+		return sdkResult;
 
 	uint32_t selected(0);
 	if (MENU_BREAK != (selected = Utility::getSelectedIndex()) && selected <= wiegandList.size())

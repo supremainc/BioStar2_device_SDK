@@ -252,7 +252,7 @@ int UserControl::getAllUserFaceEx(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int UserControl::enrollUser(BS2_DEVICE_ID id)
+int UserControl::enrollUser(BS2_DEVICE_ID id, const DeviceInfo& device)
 {
 	BS2SimpleDeviceInfo deviceInfo;
 	BS2SimpleDeviceInfoEx deviceInfoEx;
@@ -331,8 +331,59 @@ int UserControl::enrollUser(BS2_DEVICE_ID id)
 	user.numCards = 0;
 	user.numFaces = 0;
 
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobCardInfo(&userBlob.cardObjs, user.numCards, id, deviceInfo, deviceInfoEx)))
-		return sdkResult;
+	if (Utility::isYes("Do you want to scan card?"))
+	{
+		uint32_t numCard = Utility::getInput<uint32_t>("How many cards would you like to register?");
+		BS2CSNCard* ptrCard = new BS2CSNCard[numCard];
+		if (ptrCard)
+		{
+			BS2_DEVICE_ID scanId = Utility::getSelectedDeviceID(device);
+			userBlob.cardObjs = ptrCard;
+			for (uint32_t index = 0; index < numCard;)
+			{
+				BS2Card card;
+				memset(&card, 0x0, sizeof(card));
+				sdkResult = BS2_ScanCard(context_, scanId, &card, onReadyToScanCard);
+				if (BS_SDK_SUCCESS != sdkResult)
+					TRACE("BS2_ScanCard call failed: %d", sdkResult);
+				else
+				{
+					if (card.isSmartCard)
+					{
+						TRACE("CSN card only supported.");
+						continue;
+					}
+
+					memcpy(&ptrCard[index], &card.card, sizeof(BS2CSNCard));
+					user.numCards++;
+					index++;
+				}
+			}
+		}
+	}
+
+	if (Utility::isYes("Do you want to scan fingerprint?"))
+	{
+		uint32_t numFinger = Utility::getInput<uint32_t>("How many fingers would you like to register?");
+		BS2Fingerprint* ptrFinger = new BS2Fingerprint[numFinger];
+		if (ptrFinger)
+		{
+			BS2_DEVICE_ID scanId = Utility::getSelectedDeviceID(device);
+			userBlob.fingerObjs = ptrFinger;
+			for (uint32_t index = 0; index < numFinger; index++)
+			{
+				for (uint32_t templateIndex = 0; templateIndex < BS2_TEMPLATE_PER_FINGER;)
+				{
+					sdkResult = BS2_ScanFingerprint(context_, scanId, &ptrFinger[index], templateIndex, BS2_FINGER_TEMPLATE_QUALITY_HIGHEST, BS2_FINGER_TEMPLATE_FORMAT_SUPREMA, onReadyToScanFinger);
+					if (BS_SDK_SUCCESS != sdkResult)
+						TRACE("BS2_ScanFingerprint call failed: %d", sdkResult);
+					else
+						templateIndex++;
+				}
+				user.numFingers++;
+			}
+		}
+	}
 
 	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFingerprintInfo(&userBlob.fingerObjs, user.numFingers, id, deviceInfoEx)))
 		return sdkResult;

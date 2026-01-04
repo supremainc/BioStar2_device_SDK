@@ -34,6 +34,8 @@ public:
 	int setDeviceEventListener(OnDeviceAccepted fpAccepted, OnDeviceConnected fpConnected, OnDeviceDisconnected fpDisconnected);
 	int setNotificationListener(OnAlarmFired fpAlarmFired, OnInputDetected fpInputDetected, OnConfigChanged fpConfigChanged);
 	int setBarcodeScanListener(OnBarcodeScanned fpBarcodeScan);
+	int setGlobalAPBViolationHandler(OnCheckGlobalAPBViolation fpCheckAPB);
+	int checkGlobalAPBViolation(BS2_DEVICE_ID deviceID, BS2_PACKET_SEQ seq, int handleResult, BS2_ZONE_ID zoneID);
 	int setServerPort(BS2_PORT port);
 	int setSSLHandler();
 

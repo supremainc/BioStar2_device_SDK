@@ -141,16 +141,18 @@ int runAPIs(void* context, const DeviceInfo& device)
 			sdkResult = uc.getUser(id);
 			break;
 		case MENU_USR_GET_USR_FACEEX:
+			id = Utility::getSelectedDeviceID(device);
 			sdkResult = uc.getUserFaceEx(id);
 			break;
 		case MENU_USR_GET_ALLUSR:
+			id = Utility::getSelectedDeviceID(device);
 			sdkResult = uc.getAllUser(id);
 			break;
 		case MENU_USR_GET_ALLUSR_FACEEX:
 			sdkResult = uc.getAllUserFaceEx(id);
 			break;
 		case MENU_USR_ENR_USR:
-			sdkResult = uc.enrollUser(id);
+			sdkResult = uc.enrollUser(id, device);
 			break;
 		case MENU_USR_ENR_USR_SMALL:
 			sdkResult = uc.enrollUserSmall(id);

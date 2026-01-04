@@ -53,6 +53,7 @@ public:
 	// Wiegand
 	int searchWiegandDevice(BS2_DEVICE_ID id, std::vector<BS2_DEVICE_ID>& wiegandList);
 	int addWiegandDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID wiegandID);
+	int addWiegandDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID* wiegandIDs, uint32_t numOfDevice);
 	int getWiegandDevice(BS2_DEVICE_ID id, std::vector<BS2_DEVICE_ID>& wiegandList);
 	int deleteWiegandDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID wiegandID);
 

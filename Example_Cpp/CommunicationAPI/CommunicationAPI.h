@@ -111,7 +111,7 @@ std::vector<MENU_ITEM> menuInfoOsdp =
 	{MENU_OSDP_STOP_STATUS_MONITOR,				"Stop status monitor"},
 };
 
-enum EN_MENU_COMM
+enum EN_MENU_API
 {
 	MENU_COMM_BREAK = MENU_BREAK,
 	MENU_COMM_SET_KEEP_ALIVE = 1,
@@ -188,7 +188,7 @@ enum EN_MENU_USB
 	MENU_USB_GET_LOG_SMALLBLOBEX_FROMDIR,
 };
 
-std::vector<MENU_ITEM> menuInfoCommAPI =
+std::vector<MENU_ITEM> menuInfoAPI =
 {
 	{MENU_COMM_BREAK,						"Exit"},
 	{MENU_SEPARATOR,						""},

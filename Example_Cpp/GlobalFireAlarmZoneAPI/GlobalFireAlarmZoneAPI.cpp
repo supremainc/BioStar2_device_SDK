@@ -274,7 +274,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
 
-	while (BS_SDK_SUCCESS == sdkResult && MENU_COMM_BREAK != (selectedTop = Utility::showMenu(menuInfoCommAPI)))
+	while (BS_SDK_SUCCESS == sdkResult && MENU_COMM_BREAK != (selectedTop = Utility::showMenu(menuInfoAPI)))
 	{
 		switch (selectedTop)
 		{

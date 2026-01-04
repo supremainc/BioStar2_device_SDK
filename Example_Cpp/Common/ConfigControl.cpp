@@ -986,6 +986,39 @@ void ConfigControl::print(const BS2DesFireCardConfigEx& config)
 	TRACE("fileWriteKeyNumber:%u", config.desfireAppKey.fileWriteKeyNumber);
 }
 
+void ConfigControl::print(const BS2AuthConfig& config)
+{
+	TRACE("==[BS2AuthConfig]==");
+	TRACE("+--authSchedule");
+	TRACE("   +--Biometric : %u", config.authSchedule[BS2_AUTH_MODE_BIOMETRIC_ONLY]);
+	TRACE("   |--Biometric + PIN : %u", config.authSchedule[BS2_AUTH_MODE_BIOMETRIC_PIN]);
+	TRACE("   +--Card : %u", config.authSchedule[BS2_AUTH_MODE_CARD_ONLY]);
+	TRACE("   |--Card + Biometric : %u", config.authSchedule[BS2_AUTH_MODE_CARD_BIOMETRIC]);
+	TRACE("   |--Card + PIN : %u", config.authSchedule[BS2_AUTH_MODE_CARD_PIN]);
+	TRACE("   |--Card + Biometric/PIN : %u", config.authSchedule[BS2_AUTH_MODE_CARD_BIOMETRIC_OR_PIN]);
+	TRACE("   |--Card + Biometric + PIN : %u", config.authSchedule[BS2_AUTH_MODE_CARD_BIOMETRIC_PIN]);
+	TRACE("   |--ID + Biometric : %u", config.authSchedule[BS2_AUTH_MODE_ID_BIOMETRIC]);
+	TRACE("   |--ID + PIN : %u", config.authSchedule[BS2_AUTH_MODE_ID_PIN]);
+	TRACE("   |--ID + Biometric/PIN : %u", config.authSchedule[BS2_AUTH_MODE_ID_BIOMETRIC_OR_PIN]);
+	TRACE("   |--ID + Biometric + PIN : %u", config.authSchedule[BS2_AUTH_MODE_ID_BIOMETRIC_PIN]);
+	TRACE("+--useGlobalAPB : %u", config.useGlobalAPB);
+	TRACE("|--globalAPBFailAction : %u", config.globalAPBFailAction);
+	TRACE("|--useGroupMatching : %u", config.useGroupMatching);
+	TRACE("|--usePrivateAuth : %u", config.usePrivateAuth);
+	TRACE("|--faceDetectionLevel : %u", config.faceDetectionLevel);
+	TRACE("|--useServerMatching : %u", config.useServerMatching);
+	TRACE("|--useFullAccess : %u", config.useFullAccess);
+	TRACE("|--matchTimeout : %u", config.matchTimeout);
+	TRACE("|--authTimeout : %u", config.authTimeout);
+	TRACE("+--numOperators : %u", config.numOperators);
+	for (uint32_t idx = 0; idx < config.numOperators; idx++)
+	{
+		TRACE("   +--operator[%u]", idx);
+		TRACE("   |--userID : %s", config.operators[idx].userID);
+		TRACE("   |--level : %u", config.operators[idx].level);
+	}
+}
+
 void ConfigControl::print(const BS2AuthConfigExt& config)
 {
 	TRACE("==[BS2AuthConfigExt]==");

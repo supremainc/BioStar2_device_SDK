@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "BS_API.h"
+#include "DeviceList.h"
 
 #define MAX_SUPPORTED_UID		"4294967295"
 
@@ -62,7 +63,7 @@ public:
 	int getUser(BS2_DEVICE_ID id);
 	int getAllUser(BS2_DEVICE_ID id);
 	int getAllUserFaceEx(BS2_DEVICE_ID id);
-	int enrollUser(BS2_DEVICE_ID id);
+	int enrollUser(BS2_DEVICE_ID id, const DeviceInfo& device);
 	int enrollUserSmall(BS2_DEVICE_ID id);
 	int getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, uint32_t* width, uint32_t* height);
 	int removeUser(BS2_DEVICE_ID id);

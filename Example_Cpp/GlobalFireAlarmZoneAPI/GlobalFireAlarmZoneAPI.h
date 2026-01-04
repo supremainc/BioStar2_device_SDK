@@ -34,7 +34,7 @@ std::vector<MENU_ITEM> menuInfoTop =
 	{MENU_TOP_VIEW_DEVICE,		"View (Connected devices)"},
 };
 
-enum EN_MENU_COMM
+enum EN_MENU_API
 {
 	MENU_COMM_BREAK = MENU_BREAK,
 
@@ -48,7 +48,7 @@ enum EN_MENU_COMM
 	MENU_COMM_SET_ZONE_GLOBAL_APB,
 };
 
-std::vector<MENU_ITEM> menuInfoCommAPI =
+std::vector<MENU_ITEM> menuInfoAPI =
 {
 	{MENU_COMM_BREAK,						"Exit"},
 	{MENU_COMM_GET_DOOR,					"Get door"},

@@ -353,6 +353,11 @@ int CommControl::addWiegandDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID wiegandID)
 	return BS2_AddWiegandDevices(context_, id, &wiegandID, 1);
 }
 
+int CommControl::addWiegandDevice(BS2_DEVICE_ID id, BS2_DEVICE_ID* wiegandIDs, uint32_t numOfDevice)
+{
+	return BS2_AddWiegandDevices(context_, id, wiegandIDs, numOfDevice);
+}
+
 int CommControl::getWiegandDevice(BS2_DEVICE_ID id, vector<BS2_DEVICE_ID>& wiegandList)
 {
 	BS2_DEVICE_ID* wiegandDeviceObj = NULL;
