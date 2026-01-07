@@ -70,6 +70,10 @@
 #include "BSCommon/data/BS2InterlockZone.h"
 #include "BSCommon/data/BS2LiftLockUnlockZone.h"
 #include "BSCommon/data/BS2Operator.h" //[Admin 1000] 
+#include "BSCommon/data/BS2UserOverride.h"
+#include "BSCommon/data/BS2LockOverride.h"
+#include "BSCommon/data/BS2IO.h"
+ //[Admin 1000] 
 #include "BSCommon/protocol/BS2UdpDiscover.h"
 #include "BSCommon/protocol/BS2SystemInfo.h"
 #include "BSCommon/config/BS2AuthConfigExt.h"
@@ -100,6 +104,10 @@
 #define BS2_MAX_NUM_OF_CARD_PER_USER                8
 #endif
 
+#ifndef BS2_MAX_NUM_OF_CARD_PER_MASTERADMIN
+#define BS2_MAX_NUM_OF_CARD_PER_MASTERADMIN			4
+#endif
+
 #ifndef BS2_MAX_NUM_OF_FINGER_PER_USER
 #define BS2_MAX_NUM_OF_FINGER_PER_USER              10
 #endif
@@ -115,6 +123,7 @@
 #define BS2_SSL_CONNECT_TIMEOUT						(20*1000)
 
 #define DEFAULT_RESPONSE_TIMEOUT_MS					(10*1000) //[Set/Get default response wait timeout] 
+#define DEFAULT_LONG_RESPONSE_TIMEOUT_MS			(30*1000) // DSDKIIT-55 Long operation timeout
 
 #define All_nodes_in_the_interface_local	"FF01::1" //All node multicast (in the interface local)
 #define All_nodes_in_the_link_local			"FF02::1" //All node multicast (in the link local)
@@ -683,6 +692,11 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ScanCard(void* context, BS2_DEVICE_I
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_WriteCard(void* context, BS2_DEVICE_ID deviceId, BS2SmartCardData* smartCard);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EraseCard(void* context, BS2_DEVICE_ID deviceId);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_WriteQRCode(const char* qrText, BS2CSNCard* card);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLockOverride(void* context, BS2_DEVICE_ID deviceId, const BS2LockOverride* requests, uint32_t numOfRequests, BS2LockOverride** responseObjs, uint32_t* numOfResponses);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllLockOverride(void* context, BS2_DEVICE_ID deviceId, BS2LockOverride** responseObjs, uint32_t* numOfResponses);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetLockOverride(void* context, BS2_DEVICE_ID deviceId, const BS2LockOverride* requests, uint32_t numOfRequests);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveLockOverride(void* context, BS2_DEVICE_ID deviceId, const BS2LockOverride* requests, uint32_t numOfRequests);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllLockOverride(void* context, BS2_DEVICE_ID deviceId);
 
 // Config api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ClearDatabase(void* context, BS2_DEVICE_ID deviceId);
@@ -785,6 +799,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllDoor(void* context, BS2_DEV
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ReleaseDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_FLAG flag, BS2_DOOR_ID* doorIds, uint32_t doorIdCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_LockDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_FLAG flag, BS2_DOOR_ID* doorIds, uint32_t doorIdCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_UnlockDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_FLAG flag, BS2_DOOR_ID* doorIds, uint32_t doorIdCount);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_TimedLockDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_FLAG flag, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, uint32_t timeout);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_TimedUnlockDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_FLAG flag, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, uint32_t timeout);
 
 // Lift api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetLift(void* context, BS2_DEVICE_ID deviceId, BS2_LIFT_ID* liftIds, uint32_t liftIdCount, BS2Lift** liftObj, uint32_t* numLift);
@@ -836,6 +852,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ClearLog(void* context, BS2_DEVICE_I
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_StartMonitoringLog(void* context, BS2_DEVICE_ID deviceId, OnLogReceived ptrLogReceived);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_StartMonitoringLogEx(void* context, BS2_DEVICE_ID deviceId, OnLogReceivedEx ptrLogReceivedEx);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_StopMonitoringLog(void* context, BS2_DEVICE_ID deviceId);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceIOStatus(void* context, BS2_DEVICE_ID deviceId, const BS2_DEVICE_ID* slaveIDs, uint32_t numOfSlave, BS2IOStatus** statusObj, uint32_t* numOfStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllDeviceIOStatus(void* context, BS2_DEVICE_ID deviceId, BS2IOStatus** statusObj, uint32_t* numOfStatus);
 
 // Misc api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_FactoryReset(void* context, BS2_DEVICE_ID deviceId);
@@ -879,6 +897,11 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllUser(void* context, BS2_DEV
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSupportedUserMask(void* context, BS2_DEVICE_ID deviceId, BS2_USER_MASK* userMask);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetUserPhraseHandler(void* context, OnUserPhrase ptrQuery);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ResponseUserPhrase(void* context, BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, int handleResult, const BS2_USER_PHRASE userPhrase);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetUserOverride(void* context, BS2_DEVICE_ID deviceId, const char* userIDs, uint32_t numOfUsers, BS2UserOverride** overrideObjs, uint32_t* numOfOverrides);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllUserOverride(void* context, BS2_DEVICE_ID deviceId, BS2UserOverride** overrideObjs, uint32_t* numOfOverrides);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetUserOverride(void* context, BS2_DEVICE_ID deviceId, const BS2UserOverride* overrides, uint32_t numOfOverrides);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveUserOverride(void* context, BS2_DEVICE_ID deviceId, const char* userIDs, uint32_t numOfUsers);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveAllUserOverride(void* context, BS2_DEVICE_ID deviceId);
 
 // Wiegand api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchWiegandDevices(void* context, BS2_DEVICE_ID deviceId, BS2_DEVICE_ID** wiegandDeviceObj, uint32_t* numWiegandDevice);
@@ -1088,6 +1111,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSSLServerPort(void* context, BS2_
 //[Set/Get default response wait timeout]
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDefaultResponseTimeout(void* context, long ms);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDefaultResponseTimeout(void* context, long* poMs);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDefaultLongResponseTimeout(void* context, long ms);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDefaultLongResponseTimeout(void* context, long* poMs);
 
 
 //[User Small Blob]

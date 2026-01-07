@@ -119,7 +119,7 @@ int main()
 
 	sdkContext = BS2Context::getInstance()->getContext();
 
-	bool sslMode = Utility::isYes("Do you want to connect your device with SSL?");
+	bool sslMode = !Utility::isNo("Do you want to connect your device with SSL?");
 	if (sslMode)
 	{
 		if (BS_SDK_SUCCESS != setSSLHandler())
@@ -447,6 +447,12 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			break;
 		case MENU_COMM_SET_DEF_RES_TIMEOUT:
 			sdkResult = cm.setDefaultResponseTimeout();
+			break;
+		case MENU_COMM_GET_DEF_LONG_RES_TIMEOUT:
+			sdkResult = cm.getDefaultLongResponseTimeout();
+			break;
+		case MENU_COMM_SET_DEF_LONG_RES_TIMEOUT:
+			sdkResult = cm.setDefaultLongResponseTimeout();
 			break;
 		case MENU_COMM_GET_SOCKET_RETRY_COUNT:
 			sdkResult = getSocketRetryCount(context);

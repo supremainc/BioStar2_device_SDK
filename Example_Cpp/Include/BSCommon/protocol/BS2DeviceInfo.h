@@ -495,15 +495,22 @@ typedef struct {
 	//-------------------------------------------------------------------------------- 2byte
 
 	uint8_t authDenyMaskSupported: 1;	// BDP-938
-	uint8_t MifareExSupported: 1; 		//BDP-1067
-
-	uint8_t unused: 6;
+	uint8_t mifareExSupported: 1;       // BDP-1067	
+	uint8_t lockOverrideSupported: 1; //BDP-1239
+	uint8_t doorModeOverrideSupported: 1; //BDP-956
+	uint8_t alternateAccessTimerSupported: 1; //BDP-953
+	uint8_t realtimeIOStatusReportSupported:1; //BDP-962
+	uint8_t dynamicSlaveDeviceNumSupported: 1;  
+    uint8_t secureTamperSupported: 1;
 
 	//-------------------------------------------------------------------------------- 1byte
-	uint8_t unused1: 3;
+	uint8_t customSmartcardSlaveSupported: 1;	// BDP-1229
+	uint8_t serverPrivateMsgSupported: 1;		// BDP-1045
+	uint8_t facilityCodeSupported: 1; 			// BDP-1032
 	uint8_t masterAdminSupported: 1;			// BDP-788
 	uint8_t adminTwoStepAuthSupported: 1;		// BDP-788
-	uint8_t unused2: 3;
+	uint8_t qrDetectGuideLedSupported: 1;		// BDP-1252
+	uint8_t unused: 2;
 
 	uint8_t reserved[424];		///< 424 bytes
 

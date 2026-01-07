@@ -252,7 +252,7 @@ int UserControl::getAllUserFaceEx(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int UserControl::enrollUser(BS2_DEVICE_ID id, const DeviceInfo& device)
+int UserControl::enrollUser(BS2_DEVICE_ID id, const DeviceInfo* device)
 {
 	BS2SimpleDeviceInfo deviceInfo;
 	BS2SimpleDeviceInfoEx deviceInfoEx;
@@ -337,7 +337,9 @@ int UserControl::enrollUser(BS2_DEVICE_ID id, const DeviceInfo& device)
 		BS2CSNCard* ptrCard = new BS2CSNCard[numCard];
 		if (ptrCard)
 		{
-			BS2_DEVICE_ID scanId = Utility::getSelectedDeviceID(device);
+			BS2_DEVICE_ID scanId = id;
+			if (device)
+				scanId = Utility::getSelectedDeviceID(*device);
 			userBlob.cardObjs = ptrCard;
 			for (uint32_t index = 0; index < numCard;)
 			{
@@ -368,7 +370,9 @@ int UserControl::enrollUser(BS2_DEVICE_ID id, const DeviceInfo& device)
 		BS2Fingerprint* ptrFinger = new BS2Fingerprint[numFinger];
 		if (ptrFinger)
 		{
-			BS2_DEVICE_ID scanId = Utility::getSelectedDeviceID(device);
+			BS2_DEVICE_ID scanId = id;
+			if (device)
+				scanId = Utility::getSelectedDeviceID(*device);
 			userBlob.fingerObjs = ptrFinger;
 			for (uint32_t index = 0; index < numFinger; index++)
 			{
@@ -1042,7 +1046,7 @@ int UserControl::activateUser(BS2_DEVICE_ID id)
 }
 
 
-int UserControl::getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, vector<string>& uidList)
+int UserControl::getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, vector<array<char, BS2_USER_ID_SIZE>>& uidList)
 {
 	char* uidObj = NULL;
 	uint32_t numUID = 0;
@@ -1056,7 +1060,9 @@ int UserControl::getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, 
 
 	for (uint32_t idx = 0; idx < numUID; idx++)
 	{
-		uidList.push_back(string(uidObj[idx], BS2_USER_ID_SIZE));
+		array<char, BS2_USER_ID_SIZE> uid;
+		memcpy(uid.data(), &uidObj[idx * BS2_USER_ID_SIZE], BS2_USER_ID_SIZE);
+		uidList.push_back(uid);
 	}
 
 	if (uidObj)
@@ -1246,7 +1252,7 @@ RESCAN:
 	return sdkResult;
 }
 
-int UserControl::scanCard(BS2_DEVICE_ID id, uint8_t* card)
+int UserControl::scanCard(BS2_DEVICE_ID id, uint8_t* card, uint8_t& cardType)
 {
 	if (!card)
 		return BS_SDK_ERROR_INVALID_PARAM;
@@ -1258,9 +1264,15 @@ int UserControl::scanCard(BS2_DEVICE_ID id, uint8_t* card)
 	else
 	{
 		if (tempCard.isSmartCard)
+		{
 			memcpy(card, tempCard.smartCard.cardID, BS2_CARD_DATA_SIZE);
+			cardType = tempCard.smartCard.header.cardType;
+		}
 		else
+		{
 			memcpy(card, tempCard.card.data, BS2_CARD_DATA_SIZE);
+			cardType = tempCard.card.type;
+		}
 	}
 
 	return sdkResult;
@@ -2393,6 +2405,148 @@ int UserControl::setMasterAdmin(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
+int UserControl::getLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& request, vector<BS2LockOverride>& response)
+{
+	BS2LockOverride* lockOverrideObjs = NULL;
+	uint32_t numOfOverrides = 0;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (0 < request.size())
+	{
+		sdkResult = BS2_GetLockOverride(context_, id, request.data(), (uint32_t)request.size(), &lockOverrideObjs, &numOfOverrides);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetLockOverride call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+	else
+	{
+		sdkResult = BS2_GetAllLockOverride(context_, id, &lockOverrideObjs, &numOfOverrides);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetAllLockOverride call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+
+	if (lockOverrideObjs == NULL || 0 == numOfOverrides)
+	{
+		TRACE("LockOverrides is empty");
+		return sdkResult;
+	}
+
+	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
+	{
+		response.push_back(lockOverrideObjs[idx]);
+	}
+
+	BS2_ReleaseObject(lockOverrideObjs);
+	return sdkResult;
+}
+
+int UserControl::setLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& overrides)
+{
+	if (0 == overrides.size())
+		return BS_SDK_SUCCESS;
+
+	int sdkResult = BS2_SetLockOverride(context_, id, overrides.data(), (uint32_t)overrides.size());
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetLockOverride call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int UserControl::removeLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& request)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+	if (0 < request.size())
+	{
+		sdkResult = BS2_RemoveLockOverride(context_, id, request.data(), (uint32_t)request.size());
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_RemoveLockOverride call failed: %d", sdkResult);
+	}
+	else
+	{
+		sdkResult = BS2_RemoveAllLockOverride(context_, id);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_RemoveAllLockOverride call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int UserControl::getUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request, std::vector<BS2UserOverride>& response)
+{
+	BS2UserOverride* overrideObjs = NULL;
+	uint32_t numOfOverrides = 0;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (0 < request.size())
+	{
+		sdkResult = BS2_GetUserOverride(context_, id, request[0].data(), (uint32_t)request.size(), &overrideObjs, &numOfOverrides);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetUserOverride call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+	else
+	{
+		sdkResult = BS2_GetAllUserOverride(context_, id, &overrideObjs, &numOfOverrides);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetAllUserOverride call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+
+	if (overrideObjs == NULL || 0 == numOfOverrides)
+	{
+		TRACE("UserOverrides is empty");
+		return sdkResult;
+	}
+
+	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
+	{
+		response.push_back(overrideObjs[idx]);
+	}
+
+	BS2_ReleaseObject(overrideObjs);
+	return sdkResult;
+}
+
+int UserControl::setUserOverrides(BS2_DEVICE_ID id, const vector<BS2UserOverride>& overrides)
+{
+	if (0 == overrides.size())
+		return BS_SDK_SUCCESS;
+
+	int sdkResult = BS2_SetUserOverride(context_, id, overrides.data(), (uint32_t)overrides.size());
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetUserOverride call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int UserControl::removeUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+	if (0 < request.size())
+	{
+		sdkResult = BS2_RemoveUserOverride(context_, id, request[0].data(), (uint32_t)request.size());
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_RemoveUserOverride call failed: %d", sdkResult);
+	}
+	else
+	{
+		sdkResult = BS2_RemoveAllUserOverride(context_, id);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_RemoveAllUserOverride call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
 void UserControl::dumpHexa(const uint8_t* data, uint32_t size)
 {
 	if (NULL == data || size == 0)
@@ -2702,6 +2856,55 @@ void UserControl::print(const BS2UserStatistic& statistic)
 	TRACE("numNames:%u", statistic.numNames);
 	TRACE("numImages :%u", statistic.numImages);
 	TRACE("numPhrases:%u", statistic.numPhrases);
+}
+
+void UserControl::print(const BS2LockOverride& item, uint32_t idx)
+{
+	TRACE("-- Lock Override item [%u] --", idx);
+	TRACE("  cardID:%02x%02x%02x%02x%02x%02x%02x%02x",
+		item.cardID[BS2_CARD_DATA_SIZE - 8], 
+		item.cardID[BS2_CARD_DATA_SIZE - 7], 
+		item.cardID[BS2_CARD_DATA_SIZE - 6], 
+		item.cardID[BS2_CARD_DATA_SIZE - 5], 
+		item.cardID[BS2_CARD_DATA_SIZE - 4], 
+		item.cardID[BS2_CARD_DATA_SIZE - 3], 
+		item.cardID[BS2_CARD_DATA_SIZE - 2], 
+		item.cardID[BS2_CARD_DATA_SIZE - 1]);
+	TRACE("  issueCount:%u", item.issueCount);
+	TRACE("  type:%u", item.type);
+	TRACE("  size:%u", item.size);
+	TRACE("  userID:%s", item.userID);
+}
+
+void UserControl::print(const BS2UserOverride& item, uint32_t idx)
+{
+	TRACE("-- User Override item [%u] --", idx);
+	TRACE("userID:%s", item.userID);
+	TRACE("useExtendedAutoLockTimeout:%u", item.useExtendedAutoLockTimeout);
+}
+
+vector<unsigned char> UserControl::HexStringToByteArray(const string& hexString, size_t arraySize)
+{
+	vector<unsigned char> result(arraySize, 0);
+
+	string hex = hexString;
+
+	if (hex.length() % 2 != 0)
+	{
+		hex = "0" + hex;
+	}
+
+	size_t strLen = hex.length();
+	size_t byteLen = strLen / 2;
+
+	for (size_t i = 0; i < byteLen && i < arraySize; i++)
+	{
+		size_t strPos = strLen - (i + 1) * 2;
+		string hexPair = hex.substr(strPos, 2);
+		result[arraySize - 1 - i] = static_cast<unsigned char>(stoi(hexPair, nullptr, 16));
+	}
+
+	return result;
 }
 
 #if TEST_CODE

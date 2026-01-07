@@ -454,6 +454,8 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 		return "CS-20";
 	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
 		return "DI-24";
+	case BS2_DEVICE_TYPE_XPASS_Q2:
+		return "XPQ2";
 	case BS2_DEVICE_TYPE_UNKNOWN:
 	default:
 		break;
@@ -913,7 +915,7 @@ int Utility::connectViaIP(void* context, DeviceList& deviceList)
 int Utility::connectSlave(void* context, DeviceInfo& device, bool isSlave, BS2_DEVICE_ID slaveID)
 {
 	int sdkResult = BS_SDK_SUCCESS;
-	if (!Utility::isYes("Do you want to find slave devices?"))
+	if (Utility::isNo("Do you want to find slave devices?"))
 		return sdkResult;
 
 	// BS2_DEVICE_ID slaveID = 0;

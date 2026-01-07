@@ -48,7 +48,8 @@ typedef struct {
 	BS2_BOOL 				    useVisualBarcode;
 	BS2_MOTION_SENSITIVITY 	    motionSensitivity;
     BS2_VISUAL_BARCODE_TIMEOUT  visualCameraScanTimeout;
-    uint8_t 				    reserved[9];
+    BS2_BOOL 					useQRDetectGuideLed; //BDP-1252, Q2 only
+    uint8_t 				    reserved[8];
 } BS2BarcodeConfig;
 
 #endif

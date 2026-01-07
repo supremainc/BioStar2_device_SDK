@@ -17,6 +17,7 @@
 #include "../Common/CommControl.h"
 #include "../Common/DeviceList.h"
 #include "../Common/UserControl.h"
+#include "../Common/DoorControl.h"
 
 
 enum EN_MENU_DEV
@@ -49,6 +50,15 @@ enum EN_MENU_DEV
 	MENU_USR_SMARTCARD_SCAN,
 	MENU_USR_SMARTCARD_WRITE,
 	MENU_USR_SMARTCARD_ERASE,
+
+	MENU_USR_GET_LOCK_OVERRIDE,
+	MENU_USR_SET_LOCK_OVERRIDE,
+	MENU_USR_REM_LOCK_OVERRIDE,
+
+	MENU_USR_CFG_USER_OVERRIDE,
+	MENU_USR_GET_USER_OVERRIDE,
+	MENU_USR_SET_USER_OVERRIDE,
+	MENU_USR_REM_USER_OVERRIDE,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -81,6 +91,15 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_USR_SMARTCARD_SCAN,				"Smartcard scan"},
 	{MENU_USR_SMARTCARD_WRITE,				"Smartcard write"},
 	{MENU_USR_SMARTCARD_ERASE,				"Smartcard erase"},
+
+	{MENU_USR_GET_LOCK_OVERRIDE,			"Get lock override"},
+	{MENU_USR_SET_LOCK_OVERRIDE,			"Set lock override"},
+	{MENU_USR_REM_LOCK_OVERRIDE,			"Remove lock override"},
+
+	{MENU_USR_CFG_USER_OVERRIDE,			"Set extended door open time to Door"},
+	{MENU_USR_GET_USER_OVERRIDE,			"Get user override"},
+	{MENU_USR_SET_USER_OVERRIDE,			"Set user override"},
+	{MENU_USR_REM_USER_OVERRIDE,			"Remove user override"},
 };
 
 
@@ -98,3 +117,11 @@ int removeOperators(void* context, BS2_DEVICE_ID id);
 int updateUser(void* context, BS2_DEVICE_ID id);
 int getUserStatistic(void* context, BS2_DEVICE_ID id);
 BS2_USER_MASK getMaskForUpdateUser();
+int selectUserID(const std::vector<std::array<char, BS2_USER_ID_SIZE>>& listUserIDs);
+int getLockOverride(UserControl& uc, BS2_DEVICE_ID id);
+int setLockOverride(UserControl& uc, BS2_DEVICE_ID id);
+int removeLockOverride(UserControl& uc, BS2_DEVICE_ID id);
+int setUserOverrideConfig(DoorControl& dc, BS2_DEVICE_ID id);
+int getUserOverride(UserControl& uc, BS2_DEVICE_ID id);
+int setUserOverride(UserControl& uc, BS2_DEVICE_ID id);
+int removeUserOverride(UserControl& uc, BS2_DEVICE_ID id);

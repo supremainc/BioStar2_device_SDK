@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <array>
 #include "BS_API.h"
 #include "DeviceList.h"
 
@@ -63,7 +64,7 @@ public:
 	int getUser(BS2_DEVICE_ID id);
 	int getAllUser(BS2_DEVICE_ID id);
 	int getAllUserFaceEx(BS2_DEVICE_ID id);
-	int enrollUser(BS2_DEVICE_ID id, const DeviceInfo& device);
+	int enrollUser(BS2_DEVICE_ID id, const DeviceInfo* device = NULL);
 	int enrollUserSmall(BS2_DEVICE_ID id);
 	int getLastFingerprintImage(BS2_DEVICE_ID id, uint8_t** imageObj, uint32_t* width, uint32_t* height);
 	int removeUser(BS2_DEVICE_ID id);
@@ -74,7 +75,7 @@ public:
 	int enrollUserFaceEx(BS2_DEVICE_ID id, BS2CSNCard* card = NULL, BS2Fingerprint* finger = NULL, BS2Face* face = NULL, BS2FaceEx* faceEx = NULL);
 	int enrollUserFaceExScanAndLoad(BS2_DEVICE_ID id);
 	int activateUser(BS2_DEVICE_ID id);
-	int getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, std::vector<std::string>& uidList);
+	int getUserList(BS2_DEVICE_ID id, IsAcceptableUserID fpAcceptable, std::vector<std::array<char, BS2_USER_ID_SIZE>>& uidList);
 	int getUserDatas(BS2_DEVICE_ID id, std::vector<std::string>& uidList, BS2_USER_MASK userMask, std::vector<BS2UserBlob>& userList);
 	int updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const std::vector<BS2UserBlob>& userList);
 	int updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const std::vector<BS2UserBlobEx>& userList);
@@ -89,7 +90,7 @@ public:
 	int updateCardCRC(BS2SmartCardData& card);
 	int getPinCode(std::string plainText, uint8_t* cipherText);
 	int scanTemplate(BS2_DEVICE_ID id, uint8_t* fpTemplate);
-	int scanCard(BS2_DEVICE_ID id, uint8_t* card);
+	int scanCard(BS2_DEVICE_ID id, uint8_t* card, uint8_t& cardType);
 	int scanCard(BS2_DEVICE_ID id, BS2Card* card);
 	int writeCard(BS2_DEVICE_ID id, const BS2SmartCardData* card);
 	int eraseCard(BS2_DEVICE_ID id);
@@ -127,6 +128,14 @@ public:
 
 	int getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic);
 
+	int getLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& request, std::vector<BS2LockOverride>& response);
+	int setLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& overrides);
+	int removeLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& request);
+
+	int getUserOverrides(BS2_DEVICE_ID id, const std::vector<std::array<char, BS2_USER_ID_SIZE>>& request, std::vector<BS2UserOverride>& response);
+	int setUserOverrides(BS2_DEVICE_ID id, const std::vector<BS2UserOverride>& overrides);
+	int removeUserOverrides(BS2_DEVICE_ID id, const std::vector<std::array<char, BS2_USER_ID_SIZE>>& request);
+
 #if TEST_CODE	
 	int enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx);
 	int enrollUserFaceEx_WithImage_1User(BS2_DEVICE_ID id);
@@ -157,7 +166,9 @@ public:
 	static void printCardSmart(const BS2SmartCardData& card);
 	static void printCardCSN(const BS2CSNCard& card);
 	static void print(const BS2UserStatistic& statistic);
-
+	static void print(const BS2LockOverride& item, uint32_t idx);
+	static void print(const BS2UserOverride& item, uint32_t idx);
+	static std::vector<unsigned char> HexStringToByteArray(const std::string& hexString, size_t arraySize);
 
 private:
 	static void* context_;

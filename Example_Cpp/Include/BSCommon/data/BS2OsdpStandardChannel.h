@@ -44,7 +44,8 @@ typedef struct {
 	uint8_t			modelNumber;	///< 1 byte
 	uint8_t			modelVersion;	///< 1 byte
 	BS2_BOOL		readInfo;		///< 1 byte
-	uint8_t			reserved[5];	///< 5 byte (packing)
+	uint8_t			batteryLevel;	///< 1 byte
+	uint8_t			reserved[4];	///< 4 byte (packing)
 } BS2OsdpStandardDeviceNotify;		///< 28 bytes
 
 
@@ -70,7 +71,11 @@ typedef struct {
 	uint8_t			modelNumber;	///< 1 byte
 	uint8_t			modelVersion;	///< 1 byte
 	BS2_BOOL		readInfo;		///< 1 byte
-	uint8_t			reserved[25];	///< 25 byte (packing)
+	uint8_t			batteryLevel;	///< 1 byte  (0~3, wireless door)
+
+	BS2_DEVICE_ID	serialNumber;	///< 4 bytes
+	BS2_DEVICE_ID   parentDeviceID; ///< 4 bytes
+	uint8_t			reserved[16];	///< 16 byte
 } BS2OsdpStandardDevice;				///< 48 bytes
 
 

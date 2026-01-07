@@ -36,6 +36,8 @@ enum {
 
 	BS2_MAX_HELD_OPEN_ALARM_ACTION		= 5,
 	BS2_MAX_FORCED_OPEN_ALARM_ACTION	= 5,
+
+	BS2_DEFAULT_EXTENDED_AUTO_LOCK_TIMEOUT = 10,
 };
 
 /**
@@ -137,6 +139,8 @@ enum {
 	BS2_DOOR_FLAG_OPERATOR = 0x04,
 	BS2_DOOR_FLAG_EMERGENCY = 0x02,
 	BS2_DOOR_FLAG_ALL = 0xFF,
+
+	BS2_DOOR_FLAG_MASK = BS2_DOOR_FLAG_SCHEDULE|BS2_DOOR_FLAG_OPERATOR|BS2_DOOR_FLAG_EMERGENCY,
 };
 
 typedef uint8_t BS2_DOOR_FLAG;
@@ -149,6 +153,8 @@ enum {
 	BS2_DOOR_ALARM_FLAG_FORCED_OPEN = 0x01,
 	BS2_DOOR_ALARM_FLAG_HELD_OPEN = 0x02,
 	BS2_DOOR_ALARM_FLAG_APB = 0x04,
+	BS2_DOOR_ALARM_FLAG_LOCKOVERRIDE = 0x08,
+	BS2_DOOR_ALARM_FLAG_FIRE = 0x10,
 };
 
 typedef uint8_t BS2_DOOR_ALARM_FLAG;
@@ -200,10 +206,12 @@ typedef struct {
 	BS2_SCHEDULE_ID			dualAuthScheduleID;			///< 4 bytes
 	BS2_DUAL_AUTH_DEVICE	dualAuthDevice;				///< 1 byte
 	BS2_DUAL_AUTH_APPROVAL	dualAuthApprovalType;		///< 1 byte
-	uint8_t					reserved[2];				///< 2 bytes (packing)
+	uint16_t 				extendedAutoLockTimeout;  	///< 2 byte
+
 	uint32_t				dualAuthTimeout;			///< 4 bytes
 	uint8_t					numDualAuthApprovalGroups;	///< 1 byte
-	uint8_t					reserved2[3];				///< 3 bytes (packing)
+	uint8_t					unused[2];					///< 2 bytes (do not overwrite)
+	uint8_t					reserved2;					///< 1 byte (packing)
 	BS2_ACCESS_GROUP_ID		dualAuthApprovalGroupID[BS2_MAX_DUAL_AUTH_APPROVAL_GROUP];		///< 4 * 16 bytes
 
 	BS2AntiPassbackZone		apbZone;		///< 1408 bytes

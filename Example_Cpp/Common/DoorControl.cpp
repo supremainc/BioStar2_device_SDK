@@ -94,7 +94,6 @@ void DoorControl::print(const BS2Door& door)
 	TRACE("name : %s", door.name);
 	TRACE("entryDeviceID : %u", door.entryDeviceID);
 	TRACE("exitDeviceID : %u", door.exitDeviceID);
-#if 0
 	TRACE("relay");
 	print(door.relay);
 	TRACE("sensor");
@@ -109,6 +108,7 @@ void DoorControl::print(const BS2Door& door)
 	TRACE("lockFlags : %u", door.lockFlags);
 	TRACE("unconditionalLock : %u", door.unconditionalLock);
 
+#if 0
 	for (int idx = 0; idx < BS2_MAX_FORCED_OPEN_ALARM_ACTION; idx++)
 	{
 		TRACE("forcedOpenAlarm[%d]", idx);
@@ -120,16 +120,17 @@ void DoorControl::print(const BS2Door& door)
 		TRACE("heldOpenAlarm[%d]", idx);
 		print(door.heldOpenAlarm[idx]);
 	}
+#endif
 
 	TRACE("dualAuthScheduleID : %u", door.dualAuthScheduleID);
 	TRACE("dualAuthDevice : %u", door.dualAuthDevice);
 	TRACE("dualAuthApprovalType : %u", door.dualAuthApprovalType);
+	TRACE("extendedAutoLockTimeout : %u", door.extendedAutoLockTimeout);
 	TRACE("dualAuthTimeout : %u", door.dualAuthTimeout);
 	TRACE("numDualAuthApprovalGroups : %u", door.numDualAuthApprovalGroups);
 	for (int idx = 0; idx < door.numDualAuthApprovalGroups; idx++)
 		TRACE("dualAuthApprovalGroupID[%d] : %u", idx, door.dualAuthApprovalGroupID[idx]);
 	//TRACE("apbZone : %u", door.apbZone);
-#endif
 }
 
 void DoorControl::print(const BS2DoorRelay& relay)

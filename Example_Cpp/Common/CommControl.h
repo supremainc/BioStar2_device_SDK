@@ -75,6 +75,8 @@ public:
 	int setSSLServerPortIPV6();
 	int getDefaultResponseTimeout();
 	int setDefaultResponseTimeout();
+	int getDefaultLongResponseTimeout();
+	int setDefaultLongResponseTimeout();
 	int getSocketRetryCount(uint32_t& count);
 	int setSocketRetryCount(uint32_t count);
 	int getSocketSSLRetryCount(uint32_t& count);

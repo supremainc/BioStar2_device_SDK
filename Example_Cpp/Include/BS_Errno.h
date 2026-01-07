@@ -15,6 +15,7 @@
 #define BS_SDK_DUAL_AUTH_SUCCESS                            5
 #define BS_SDK_WIEGAND_BYPASS_SUCCESS                       11
 #define BS_SDK_ANONYMOUS_SUCCESS                            12
+#define BS_SDK_LOCKOVERRIDE_SUCCESS 						13
 
 // Driver errors
 #define BS_SDK_ERROR_FROM_DEVICE_DRIVER                     -1
@@ -189,8 +190,14 @@
 #define BS_SDK_ERROR_NO_FINGERPRINT_PIN_CREDENTIAL          -762
 #define BS_SDK_ERROR_USER_IMAGE_EX_FULL                     (DEPRECATED_MAC)-763
 #define BS_SDK_ERROR_SQL_ERROR                              -763
+#define BS_SDK_ERROR_LOCKOVERRIDE_LIST_FULL 				-764
+#define BS_SDK_ERROR_CANNOT_FIND_LOCKOVERRIDE_LIST 			-765
+#define BS_SDK_ERROR_USER_OVERRIDE_FULL 					-766
 #define BS_SDK_ERROR_ADMIN_INVALID_CREDENTIAL               -767
 #define BS_SDK_ERROR_ADMIN_USER_NO_CREDENTIAL               -768
+#define BS_SDK_ERROR_ADMIN_USER_NOT_ENOUGH_CREDENTIAL 		-769
+#define BS_SDK_ERROR_ADMIN_UNSUPPORTED_CREDENTIAL 			-770
+#define BS_SDK_ERROR_ADMIN_CANNOT_SCAN 						-771
 
 //Config errors
 #define BS_SDK_ERROR_INVALID_CONFIG                         -800
@@ -214,6 +221,7 @@
 #define BS_SDK_ERROR_SLAVE_FULL                             -910
 #define BS_SDK_ERROR_CANNOT_ADD_DEVICE                      -911
 #define BS_SDK_ERROR_SLAVE_NOT_READY                        -912
+#define BS_SDK_ERROR_CANNOT_DEL_DEVICE 						-913
 
 //Door errors
 #define BS_SDK_ERROR_CANNOT_FIND_DOOR                       -1000
@@ -372,6 +380,11 @@
 #define BS_SDK_ERROR_LICENSE_ENABLE_PARTIAL                 -4016
 #define BS_SDK_ERROR_LICENSE_NO_MATCH_DEVICE                -4017
 
+#define BS_SDK_ERROR_UZ_ENABLE_COUNT_ZERO                   -4020
+#define BS_SDK_ERROR_UZ_ENABLE_FULL                         -4021
+#define BS_SDK_ERROR_UZ_CHANNEL_FULL                        -4022
+#define BS_SDK_ERROR_UZ_SPEC_FULL                           -4023
+#define BS_SDK_ERROR_UZ_ADD_FAIL                            -4024
 
 #define BS_SDK_ERROR_NULL_POINTER                           -10000
 #define BS_SDK_ERROR_UNINITIALIZED                          -10001

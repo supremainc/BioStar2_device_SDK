@@ -544,7 +544,7 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
 
 	TRACE("authOnlyNoMaskSupported : %u", info.authDenyMaskSupported);
-	TRACE("MifareExSupported : %u",	info.MifareExSupported);
+	TRACE("MifareExSupported : %u",	info.mifareExSupported);
 
 	TRACE("masterAdminSupported : %u", info.masterAdminSupported);
 	TRACE("adminTwoStepAuthSupported : %u", info.adminTwoStepAuthSupported);

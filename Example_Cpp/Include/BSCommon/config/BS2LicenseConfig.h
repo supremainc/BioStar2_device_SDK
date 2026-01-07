@@ -21,6 +21,8 @@ enum {
     BS2_LICENSE_STATUS_DISABLE,
     BS2_LICENSE_STATUS_ENABLE,
     BS2_LICENSE_STATUS_EXPIRED,
+    BS2_LICENSE_STATUS_NOT_EXIST,
+    BS2_LICENSE_STATUS_ALREADY_ADD,
 };
 
 typedef uint8_t            BS2_LICENSE_STATUS;
@@ -41,9 +43,10 @@ typedef struct {
  *	BS2_LICENSE_TYPE
  */
 enum {
-    BS2_LICENSE_TYPE_NONE           = 0x0000,
-    BS2_LICENSE_TYPE_VISUAL_QR_MASK = 0x0001,
-    BS2_LICENSE_TYPE_MAX_MASK       = BS2_LICENSE_TYPE_VISUAL_QR_MASK,
+    BS2_LICENSE_TYPE_NONE               = 0x0000,
+    BS2_LICENSE_TYPE_VISUAL_QR_MASK     = 0x0001,
+    BS2_LICENSE_TYPE_UZ_WIRELESS_LOCK   = 0x0002,
+    BS2_LICENSE_TYPE_MAX_MASK           = BS2_LICENSE_TYPE_UZ_WIRELESS_LOCK,
 };
 
 typedef uint16_t			BS2_LICENSE_TYPE;
@@ -79,7 +82,7 @@ typedef struct {
     uint8_t               index;          ///< 1 byte
     uint8_t               hasCapability;  ///< 1 byte 
     uint8_t               enable;         ///< 1 byte
-    uint8_t               reserved;       ///< 1 byte
+    uint8_t               enableCount;    ///< 1 byte
     BS2_LICENSE_TYPE      licenseType;    ///< 2 bytes
     BS2_LICENSE_SUB_TYPE  licenseSubType; ///< 2 bytes   
     uint32_t              enableTime;     ///< 4 bytes
@@ -96,8 +99,8 @@ typedef struct {
     uint8_t         version;                ///< 1 byte 
     uint8_t         numOfLicense;           ///< 1 byte
     uint8_t         reserved[2];            ///< 2 bytes
-    BS2License      license[BS2_MAX_LICENSE_COUNT]; ///< 20 x 16  = 832
+    BS2License      license[BS2_MAX_LICENSE_COUNT]; ///< 52 x 16  = 832
     uint8_t         reserved1[16];           ///< 16 bytes
-} BS2LicenseConfig;      ///< 842 bytes
+} BS2LicenseConfig;      ///< 852 bytes
 
 #endif

@@ -613,6 +613,38 @@ int CommControl::setDefaultResponseTimeout()
 	return sdkResult;
 }
 
+int CommControl::getDefaultLongResponseTimeout()
+{
+	long ms = 0L;
+
+	int sdkResult = BS2_GetDefaultLongResponseTimeout(context_, &ms);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDefaultLongResponseTimeout call failed: %d", sdkResult);
+	}
+	else
+	{
+		ms /= 1000;
+		cout << "DefaultLongResponseTimeout is " << ms << endl;
+	}
+
+	return sdkResult;
+}
+
+int CommControl::setDefaultLongResponseTimeout()
+{
+	const long MILLI_SEC = 1000;
+
+	long sec = Utility::getInput<long>("How many seconds?");
+	sec *= MILLI_SEC;
+
+	int sdkResult = BS2_SetDefaultLongResponseTimeout(context_, sec);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetDefaultLongResponseTimeout call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int CommControl::getSocketRetryCount(uint32_t& count)
 {
 	int sdkResult = BS2_GetSocketRetryCount(context_, &count);
