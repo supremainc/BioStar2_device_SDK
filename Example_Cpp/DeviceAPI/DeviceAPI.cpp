@@ -2629,21 +2629,21 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 
 	config.formats[0].format.idFields[0][28] = 0x01;
 	config.formats[0].format.idFields[0][29] = 0xFE;
+
 	config.formats[0].format.idFields[1][29] = 0x01;
 	config.formats[0].format.idFields[1][30] = 0xFF;
 	config.formats[0].format.idFields[1][31] = 0xFE;
 
-	config.formats[0].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
-	config.formats[0].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
-
-	config.formats[0].format.parityPos[0] = 0;
-	config.formats[0].format.parityPos[1] = 25;
-
 	config.formats[0].format.parityFields[0][28] = 0x01;
 	config.formats[0].format.parityFields[0][29] = 0xFF;
 	config.formats[0].format.parityFields[0][30] = 0xE0;
+	config.formats[0].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[0].format.parityPos[0] = 0;
+
 	config.formats[0].format.parityFields[1][30] = 0x1F;
 	config.formats[0].format.parityFields[1][31] = 0xFE;
+	config.formats[0].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[0].format.parityPos[1] = 25;
 
 	//////////////////////////////////////////////////////////////////////////
 	// H10302 37 bit format
@@ -2660,18 +2660,14 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 	config.formats[1].format.idFields[0][30] = 0xFF;
 	config.formats[1].format.idFields[0][31] = 0xFE;
 
-	config.formats[1].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
-	config.formats[1].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
-
-	config.formats[1].format.parityPos[0] = 0;
-	config.formats[1].format.parityPos[1] = 36;
-
 	// According to H10302, the first even parity calculates the bits starting from 1 ~ 18
 	// 000 0<parity bit 1111 / 1111 1111 / 1111 1100                -> 0F / FF / FC
 	//           27         /     28    /     29
 	config.formats[1].format.parityFields[0][27] = 0x0F;
 	config.formats[1].format.parityFields[0][28] = 0xFF;
 	config.formats[1].format.parityFields[0][29] = 0xFC;
+	config.formats[1].format.parityPos[0] = 0;
+	config.formats[1].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
 
 	// The second parity calculates the bits starting from 18 ~ 35. Since this is for the second parity bit,
 	// parityFields[1][0] ~ [1][31] is used.
@@ -2680,32 +2676,33 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 	config.formats[1].format.parityFields[1][29] = 0x07;
 	config.formats[1].format.parityFields[1][30] = 0xFF;
 	config.formats[1].format.parityFields[1][31] = 0xFE;
+	config.formats[1].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[1].format.parityPos[1] = 36;
 
 	//////////////////////////////////////////////////////////////////////////
 	// H10304 37 bit format
 	config.formats[2].formatID = 3;
 	config.formats[2].format.length = 37;
 
-	config.formats[2].format.idFields[0][29] = 0x0F;
-	config.formats[2].format.idFields[0][30] = 0xFF;
-	config.formats[2].format.idFields[0][31] = 0xFE;
-	config.formats[2].format.idFields[1][27] = 0x0F;
-	config.formats[2].format.idFields[1][28] = 0xFF;
-	config.formats[2].format.idFields[1][29] = 0xF0;
+	config.formats[2].format.idFields[0][27] = 0x0F;
+	config.formats[2].format.idFields[0][28] = 0xFF;
+	config.formats[2].format.idFields[0][29] = 0xF0;
 
-	config.formats[2].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
-	config.formats[2].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
-
-	config.formats[2].format.parityPos[0] = 0;
-	config.formats[2].format.parityPos[1] = 36;
+	config.formats[2].format.idFields[1][29] = 0x0F;
+	config.formats[2].format.idFields[1][30] = 0xFF;
+	config.formats[2].format.idFields[1][31] = 0xFE;
 
 	config.formats[2].format.parityFields[0][27] = 0x0F;
 	config.formats[2].format.parityFields[0][28] = 0xFF;
 	config.formats[2].format.parityFields[0][29] = 0xFC;
+	config.formats[2].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[2].format.parityPos[0] = 0;
 
 	config.formats[2].format.parityFields[1][29] = 0x07;
 	config.formats[2].format.parityFields[1][30] = 0xFF;
 	config.formats[2].format.parityFields[1][31] = 0xFE;
+	config.formats[2].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[2].format.parityPos[1] = 36;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Corporate 1000 35 bit format
@@ -2715,35 +2712,34 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 	config.formats[3].format.idFields[0][27] = 0x01;
 	config.formats[3].format.idFields[0][28] = 0xFF;
 	config.formats[3].format.idFields[0][29] = 0xE0;
+
 	config.formats[3].format.idFields[1][29] = 0x1F;
 	config.formats[3].format.idFields[1][30] = 0xFF;
 	config.formats[3].format.idFields[1][31] = 0xFE;
-
-	config.formats[3].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
-	config.formats[3].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
-	config.formats[3].format.parityType[2] = BS2_WIEGAND_PARITY_ODD;
-
-	config.formats[3].format.parityPos[0] = 1;
-	config.formats[3].format.parityPos[1] = 34;
-	config.formats[3].format.parityPos[2] = 0;
 
 	config.formats[3].format.parityFields[0][27] = 0x01;
 	config.formats[3].format.parityFields[0][28] = 0xB6;
 	config.formats[3].format.parityFields[0][29] = 0xDB;
 	config.formats[3].format.parityFields[0][30] = 0x6D;
 	config.formats[3].format.parityFields[0][31] = 0xB6;
+	config.formats[3].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[3].format.parityPos[0] = 1;
 
 	config.formats[3].format.parityFields[1][27] = 0x03;
 	config.formats[3].format.parityFields[1][28] = 0x6D;
 	config.formats[3].format.parityFields[1][29] = 0xB6;
 	config.formats[3].format.parityFields[1][30] = 0xDB;
 	config.formats[3].format.parityFields[1][31] = 0x6C;
+	config.formats[3].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[3].format.parityPos[1] = 34;
 
 	config.formats[3].format.parityFields[2][27] = 0x03;
 	config.formats[3].format.parityFields[2][28] = 0xFF;
 	config.formats[3].format.parityFields[2][29] = 0xFF;
 	config.formats[3].format.parityFields[2][30] = 0xFF;
 	config.formats[3].format.parityFields[2][31] = 0xFF;
+	config.formats[3].format.parityType[2] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[3].format.parityPos[2] = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Corporate 1000 48 bit format
@@ -2758,20 +2754,14 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 	config.formats[4].format.idFields[1][30] = 0xFF;
 	config.formats[4].format.idFields[1][31] = 0xFE;
 
-	config.formats[4].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
-	config.formats[4].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
-	config.formats[4].format.parityType[2] = BS2_WIEGAND_PARITY_ODD;
-
-	config.formats[4].format.parityPos[0] = 1;
-	config.formats[4].format.parityPos[1] = 47;
-	config.formats[4].format.parityPos[2] = 0;
-
 	config.formats[4].format.parityFields[0][26] = 0x1B;
 	config.formats[4].format.parityFields[0][27] = 0x6D;
 	config.formats[4].format.parityFields[0][28] = 0xB6;
 	config.formats[4].format.parityFields[0][29] = 0xDB;
 	config.formats[4].format.parityFields[0][30] = 0x6D;
 	config.formats[4].format.parityFields[0][31] = 0xB6;
+	config.formats[4].format.parityType[0] = BS2_WIEGAND_PARITY_EVEN;
+	config.formats[4].format.parityPos[0] = 1;
 
 	config.formats[4].format.parityFields[1][26] = 0x36;
 	config.formats[4].format.parityFields[1][27] = 0xDB;
@@ -2779,6 +2769,8 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 	config.formats[4].format.parityFields[1][29] = 0xB6;
 	config.formats[4].format.parityFields[1][30] = 0xDB;
 	config.formats[4].format.parityFields[1][31] = 0x6C;
+	config.formats[4].format.parityType[1] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[4].format.parityPos[1] = 47;
 
 	config.formats[4].format.parityFields[2][26] = 0x7F;
 	config.formats[4].format.parityFields[2][27] = 0xFF;
@@ -2786,6 +2778,8 @@ int setWiegandMultiConfigWithPreset(void* context, const DeviceInfo& device)
 	config.formats[4].format.parityFields[2][29] = 0xFF;
 	config.formats[4].format.parityFields[2][30] = 0xFF;
 	config.formats[4].format.parityFields[2][31] = 0xFF;
+	config.formats[4].format.parityType[2] = BS2_WIEGAND_PARITY_ODD;
+	config.formats[4].format.parityPos[2] = 0;
 
 	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
 	return cc.setWiegandMultiConfig(id, config);
