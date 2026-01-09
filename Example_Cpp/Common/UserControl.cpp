@@ -2015,6 +2015,7 @@ int UserControl::getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces
 		}
 		else if (Utility::isYes("Do you want to register from file image? (Send the image to the device and the device automatically extracts the template.)"))
 		{
+#if OLD_CODE
 			string imagePath = Utility::getInput<string>("Enter the face image path and name:");
 			uint32_t size = Utility::getResourceSize(imagePath);
 			shared_ptr<uint8_t> buffer(new uint8_t[size], ArrayDeleter<uint8_t>());
@@ -2029,6 +2030,21 @@ int UserControl::getUserBlobFaceInfo(BS2FaceEx** faceExObjs, uint8_t& numOfFaces
 				(*faceExObjs)->flag = BS2_FACE_EX_FLAG_NONE;
 				(*faceExObjs)->imageLen = size;
 				memcpy(ptrFace + dataOffset, buffer.get(), size);
+
+				numOfFaces = 1;
+			}
+#endif
+			BS2FaceEx* ptrFace = new BS2FaceEx;
+			if (ptrFace)
+			{
+				*faceExObjs = ptrFace;
+
+				sdkResult = getNormalizedImage(id, ptrFace->imageData, ptrFace->imageLen);
+				if (BS_SDK_SUCCESS != sdkResult)
+					return sdkResult;
+
+				ptrFace->faceIndex = 0;
+				ptrFace->flag = BS2_FACE_EX_FLAG_WARPED;
 
 				numOfFaces = 1;
 			}
@@ -2056,7 +2072,7 @@ int UserControl::getUserBlobFaceInfoTemplateOnly(BS2FaceEx** faceExObjs, uint8_t
 				uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
 				uint32_t imageLen = 0;
 
-				sdkResult = getNormalizedImageFaceEx(id, imageData, imageLen);
+				sdkResult = getNormalizedImage(id, imageData, imageLen);
 				if (BS_SDK_SUCCESS != sdkResult)
 					return sdkResult;
 
@@ -2116,9 +2132,12 @@ int UserControl::scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, B
 {
 	int sdkResult = BS_SDK_SUCCESS;
 
-	uint32_t sizeTotal = numOfScan * sizeof(BS2FaceEx);
+	//uint32_t sizeTotal = numOfScan * sizeof(BS2FaceEx);
+	*faceExObjs = new BS2FaceEx[numOfScan + numOfImage];
+	memset(*faceExObjs, 0x0, sizeof(BS2FaceEx) * (numOfScan + numOfImage));
+
 	vector<UserImageInfo> listImage;
-	const size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
+	//const size_t dataOffset = offsetof(BS2FaceEx, rawImageData);
 
 	for (uint32_t imageIdx = 0; imageIdx < numOfImage; imageIdx++)
 	{
@@ -2126,7 +2145,7 @@ int UserControl::scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, B
 		uint32_t size = Utility::getResourceSize(filePath);
 		if (0 < size)
 		{
-			sizeTotal += (dataOffset + size);
+			//sizeTotal += (dataOffset + size);
 			UserImageInfo info;
 			info.fileName = filePath;
 			info.size = size;
@@ -2134,9 +2153,9 @@ int UserControl::scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, B
 		}
 	}
 
-	uint8_t* ptrBuff = new uint8_t[sizeTotal];
-	memset(ptrBuff, 0x0, sizeTotal);
-	*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrBuff);
+	//uint8_t* ptrBuff = new uint8_t[sizeTotal];
+	//memset(ptrBuff, 0x0, sizeTotal);
+	//*faceExObjs = reinterpret_cast<BS2FaceEx*>(ptrBuff);
 	BS2FaceEx* ptrFace = *faceExObjs;
 
 	for (uint32_t idx = 0; idx < numOfScan; idx++, ptrFace++)
@@ -2148,6 +2167,7 @@ int UserControl::scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, B
 
 	for (auto imageInfo : listImage)
 	{
+#if OLD_CODE
 		shared_ptr<uint8_t> buffer(new uint8_t[imageInfo.size], ArrayDeleter<uint8_t>());
 		uint32_t sizeFaceEx = dataOffset + imageInfo.size;
 		if (Utility::getResourceFromFile(imageInfo.fileName, buffer, imageInfo.size))
@@ -2161,6 +2181,17 @@ int UserControl::scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, B
 			ptrBuff += sizeFaceEx;
 			ptrFace = reinterpret_cast<BS2FaceEx*>(ptrBuff);
 		}
+#endif
+
+		sdkResult = getNormalizedImageFromFile(id, imageInfo.fileName, ptrFace->imageData, ptrFace->imageLen);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+
+		ptrFace->faceIndex = 0;
+		ptrFace->flag = BS2_FACE_EX_FLAG_WARPED;
+
+		numOfFace++;
+		ptrFace++;
 	}
 
 	return sdkResult;
@@ -2272,7 +2303,7 @@ int UserControl::extractTemplateFaceEx(BS2_DEVICE_ID id, uint8_t* imageData, uin
 	return sdkResult;
 }
 
-int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer, uint32_t& bufferSize)
+int UserControl::getNormalizedImage(BS2_DEVICE_ID id, uint8_t* imageBuffer, uint32_t& bufferSize)
 {
 	BS2SimpleDeviceInfoEx deviceInfoEx;
 	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
@@ -2319,6 +2350,65 @@ int UserControl::getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer
 				TRACE("File write failed: %s", warpedPath.c_str());
 		}
 #endif
+	}
+	else
+	{
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	return sdkResult;
+}
+
+int UserControl::getNormalizedImageFromFile(BS2_DEVICE_ID id, string unwarpedPath, uint8_t* imageBuffer, uint32_t& bufferSize)
+{
+	BS2SimpleDeviceInfoEx deviceInfoEx;
+	memset(&deviceInfoEx, 0x0, sizeof(deviceInfoEx));
+
+	int sdkResult = BS2_GetDeviceInfoEx(context_, id, NULL, &deviceInfoEx);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
+	if (!faceExScanSupported)
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+
+	uint32_t unwarpedSize = Utility::getResourceSize(unwarpedPath);
+	shared_ptr<uint8_t> unwarpedBuffer(new uint8_t[unwarpedSize], ArrayDeleter<uint8_t>());
+	shared_ptr<uint8_t> warpedBuffer(new uint8_t[BS2_MAX_WARPED_IMAGE_LENGTH], ArrayDeleter<uint8_t>());
+	uint32_t warpedSize(0);
+
+	if (Utility::getResourceFromFile(unwarpedPath, unwarpedBuffer, unwarpedSize))
+	{
+		sdkResult = BS2_GetNormalizedImageFaceEx(context_, id, unwarpedBuffer.get(), unwarpedSize, warpedBuffer.get(), &warpedSize);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetNormalizedImageFaceEx call failed: %d", sdkResult);
+			return sdkResult;
+		}
+
+		if (imageBuffer)
+		{
+			memcpy(imageBuffer, warpedBuffer.get(), warpedSize);
+			bufferSize = warpedSize;
+		}
+
+#if SAVE_WARPED_IMAGE
+		string warpedPath = Utility::getInput<string>("Enter the path and name of warped image file:");
+		if (0 < warpedPath.size())
+		{
+			if (Utility::setResourceToFile(warpedPath, warpedBuffer, warpedSize))
+				TRACE("File write success: %s", warpedPath.c_str());
+			else
+				TRACE("File write failed: %s", warpedPath.c_str());
+		}
+#endif
+	}
+	else
+	{
+		return BS_SDK_ERROR_NOT_SUPPORTED;
 	}
 
 	return sdkResult;

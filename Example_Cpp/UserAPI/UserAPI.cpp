@@ -467,7 +467,7 @@ int writeCard(UserControl& uc, BS2_DEVICE_ID id)
 		uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
 		uint32_t imageLen = 0;
 
-		int sdkResult = uc.getNormalizedImageFaceEx(id, imageData, imageLen);
+		int sdkResult = uc.getNormalizedImage(id, imageData, imageLen);
 		if (BS_SDK_SUCCESS != sdkResult)
 			return sdkResult;
 
@@ -553,7 +553,7 @@ int extractTemplateFaceEx(void* context, BS2_DEVICE_ID id)
 	uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
 	uint32_t imageLen = 0;
 
-	int sdkResult = uc.getNormalizedImageFaceEx(id, imageData, imageLen);
+	int sdkResult = uc.getNormalizedImage(id, imageData, imageLen);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
@@ -572,7 +572,7 @@ int getNormalizedImageFaceEx(void* context, BS2_DEVICE_ID id)
 	uint8_t imageData[BS2_MAX_WARPED_IMAGE_LENGTH] = { 0, };
 	uint32_t imageLen = 0;
 
-	int sdkResult = uc.getNormalizedImageFaceEx(id, imageData, imageLen);
+	int sdkResult = uc.getNormalizedImage(id, imageData, imageLen);
 	if (BS_SDK_SUCCESS == sdkResult)
 	{
 		if (Utility::isYes("Do you want to enroll a user with the warped image?"))

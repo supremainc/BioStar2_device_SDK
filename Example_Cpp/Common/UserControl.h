@@ -124,8 +124,8 @@ public:
 	int scanAndLoadFaceEx(BS2FaceEx** faceExObjs, uint8_t& numOfFace, BS2_DEVICE_ID id, uint32_t numOfScan, uint32_t numOfImage);
 	int extractTemplateFaceEx(BS2_DEVICE_ID id, uint8_t* imageData, uint32_t imageSize, BS2TemplateEx& templateEx);
 
-	int getNormalizedImageFaceEx(BS2_DEVICE_ID id, uint8_t* imageBuffer, uint32_t& bufferSize);
-
+	int getNormalizedImage(BS2_DEVICE_ID id, uint8_t* imageBuffer, uint32_t& bufferSize);
+	int getNormalizedImageFromFile(BS2_DEVICE_ID id, std::string unwarpedPath, uint8_t* imageBuffer, uint32_t& bufferSize);
 	int getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic);
 
 	int getLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& request, std::vector<BS2LockOverride>& response);
