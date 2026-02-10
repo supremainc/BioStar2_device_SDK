@@ -1,6 +1,7 @@
-> [!NOTE]
-> Starting March 2, 2026, SDK downloads will be centralized in the Suprema Download Center. Therefore, all SDK download files registered here will be deleted after this date.
-> Sample code will be continuously updated via GitHub.
+> <span style="font-size: 1.5em; font-weight: bold;">[!NOTE]</span>
+> <span style="font-size: 1.5em; font-weight: bold;">1. Starting March 2, 2026, SDK downloads will be centralized in the Suprema Download Center. Therefore, all SDK download files registered here will be deleted after this date.</span>
+> 
+> <span style="font-size: 1.5em; font-weight: bold;">2. Sample code will be continuously updated via GitHub.</span>
 
 ### What is the BioStar?
 
