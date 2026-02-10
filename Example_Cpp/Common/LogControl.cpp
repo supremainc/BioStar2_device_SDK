@@ -6,6 +6,7 @@
 #include "LogControl.h"
 #include "BS_Errno.h"
 #include "../Common/Utility.h"
+#include "BS2EventStringUtil.h"
 
 #define CAST_UINT32(x)				static_cast<uint32_t>(x)
 
@@ -33,6 +34,8 @@ string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32
 		temper = (float)temperature / (float)100.0;
 	}
 
+	string eventDesc = BS2EventStringUtil::getEventString(event.code);
+
 	switch (event.code & BS2_EVENT_MASK)
 	{
 	case BS2_EVENT_USER_ENROLL_SUCCESS:
@@ -49,13 +52,13 @@ string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32
 #ifndef _NEW_CODE
 		if (0 < temperature)
 		{
-			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
-				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
+			sprintf(buffer, "Device(%u), [%s] dateTime(%s) deviceID(%d) userID(%s) where(%s) temperature(%.2f)",
+				id, eventDesc.c_str(), Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server", temper);
 		}
 		else
 		{
-			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) userID(%s) where(%s)",
-				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server");
+			sprintf(buffer, "Device(%u), [%s] dateTime(%s) deviceID(%d) userID(%s) where(%s)",
+				id, eventDesc.c_str(), Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.userID, event.param ? "Device" : "Server");
 		}
 #else
 		if (0 < temperature)
@@ -74,20 +77,20 @@ string LogControl::getEventString(BS2_DEVICE_ID id, const BS2Event& event, int32
 	case BS2_EVENT_RELAY_ACTION_ON:
 	case BS2_EVENT_RELAY_ACTION_OFF:
 	case BS2_EVENT_RELAY_ACTION_KEEP:
-		sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) relayPort(%u) inputPort(%u)",
-			id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.relayAction.relayPort, event.relayAction.inputPort);
+		sprintf(buffer, "Device(%u), [%s] dateTime(%s) deviceID(%d) relayPort(%u) inputPort(%u)",
+			id, eventDesc.c_str(), Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, event.relayAction.relayPort, event.relayAction.inputPort);
 		break;
 
 	default:
 		if (0 < temperature)
 		{
-			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d) temperature(%.2f)",
-				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, temper);
+			sprintf(buffer, "Device(%u), [%s] dateTime(%s) deviceID(%d) temperature(%.2f)",
+				id, eventDesc.c_str(), Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID, temper);
 		}
 		else
 		{
-			sprintf(buffer, "Device(%u), mainCode(0x%02x) subCode(0x%02x) dateTime(%s) deviceID(%d)",
-				id, event.mainCode, event.subCode, Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID);
+			sprintf(buffer, "Device(%u), [%s] dateTime(%s) deviceID(%d)",
+				id, eventDesc.c_str(), Utility::convertTimeUTC2String(event.dateTime + timezone).c_str(), event.deviceID);
 		}
 		break;
 	}
@@ -141,6 +144,46 @@ int LogControl::getLogSmallBlobEx(BS2_DEVICE_ID id)
 
 		BS2_ReleaseObject(blobObj);
 	}
+	return sdkResult;
+}
+
+int LogControl::getDeviceIOStatus(BS2_DEVICE_ID id, const vector<BS2_DEVICE_ID>& request, vector<BS2IOStatus>& response)
+{
+	BS2IOStatus* statusObjs = NULL;
+	uint32_t numOfStatus = 0;
+	int sdkResult = BS_SDK_SUCCESS;
+
+	if (0 < request.size())
+	{
+		sdkResult = BS2_GetDeviceIOStatus(context_, id, request.data(), (uint32_t)request.size(), &statusObjs, &numOfStatus);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetDeviceIOStatus call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+	else
+	{
+		sdkResult = BS2_GetAllDeviceIOStatus(context_, id, &statusObjs, &numOfStatus);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetAllDeviceIOStatus call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+
+	if (statusObjs == NULL || 0 == numOfStatus)
+	{
+		TRACE("No IO status");
+		return sdkResult;
+	}
+
+	for (uint32_t idx = 0; idx < numOfStatus; idx++)
+	{
+		response.push_back(statusObjs[idx]);
+	}
+
+	BS2_ReleaseObject(statusObjs);
 	return sdkResult;
 }
 
@@ -262,4 +305,34 @@ void LogControl::print(const BS2EventExtInfo& info)
 	TRACE("  deviceID : %u", info.deviceID);
 	TRACE("  mainCode : %x", info.mainCode);
 	TRACE("  subCode : %x", info.subCode);
+}
+
+string LogControl::getAllStatusOfPort(const BS2_IO_STATUS& portStatus)
+{
+	ostringstream str;
+	for (uint32_t idx = 0; idx < portStatus.count; idx++)
+	{
+		str << (uint32_t)portStatus.status[idx] << ", ";
+	}
+
+	return str.str();
+}
+
+void LogControl::print(const BS2IOStatus& status)
+{
+	TRACE("-- Device IO Status --");
+	ostringstream str;
+	for (int idx = 0; idx < status.numOfSupervisorInput; idx++)
+	{
+		str << status.supervisorInputStatus[idx] << ", ";
+	}
+
+	TRACE("  deviceID : %u", status.deviceID);
+	TRACE("  input[%u] : [%s]", status.input.count, LogControl::getAllStatusOfPort(status.input).c_str());
+	TRACE("  output[%u] : [%s]", status.output.count, LogControl::getAllStatusOfPort(status.output).c_str());
+	TRACE("  relay[%u] : [%s]", status.relay.count, LogControl::getAllStatusOfPort(status.relay).c_str());
+	TRACE("  tamper[%u] : [%s]", status.tamper.count, LogControl::getAllStatusOfPort(status.tamper).c_str());
+	TRACE("  auxIn[%u] : [%s]", status.auxIn.count, LogControl::getAllStatusOfPort(status.auxIn).c_str());
+	TRACE("  auxOut[%u] : [%s]", status.auxOut.count, LogControl::getAllStatusOfPort(status.auxOut).c_str());
+	TRACE("  supervisorInputStatus[%u] : [%s]", status.numOfSupervisorInput, str.str().c_str());
 }

@@ -448,10 +448,10 @@ int runAPIs(void* context, const DeviceList& deviceList)
 		case MENU_COMM_SET_DEF_RES_TIMEOUT:
 			sdkResult = cm.setDefaultResponseTimeout();
 			break;
-		case MENU_COMM_GET_DEF_LONG_RES_TIMEOUT:
+		case MENU_COMM_GET_DEF_LONGRES_TIMEOUT:
 			sdkResult = cm.getDefaultLongResponseTimeout();
 			break;
-		case MENU_COMM_SET_DEF_LONG_RES_TIMEOUT:
+		case MENU_COMM_SET_DEF_LONGRES_TIMEOUT:
 			sdkResult = cm.setDefaultLongResponseTimeout();
 			break;
 		case MENU_COMM_GET_SOCKET_RETRY_COUNT:
@@ -478,6 +478,10 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = getFactoryConfig(context, id);
 			break;
+		case MENU_COMM_RESET_FACTORY:
+			sdkResult = dc.factoryReset(Utility::selectDeviceID(deviceList, true, false));
+			break;
+
 		case MENU_ELOG_GET_EVENTSMALLBLOB:
 			id = Utility::selectDeviceID(deviceList, true, false);
 			sdkResult = lc.getLogSmallBlob(id);

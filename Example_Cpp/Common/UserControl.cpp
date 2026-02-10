@@ -2526,6 +2526,7 @@ int UserControl::getLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride
 		return sdkResult;
 	}
 
+	response.clear();
 	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
 	{
 		response.push_back(lockOverrideObjs[idx]);
@@ -2566,7 +2567,7 @@ int UserControl::removeLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverr
 	return sdkResult;
 }
 
-int UserControl::getUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request, std::vector<BS2UserOverride>& response)
+int UserControl::getUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request, vector<BS2UserOverride>& response)
 {
 	BS2UserOverride* overrideObjs = NULL;
 	uint32_t numOfOverrides = 0;
@@ -2597,6 +2598,7 @@ int UserControl::getUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2
 		return sdkResult;
 	}
 
+	response.clear();
 	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
 	{
 		response.push_back(overrideObjs[idx]);

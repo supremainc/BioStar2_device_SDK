@@ -454,6 +454,10 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 		return "CS-20";
 	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
 		return "DI-24";
+	case BS2_DEVICE_TYPE_BIOSTATION_3_MAX:
+		return "BS3M";
+	case BS2_DEVICE_TYPE_BIOSTATION_3_MAX_FP:
+		return "BS3M-Fp";
 	case BS2_DEVICE_TYPE_XPASS_Q2:
 		return "XPQ2";
 	case BS2_DEVICE_TYPE_UNKNOWN:
@@ -649,6 +653,7 @@ bool Utility::isBigEndianSystem()
 
 uint32_t Utility::showMenu(vector<MENU_ITEM>& info)
 {
+	cout << endl;
 	for (const auto& item : info)
 	{
 		if (item.index == MENU_SEPARATOR)

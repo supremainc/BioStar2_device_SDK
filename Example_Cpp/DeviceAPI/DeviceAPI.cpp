@@ -6,6 +6,7 @@
 #include "../Common/CommControl.h"
 #include "../Common/LogControl.h"
 #include "../Common/UserControl.h"
+#include "../Common/DoorControl.h"
 
 #pragma warning(disable:4800)
 
@@ -138,12 +139,45 @@ void connectTestDevice(void* context)
 	Utility::connectSlave(context, deviceInfo);
 	Utility::connectWiegand(context, deviceInfo);
 	
-
 	runAPIs(context, deviceInfo);
 }
 
-
 int runAPIs(void* context, DeviceInfo& device)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+
+	cout << endl << endl << "== Top ==" << endl;
+
+	bool menuBreak = false;
+	while (!menuBreak)
+	{
+		uint32_t selected = Utility::showMenu(menuInfoTop);
+		switch (selected)
+		{
+		case MENU_TOP_BREAK:
+			menuBreak = true;
+			break;
+		case MENU_TOP_DEVICE_TEST:
+			sdkResult = runDeviceAPIs(context, device);
+			break;
+		case MENU_TOP_DOOR_TEST:
+			sdkResult = runDoorAPIs(context, device);
+			break;
+		case MENU_TOP_LOG_TEST:
+			sdkResult = runLogAPIs(context, device);
+			break;
+		default:
+			break;
+		}
+
+		//if (BS_SDK_SUCCESS != sdkResult)
+		//	return;
+	}
+
+	return sdkResult;
+}
+
+int runDeviceAPIs(void* context, DeviceInfo& device)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	int selectedTop(0);
@@ -404,6 +438,91 @@ int runAPIs(void* context, DeviceInfo& device)
 	return sdkResult;
 }
 
+int runDoorAPIs(void* context, DeviceInfo& device)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+	int selectedTop(0);
+	DoorControl dc(context);
+
+	cout << endl << endl << "== DoorAPI Test ==" << endl;
+
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_DOOR_BREAK != (selectedTop = Utility::showMenu(menuInfoDoorAPI)))
+	{
+		if (!device.connected_)
+		{
+			TRACE("No device connected");
+			return BS_SDK_ERROR_CANNOT_CONNECT_SOCKET;
+		}
+
+		switch (selectedTop)
+		{
+		case MENU_DOOR_BREAK:
+			return BS_SDK_SUCCESS;
+
+		case MENU_DOOR_GET_DOOR:
+			sdkResult = getDoors(context, device);
+			break;
+		case MENU_DOOR_SET_DOOR:
+			sdkResult = setDoors(context, device);
+			break;
+		case MENU_DOOR_REM_DOORALL:
+			sdkResult = dc.removeAllDoor(Utility::getSelectedDeviceID(device));
+			break;
+		case MENU_DOOR_LOCK:
+			sdkResult = lockDoor(context, device);
+			break;
+		case MENU_DOOR_UNLOCK:
+			sdkResult = unlockDoor(context, device);
+			break;
+		case MENU_DOOR_GETSTATUS:
+			sdkResult = getStatus(context, device);
+			break;
+		default:
+			break;
+		}
+	}
+
+	return sdkResult;
+}
+
+int runLogAPIs(void* context, DeviceInfo& device)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+	int selectedTop(0);
+	LogControl lc(context);
+
+	cout << endl << endl << "== LogAPI Test ==" << endl;
+
+	while (/*BS_SDK_SUCCESS == sdkResult && */MENU_LOG_BREAK != (selectedTop = Utility::showMenu(menuInfoLogAPI)))
+	{
+		if (!device.connected_)
+		{
+			TRACE("No device connected");
+			return BS_SDK_ERROR_CANNOT_CONNECT_SOCKET;
+		}
+
+		switch (selectedTop)
+		{
+		case MENU_LOG_BREAK:
+			return BS_SDK_SUCCESS;
+
+		case MENU_LOG_GET_LOG:
+			sdkResult = lc.getLogSmallBlob(Utility::getSelectedDeviceID(device));
+			break;
+		case MENU_LOG_GET_LOGEX:
+			sdkResult = lc.getLogSmallBlobEx(Utility::getSelectedDeviceID(device));
+			break;
+		case MENU_LOG_GET_DEVICEIO_STATUS:
+			sdkResult = getDeviceIOStatus(context, device);
+			break;
+		default:
+			break;
+		}
+	}
+
+	return sdkResult;
+}
+
 int searchSlave(void* context, DeviceInfo& device)
 {
 	bool isSlave = false;
@@ -634,6 +753,8 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 		case BS2_DEVICE_TYPE_FACESTATION_F2:
 		case BS2_DEVICE_TYPE_BIOSTATION_3:
 		case BS2_DEVICE_TYPE_BIOENTRY_W3:
+		case BS2_DEVICE_TYPE_BIOSTATION_3_MAX:
+		case BS2_DEVICE_TYPE_BIOSTATION_3_MAX_FP:
 			defaultEnrollTimeout = 20;
 			defaultLFD = 1;
 			needInput = true;
@@ -693,6 +814,8 @@ int setFaceConfig(void* context, const DeviceInfo& device)
 
 		case BS2_DEVICE_TYPE_BIOSTATION_3:
 		case BS2_DEVICE_TYPE_BIOENTRY_W3:
+		case BS2_DEVICE_TYPE_BIOSTATION_3_MAX:
+		case BS2_DEVICE_TYPE_BIOSTATION_3_MAX_FP:
 			sprintf(buf, "Insert min value of detectDistance. (%d~%d, default: %d)",
 				BS2_FACE_DETECT_DISTANCE_MIN_MIN,
 				BS2_FACE_DETECT_DISTANCE_MIN_MAX,
@@ -1786,6 +1909,8 @@ int setBarcodeConfig(void* context, const DeviceInfo& device)
 	case BS2_DEVICE_TYPE_XSTATION_2_FP:		// Supported V1.2.0
 	case BS2_DEVICE_TYPE_XSTATION_2:		// Supported V1.2.0
 	case BS2_DEVICE_TYPE_BIOSTATION_3:		// Supported V1.1.0
+	case BS2_DEVICE_TYPE_BIOSTATION_3_MAX:
+	case BS2_DEVICE_TYPE_BIOSTATION_3_MAX_FP:
 		config.useVisualBarcode = useBarcode;
 		if (useBarcode)
 		{
@@ -2915,7 +3040,11 @@ int setRtspConfig(void* context, const DeviceInfo& device)
 	ConfigControl cc(context);
 	BS2RtspConfig config = { 0, };
 
-	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	BS2_DEVICE_ID id = 0;
+	BS2_DEVICE_TYPE type = BS2_DEVICE_TYPE_UNKNOWN;
+	if (!Utility::getSelectedDeviceID(device, id, type))
+		return BS_SDK_SUCCESS;
+
 	int sdkResult = cc.getRtspConfig(id, config);
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
@@ -2944,8 +3073,25 @@ int setRtspConfig(void* context, const DeviceInfo& device)
 		msg = "Enter the port of the RTSP server. (default: 554)";
 		config.port = (BS2_PORT)Utility::getInput<uint32_t>(msg);
 
-		msg = "Select video resolution (0:180x320, 1:720x480, default:0)";
-		config.resolution = (uint8_t)Utility::getInput<uint32_t>(msg);
+		uint32_t defaultResolution = 0;
+		switch (type)
+		{
+		case BS2_DEVICE_TYPE_BIOSTATION_3:
+		case BS2_DEVICE_TYPE_BIOENTRY_W3:
+			defaultResolution = RTSP_RESOLUTION_TYPE_2;
+			break;
+		case BS2_DEVICE_TYPE_FACESTATION_F2:
+		case BS2_DEVICE_TYPE_FACESTATION_F2_FP:
+		case BS2_DEVICE_TYPE_BIOSTATION_3_MAX:
+		case BS2_DEVICE_TYPE_BIOSTATION_3_MAX_FP:
+			defaultResolution = RTSP_RESOLUTION_TYPE_3;
+			break;
+		default:
+			defaultResolution = RTSP_RESOLUTION_TYPE_1;
+			break;
+		}
+		msg = "Select video resolution. (0:180x320, 1:720x480, 2:360x640)";
+		config.resolution = (uint8_t)Utility::getDefaultInput<uint32_t>(msg, defaultResolution);
 	}
 	else
 	{
@@ -3525,4 +3671,239 @@ int runAction(void* context, const DeviceInfo& device)
 	//action.delay = 100;
 
 	return dc.runAction(id, action);
+}
+
+int getDoors(void* context, const DeviceInfo& device)
+{
+	vector<BS2Door> vecDoors;
+	int sdkResult = BS_SDK_SUCCESS;
+	DoorControl dc(context);
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	if (BS_SDK_SUCCESS != (sdkResult = dc.getAllDoor(id, vecDoors)))
+		return sdkResult;
+
+	if (0 < vecDoors.size())
+	{
+		for (auto door : vecDoors)
+			dc.print(door);
+	}
+
+	return sdkResult;
+}
+
+int setDoors(void* context, const DeviceInfo& device)
+{
+	vector<BS2Door> vecDoors;
+	stringstream msg;
+	DoorControl dc(context);
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	uint32_t numOfDoors = Utility::getInput<uint32_t>("How many doors do you want to register?");
+	for (uint32_t idx = 0; idx < numOfDoors; idx++)
+	{
+		BS2Door door = { 0, };
+		BS2_DOOR_ID doorID = Utility::getInput<BS2_DOOR_ID>("Please enter the door ID:");
+		door.doorID = doorID;
+		sprintf(door.name, "Door%u", doorID);
+
+		door.entryDeviceID = (BS2_DEVICE_ID)Utility::getDefaultInput<uint32_t>("Enter the device ID for entry.", id);
+		door.exitDeviceID = (BS2_DEVICE_ID)Utility::getDefaultInput<uint32_t>("Enter the device ID for exit.", id);
+
+		door.relay.deviceID = (BS2_DEVICE_ID)Utility::getDefaultInput<uint32_t>("Enter the device ID to be used as a relay.", id);
+		if (0 < door.relay.deviceID)
+		{
+			msg.str("");
+			msg << "Enter the port of " << door.relay.deviceID << " relay.";
+			door.relay.port = (uint8_t)Utility::getDefaultInput<uint32_t>(msg.str(), 0);
+		}
+		else
+		{
+			door.relay.port = 0;
+		}
+
+		door.sensor.deviceID = (BS2_DEVICE_ID)Utility::getDefaultInput<uint32_t>("Enter the device ID to be used as a sensor.", id);
+		if (0 < door.sensor.deviceID)
+		{
+			msg.str("");
+			msg << "Enter the port of " << door.sensor.deviceID << " sensor.";
+			door.sensor.port = (uint8_t)Utility::getDefaultInput<uint32_t>(msg.str(), 0);
+			msg.str("");
+			msg << "Enter the switch type of " << door.sensor.deviceID << " sensor.";
+			door.sensor.switchType = (BS2_SWITCH_TYPE)Utility::getDefaultInput<uint32_t>(msg.str(), BS2_SWITCH_TYPE_NORMAL_OPEN);
+			door.sensor.apbUseDoorSensor = (uint8_t)!Utility::isNo("When using Global APB, do you want to use the door sensor to check whether the user has entered or not?");
+		}
+		else
+		{
+			door.sensor.port = 0;
+			door.sensor.switchType = BS2_SWITCH_TYPE_NORMAL_OPEN;
+			door.sensor.apbUseDoorSensor = 0;
+		}
+
+		door.button.deviceID = (BS2_DEVICE_ID)Utility::getDefaultInput<uint32_t>("Enter the device ID to be used as a RTE button.", id);
+		if (0 < door.button.deviceID)
+		{
+			msg.str("");
+			msg << "Enter the port of " << door.button.deviceID << " RTE button.";
+			door.button.port = (uint8_t)Utility::getDefaultInput<uint32_t>(msg.str(), 1);
+			msg.str("");
+			msg << "Enter the switch type of " << door.button.deviceID << " RTE button.";
+			door.button.switchType = (BS2_SWITCH_TYPE)Utility::getDefaultInput<uint32_t>(msg.str(), BS2_SWITCH_TYPE_NORMAL_OPEN);
+		}
+		else
+		{
+			door.button.port = 0;
+			door.button.switchType = BS2_SWITCH_TYPE_NORMAL_OPEN;
+		}
+
+		door.autoLockTimeout = Utility::getDefaultInput<uint32_t>("Enter the auto lock timeout in seconds.", BS2_DEFAULT_AUTO_LOCK_TIMEOUT);
+		door.heldOpenTimeout = Utility::getDefaultInput<uint32_t>("Enter the held open timeout in seconds.", BS2_DEFAULT_HELD_OPEN_TIMEOUT);
+
+		door.instantLock = !Utility::isNo("Should this door be locked instantly when it is closed?");
+
+		door.lockFlags = (BS2_DOOR_FLAG)Utility::getDefaultInput<uint32_t>("How to act at lock door? [0: None, 1: Schedule, 2: Emergency, 4: Operator] ", BS2_DOOR_FLAG_NONE);
+		door.unlockFlags = (BS2_DOOR_FLAG)Utility::getDefaultInput<uint32_t>("How to act at unlock door? [0: None, 1: Schedule, 2: Emergency, 4: Operator] ", BS2_DOOR_FLAG_NONE);
+		door.unconditionalLock = !Utility::isNo("Should this Door be locked after autoLock timeout?");
+
+		bool useDualAuth = !Utility::isNo("Does this door need to dual authentication?");
+		if (useDualAuth)
+		{
+			door.dualAuthScheduleID = (BS2_SCHEDULE_ID)Utility::getDefaultInput<uint32_t>("Enter the id of access schedule for dual authentication: [0: Never, 1: Always, or the other schedule id] ", BS2_SCHEDULE_ALWAYS_ID);
+			door.dualAuthDevice = (BS2_DUAL_AUTH_DEVICE)Utility::getDefaultInput<uint32_t>("Which reader requires dual authentication? [1: Entrance Only, 2: Exit Only, 3: Both] ", BS2_DUAL_AUTH_ENTRY_DEVICE_ONLY);
+			door.dualAuthTimeout = Utility::getDefaultInput<uint32_t>("Enter the dual authentication timeout in seconds: ", BS2_DEFAULT_DUAL_AUTH_TIMEOUT);
+			door.dualAuthApprovalType = (BS2_DUAL_AUTH_APPROVAL)Utility::getDefaultInput<uint32_t>("Who should be the dual authentication approver for this door? [0: Not required, 1: Second user] ", BS2_DUAL_AUTH_APPROVAL_NONE);
+			door.numDualAuthApprovalGroups = 0;
+			// ...
+		}
+		else
+		{
+			door.dualAuthScheduleID = BS2_SCHEDULE_NEVER_ID;
+			door.dualAuthDevice = BS2_DUAL_AUTH_NO_DEVICE;
+			door.dualAuthTimeout = 0;
+			door.dualAuthApprovalType = BS2_DUAL_AUTH_APPROVAL_NONE;
+			door.numDualAuthApprovalGroups = 0;
+		}
+
+		vecDoors.push_back(door);
+	}
+
+	if (0 < vecDoors.size())
+		return dc.setDoor(id, vecDoors);
+
+	return BS_SDK_SUCCESS;
+}
+
+int lockDoor(void* context, const DeviceInfo& device)
+{
+	vector<BS2_DOOR_ID> listDoors;
+	DoorControl dc(context);
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	uint32_t numOfDoors = Utility::getDefaultInput<uint32_t>("How many doors do you want to lock?", 1);
+	for (uint32_t idx = 0; idx < numOfDoors; idx++)
+	{
+		BS2_DOOR_ID doorID = Utility::getInput<BS2_DOOR_ID>("Enter a door ID:");
+		listDoors.push_back(doorID);
+	}
+
+	if (0 < listDoors.size())
+	{
+		BS2_DOOR_FLAG doorFlag = (BS2_DOOR_FLAG)Utility::getDefaultInput<uint32_t>("Enter the flag for the doors to be locked: [0: None, 1: By Schedule, 2: By Emergency, 4: By Operator] ", BS2_DOOR_FLAG_OPERATOR);
+
+		uint32_t timeout = Utility::getDefaultInput<uint32_t>("Enter the normalize timer in seconds [0: Infinite, 1~86400: Sec] ", 0);
+
+		return dc.lockDoor(id, listDoors, doorFlag, timeout);
+	}
+
+	return BS_SDK_SUCCESS;
+}
+
+int unlockDoor(void* context, const DeviceInfo& device)
+{
+	vector<BS2_DOOR_ID> listDoors;
+	DoorControl dc(context);
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	uint32_t numOfDoors = Utility::getDefaultInput<uint32_t>("How many doors do you want to unlock?", 1);
+	for (uint32_t idx = 0; idx < numOfDoors; idx++)
+	{
+		BS2_DOOR_ID doorID = Utility::getInput<BS2_DOOR_ID>("Enter a door ID:");
+		listDoors.push_back(doorID);
+	}
+
+	if (0 < listDoors.size())
+	{
+		BS2_DOOR_FLAG doorFlag = (BS2_DOOR_FLAG)Utility::getDefaultInput<uint32_t>("Enter the flag for the doors to be unlocked: [0: None, 1: By Schedule, 2: By Emergency, 4: By Operator] ", BS2_DOOR_FLAG_OPERATOR);
+
+		uint32_t timeout = Utility::getDefaultInput<uint32_t>("Enter the normalize timer in seconds [0: Infinite, 1~86400: Sec] ", 0);
+
+		return dc.unlockDoor(id, listDoors, doorFlag, timeout);
+	}
+
+	return BS_SDK_SUCCESS;
+}
+
+int getStatus(void* context, const DeviceInfo& device)
+{
+	vector<BS2_DOOR_ID> listDoors;
+	vector<BS2DoorStatus> listStatus;
+	int sdkResult = BS_SDK_SUCCESS;
+	DoorControl dc(context);
+
+#ifdef _DEBUG
+	BS2_DEVICE_ID id = device.id_;
+#else
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+#endif
+
+#ifdef _DEBUG
+	listDoors.push_back(1);
+#else
+	uint32_t numOfDoors = Utility::getDefaultInput<uint32_t>("How many door status do you want to get?", 1);
+	for (uint32_t idx = 0; idx < numOfDoors; idx++);
+	{
+		BS2_DOOR_ID doorID = Utility::getInput<BS2_DOOR_ID>("Enter a door ID:");
+		listDoors.push_back(doorID);
+	}
+#endif
+
+	if (0 < listDoors.size())
+	{
+		sdkResult = dc.getDoorStatus(id, listDoors, listStatus);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+	}
+
+	uint32_t idx(0);
+	for (auto item : listStatus)
+		dc.print(item, idx++);
+
+	return sdkResult;
+}
+
+int getDeviceIOStatus(void* context, const DeviceInfo& device)
+{
+	LogControl lc(context);
+	vector<BS2_DEVICE_ID> request;
+	vector<BS2IOStatus> response;
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	if (!Utility::isYes("Do you want to get IO states of all currently connected devices?"))
+	{
+		request = Utility::getLineNumbers<uint32_t>("  Enter the deviceIDs to get [ID_1, ID_2 ...] ", ',');
+	}
+
+	int sdkResult = lc.getDeviceIOStatus(id, request, response);
+	if (BS_SDK_SUCCESS == sdkResult)
+	{
+		for (uint32_t idx = 0; idx < response.size(); idx++)
+			lc.print(response[idx]);
+	}
+
+	return sdkResult;
 }

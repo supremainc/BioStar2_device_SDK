@@ -271,7 +271,7 @@ int runAPIs(void* context, const DeviceList& deviceList)
 	LogControl lc(context);
 	UserControl uc(context);
 
-	cout << endl << endl << "== CommunicationAPI Test ==" << endl;
+	cout << endl << endl << "== GlobalFireAlarmZone Test ==" << endl;
 	BS2_DEVICE_ID id = 0;
 
 	while (BS_SDK_SUCCESS == sdkResult && MENU_COMM_BREAK != (selectedTop = Utility::showMenu(menuInfoAPI)))

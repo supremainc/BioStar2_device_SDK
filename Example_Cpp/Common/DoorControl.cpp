@@ -75,15 +75,74 @@ int DoorControl::removeAllDoor(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int DoorControl::lockDoor(BS2_DEVICE_ID id)
+int DoorControl::lockDoor(BS2_DEVICE_ID id, const vector<BS2_DOOR_ID>& doorIDs, BS2_DOOR_FLAG doorFlag, uint32_t timeout)
 {
+	if (0 == doorIDs.size())
+		return BS_SDK_SUCCESS;
+
 	int sdkResult = BS_SDK_SUCCESS;
+	if (0 == timeout)
+	{
+		sdkResult = BS2_LockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()));
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_LockDoor call failed: %d", sdkResult);
+	}
+	else
+	{
+		sdkResult = BS2_TimedLockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), timeout);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_TimedLockDoor call failed: %d", sdkResult);
+	}
+
 	return sdkResult;
 }
 
-int DoorControl::unlockDoor(BS2_DEVICE_ID id, std::vector<BS2_DOOR_ID>& doorIDs)
+int DoorControl::unlockDoor(BS2_DEVICE_ID id, const vector<BS2_DOOR_ID>& doorIDs, BS2_DOOR_FLAG doorFlag, uint32_t timeout)
 {
+	if (0 == doorIDs.size())
+		return BS_SDK_SUCCESS;
+
 	int sdkResult = BS_SDK_SUCCESS;
+	if (0 == timeout)
+	{
+		sdkResult = BS2_UnlockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()));
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_UnlockDoor call failed: %d", sdkResult);
+	}
+	else
+	{
+		sdkResult = BS2_TimedUnlockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), timeout);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_TimedUnlockDoor call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
+int DoorControl::getDoorStatus(BS2_DEVICE_ID id, const vector<BS2_DOOR_ID>& doorIDs, vector<BS2DoorStatus>& doorStatus)
+{
+	BS2DoorStatus* statusObjs = NULL;
+	uint32_t numOfStatus(0);
+	int sdkResult = BS2_GetDoorStatus(context_, id, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), &statusObjs, &numOfStatus);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_EnableDeviceLicense call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	if (statusObjs == NULL || 0 == numOfStatus)
+	{
+		TRACE("BS2DoorStatus is empty.");
+		return sdkResult;
+	}
+
+	doorStatus.clear();
+	for (uint32_t idx = 0; idx < numOfStatus; idx++)
+	{
+		doorStatus.push_back(statusObjs[idx]);
+	}
+
+	BS2_ReleaseObject(statusObjs);
 	return sdkResult;
 }
 
@@ -261,4 +320,17 @@ void DoorControl::print(const BS2Signal& signal)
 	TRACE("     -onDuration : %u", signal.onDuration);
 	TRACE("     -offDuration : %u", signal.offDuration);
 	TRACE("     -delay : %u", signal.delay);
+}
+
+void DoorControl::print(const BS2DoorStatus& status, uint32_t idx)
+{
+	TRACE("-- Door Status item [%u] --", idx);
+	TRACE("  doorID:%u", status.id);
+	TRACE("  opened:%u", status.opened);
+	TRACE("  unlocked:%u", status.unlocked);
+	TRACE("  heldOpened:%u", status.heldOpened);
+	TRACE("  unlockFlags:%u", status.unlockFlags);
+	TRACE("  lockFlags:%u", status.lockFlags);
+	TRACE("  alarmFlags:%u", status.alarmFlags);
+	TRACE("  lastOpenTime:%s", Utility::convertTimeUTC2String(status.lastOpenTime).c_str());
 }

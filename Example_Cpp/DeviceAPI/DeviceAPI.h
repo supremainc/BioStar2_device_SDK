@@ -13,6 +13,22 @@
 #include "../Common/CommControl.h"
 #include "../Common/DeviceList.h"
 
+enum EN_MENU_TOP
+{
+	MENU_TOP_BREAK = MENU_BREAK,
+	MENU_TOP_DEVICE_TEST = 1,
+	MENU_TOP_DOOR_TEST,
+	MENU_TOP_LOG_TEST,
+};
+
+std::vector<MENU_ITEM> menuInfoTop =
+{
+	{MENU_TOP_BREAK,		"Exit"},
+	{MENU_SEPARATOR,		""},
+	{MENU_TOP_DEVICE_TEST,	"Device test"},
+	{MENU_TOP_DOOR_TEST,	"Door test"},
+	{MENU_TOP_LOG_TEST,		"Log test"},
+};
 
 enum EN_MENU_DEV
 {
@@ -132,7 +148,8 @@ enum EN_MENU_DEV
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
 {
-	{MENU_DEV_BREAK,					"Exit"},
+	{MENU_DEV_BREAK,					"Back"},
+	{MENU_SEPARATOR,					""},
 	{MENU_DEV_GET_DEVINF,				"BS2_GetDeviceInfo" },
 	{MENU_DEV_GET_DEVINFEX,				"BS2_GetDeviceInfoEx" },
 
@@ -246,9 +263,52 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 	{MENU_DEV_SET_FACILITYCODECONFIG,	"BS2_SetFacilityCodeConfig" },
 };
 
+enum EN_MENU_DOOR
+{
+	MENU_DOOR_BREAK = MENU_BREAK,
+	MENU_DOOR_GET_DOOR,
+	MENU_DOOR_SET_DOOR,
+	MENU_DOOR_REM_DOORALL,
+
+	MENU_DOOR_LOCK,
+	MENU_DOOR_UNLOCK,
+	MENU_DOOR_GETSTATUS,
+};
+
+std::vector<MENU_ITEM> menuInfoDoorAPI =
+{
+	{MENU_DOOR_BREAK,			"Back"},
+	{MENU_SEPARATOR,			""},
+	{MENU_DOOR_GET_DOOR,		"Get doors"},
+	{MENU_DOOR_SET_DOOR,		"Set doors"},
+	{MENU_DOOR_REM_DOORALL, 	"Remove all doors"},
+	{MENU_DOOR_LOCK,			"(Timed) Lock doors"},
+	{MENU_DOOR_UNLOCK,			"(Timed) Unlock doors"},
+	{MENU_DOOR_GETSTATUS,		"Get status"},
+};
+
+enum EN_MENU_LOG
+{
+	MENU_LOG_BREAK = MENU_BREAK,
+	MENU_LOG_GET_LOG,
+	MENU_LOG_GET_LOGEX,
+	MENU_LOG_GET_DEVICEIO_STATUS,
+};
+
+std::vector<MENU_ITEM> menuInfoLogAPI =
+{
+	{MENU_LOG_BREAK,				"Back"},
+	{MENU_SEPARATOR,				""},
+	{MENU_LOG_GET_LOG,				"Get log"},
+	{MENU_LOG_GET_LOGEX,			"Get logEx"},
+	{MENU_LOG_GET_DEVICEIO_STATUS,	"Get device IO status" },
+};
 
 void connectTestDevice(void* context);
 int runAPIs(void* context, DeviceInfo& device);
+int runDeviceAPIs(void* context, DeviceInfo& device);
+int runDoorAPIs(void* context, DeviceInfo& device);
+int runLogAPIs(void* context, DeviceInfo& device);
 int getDeviceInfo(void* context, const DeviceInfo& device);
 int getDeviceInfoEx(void* context, const DeviceInfo& device);
 int getFingerprintConfig(void* context, const DeviceInfo& device);
@@ -328,3 +388,11 @@ int searchSlave(void* context, DeviceInfo& device);
 void displaySlave(void* context, const DeviceInfo& device);
 int getFacilityCodeConfig(void* context, const DeviceInfo& device);
 int setFacilityCodeConfig(void* context, const DeviceInfo& device);
+
+int getDoors(void* context, const DeviceInfo& device);
+int setDoors(void* context, const DeviceInfo& device);
+int lockDoor(void* context, const DeviceInfo& device);
+int unlockDoor(void* context, const DeviceInfo& device);
+int getStatus(void* context, const DeviceInfo& device);
+
+int getDeviceIOStatus(void* context, const DeviceInfo& device);

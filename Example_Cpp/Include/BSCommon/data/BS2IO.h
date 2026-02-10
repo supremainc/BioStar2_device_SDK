@@ -21,9 +21,9 @@
 #include "../BS2Types.h"
 
 enum {
-    MAX_IO_PORT_COUNT = 32,
-    MAX_SIO_PORT_COUNT = 16,
-    MAX_TIME_LIMIT_OF_RUN_ACTION = 86400,   //
+    BS2_IO_STATUS_MAX_IO_PORT = 32,
+    BS2_IO_STATUS_MAX_SIO_PORT = 16,
+    BS2_IO_STATUS_MAX_TIME_LIMIT_OF_RUN_ACTION = 86400,   //
 };
 
 enum{
@@ -53,7 +53,7 @@ typedef struct {
 typedef struct{
     uint8_t count;
     uint8_t reserved[3];
-    BS2_PORT_VALUE status[MAX_IO_PORT_COUNT];
+    BS2_PORT_VALUE status[BS2_IO_STATUS_MAX_IO_PORT];
 } BS2_IO_STATUS;
 
 typedef struct{
@@ -67,7 +67,7 @@ typedef struct{
     BS2_IO_STATUS auxOut;
     
     uint8_t numOfSupervisorInput;
-    BS2_PORT_VALUE supervisorInputStatus[MAX_SIO_PORT_COUNT];
+    BS2_PORT_VALUE supervisorInputStatus[BS2_IO_STATUS_MAX_SIO_PORT];
     uint8_t reserved1[3];
     uint8_t reserved2[16];
 

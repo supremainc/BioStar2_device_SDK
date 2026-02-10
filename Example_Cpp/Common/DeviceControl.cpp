@@ -307,61 +307,82 @@ int DeviceControl::getDeviceCapabilities(BS2_DEVICE_ID id, BS2DeviceCapabilities
 
 int DeviceControl::enableDeviceLicense(BS2_DEVICE_ID id, const BS2LicenseBlob* licenseBlob, vector<BS2LicenseResult>& licenseResult)
 {
-	BS2LicenseResult* result = NULL;
+	BS2LicenseResult* resultObjs = NULL;
 	uint32_t numOfResult = 0;
-	int sdkResult = BS2_EnableDeviceLicense(context_, id, licenseBlob, &result, &numOfResult);
+	int sdkResult = BS2_EnableDeviceLicense(context_, id, licenseBlob, &resultObjs, &numOfResult);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_EnableDeviceLicense call failed: %d", sdkResult);
 		return sdkResult;
 	}
 
+	if (resultObjs == NULL || 0 == numOfResult)
+	{
+		TRACE("BS2LicenseResult is empty.");
+		return sdkResult;
+	}
+
 	licenseResult.clear();
 	for (uint32_t idx = 0; idx < numOfResult; idx++)
 	{
-		licenseResult.push_back(result[idx]);
+		licenseResult.push_back(resultObjs[idx]);
 	}
 
+	BS2_ReleaseObject(resultObjs);
 	return sdkResult;
 }
 
 int DeviceControl::disableDeviceLicense(BS2_DEVICE_ID id, const BS2LicenseBlob* licenseBlob, vector<BS2LicenseResult>& licenseResult)
 {
-	BS2LicenseResult* result = NULL;
+	BS2LicenseResult* resultObjs = NULL;
 	uint32_t numOfResult = 0;
-	int sdkResult = BS2_DisableDeviceLicense(context_, id, licenseBlob, &result, &numOfResult);
+	int sdkResult = BS2_DisableDeviceLicense(context_, id, licenseBlob, &resultObjs, &numOfResult);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
 		TRACE("BS2_DisableDeviceLicense call failed: %d", sdkResult);
 		return sdkResult;
 	}
 
-	licenseResult.clear();
-	for (uint32_t idx = 0; idx < numOfResult; idx++)
+	if (resultObjs == NULL || 0 == numOfResult)
 	{
-		licenseResult.push_back(result[idx]);
-	}
-
-	return sdkResult;
-}
-
-int DeviceControl::queryDeviceLicense(BS2_DEVICE_ID id, BS2_LICENSE_TYPE licenseType, vector<BS2LicenseResult>& licenseResult)
-{
-	BS2LicenseResult* result = NULL;
-	uint32_t numOfResult = 0;
-	int sdkResult = BS2_QueryDeviceLicense(context_, id, licenseType, &result, &numOfResult);
-	if (BS_SDK_SUCCESS != sdkResult)
-	{
-		TRACE("BS2_QueryDeviceLicense call failed: %d", sdkResult);
+		TRACE("BS2LicenseResult is empty.");
 		return sdkResult;
 	}
 
 	licenseResult.clear();
 	for (uint32_t idx = 0; idx < numOfResult; idx++)
 	{
-		licenseResult.push_back(result[idx]);
+		licenseResult.push_back(resultObjs[idx]);
 	}
 
+	BS2_ReleaseObject(resultObjs);
+	return sdkResult;
+}
+
+int DeviceControl::queryDeviceLicense(BS2_DEVICE_ID id, BS2_LICENSE_TYPE licenseType, vector<BS2LicenseResult>& licenseResult)
+{
+	BS2LicenseResult* resultObjs = NULL;
+	uint32_t numOfResult = 0;
+	int sdkResult = BS2_QueryDeviceLicense(context_, id, licenseType, &resultObjs, &numOfResult);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_QueryDeviceLicense call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	if (resultObjs == NULL || 0 == numOfResult)
+	{
+		TRACE("BS2LicenseResult is empty.");
+		return sdkResult;
+	}
+
+	licenseResult.clear();
+	for (uint32_t idx = 0; idx < numOfResult; idx++)
+	{
+		licenseResult.push_back(resultObjs[idx]);
+	}
+
+	BS2_ReleaseObject(resultObjs);
 	return sdkResult;
 }
 
@@ -543,11 +564,21 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 
 	TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
 
-	TRACE("authOnlyNoMaskSupported : %u", info.authDenyMaskSupported);
-	TRACE("MifareExSupported : %u",	info.mifareExSupported);
+	TRACE("authDenyMaskSupported : %u", info.authDenyMaskSupported);
+	TRACE("mifareExSupported : %u",	info.mifareExSupported);
+	TRACE("lockOverrideSupported : %u", info.lockOverrideSupported);
+	TRACE("doorModeOverrideSupported : %u", info.doorModeOverrideSupported);
+	TRACE("alternateAccessTimerSupported : %u", info.alternateAccessTimerSupported);
+	TRACE("realtimeIOStatusReportSupported : %u", info.realtimeIOStatusReportSupported);
+	TRACE("dynamicSlaveDeviceNumSupported : %u", info.dynamicSlaveDeviceNumSupported);
+    TRACE("secureTamperSupported : %u", info.secureTamperSupported);
 
+	TRACE("customSmartcardSlaveSupported : %u", info.customSmartcardSlaveSupported);
+	TRACE("serverPrivateMsgSupported : %u", info.serverPrivateMsgSupported);
+	TRACE("facilityCodeSupported : %u", info.facilityCodeSupported);
 	TRACE("masterAdminSupported : %u", info.masterAdminSupported);
 	TRACE("adminTwoStepAuthSupported : %u", info.adminTwoStepAuthSupported);
+	TRACE("qrDetectGuideLedSupported : %u", info.qrDetectGuideLedSupported);
 }
 
 #if 0

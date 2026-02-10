@@ -16,8 +16,9 @@ public:
 	int getAllDoor(BS2_DEVICE_ID id, std::vector<BS2Door>& doors);
 	int setDoor(BS2_DEVICE_ID id, std::vector<BS2Door>& doors);
 	int removeAllDoor(BS2_DEVICE_ID id);
-	int lockDoor(BS2_DEVICE_ID id);
-	int unlockDoor(BS2_DEVICE_ID id, std::vector<BS2_DOOR_ID>& doorIDs);
+	int lockDoor(BS2_DEVICE_ID id, const std::vector<BS2_DOOR_ID>& doorIDs, BS2_DOOR_FLAG doorFlag, uint32_t timeout);
+	int unlockDoor(BS2_DEVICE_ID id, const std::vector<BS2_DOOR_ID>& doorIDs, BS2_DOOR_FLAG doorFlag, uint32_t timeout);
+	int getDoorStatus(BS2_DEVICE_ID id, const std::vector<BS2_DOOR_ID>& doorIDs, std::vector<BS2DoorStatus>& doorStatus);
 
 	void print(const BS2Door& door);
 	void print(const BS2DoorRelay& relay);
@@ -32,6 +33,7 @@ public:
 	void print(const BS2BuzzerAction& relay);
 	void print(const BS2LiftAction& relay);
 	void print(const BS2Signal& signal);
+	void print(const BS2DoorStatus& status, uint32_t index);
 
 
 private:
