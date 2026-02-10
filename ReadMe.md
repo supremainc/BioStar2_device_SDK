@@ -1,4 +1,4 @@
-> ## [!NOTE]
+> [!NOTE]
 > ## 1. Starting March 2, 2026, SDK downloads will be centralized in the Suprema Download Center. Therefore, all SDK download files registered here will be deleted after this date.
 > ## 2. Sample code will be continuously updated via GitHub.
 
