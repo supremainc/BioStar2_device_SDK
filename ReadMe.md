@@ -1,3 +1,7 @@
+> [!NOTE]
+> Starting March 2, 2026, SDK downloads will be centralized in the Suprema Download Center. Therefore, all SDK download files registered here will be deleted after this date.
+> Sample code will be continuously updated via GitHub.
+
 ### What is the BioStar?
 
 BioStar2 is a web-based, open, and integrated security platform that provides comprehensive functionality for access control and time & attendance. Featuring a modular, flexible framework, the platform supports both the BioStar 2 Device SDK which is used to integrate Suprema's terminals with thirdparty systems and web APIs which are used to integrate the functionality of the BioStar 2 platform with third-party systems. In addition, in step with the mobile era, the mobile app for BioStar 2 has been designed to enable you not only to remotely control the BioStar 2 platform but also to get a mobile card issued to you for use.
