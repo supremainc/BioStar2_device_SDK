@@ -484,6 +484,9 @@ namespace Suprema
                 case BS2DeviceTypeEnum.XSTATION_2_FP:   // Supported V1.2.0
                 case BS2DeviceTypeEnum.XSTATION_2:      // Supported V1.2.0
                 case BS2DeviceTypeEnum.BIOSTATION_3:    // Supported V1.1.0
+                case BS2DeviceTypeEnum.BIOSTATION_3_MAX:
+                case BS2DeviceTypeEnum.BIOSTATION_3_MAX_FP:
+                case BS2DeviceTypeEnum.XPASS_Q2:
                     config.useVisualBarcode = Convert.ToByte(useBarcode);
                     if (useBarcode)
                     {
@@ -1018,7 +1021,7 @@ namespace Suprema
         public void setSlaveExCardConfig(IntPtr sdkContext, UInt32 deviceID, UInt32 slaveID)
         {
             // Enroll test user
-            enrollUserEx(sdkContext, deviceID, slaveID, "testuser", "1", "1122");
+            enrollUserEx(sdkContext, deviceID, slaveID, "testuser", "1", "11112222");
 
             Console.WriteLine("Do you want update card config? [y/n]");
             Console.Write(">>>> ");
@@ -1459,7 +1462,7 @@ namespace Suprema
 
             Console.WriteLine("Try adding a license");
 
-            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR)");
+            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR, 2:Wireless lock(CS-40))");
             Console.Write(">>>> ");
             licenseBlob.licenseType = Util.GetInput((UInt16)BS2LicenseType.VISUAL_QR_MASK);
 
@@ -1533,7 +1536,7 @@ namespace Suprema
 
             Console.WriteLine("Try removing the license");
 
-            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR)");
+            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR, 2:Wireless lock(CS-40))");
             Console.Write(">>>> ");
             licenseBlob.licenseType = Util.GetInput((UInt16)BS2LicenseType.VISUAL_QR_MASK);
 
@@ -1595,7 +1598,7 @@ namespace Suprema
         {
             Console.WriteLine("Trying to get a license");
 
-            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR)");
+            Console.WriteLine("Enter the license type. (0: None, 1: Visual QR, 2:Wireless lock(CS-40))");
             Console.Write(">>>> ");
             UInt16 licenseType = Util.GetInput((UInt16)BS2LicenseType.VISUAL_QR_MASK);
 

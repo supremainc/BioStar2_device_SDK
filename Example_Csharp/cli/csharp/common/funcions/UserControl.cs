@@ -1240,9 +1240,35 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Activate user phrase", activateUserPhrase));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Deactivate user phrase", deactivateUserPhrase));
 
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get lock override", getLockOverride));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set lock override", setLockOverride));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove lock override", removeLockOverride));
+
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get user override", getUserOverride));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set user override", setUserOverride));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Remove user override", removeUserOverride));
+
             return functionList;
         }
-        
+
+        private CardRegisterType SelectCardRegisterType()
+        {
+            Console.WriteLine("Select the Card Register Type:");
+            foreach (CardRegisterType type in Enum.GetValues(typeof(CardRegisterType)))
+            {
+                Console.WriteLine($"{(int)type}: {type}");
+            }
+            Console.Write(">>>> ");
+            
+            int selectedValue;
+            while (!int.TryParse(Console.ReadLine(), out selectedValue) || !Enum.IsDefined(typeof(CardRegisterType), selectedValue))
+            {
+                Console.WriteLine("Invalid selection. Please try again.");
+                Console.Write(">>>> ");
+            }
+
+            return (CardRegisterType)selectedValue;
+        }
 
         public void getUserMask(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
@@ -1670,6 +1696,12 @@ namespace Suprema
                     Console.WriteLine("Pin code should less than {0} words.", BS2Environment.BS2_PIN_HASH_SIZE);
                     return;
                 }
+                else if (pin.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                {
+                    Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
+                    return;
+                }
+
                 else
                 {
                     IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pin);
@@ -2697,6 +2729,12 @@ namespace Suprema
                     Console.WriteLine("Pin code should less than {0} words.", BS2Environment.BS2_PIN_HASH_SIZE);
                     return;
                 }
+                else if (pin.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                {
+                    Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
+                    return;
+                }
+
                 else
                 {
                     IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pin);
@@ -3654,7 +3692,7 @@ namespace Suprema
             Array.Clear(userBlob[0].pin, 0, BS2Environment.BS2_PIN_HASH_SIZE);
 	        if (pinSupported)
 	        {
-                Console.WriteLine("Do you want to encrypt the PIN code with a custom key and apply it? [y/n]");
+                Console.WriteLine("Do you want to encrypt the PIN code with a custom key and apply it? [y/N]");
                 Console.Write(">> ");
                 if (Util.IsNo())
                 {
@@ -3665,6 +3703,11 @@ namespace Suprema
                     if (BS2Environment.BS2_PIN_HASH_SIZE < pinString.Length)
                     {
                         Console.WriteLine("PIN code is too long");
+                        return;
+                    }
+                    else if (pinString.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                    {
+                        Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
                         return;
                     }
 
@@ -3701,6 +3744,11 @@ namespace Suprema
                         Console.WriteLine("PIN code is too long");
                         return;
                     }
+                    else if (pinString.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                    {
+                        Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
+                        return;
+                    }
 
                     IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pinString);
                     IntPtr pinCode = Marshal.AllocHGlobal(BS2Environment.BS2_PIN_HASH_SIZE);
@@ -3721,9 +3769,9 @@ namespace Suprema
             userBlob[0].setting.cardAuthMode = (byte)BS2CardAuthModeEnum.NONE;
             userBlob[0].setting.idAuthMode = (byte)BS2IDAuthModeEnum.NONE;
 
-            Console.WriteLine("Do you want to register private auth mode? [y/n]");
+            Console.WriteLine("Do you want to register private auth mode? [y/N]");
             Console.Write(">> ");
-            if (Util.IsYes())
+            if (!Util.IsNo())
 	        {
 		        if (fingerScanSupported || faceScanSupported)
 		        {
@@ -3816,9 +3864,9 @@ namespace Suprema
             userBlob[0].settingEx.cardAuthMode = (byte)BS2ExtCardAuthModeEnum.NONE;
             userBlob[0].settingEx.idAuthMode = (byte)BS2ExtIDAuthModeEnum.NONE;
 
-            Console.WriteLine("Do you want to register private auth-ex mode? [y/n]");
+            Console.WriteLine("Do you want to register private auth-ex mode? [y/N]");
             Console.Write(">> ");
-            if (Util.IsYes())
+            if (!Util.IsNo())
 	        {
 		        if (faceExScanSupported)
 		        {
@@ -4040,9 +4088,9 @@ namespace Suprema
 	        }
 
             Array.Clear(userBlob[0].accessGroupId, 0, BS2Environment.BS2_MAX_ACCESS_GROUP_PER_USER);
-            Console.WriteLine("Do you want to register access group ID? [y/n]");
+            Console.WriteLine("Do you want to register access group ID? [y/N]");
             Console.Write(">> ");
-            if (Util.IsYes())
+            if (!Util.IsNo())
 	        {
 		        Console.WriteLine("Please enter access group IDs. ex)ID1 ID2 ID3 ...");
                 Console.Write(">> ");
@@ -4071,7 +4119,7 @@ namespace Suprema
 	        }
 
 	        {
-		        Console.WriteLine("Do you want to overwrite the user if it exist? [y/n]");
+		        Console.WriteLine("Do you want to overwrite the user if it exist? [Y/n]");
                 Console.Write(">> ");
                 userBlob[0].user.flag = (byte)(Util.IsYes() ? BS2UserFlagEnum.CREATED | BS2UserFlagEnum.UPDATED : BS2UserFlagEnum.CREATED);
 	        }
@@ -4082,9 +4130,9 @@ namespace Suprema
 
 	        if (cardSupported)
 	        {
-		        Console.WriteLine("Do you want to scan card? [y/n]");
+		        Console.WriteLine("Do you want to scan card? [y/N]");
                 Console.Write(">> ");
-		        if (Util.IsYes())
+		        if (!Util.IsNo())
 		        {
 			        Console.WriteLine("How many cards would you like to register?");
                     Console.Write(">> ");
@@ -4124,9 +4172,9 @@ namespace Suprema
 
 	        if (fingerScanSupported)
 	        {
-		        Console.WriteLine("Do you want to scan fingerprint? [y/n]");
+		        Console.WriteLine("Do you want to scan fingerprint? [y/N]");
                 Console.Write(">> ");
-		        if (Util.IsYes())
+		        if (!Util.IsNo())
 		        {
 			        Console.WriteLine("How many fingers would you like to register?");
                     Console.Write(">> ");
@@ -4162,12 +4210,12 @@ namespace Suprema
 		        }
 	        }
 
-            bool unwarpedMemory = false;
+            //bool unwarpedMemory = false;
 	        if (faceScanSupported)
 	        {
-			    Console.WriteLine("Do you want to scan face? [y/n]");
+			    Console.WriteLine("Do you want to scan face? [y/N]");
                 Console.Write(">> ");
-		        if (Util.IsYes())
+		        if (!Util.IsNo())
                 {
                     Console.WriteLine("How many face would you like to register?");
                     Console.Write(">> ");
@@ -4777,6 +4825,11 @@ namespace Suprema
                         Console.WriteLine("PIN code is too long");
                         return BS2ErrorCode.BS_SDK_ERROR_INVALID_PARAM;
                     }
+                    else if (pinString.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                    {
+                        Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
+                        return BS2ErrorCode.BS_SDK_ERROR_INVALID_PARAM;
+                    }
 
                     IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pinString);
                     IntPtr pinCode = Marshal.AllocHGlobal(BS2Environment.BS2_PIN_HASH_SIZE);
@@ -4809,6 +4862,11 @@ namespace Suprema
                     if (BS2Environment.BS2_PIN_HASH_SIZE < pinString.Length)
                     {
                         Console.WriteLine("PIN code is too long");
+                        return BS2ErrorCode.BS_SDK_ERROR_INVALID_PARAM;
+                    }
+                    else if (pinString.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                    {
+                        Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
                         return BS2ErrorCode.BS_SDK_ERROR_INVALID_PARAM;
                     }
 
@@ -5168,6 +5226,7 @@ namespace Suprema
                         Console.Write(">> ");
                         if (Util.IsYes())
                         {
+#if OLD_CODE
                             Console.WriteLine("Enter the face image path and name:");
                             Console.Write(">> ");
                             string imagePath = Console.ReadLine();
@@ -5213,6 +5272,32 @@ namespace Suprema
 
                                 Marshal.FreeHGlobal(imageData);
                             }
+#endif
+
+                            int structSize = Marshal.SizeOf(typeof(BS2FaceExWarped));
+                            faceExObjs = Marshal.AllocHGlobal(structSize);
+                            IntPtr curFaceExObjs = faceExObjs;
+
+                            BS2FaceExWarped warped = Util.AllocateStructure<BS2FaceExWarped>();
+                            IntPtr warpedImagePtr = Marshal.AllocHGlobal(BS2Environment.BS2_MAX_WARPED_IMAGE_LENGTH);
+                            UInt32 warpedImageLen = 0;
+                            try
+                            {
+                                if (!getNormalizedImage(sdkContext, deviceID, warpedImagePtr, ref warpedImageLen))
+                                    return BS2ErrorCode.BS_SDK_ERROR_INVALID_DATA_FILE;
+
+                                Marshal.Copy(warpedImagePtr, warped.imageData, 0, (int)warpedImageLen);
+                                warped.imageLen = warpedImageLen;
+                                warped.faceIndex = 0;
+                                warped.flag = Convert.ToByte(BS2FaceExFlag.WARPED);
+                            }
+                            finally
+                            {
+                                Marshal.FreeHGlobal(warpedImagePtr);
+                            }
+
+                            Marshal.StructureToPtr(warped, curFaceExObjs, false);
+                            numFaces = 1;
                         }
                     }
                 }
@@ -5622,6 +5707,282 @@ namespace Suprema
             print(statistic);
         }
 
+        public void getLockOverride(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            List<BS2LockOverride> requests = new List<BS2LockOverride>();
+            List<BS2LockOverride> listResult = null;
+
+            Console.WriteLine("Do you want to get all Lock Overrides? [Y/n]");
+            Console.Write(">>>> ");
+            if (!Util.IsYes())
+            {
+                Console.WriteLine("  Enter number of Lock Overrides to get");
+                Console.Write("  >> ");
+                UInt32 numOfOverrides = (UInt32)Util.GetInput((UInt32)1);
+                BS2LockOverride item = Util.AllocateStructure<BS2LockOverride>();
+                for (int i = 0; i < (int)numOfOverrides; i++)
+                {
+                    Console.WriteLine("    Enter the CardID (Ex: E43DD05C)");
+                    Console.Write("    >> ");
+                    string cardStr = Console.ReadLine();
+
+                    if (cardStr.Length > BS2Environment.BS2_CARD_DATA_SIZE * 2)
+                    {
+                        Console.WriteLine("Card id should less than {0}.", BS2Environment.BS2_CARD_DATA_SIZE * 2);
+                        return;
+                    }
+
+                    byte[] cardIDArray = Util.HexStringToByteArray(cardStr, BS2Environment.BS2_CARD_DATA_SIZE);
+                    Array.Copy(cardIDArray, item.cardID, BS2Environment.BS2_CARD_DATA_SIZE);
+
+                    Console.WriteLine("    Enter the Issue Count");
+                    Console.Write("    >> ");
+                    item.issueCount = (UInt16)Util.GetInput((UInt16)0);
+
+                    requests.Add(item);
+                }
+            }
+
+            if (CommonControl.getLockOverrides(sdkContext, deviceID, ref requests, out listResult))
+            {
+                for (UInt32 idx = 0; idx < listResult.Count; idx++)
+                {
+                    CommonControl.print(listResult[(int)idx], idx);
+                }
+            }
+        }
+
+        public void setLockOverride(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            Console.WriteLine("Enter number of Lock Overrides to set");
+            Console.Write(">>>> ");
+            UInt32 numOfOverrides = Util.GetInput(((UInt32)1));
+
+            List<BS2LockOverride> listOverrides = new List<BS2LockOverride>();
+
+            for (UInt32 idx = 0; idx < numOfOverrides; idx++)
+            {
+                BS2LockOverride item = Util.AllocateStructure<BS2LockOverride>();
+                List<byte[]> listUserIDs = null;
+                if (CommonControl.getUserIDs(sdkContext, deviceID, out listUserIDs))
+                {
+                    Console.WriteLine("--- Select User ID ---");
+                    for (int i = 0; i < listUserIDs.Count; i++)
+                    {
+                        Console.WriteLine("{0}: UserID[{1}]", i, Encoding.UTF8.GetString(listUserIDs[i]).TrimEnd('\0'));
+                    }
+                    Console.WriteLine("999: N/A");
+
+                    Console.WriteLine("Enter the INDEX of the user ID to select:");
+                    Console.Write(">> ");
+                    int selectedIndex = Util.GetInput();
+                    if (selectedIndex >= 0 && selectedIndex < listUserIDs.Count)
+                    {
+                        Array.Copy(listUserIDs[selectedIndex], item.userID, BS2Environment.BS2_USER_ID_SIZE);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ignore user ID.");
+                    }
+                }
+
+                while (true)
+                {
+                    Console.WriteLine($"Scanning card for Lock Override entry {idx + 1}/{numOfOverrides} from device{deviceID}...");
+                    BS2Card? scannedCard = CommonControl.scanCard(sdkContext, deviceID);
+                    if (scannedCard == null)
+                    {
+                        Console.WriteLine("Failed to scan card. Please try again.");
+                        continue;
+                    }
+
+                    if (Convert.ToBoolean(scannedCard?.isSmartCard))
+                    {
+                        BS2SmartCardData smartCard = Util.ConvertTo<BS2SmartCardData>(scannedCard?.cardUnion);
+                        switch (smartCard.header.cardType)
+                        {
+                            case (byte)BS2CardTypeEnum.SECURE:
+                                item.cardType = smartCard.header.cardType;
+                                item.size = BS2Environment.BS2_CARD_DATA_SIZE;
+                                Array.Copy(smartCard.cardID, 0, item.cardID, 0, BS2Environment.BS2_CARD_DATA_SIZE);
+                                break;
+                            default:
+                                Console.WriteLine("Unsupported Smart Card type scanned. Please try again.");
+                                continue;
+                        }
+                    }
+                    else
+                    {
+                        BS2CSNCard csnCard = Util.ConvertTo<BS2CSNCard>(scannedCard?.cardUnion);
+                        item.cardType = csnCard.type;
+                        item.size = csnCard.size;
+                        Array.Copy(csnCard.data, 0, item.cardID, 0, csnCard.size);
+                    }
+
+                    break;
+                }
+
+                Console.WriteLine("  Enter the Issue Count");
+                Console.Write("  >> ");
+                item.issueCount = (UInt16)Util.GetInput((UInt16)0);
+
+                listOverrides.Add(item);
+            }
+
+            if (CommonControl.setLockOverrides(sdkContext, deviceID, ref listOverrides))
+            {
+                Console.WriteLine("Set Lock Overrides successful.");
+            }
+        }
+
+        public void removeLockOverride(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            List<BS2LockOverride> listDelete = new List<BS2LockOverride>();
+
+            Console.WriteLine("Do you want to remove all Lock Overrides? [Y/n]");
+            Console.Write(">>>> ");
+            if (!Util.IsYes())
+            {
+                List<BS2LockOverride> requestAll = null;
+                List<BS2LockOverride> listResult = null;
+
+                if (CommonControl.getLockOverrides(sdkContext, deviceID, ref requestAll, out listResult))
+                {
+                    for (UInt32 idx = 0; idx < listResult.Count; idx++)
+                    {
+                        CommonControl.print(listResult[(int)idx], idx);
+                    }
+
+                    Console.WriteLine("Select the Lock Override INDEX to delete:");
+                    Console.Write(">>>> ");
+                    int delIndex = Util.GetInput(0);
+
+                    listDelete.Add(listResult[delIndex]);
+                }
+            }
+
+            if (CommonControl.removeLockOverrides(sdkContext, deviceID, ref listDelete))
+            {
+                Console.WriteLine("Delete Lock Overrides successful.");
+            }
+        }
+
+        public void getUserOverride(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            List<byte[]> requests = new List<byte[]>();
+            List<BS2UserOverride> listResult = null;
+
+            Console.WriteLine("Do you want to get all User Overrides? [Y/n]");
+            Console.Write(">>>> ");
+            if (!Util.IsYes())
+            {
+                Console.WriteLine("  Enter number of User Overrides to get");
+                Console.Write("  >> ");
+                UInt32 numOfOverrides = (UInt32)Util.GetInput((UInt32)1);
+
+                List<byte[]> listUserIDs = null;
+                if (CommonControl.getUserIDs(sdkContext, deviceID, out listUserIDs))
+                {
+                    while (requests.Count < numOfOverrides)
+                    {
+                        Console.WriteLine("--- Select User ID ---");
+                        for (int i = 0; i < listUserIDs.Count; i++)
+                        {
+                            Console.WriteLine("{0}: UserID[{1}]", i, Encoding.UTF8.GetString(listUserIDs[i]).TrimEnd('\0'));
+                        }
+                        Console.WriteLine("999: N/A");
+
+                        Console.WriteLine("Enter the INDEX of the user ID to select:");
+                        Console.Write(">> ");
+                        int selectedIndex = Util.GetInput();
+                        if (selectedIndex >= 0 && selectedIndex < listUserIDs.Count)
+                            requests.Add(listUserIDs[selectedIndex]);
+                    }
+                }
+            }
+
+            if (CommonControl.getUserOverrides(sdkContext, deviceID, ref requests, out listResult))
+            {
+                for (UInt32 idx = 0; idx < listResult.Count; idx++)
+                {
+                    CommonControl.print(listResult[(int)idx], idx);
+                }
+            }
+        }
+
+        public void setUserOverride(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            Console.WriteLine("Enter number of User Overrides to set");
+            Console.Write(">>>> ");
+            UInt32 numOfOverrides = Util.GetInput(((UInt32)1));
+
+            List<BS2UserOverride> listOverrides = new List<BS2UserOverride>();
+
+            while (listOverrides.Count < numOfOverrides)
+            {
+                BS2UserOverride item = Util.AllocateStructure<BS2UserOverride>();
+                List<byte[]> listUserIDs = null;
+                if (CommonControl.getUserIDs(sdkContext, deviceID, out listUserIDs))
+                {
+                    Console.WriteLine("--- Select User ID ---");
+                    for (int i = 0; i < listUserIDs.Count; i++)
+                    {
+                        Console.WriteLine("{0}: UserID[{1}]", i, Encoding.UTF8.GetString(listUserIDs[i]).TrimEnd('\0'));
+                    }
+                    Console.WriteLine("999: N/A");
+
+                    Console.WriteLine("Enter the INDEX of the user ID to select:");
+                    Console.Write(">> ");
+                    int selectedIndex = Util.GetInput();
+                    if (selectedIndex >= 0 && selectedIndex < listUserIDs.Count)
+                    {
+                        Array.Copy(listUserIDs[selectedIndex], item.userID, BS2Environment.BS2_USER_ID_SIZE);
+                        Console.WriteLine("Do you want to user Extended Door Open Time? [Y/n]");
+                        Console.Write(">> ");
+                        item.useExtendedAutoLockTimeout = Convert.ToByte(Util.IsYes());
+                    }
+                }
+
+                listOverrides.Add(item);
+            }
+
+            if (CommonControl.setUserOverrides(sdkContext, deviceID, ref listOverrides))
+            {
+                Console.WriteLine("Set User Overrides successful.");
+            }
+        }
+
+        public void removeUserOverride(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            List<byte[]> listDelete = new List<byte[]>();
+
+            Console.WriteLine("Do you want to remove all Lock Overrides? [Y/n]");
+            Console.Write(">>>> ");
+            if (!Util.IsYes())
+            {
+                List<byte[]> requestAll = null;
+                List<BS2UserOverride> listResult = null;
+
+                if (CommonControl.getUserOverrides(sdkContext, deviceID, ref requestAll, out listResult))
+                {
+                    for (UInt32 idx = 0; idx < listResult.Count; idx++)
+                    {
+                        CommonControl.print(listResult[(int)idx], idx);
+                    }
+
+                    Console.WriteLine("Select the User Override INDEX to delete:");
+                    Console.Write(">>>> ");
+                    int delIndex = Util.GetInput(0);
+
+                    listDelete.Add(listResult[delIndex].userID);
+                }
+            }
+
+            if (CommonControl.removeUserOverrides(sdkContext, deviceID, ref listDelete))
+            {
+                Console.WriteLine("Delete User Overrides successful.");
+            }
+        }
 
         void print(BS2UserBlob userBlob)
         {

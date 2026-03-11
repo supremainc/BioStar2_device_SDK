@@ -120,39 +120,32 @@ namespace Suprema
             {
                 wiegandMultiConfig.formats[i].formatID = 0;
                 wiegandMultiConfig.formats[i].format.length = 0;
-                Array.Clear(wiegandMultiConfig.formats[i].format.idFields, 0, 128);
-                Array.Clear(wiegandMultiConfig.formats[i].format.parityFields, 0, 128);
-                Array.Clear(wiegandMultiConfig.formats[i].format.parityType, 0, 4);                                                                                                                                                   
-                Array.Clear(wiegandMultiConfig.formats[i].format.parityPos, 0, 4);
+                Array.Clear(wiegandMultiConfig.formats[i].format.idFields, 0, BS2Environment.BS2_WIEGAND_MAX_FIELDS * BS2Environment.BS2_WIEGAND_FIELD_SIZE);
+                Array.Clear(wiegandMultiConfig.formats[i].format.parityFields, 0, BS2Environment.BS2_WIEGAND_MAX_PARITIES * BS2Environment.BS2_WIEGAND_FIELD_SIZE);
+                Array.Clear(wiegandMultiConfig.formats[i].format.parityType, 0, BS2Environment.BS2_WIEGAND_MAX_PARITIES);
+                Array.Clear(wiegandMultiConfig.formats[i].format.parityPos, 0, BS2Environment.BS2_WIEGAND_MAX_PARITIES);
             }
 
             wiegandMultiConfig.formats[0].formatID = 1;                                    
             wiegandMultiConfig.formats[0].format.length = 26;
-            wiegandMultiConfig.formats[0].format.idFields[28] = 0x01;
-            wiegandMultiConfig.formats[0].format.idFields[29] = 0xFE;
 
-            wiegandMultiConfig.formats[0].format.idFields[31 + 29] = 0x01;
-            wiegandMultiConfig.formats[0].format.idFields[31 + 30] = 0xFF;
-            wiegandMultiConfig.formats[0].format.idFields[31 + 31] = 0xFE;
+            wiegandMultiConfig.formats[0].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0x01;
+            wiegandMultiConfig.formats[0].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFE;
 
-            wiegandMultiConfig.formats[0].format.parityType[0] = 2;
+            wiegandMultiConfig.formats[0].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0x01;
+            wiegandMultiConfig.formats[0].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            wiegandMultiConfig.formats[0].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
+
+            wiegandMultiConfig.formats[0].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0x01;
+            wiegandMultiConfig.formats[0].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFF;
+            wiegandMultiConfig.formats[0].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xE0;
+            wiegandMultiConfig.formats[0].format.parityType[0] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_EVEN;
             wiegandMultiConfig.formats[0].format.parityPos[0] = 0;
 
-            wiegandMultiConfig.formats[0].format.parityType[1] = 1;
+            wiegandMultiConfig.formats[0].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0x1F;
+            wiegandMultiConfig.formats[0].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
+            wiegandMultiConfig.formats[0].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
             wiegandMultiConfig.formats[0].format.parityPos[1] = 25;
-
-            wiegandMultiConfig.formats[0].format.parityType[2] = 0;
-            wiegandMultiConfig.formats[0].format.parityPos[2] = 0;
-
-            wiegandMultiConfig.formats[0].format.parityType[3] = 0;
-            wiegandMultiConfig.formats[0].format.parityPos[3] = 0;
-
-            wiegandMultiConfig.formats[0].format.parityFields[28] = 0x01;
-            wiegandMultiConfig.formats[0].format.parityFields[29] = 0xFE;
-            wiegandMultiConfig.formats[0].format.parityFields[30] = 0xE0;
-
-            wiegandMultiConfig.formats[0].format.parityFields[31 + 30] = 0x1F;
-            wiegandMultiConfig.formats[0].format.parityFields[31 + 31] = 0xFE;
 
             Console.WriteLine("Set to predefined wiegandMutlConfig values...");
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetWiegandMultiConfig(sdkContext, deviceID, ref wiegandMultiConfig);
@@ -175,9 +168,9 @@ namespace Suprema
                 Console.WriteLine("     |--length : {0}", wiegandMultiConfig.formats[idx].format.length);
                 for (int j = 0; j < 4; ++j)
                 {
-                    for(int k = 27; k < 32; ++k)
+                    for(int k = 27; k < BS2Environment.BS2_WIEGAND_FIELD_SIZE; ++k)
                     {
-                        Console.WriteLine("     |--idFields[{0},{1}] : {2}", j, k, wiegandMultiConfig.formats[idx].format.idFields[(j*31)+k]);
+                        Console.WriteLine("     |--idFields[{0},{1}] : {2}", j, k, wiegandMultiConfig.formats[idx].format.idFields[(j * BS2Environment.BS2_WIEGAND_FIELD_SIZE) + k]);
                     }
                 }
             }

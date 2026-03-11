@@ -15,6 +15,7 @@ namespace Suprema
         BS_SDK_DUAL_AUTH_SUCCESS                            = 5,
         BS_SDK_WIEGAND_BYPASS_SUCCESS                       = 11,
         BS_SDK_ANONYMOUS_SUCCESS                            = 12,
+        BS_SDK_LOCKOVERRIDE_SUCCESS 						= 13,
 
 		// Driver errors
         BS_SDK_ERROR_FROM_DEVICE_DRIVER                     = -1,
@@ -189,8 +190,14 @@ namespace Suprema
         BS_SDK_ERROR_NO_FACE_PIN_CREDENTIAL                 = -761,
         BS_SDK_ERROR_NO_FINGERPRINT_PIN_CREDENTIAL          = -762,
         BS_SDK_ERROR_SQL_ERROR                              = -763,
+        BS_SDK_ERROR_LOCKOVERRIDE_LIST_FULL 				= -764,
+        BS_SDK_ERROR_CANNOT_FIND_LOCKOVERRIDE_LIST 			= -765,
+        BS_SDK_ERROR_USER_OVERRIDE_FULL 					= -766,
         BS_SDK_ERROR_ADMIN_INVALID_CREDENTIAL               = -767,
         BS_SDK_ERROR_ADMIN_USER_NO_CREDENTIAL               = -768,
+        BS_SDK_ERROR_ADMIN_USER_NOT_ENOUGH_CREDENTIAL 		= -769,
+        BS_SDK_ERROR_ADMIN_UNSUPPORTED_CREDENTIAL 			= -770,
+        BS_SDK_ERROR_ADMIN_CANNOT_SCAN 						= -771,
 
         //Config errors
         BS_SDK_ERROR_INVALID_CONFIG                         = -800,
@@ -214,6 +221,7 @@ namespace Suprema
         BS_SDK_ERROR_SLAVE_FULL                             = -910,
         BS_SDK_ERROR_CANNOT_ADD_DEVICE                      = -911,
         BS_SDK_ERROR_SLAVE_NOT_READY                        = -912,     // SetSlaveBaudrate
+        BS_SDK_ERROR_CANNOT_DEL_DEVICE 						= -913,
 
         //Door errors
         BS_SDK_ERROR_CANNOT_FIND_DOOR                       = -1000,
@@ -323,6 +331,7 @@ namespace Suprema
         BS_SDK_ERROR_JPEG_ENCODER_DEINIT_FAIL               = -1504,
         BS_SDK_ERROR_CAMERA_CAPTURE_FAIL                    = -1505,
         BS_SDK_ERROR_CANNOT_DETECT_FACE                     = -1506,
+        BS_SDK_ERROR_CANNOT_EXECUTE_THREAD                  = -1507,
         
         //ETC.
         BS_SDK_ERROR_FILE_IO                                = -2000,
@@ -366,6 +375,12 @@ namespace Suprema
         BS_SDK_ERROR_LICENSE_JSON_FORMAT                    = -4015,
         BS_SDK_ERROR_LICENSE_ENABLE_PARTIAL                 = -4016,
         BS_SDK_ERROR_LICENSE_NO_MATCH_DEVICE                = -4017,
+
+        BS_SDK_ERROR_UZ_ENABLE_COUNT_ZERO                   = -4020,
+        BS_SDK_ERROR_UZ_ENABLE_FULL                         = -4021,
+        BS_SDK_ERROR_UZ_CHANNEL_FULL                        = -4022,
+        BS_SDK_ERROR_UZ_SPEC_FULL                           = -4023,
+        BS_SDK_ERROR_UZ_ADD_FAIL                            = -4024,
 
         BS_SDK_ERROR_NULL_POINTER                           = -10000,
         BS_SDK_ERROR_UNINITIALIZED                          = -10001,
@@ -689,52 +704,58 @@ namespace Suprema
     [Flags]
     public enum BS2DeviceTypeEnum
     {
-        UNKNOWN         = 0x00,
+        UNKNOWN                 = 0x00,
 
-        BIOENTRY_PLUS   = 0x01,
-        BIOENTRY_W      = 0x02,
-        BIOLITE_NET     = 0x03,
-        XPASS           = 0x04,
-        XPASS_S2        = 0x05,
-        SECURE_IO_2     = 0x06,
-        DOOR_MODULE_20  = 0x07,
-        BIOSTATION_2    = 0x08,
-        BIOSTATION_A2   = 0x09,
-        FACESTATION_2   = 0x0A,
-        IO_DEVICE       = 0x0B,
-        BIOSTATION_L2   = 0x0C,
-        BIOENTRY_W2     = 0x0D,
-        //CORE_STATION  = 0x0E,		// Deprecated 2.6.0
-        CORESTATION_40  = 0x0E,
-        OUTPUT_MODULE   = 0x0F,
-        INPUT_MODULE    = 0x10,
-        BIOENTRY_P2     = 0x11,
-        BIOLITE_N2      = 0x12,
-        XPASS2          = 0x13,
-        XPASS_S3        = 0x14,
-        BIOENTRY_R2     = 0x15,
-        XPASS_D2        = 0x16,
-        DOOR_MODULE_21  = 0x17,
-        XPASS_D2_KEYPAD = 0x18,
-        FACELITE        = 0x19,
-        XPASS2_KEYPAD   = 0x1A,
-        XPASS_D2_REV    = 0x1B,     // [+2.7]
-        XPASS_D2_KEYPAD_REV = 0x1C, // [+2.7]
-        FACESTATION_F2_FP = 0x1D,   // FSF2 support
-        FACESTATION_F2  = 0x1E,     // FSF2 support
-        XSTATION_2_QR   = 0x1F,     // [+2.8]
-        XSTATION_2      = 0x20,     // [+2.8]
-        IM_120          = 0x21,     // [+2.8.1]
-        XSTATION_2_FP   = 0x22,     // [+2.8.1]
-        BIOSTATION_3    = 0x23,     // [+2.8.3]
-        THIRD_OSDP_DEVICE = 0x24,   // [+2.9.1]
-        THIRD_OSDP_IO_DEVICE = 0x25,   // [+2.9.1]
-        BIOSTATION_2A   = 0x26,     // [+2.9.4]
-        BIOENTRY_W3     = 0x2A,     // [+2.9.6]
-        CORESTATION_20 = 0x2B,      // [+2.9.9]
-        DOOR_INTERFACE_24 = 0x2C,   // [+2.9.9]
+        BIOENTRY_PLUS           = 0x01,
+        BIOENTRY_W              = 0x02,
+        BIOLITE_NET             = 0x03,
+        XPASS                   = 0x04,
+        XPASS_S2                = 0x05,
+        SECURE_IO_2             = 0x06,
+        DOOR_MODULE_20          = 0x07,
+        BIOSTATION_2            = 0x08,
+        BIOSTATION_A2           = 0x09,
+        FACESTATION_2           = 0x0A,
+        IO_DEVICE               = 0x0B,
+        BIOSTATION_L2           = 0x0C,
+        BIOENTRY_W2             = 0x0D,
+        //CORE_STATION          = 0x0E,		// Deprecated 2.6.0
+        CORESTATION_40          = 0x0E,
+        OUTPUT_MODULE           = 0x0F,
+        INPUT_MODULE            = 0x10,
+        BIOENTRY_P2             = 0x11,
+        BIOLITE_N2              = 0x12,
+        XPASS2                  = 0x13,
+        XPASS_S3                = 0x14,
+        BIOENTRY_R2             = 0x15,
+        XPASS_D2                = 0x16,
+        DOOR_MODULE_21          = 0x17,
+        XPASS_D2_KEYPAD         = 0x18,
+        FACELITE                = 0x19,
+        XPASS2_KEYPAD           = 0x1A,
+        XPASS_D2_REV            = 0x1B, // [+2.7]
+        XPASS_D2_KEYPAD_REV     = 0x1C, // [+2.7]
+        FACESTATION_F2_FP       = 0x1D, // FSF2 support
+        FACESTATION_F2          = 0x1E, // FSF2 support
+        XSTATION_2_QR           = 0x1F, // [+2.8]
+        XSTATION_2              = 0x20, // [+2.8]
+        IM_120                  = 0x21, // [+2.8.1]
+        XSTATION_2_FP           = 0x22, // [+2.8.1]
+        BIOSTATION_3            = 0x23, // [+2.8.3]
+        THIRD_OSDP_DEVICE       = 0x24, // [+2.9.1]
+        THIRD_OSDP_IO_DEVICE    = 0x25, // [+2.9.1]
+        BIOSTATION_2A           = 0x26, // [+2.9.4]
+        UZ_OSDP_MODULE          = 0x27, // [+2.9.12]
+        UZ_OSDP_DOOR_HANDLE     = 0x28, // [+2.9.12]
+        UZ_OSDP_DOOR_KNOB       = 0x29, // [+2.9.12]
+        BIOENTRY_W3             = 0x2A, // [+2.9.6]
+        CORESTATION_20          = 0x2B, // [+2.9.9]
+        DOOR_INTERFACE_24       = 0x2C, // [+2.9.9]
+        BIOSTATION_3_MAX        = 0x2D, // [+2.9.12]
+        BIOSTATION_3_MAX_FP     = 0x2E, // [+2.9.12]
+        XPASS_Q2                = 0x2F, // [+2.9.12]
 
-        TYPE_MAX        = DOOR_INTERFACE_24,
+        TYPE_MAX                = XPASS_Q2,
         //UNKNOWN         = 0xFF,
     }
 
@@ -1211,6 +1232,7 @@ namespace Suprema
         VERIFY_SUCCESS_QR_FACE_PIN = 0x102A,
         VERIFY_SUCCESS_QR_FACE_FINGER = 0x102B,
         VERIFY_SUCCESS_QR_FINGER_FACE = 0x102C,
+        VERIFY_SUCCESS_LOCKOVERRIDE = 0x1031,
 
         VERIFY_FAIL = 0x1100,
         VERIFY_FAIL_ID = 0x1101,
@@ -1225,6 +1247,7 @@ namespace Suprema
         VERIFY_FAIL_NON_NUMERIC_QR = 0x1109,
         VERIFY_FAIL_NON_PRINTABLE_QR = 0x110A,
         VERIFY_FAIL_TOO_LONG_QR = 0x110B,
+        VERIFY_FAIL_LOCKOVERRIDE = 0x1131,
 
         VERIFY_DURESS = 0x1200,
         VERIFY_DURESS_ID_PIN = 0x1201,
@@ -1333,6 +1356,8 @@ namespace Suprema
         ACCESS_DENIED_HIGH_TEMPERATURE = 0x1913,    // [+V2.8.3]
         ACCESS_DENIED_NO_TEMPERATURE = 0x1914,      // [+V2.8.3]
         ACCESS_DENIED_UNMASKED_FACE = 0x1915,       // [+V2.8.3]
+        ACCESS_DENIED_OCCUPANCY_LIMIT = 0x1916,     // [+V2.9.12]
+        ACCESS_DENIED_DOOR_LOCKED = 0x1917,         // [+V2.9.12]
 
         USER_ENROLL_SUCCESS = 0x2000,
         USER_ENROLL_FAIL = 0x2100,
@@ -1427,6 +1452,20 @@ namespace Suprema
         DOOR_UNLOCK_SCHEDULE = 0x5E01,
         DOOR_UNLOCK_EMERGENCY = 0x5E02,
         DOOR_UNLOCK_OPERATOR = 0x5E04,
+        DOOR_UNLOCK_REQ_BY_LOCKOVERRIDE = 0x5E05,       // [+V2.9.12]
+
+        DOOR_SEND_UNLOCK_TIMER = 0x5F00,                // [+V2.9.12]
+        DOOR_SEND_UNLOCK = 0x5F01,                      // [+V2.9.12]
+        DOOR_SEND_LOCK = 0x5F02,                        // [+V2.9.12]
+        DOOR_SEND_RELEASE = 0x5F03,                     // [+V2.9.12]
+
+        DOOR_FIRE_BUTTON_INPUT = 0x5F04,                // [+V2.9.12]
+        DOOR_FIRE_ALARM = 0x5F05,                       // [+V2.9.12]
+        DOOR_FIRE_ALARM_CLEAR = 0x5F06,                 // [+V2.9.12]
+
+        DOOR_NORMALIZED = 0x5F07,                       // [+V2.9.12]
+        DOOR_OPEN_LOCKOVERRIDE_ALARM = 0x5601,          // [+V2.9.12]
+        DOOR_OPEN_LOCKOVERRIDE_ALARM_CLEAR = 0x5702,	// [+V2.9.12]
 
         ZONE_APB_VIOLATION = 0x6000,
         ZONE_APB_VIOLATION_HARD = 0x6001,
@@ -1999,15 +2038,25 @@ namespace Suprema
     [Flags]
     public enum BS2CapabilityFunctionSupport4
     {
-        FUNCTION4_SUPPORT_AUTHDENYMASK                = 0x01,  // [V2.9.8]
-        FUNCTION4_SUPPORT_MIFARECARDCONFIGEX          = 0x02,  // [V2.9.9]
+        FUNCTION4_SUPPORT_AUTHDENYMASK				= 0x01,  // [V2.9.8]
+        FUNCTION4_SUPPORT_MIFARECARDCONFIGEX        = 0x02,  // [V2.9.9]
+		FUNCTION4_SUPPORT_LOCK_OVERRIDE				= 0x04,  // [V2.9.12]
+		FUNCTION4_SUPPORT_DOORMODE_OVERRIDE			= 0x08,  // [V2.9.12]
+		FUNCTION4_SUPPORT_ALTERNATE_ACCESSTIMER	  	= 0x10,  // [V2.9.12]
+		FUNCTION4_SUPPORT_REALTIME_IOSTATUS		  	= 0x20,  // [V2.9.12]
+		FUNCTION4_SUPPORT_DYNAMIC_SLAVEDEVICE		= 0x40,  // [V2.9.12]
+    	FUNCTION4_SUPPORT_SECURETAMPER		  		= 0x80,  // [V2.9.12]
     }
 
     [Flags]
     public enum BS2CapabilityFunctionSupport5
     {
-        FUNCTION5_SUPPORT_MASTERADMIN           = 0x08,     // [V2.9.9.1]
-        FUNCTION5_SUPPORT_ADMINTWOSTEPAUTH      = 0x10,     // [V2.9.9.1]
+		FUNCTION5_SUPPORT_CUSTOM_SMARTCARDSLAVE	= 0x01,     // [V2.9.12]
+		FUNCTION5_SUPPORT_SERVER_PRIVATEMSG		= 0x02,     // [V2.9.12]
+		FUNCTION5_SUPPORT_FACILITYCODE			= 0x04,     // [V2.9.12]
+		FUNCTION5_SUPPORT_MASTER_ADMIN			= 0x08,     // [V2.9.12]
+		FUNCTION5_SUPPORT_ADMIN_TWOSTEP_AUTH	= 0x10,     // [V2.9.12]
+		FUNCTION5_SUPPORT_QR_DETECT_GUIDELED	= 0x20,     // [V2.9.12]
     }
 
     [Flags]
@@ -2054,14 +2103,17 @@ namespace Suprema
         DISABLE         = 1,
         ENABLE          = 2,
         EXPIRED         = 3,
+        NOT_EXIST       = 4,    //>> 2.9.12
+        ALREADY_ADD     = 5     //>> 2.9.12
     }
 
     [Flags]
     public enum BS2LicenseType                      // + 2.9.1
     {
-        NONE           = 0x0000,
-        VISUAL_QR_MASK = 0x0001,
-        MAX_MASK       = VISUAL_QR_MASK,
+        NONE           			= 0x0000,
+        VISUAL_QR_MASK 			= 0x0001,
+        WIRELESS_DOORLOCK_MASK 	= 0x0002,
+        MAX_MASK       			= WIRELESS_DOORLOCK_MASK,
     }
 
     [Flags]
@@ -2126,5 +2178,18 @@ namespace Suprema
         NONE                = 0x00,
         ON_DOOR_CLOSED      = 0x01,
         BY_CMD_RUN_ACTION   = 0x02,
+    }
+
+    public enum CardRegisterType
+    {
+        SCAN            = 0,
+        MANUAL_INPUT    = 1,
+    }
+
+    public enum BS2RTSPResolution
+    {
+        TYPE_1 = 0, //BS3, W3: 180x320
+        TYPE_2 = 1, //BS3, W3: 720x480
+        TYPE_3 = 2, //F2, BS3Max: 360x640
     }
 }

@@ -2481,6 +2481,11 @@ namespace Suprema
                     Console.WriteLine("Pin code should less than {0} words.", BS2Environment.BS2_PIN_HASH_SIZE);
                     return;
                 }
+                else if (pin.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                {
+                    Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
+                    return;
+                }
                 else
                 {
                     IntPtr ptrChar = Marshal.StringToHGlobalAnsi(pin);
@@ -3537,6 +3542,11 @@ namespace Suprema
                 else if (pin.Length > BS2Environment.BS2_PIN_HASH_SIZE)
                 {
                     Console.WriteLine("Pin code should less than {0} words.", BS2Environment.BS2_PIN_HASH_SIZE);
+                    return;
+                }
+                else if (pin.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                {
+                    Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
                     return;
                 }
                 else

@@ -81,6 +81,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\common\funcions\CommonControl.cs">
+      <Link>CommonControl.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\common\funcions\LogControl.cs">
       <Link>LogControl.cs</Link>
     </Compile>

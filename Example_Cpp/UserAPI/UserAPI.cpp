@@ -198,10 +198,10 @@ int runAPIs(void* context, const DeviceInfo& device)
 			break;
 
 		case MENU_USR_GET_MASTER_ADMIN:
-			sdkResult = uc.getMasterAdmin(id);
+			//sdkResult = uc.getMasterAdmin(id);
 			break;
 		case MENU_USR_SET_MASTER_ADMIN:
-			sdkResult = uc.setMasterAdmin(id);
+			//sdkResult = uc.setMasterAdmin(id);
 			break;
 
 		case MENU_USR_SMARTCARD_SCAN:
@@ -977,242 +977,242 @@ int selectUserID(const vector<array<char, BS2_USER_ID_SIZE>>& listUserIDs)
 
 int getLockOverride(UserControl& uc, BS2_DEVICE_ID id)
 {
-	vector<BS2LockOverride> request, response;
+	//vector<BS2LockOverride> request, response;
 
-	if (!Utility::isYes("Do you want to get all Lock Overrides?"))
-	{
-		uint32_t numOfOverrides = Utility::getInput<uint32_t>("  Enter number of Lock Overrides to get:");
-		BS2LockOverride item = { 0, };
+	//if (!Utility::isYes("Do you want to get all Lock Overrides?"))
+	//{
+	//	uint32_t numOfOverrides = Utility::getInput<uint32_t>("  Enter number of Lock Overrides to get:");
+	//	BS2LockOverride item = { 0, };
 
-		for (uint32_t idx = 0; idx < numOfOverrides; idx++)
-		{
-			string strCard = Utility::getLine("    Enter the CardID (Ex: E43DD05C)");
-			if (BS2_CARD_DATA_SIZE * 2 < strCard.size())
-			{
-				TRACE("Card id should less than %u.", BS2_CARD_DATA_SIZE * 2);
-				return BS_SDK_ERROR_INVALID_PARAM;
-			}
+	//	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
+	//	{
+	//		string strCard = Utility::getLine("    Enter the CardID (Ex: E43DD05C)");
+	//		if (BS2_CARD_DATA_SIZE * 2 < strCard.size())
+	//		{
+	//			TRACE("Card id should less than %u.", BS2_CARD_DATA_SIZE * 2);
+	//			return BS_SDK_ERROR_INVALID_PARAM;
+	//		}
 
-			vector<unsigned char> cardIDArray = UserControl::HexStringToByteArray(strCard, BS2_CARD_DATA_SIZE);
-			memcpy(item.cardID, cardIDArray.data(), BS2_CARD_DATA_SIZE);
+	//		vector<unsigned char> cardIDArray = UserControl::HexStringToByteArray(strCard, BS2_CARD_DATA_SIZE);
+	//		memcpy(item.cardID, cardIDArray.data(), BS2_CARD_DATA_SIZE);
 
-			item.issueCount = Utility::getInput<uint32_t>("    Enter the Issue Count:");
+	//		item.issueCount = Utility::getInput<uint32_t>("    Enter the Issue Count:");
 
-			request.push_back(item);
-		}
-	}
+	//		request.push_back(item);
+	//	}
+	//}
 
-	int sdkResult = uc.getLockOverrides(id, request, response);
-	if (BS_SDK_SUCCESS == sdkResult)
-	{
-		for (uint32_t idx = 0; idx < response.size(); idx++)
-			uc.print(response[idx], idx);
-	}
+	//int sdkResult = uc.getLockOverrides(id, request, response);
+	//if (BS_SDK_SUCCESS == sdkResult)
+	//{
+	//	for (uint32_t idx = 0; idx < response.size(); idx++)
+	//		uc.print(response[idx], idx);
+	//}
 
-	return sdkResult;
+	return 1;
 }
 
 int setLockOverride(UserControl& uc, BS2_DEVICE_ID id)
 {
-	vector<BS2LockOverride> listOverrides;
-	int sdkResult = BS_SDK_SUCCESS;
+	//vector<BS2LockOverride> listOverrides;
+	//int sdkResult = BS_SDK_SUCCESS;
 
-	uint32_t numOfOverrides = Utility::getInput<uint32_t>("Enter number of Lock Overrides to set:");
-	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
-	{
-		BS2LockOverride item = { 0, };
+	//uint32_t numOfOverrides = Utility::getInput<uint32_t>("Enter number of Lock Overrides to set:");
+	//for (uint32_t idx = 0; idx < numOfOverrides; idx++)
+	//{
+	//	BS2LockOverride item = { 0, };
 
-		if (!Utility::isNo("Do you like to set the userID?"))
-		{
-			vector<array<char, BS2_USER_ID_SIZE>> listUserIDs;
-			sdkResult = uc.getUserList(id, NULL, listUserIDs);
+	//	if (!Utility::isNo("Do you like to set the userID?"))
+	//	{
+	//		vector<array<char, BS2_USER_ID_SIZE>> listUserIDs;
+	//		sdkResult = uc.getUserList(id, NULL, listUserIDs);
 
-			if (BS_SDK_SUCCESS == sdkResult && 0 < listUserIDs.size())
-			{
-				int selected = selectUserID(listUserIDs);
-				if (-1 != selected)
-					memcpy(item.userID, listUserIDs[selected].data(), BS2_USER_ID_SIZE);
-			}
-		}
+	//		if (BS_SDK_SUCCESS == sdkResult && 0 < listUserIDs.size())
+	//		{
+	//			int selected = selectUserID(listUserIDs);
+	//			if (-1 != selected)
+	//				memcpy(item.userID, listUserIDs[selected].data(), BS2_USER_ID_SIZE);
+	//		}
+	//	}
 
-		cout << "Scanning card for Lock Override entry " << idx + 1 << "/" << numOfOverrides << "from device:" << id << "..." << endl;
-		uint8_t cardBuff[BS2_CARD_DATA_SIZE] = { 0, };
-		uint8_t cardType = BS2_CARD_TYPE_UNKNOWN;
-		sdkResult = uc.scanCard(id, cardBuff, cardType);
-		if (sdkResult != BS_SDK_SUCCESS)
-			return sdkResult;
+	//	cout << "Scanning card for Lock Override entry " << idx + 1 << "/" << numOfOverrides << "from device:" << id << "..." << endl;
+	//	uint8_t cardBuff[BS2_CARD_DATA_SIZE] = { 0, };
+	//	uint8_t cardType = BS2_CARD_TYPE_UNKNOWN;
+	//	sdkResult = uc.scanCard(id, cardBuff, cardType);
+	//	if (sdkResult != BS_SDK_SUCCESS)
+	//		return sdkResult;
 
-		memcpy(item.cardID, cardBuff, BS2_CARD_DATA_SIZE);
-		item.size = BS2_CARD_DATA_SIZE;
-		item.type = cardType;
+	//	memcpy(item.cardID, cardBuff, BS2_CARD_DATA_SIZE);
+	//	item.size = BS2_CARD_DATA_SIZE;
+	//	item.type = cardType;
 
-		item.issueCount = (uint16_t)Utility::getInput<uint32_t>("Enter the Issue Count:");
+	//	item.issueCount = (uint16_t)Utility::getInput<uint32_t>("Enter the Issue Count:");
 
-		listOverrides.push_back(item);
-	}
+	//	listOverrides.push_back(item);
+	//}
 
-	return uc.setLockOverrides(id, listOverrides);
+	return 1;
 }
 
 int removeLockOverride(UserControl& uc, BS2_DEVICE_ID id)
 {
-	vector<BS2LockOverride> listDelete;
-	int sdkResult = BS_SDK_SUCCESS;
+	//vector<BS2LockOverride> listDelete;
+	//int sdkResult = BS_SDK_SUCCESS;
 
-	if (!Utility::isYes("Do you want to remove all Lock Overrides?"))
-	{
-		vector<BS2LockOverride> requestAll;
-		vector<BS2LockOverride> listResult;
+	//if (!Utility::isYes("Do you want to remove all Lock Overrides?"))
+	//{
+	//	vector<BS2LockOverride> requestAll;
+	//	vector<BS2LockOverride> listResult;
 
-		sdkResult = uc.getLockOverrides(id, requestAll, listResult);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
+	//	sdkResult = uc.getLockOverrides(id, requestAll, listResult);
+	//	if (BS_SDK_SUCCESS != sdkResult)
+	//		return sdkResult;
 
-		for (uint32_t idx = 0; idx < listResult.size(); idx++)
-			uc.print(listResult[idx], idx);
+	//	for (uint32_t idx = 0; idx < listResult.size(); idx++)
+	//		uc.print(listResult[idx], idx);
 
-		int delIndex = Utility::getInput<int>("Select the Lock Override INDEX to delete:");
-		listDelete.push_back(listResult[delIndex]);
-	}
+	//	int delIndex = Utility::getInput<int>("Select the Lock Override INDEX to delete:");
+	//	listDelete.push_back(listResult[delIndex]);
+	//}
 
-	return uc.removeLockOverrides(id, listDelete);
+	return 1;
 }
 
 int setUserOverrideConfig(DoorControl& dc, BS2_DEVICE_ID id)
 {
-	vector<BS2Door> listDoors;
+	//vector<BS2Door> listDoors;
 
-	stringstream msg;
-	BS2Door door = { 0, };
-	msg << "Please enter the door ID:";
-	door.doorID = Utility::getInput<BS2_DOOR_ID>(msg.str());
-	sprintf(door.name, "TEST DOOR %u", door.doorID);
-	door.entryDeviceID = id;
-	door.exitDeviceID = 0;
+	//stringstream msg;
+	//BS2Door door = { 0, };
+	//msg << "Please enter the door ID:";
+	//door.doorID = Utility::getInput<BS2_DOOR_ID>(msg.str());
+	//sprintf(door.name, "TEST DOOR %u", door.doorID);
+	//door.entryDeviceID = id;
+	//door.exitDeviceID = 0;
 
-	door.relay.deviceID = id;
-	door.relay.port = 0;
-	door.sensor.deviceID = 0;
-	door.sensor.port = 0;
-	door.sensor.switchType = BS2_SWITCH_TYPE_NORMAL_OPEN;
-	door.sensor.apbUseDoorSensor = 0;
-	door.button.deviceID = 0;
-	door.button.port = 0;
-	door.button.switchType = BS2_SWITCH_TYPE_NORMAL_OPEN;
+	//door.relay.deviceID = id;
+	//door.relay.port = 0;
+	//door.sensor.deviceID = 0;
+	//door.sensor.port = 0;
+	//door.sensor.switchType = BS2_SWITCH_TYPE_NORMAL_OPEN;
+	//door.sensor.apbUseDoorSensor = 0;
+	//door.button.deviceID = 0;
+	//door.button.port = 0;
+	//door.button.switchType = BS2_SWITCH_TYPE_NORMAL_OPEN;
 
-	door.autoLockTimeout = 3;
-	door.heldOpenTimeout = 3;
-	door.instantLock = false;
-	door.unlockFlags = BS2_DOOR_FLAG_EMERGENCY;
-	door.lockFlags = BS2_DOOR_FLAG_NONE;
-	door.unconditionalLock = false;
+	//door.autoLockTimeout = 3;
+	//door.heldOpenTimeout = 3;
+	//door.instantLock = false;
+	//door.unlockFlags = BS2_DOOR_FLAG_EMERGENCY;
+	//door.lockFlags = BS2_DOOR_FLAG_NONE;
+	//door.unconditionalLock = false;
 
-	door.dualAuthScheduleID = 0;
-	door.dualAuthDevice = BS2_DUAL_AUTH_NO_DEVICE;
-	door.dualAuthApprovalType = BS2_DUAL_AUTH_APPROVAL_NONE;
-	door.extendedAutoLockTimeout = (uint16_t)Utility::getDefaultInput<uint32_t>("Please enter the extended door open time in seconds:", BS2_DEFAULT_EXTENDED_AUTO_LOCK_TIMEOUT);
-	door.dualAuthTimeout = 1;
-	door.numDualAuthApprovalGroups = 0;
+	//door.dualAuthScheduleID = 0;
+	//door.dualAuthDevice = BS2_DUAL_AUTH_NO_DEVICE;
+	//door.dualAuthApprovalType = BS2_DUAL_AUTH_APPROVAL_NONE;
+	//door.extendedAutoLockTimeout = (uint16_t)Utility::getDefaultInput<uint32_t>("Please enter the extended door open time in seconds:", BS2_DEFAULT_EXTENDED_AUTO_LOCK_TIMEOUT);
+	//door.dualAuthTimeout = 1;
+	//door.numDualAuthApprovalGroups = 0;
 
-	listDoors.push_back(door);
+	//listDoors.push_back(door);
 
-	int sdkResult = dc.setDoor(id, listDoors);
-	if (BS_SDK_SUCCESS == sdkResult)
-	{
-		vector<BS2Door> listResult;
-		sdkResult = dc.getAllDoor(id, listResult);
-		if (BS_SDK_SUCCESS == sdkResult)
-		{
-			for (auto item : listResult)
-				dc.print(item);
-		}
-	}
+	//int sdkResult = dc.setDoor(id, listDoors);
+	//if (BS_SDK_SUCCESS == sdkResult)
+	//{
+	//	vector<BS2Door> listResult;
+	//	sdkResult = dc.getAllDoor(id, listResult);
+	//	if (BS_SDK_SUCCESS == sdkResult)
+	//	{
+	//		for (auto item : listResult)
+	//			dc.print(item);
+	//	}
+	//}
 
-	return sdkResult;
+	return 1;
 }
 
 int getUserOverride(UserControl& uc, BS2_DEVICE_ID id)
 {
-	vector<array<char, BS2_USER_ID_SIZE>> listUserIDs, request;
-	vector<BS2UserOverride> response;
-	int sdkResult = BS_SDK_SUCCESS;
+	//vector<array<char, BS2_USER_ID_SIZE>> listUserIDs, request;
+	//vector<BS2UserOverride> response;
+	//int sdkResult = BS_SDK_SUCCESS;
 
-	if (!Utility::isYes("Do you want to get all User Overrides?"))
-	{
-		uint32_t numOfOverides = Utility::getInput<uint32_t>("  Enter number of User Overrides to get:");
+	//if (!Utility::isYes("Do you want to get all User Overrides?"))
+	//{
+	//	uint32_t numOfOverides = Utility::getInput<uint32_t>("  Enter number of User Overrides to get:");
 
-		sdkResult = uc.getUserList(id, NULL, listUserIDs);
-		if (BS_SDK_SUCCESS == sdkResult && 0 < listUserIDs.size())
-		{
-			do
-			{
-				int selected = selectUserID(listUserIDs);
-				if (-1 != selected)
-					request.push_back(listUserIDs[selected]);
-			} while (request.size() < numOfOverides);
-		}
-	}
+	//	sdkResult = uc.getUserList(id, NULL, listUserIDs);
+	//	if (BS_SDK_SUCCESS == sdkResult && 0 < listUserIDs.size())
+	//	{
+	//		do
+	//		{
+	//			int selected = selectUserID(listUserIDs);
+	//			if (-1 != selected)
+	//				request.push_back(listUserIDs[selected]);
+	//		} while (request.size() < numOfOverides);
+	//	}
+	//}
 
-	sdkResult = uc.getUserOverrides(id, request, response);
-	if (BS_SDK_SUCCESS == sdkResult)
-	{
-		for (uint32_t idx = 0; idx < response.size(); idx++)
-			uc.print(response[idx], idx);
-	}
+	//sdkResult = uc.getUserOverrides(id, request, response);
+	//if (BS_SDK_SUCCESS == sdkResult)
+	//{
+	//	for (uint32_t idx = 0; idx < response.size(); idx++)
+	//		uc.print(response[idx], idx);
+	//}
 
-	return sdkResult;
+	return 1;
 }
 
 int setUserOverride(UserControl& uc, BS2_DEVICE_ID id)
 {
-	vector<BS2UserOverride> listOverrides;
-	int sdkResult = BS_SDK_SUCCESS;
+	//vector<BS2UserOverride> listOverrides;
+	//int sdkResult = BS_SDK_SUCCESS;
 
-	uint32_t numOfOverrides = Utility::getInput<uint32_t>("Enter number of User Overrides to set:");
-	while (listOverrides.size() < numOfOverrides)
-	{
-		BS2UserOverride item = { 0, };
-		vector<array<char, BS2_USER_ID_SIZE>> listUserIDs;
+	//uint32_t numOfOverrides = Utility::getInput<uint32_t>("Enter number of User Overrides to set:");
+	//while (listOverrides.size() < numOfOverrides)
+	//{
+	//	BS2UserOverride item = { 0, };
+	//	vector<array<char, BS2_USER_ID_SIZE>> listUserIDs;
 
-		sdkResult = uc.getUserList(id, NULL, listUserIDs);
-		if (BS_SDK_SUCCESS == sdkResult && 0 < listUserIDs.size())
-		{
-			int selected = selectUserID(listUserIDs);
-			if (-1 != selected)
-			{
-				memcpy(item.userID, listUserIDs[selected].data(), BS2_USER_ID_SIZE);
-				item.useExtendedAutoLockTimeout = Utility::isYes("Do you want to use Extended Door Open Time?");
-			}
-		}
+	//	sdkResult = uc.getUserList(id, NULL, listUserIDs);
+	//	if (BS_SDK_SUCCESS == sdkResult && 0 < listUserIDs.size())
+	//	{
+	//		int selected = selectUserID(listUserIDs);
+	//		if (-1 != selected)
+	//		{
+	//			memcpy(item.userID, listUserIDs[selected].data(), BS2_USER_ID_SIZE);
+	//			item.useExtendedAutoLockTimeout = Utility::isYes("Do you want to use Extended Door Open Time?");
+	//		}
+	//	}
 
-		listOverrides.push_back(item);
-	}
+	//	listOverrides.push_back(item);
+	//}
 
-	return uc.setUserOverrides(id, listOverrides);
+	return 1;
 }
 
 int removeUserOverride(UserControl& uc, BS2_DEVICE_ID id)
 {
-	vector<array<char, BS2_USER_ID_SIZE>> listDelete;
-	int sdkResult = BS_SDK_SUCCESS;
+	//vector<array<char, BS2_USER_ID_SIZE>> listDelete;
+	//int sdkResult = BS_SDK_SUCCESS;
 
-	if (!Utility::isYes("Do you want to remove all Lock Overrides?"))
-	{
-		vector<array<char, BS2_USER_ID_SIZE>> requestAll;
-		vector<BS2UserOverride> listResult;
+	//if (!Utility::isYes("Do you want to remove all Lock Overrides?"))
+	//{
+	//	vector<array<char, BS2_USER_ID_SIZE>> requestAll;
+	//	vector<BS2UserOverride> listResult;
 
-		sdkResult = uc.getUserOverrides(id, requestAll, listResult);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
+	//	sdkResult = uc.getUserOverrides(id, requestAll, listResult);
+	//	if (BS_SDK_SUCCESS != sdkResult)
+	//		return sdkResult;
 
-		for (uint32_t idx = 0; idx < listResult.size(); idx++)
-			uc.print(listResult[idx], idx);
+	//	for (uint32_t idx = 0; idx < listResult.size(); idx++)
+	//		uc.print(listResult[idx], idx);
 
-		int delIndex = Utility::getInput<int>("Select the User Override INDEX to delete:");
-		array<char, BS2_USER_ID_SIZE> item;
-		memcpy(item.data(), listResult[delIndex].userID, BS2_USER_ID_SIZE);
-		listDelete.push_back(item);
-	}
+	//	int delIndex = Utility::getInput<int>("Select the User Override INDEX to delete:");
+	//	array<char, BS2_USER_ID_SIZE> item;
+	//	memcpy(item.data(), listResult[delIndex].userID, BS2_USER_ID_SIZE);
+	//	listDelete.push_back(item);
+	//}
 
-	return uc.removeUserOverrides(id, listDelete);
+	return 1;
 }

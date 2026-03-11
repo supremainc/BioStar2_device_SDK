@@ -16,7 +16,7 @@ public:
 public:
 	int getLogSmallBlob(BS2_DEVICE_ID id);
 	int getLogSmallBlobEx(BS2_DEVICE_ID id);
-	int getDeviceIOStatus(BS2_DEVICE_ID id, const std::vector<BS2_DEVICE_ID>& request, std::vector<BS2IOStatus>& response);
+	//int getDeviceIOStatus(BS2_DEVICE_ID id, const std::vector<BS2_DEVICE_ID>& request, std::vector<BS2IOStatus>& response);
 
 
 //private:
@@ -29,11 +29,11 @@ public:
 	static void print(const BS2EventSmallBlobEx& log);
 	static void print(const BS2EventSmallBlobEx* logs, size_t numLog);
 	static void print(const BS2EventExtInfo& info);
-	static void print(const BS2IOStatus& status);
+	//static void print(const BS2IOStatus& status);
 
 
 private:
-	static std::string getAllStatusOfPort(const BS2_IO_STATUS& portStatus);
+	//static std::string getAllStatusOfPort(const BS2_IO_STATUS& portStatus);
 
 
 private:

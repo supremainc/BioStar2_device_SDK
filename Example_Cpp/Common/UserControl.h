@@ -83,8 +83,8 @@ public:
 	int updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const std::vector<BS2UserSmallBlobEx>& userList);
 	int updateUser(BS2_DEVICE_ID id, BS2_USER_MASK mask, const std::vector<BS2UserFaceExBlob>& userList);
 
-	int getMasterAdmin(BS2_DEVICE_ID id);
-	int setMasterAdmin(BS2_DEVICE_ID id);
+	//int getMasterAdmin(BS2_DEVICE_ID id);
+	//int setMasterAdmin(BS2_DEVICE_ID id);
 
 	int updateCardTypeCRC(BS2SmartCardData& card);
 	int updateCardCRC(BS2SmartCardData& card);
@@ -128,13 +128,13 @@ public:
 	int getNormalizedImageFromFile(BS2_DEVICE_ID id, std::string unwarpedPath, uint8_t* imageBuffer, uint32_t& bufferSize);
 	int getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic);
 
-	int getLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& request, std::vector<BS2LockOverride>& response);
-	int setLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& overrides);
-	int removeLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& request);
+	//int getLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& request, std::vector<BS2LockOverride>& response);
+	//int setLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& overrides);
+	//int removeLockOverrides(BS2_DEVICE_ID id, const std::vector<BS2LockOverride>& request);
 
-	int getUserOverrides(BS2_DEVICE_ID id, const std::vector<std::array<char, BS2_USER_ID_SIZE>>& request, std::vector<BS2UserOverride>& response);
-	int setUserOverrides(BS2_DEVICE_ID id, const std::vector<BS2UserOverride>& overrides);
-	int removeUserOverrides(BS2_DEVICE_ID id, const std::vector<std::array<char, BS2_USER_ID_SIZE>>& request);
+	//int getUserOverrides(BS2_DEVICE_ID id, const std::vector<std::array<char, BS2_USER_ID_SIZE>>& request, std::vector<BS2UserOverride>& response);
+	//int setUserOverrides(BS2_DEVICE_ID id, const std::vector<BS2UserOverride>& overrides);
+	//int removeUserOverrides(BS2_DEVICE_ID id, const std::vector<std::array<char, BS2_USER_ID_SIZE>>& request);
 
 #if TEST_CODE	
 	int enrollUserFaceEx_1User(BS2_DEVICE_ID id, uint32_t idx);
@@ -166,8 +166,8 @@ public:
 	static void printCardSmart(const BS2SmartCardData& card);
 	static void printCardCSN(const BS2CSNCard& card);
 	static void print(const BS2UserStatistic& statistic);
-	static void print(const BS2LockOverride& item, uint32_t idx);
-	static void print(const BS2UserOverride& item, uint32_t idx);
+	//static void print(const BS2LockOverride& item, uint32_t idx);
+	//static void print(const BS2UserOverride& item, uint32_t idx);
 	static std::vector<unsigned char> HexStringToByteArray(const std::string& hexString, size_t arraySize);
 
 private:

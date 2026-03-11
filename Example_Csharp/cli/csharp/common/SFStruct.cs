@@ -29,6 +29,7 @@ namespace Suprema
 
         public const int BS2_MAX_NUM_OF_FINGER_PER_USER = 10;
         public const int BS2_MAX_NUM_OF_CARD_PER_USER = 8;
+        public const int BS2_MAX_NUM_OF_CARD_PER_MASTERADMIN = 4;   // [+ 2.9.12]
         public const int BS2_MAX_NUM_OF_FACE_PER_USER = 5;
         public const int BS2_NUM_OF_AUTH_MODE = 11;
         public const int BS2_MAC_ADDR_LEN = 6;
@@ -42,6 +43,7 @@ namespace Suprema
         public const int BS2_USER_NAME_LEN = 48 * 4;
         public const int BS2_USER_PHOTO_SIZE = 16 * 1024;
         public const int BS2_PIN_HASH_SIZE = 32;
+        public const int BS2_MIN_PIN_LEN = 8;                       // [+ 2.9.12]
         public const int BS2_MAX_OPERATORS = 10;
         public const int BS2_DEVICE_STATUS_NUM = (int)BS2DeviceStatus.NUM_OF_STATUS;
         public const int BS2_MAX_SHORTCUT_HOME = 8;
@@ -252,6 +254,11 @@ namespace Suprema
         // FacilityCode
         public const int BS2_FACILITY_CODE_SIZE = 4;
         public const int BS2_MAX_NUMBER_FACILITY_CODE = 16;
+
+        public const int BS2_DEFAULT_EXTENDED_AUTO_LOCK_TIMEOUT = 10;   // [+ 2.9.12]
+
+        public const int BS2_IO_STATUS_MAX_IO_PORT = 32;                // [+ 2.9.12]
+        public const int BS2_IO_STATUS_MAX_SIO_PORT = 16;               // [+ 2.9.12]
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1666,15 +1673,72 @@ namespace Suprema
         public UInt32 dualAuthScheduleID;
         public byte dualAuthDevice;
         public byte dualAuthApprovalType;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        public byte[] reserved;         // [+ V2.8]
+        public UInt16 extendedAutoLockTimeout;         // [+ V2.9.12]
         public UInt32 dualAuthTimeout;
         public byte numDualAuthApprovalGroups;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public byte[] reserved2;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+		public byte[] unused;
+        public byte reserved2;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_MAX_DUAL_AUTH_APPROVAL_GROUP)]
         public UInt32[] dualAuthApprovalGroupID;
         public BS2AntiPassbackZone apbZone;
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2UserOverride
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] userID;
+        public byte   useExtendedAutoLockTimeout;    // [+ V2.9.12] 0 : 1
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 11)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2LockOverride
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_CARD_DATA_SIZE)]
+        public byte[] cardID;
+        public UInt16 issueCount;
+        public byte cardType;
+        public byte size;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_USER_ID_SIZE)]
+        public byte[] userID;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2_IO_STATUS
+    {
+        public byte count;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_IO_STATUS_MAX_IO_PORT)]
+        public byte[] status;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BS2IOStatus
+    {
+        public UInt32 deviceID;
+        
+        public BS2_IO_STATUS input;
+        public BS2_IO_STATUS output;
+        public BS2_IO_STATUS relay;
+        public BS2_IO_STATUS tamper;
+        public BS2_IO_STATUS auxIn;
+        public BS2_IO_STATUS auxOut;
+
+        public byte numOfSupervisorInput;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = BS2Environment.BS2_IO_STATUS_MAX_SIO_PORT)]
+        public byte[] supervisorInputStatus;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] reserved1;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] reserved2;          
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -2482,15 +2546,15 @@ namespace Suprema
         public BS2HolidaySchedule[] holidaySchedules;
     }
 
-    public class Translator<TSource, TOutput>  //: TranslatorBase<TSource, TOutput>
+    public class Translator<TSource, TTarget>  //: TranslatorBase<TSource, TOutput>
     {
-        public void Translate<TSource, TOutput>(ref TSource src, ref TOutput output)
+        public void Translate<TInput, TOutput>(ref TInput src, ref TOutput output)
         {
-            Util.TranslatePrimitive<TSource, TOutput>(ref src, ref output);
+            Util.TranslatePrimitive<TInput, TOutput>(ref src, ref output);
             try
             {
-                Type type = typeof(Translator<TSource, TOutput>);
-                MethodInfo extTranslate = type.GetMethod("Translate_", new Type[] { typeof(TSource).MakeByRefType(), typeof(TOutput).MakeByRefType()} );
+                Type type = typeof(Translator<TInput, TOutput>);
+                MethodInfo extTranslate = type.GetMethod("Translate_", new Type[] { typeof(TInput).MakeByRefType(), typeof(TOutput).MakeByRefType()} );
                 if (extTranslate != null)
                 {
                     output = (TOutput)extTranslate.Invoke(this, new object[] { src, output });
@@ -3117,14 +3181,22 @@ namespace Suprema
 
         public byte functionSupported4;             // [+ 2.9.8]
         //authDenyMaskSupported: 1;
-        //MifareExSupported: 1;
-       	//unused: 6;
+        //mifareExSupported: 1;
+		//lockOverrideSupported: 1;
+		//doorModeOverrideSupported: 1;
+		//alternateAccessTimerSupported: 1;
+		//realtimeIOStatusReportSupported: 1;
+		//dynamicSlaveDeviceNumSupported: 1;
+    	//secureTamperSupported: 1;
 
-        public byte functionSupported5;             // [+ 2.9.9.1]
-	    //unused1: 3;
-	    //masterAdminSupported: 1;
-	    //adminTwoStepAuthSupported: 1;
-	    //unused2: 3;
+        public byte functionSupported5;             // [+ 2.9.12]
+		//customSmartcardSlaveSupported: 1;
+		//serverPrivateMsgSupported: 1;
+		//facilityCodeSupported: 1;
+		//masterAdminSupported: 1;
+		//adminTwoStepAuthSupported: 1;
+		//qrDetectGuideLedSupported: 1;
+		//unused: 2;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 424)]
 	    public byte[] reserved;

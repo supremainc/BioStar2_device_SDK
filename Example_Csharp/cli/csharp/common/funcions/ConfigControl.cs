@@ -14,7 +14,6 @@ namespace Suprema
     public class ConfigControl : FunctionModule
     {
         private API.OnBarcodeScanned cbOnBarcodeScanned = null;
-        private API.OnReadyToScan cbCardOnReadyToScan = null;
         private List<Tuple<UInt32, UInt16>> searchedSlave = new List<Tuple<UInt32, UInt16>>();                              //slaveID-slaveType
         private List<Tuple<UInt32, UInt32, UInt16>> searchedGrandSlaves = new List<Tuple<UInt32, UInt32, UInt16>>();        //slaveID-gslaveID-gslaveType
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
@@ -80,6 +79,7 @@ namespace Suprema
 
             //[IPv6] 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get IPConfig", getIPConfig));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set IPConfig", setIPConfig));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get IPV6Config", getIPV6Config));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Set IPV6Config", setIPV6Config));
             //<=
@@ -646,7 +646,6 @@ namespace Suprema
         void getDeviceCapabilities(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2DeviceCapabilities capa;
-            UInt32 id = 0;
 
             printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
             Console.WriteLine("Please enter the device ID:");
@@ -668,36 +667,30 @@ namespace Suprema
         }
 
         //[IPv6]
-        void print(IntPtr sdkContext, BS2IpConfig config)
-        {
-            Console.WriteLine(">>>> IP configuration ");
-            Console.WriteLine("     |--connectionMode : {0}", config.connectionMode);
-            Console.WriteLine("     |--useDHCP : {0}", config.useDHCP);
-            Console.WriteLine("     |--useDNS : {0}", config.useDNS);
-            Console.WriteLine("     |--ipAddress : {0}", Encoding.UTF8.GetString(config.ipAddress), BitConverter.ToString(config.ipAddress));
-            Console.WriteLine("     |--gateway : {0}", Encoding.UTF8.GetString(config.gateway), BitConverter.ToString(config.gateway));
-            Console.WriteLine("     |--subnetMask : {0}", Encoding.UTF8.GetString(config.subnetMask), BitConverter.ToString(config.subnetMask));
-            Console.WriteLine("     |--serverAddr : {0}", Encoding.UTF8.GetString(config.serverAddr), BitConverter.ToString(config.serverAddr));
-            Console.WriteLine("     |--port : {0}", config.port);
-            Console.WriteLine("     |--serverPort : {0}", config.serverPort);
-            Console.WriteLine("     |--mtuSize : {0}", config.mtuSize);
-            Console.WriteLine("     |--baseband : {0}", config.baseband);
-            Console.WriteLine("     |--sslServerPort : {0}", config.sslServerPort);
-            Console.WriteLine("<<<< ");
-        }
 
-        void getIPConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        public void getIPConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             BS2IpConfig config;
-            Console.WriteLine("Trying to get IPConfig");
-            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetIPConfig(sdkContext, deviceID, out config);
-            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput(deviceID);
+
+            if (CommonControl.getIPConfig(sdkContext, deviceID, out config))
+                CommonControl.print(ref config);
+        }
+
+        public void setIPConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2IpConfig config = Util.AllocateStructure<BS2IpConfig>();
+
+            printSlavesEx(IntPtr.Zero, deviceID, isMasterDevice);
+            Console.WriteLine("Please enter the device ID:");
+            deviceID = (UInt32)Util.GetInput(deviceID);
+
+            if (CommonControl.getIPConfig(sdkContext, deviceID, out config))
             {
-                Console.WriteLine("Got error({0}).", result);
-            }
-            else
-            {
-                print(sdkContext, config);
+                CommonControl.setIPConfig(sdkContext, deviceID, ref config);
             }
         }
 
@@ -1227,6 +1220,8 @@ namespace Suprema
             case BS2DeviceTypeEnum.FACESTATION_F2:
             case BS2DeviceTypeEnum.BIOSTATION_3:
             case BS2DeviceTypeEnum.BIOENTRY_W3:
+            case BS2DeviceTypeEnum.BIOSTATION_3_MAX:
+            case BS2DeviceTypeEnum.BIOSTATION_3_MAX_FP:
                 defaultEnrollTimeout = 20;
                 defaultLFD = 1;
                 needInput = true;
@@ -1292,7 +1287,9 @@ namespace Suprema
                 config.searchRange.width = Util.GetInput(BS2Environment.BS2_FACE_SEARCH_RANGE_WIDTH_DEFAULT);
             }
             else if (((BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.BIOSTATION_3) ||
-                ((BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.BIOENTRY_W3))
+                ((BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.BIOENTRY_W3) ||
+                ((BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.BIOSTATION_3_MAX) ||
+                ((BS2DeviceTypeEnum)deviceInfo.type == BS2DeviceTypeEnum.BIOSTATION_3_MAX_FP))
             {
                 Console.WriteLine("Insert min value of detectDistance. ({0}~{1}, default: {2})",
                     BS2Environment.BS2_FACE_DETECT_DISTANCE_MIN_MIN,
@@ -1905,14 +1902,42 @@ namespace Suprema
 
             BS2CardConfigEx config = Util.AllocateStructure<BS2CardConfigEx>();
 
-            config.seos.oid_ADF[0] = 0x01;
-            config.seos.oid_ADF[1] = 0x02;
+            //////////////////////////////////////
+            // Seos OID ADF settings (Fixed values)
+            config.seos.oid_ADF[00] = 0x2A;
+            config.seos.oid_ADF[01] = 0x85;
+            config.seos.oid_ADF[02] = 0x70;
+            config.seos.oid_ADF[03] = 0x81;
+            config.seos.oid_ADF[04] = 0x1E;
+            config.seos.oid_ADF[05] = 0x10;
+            config.seos.oid_ADF[06] = 0x00;
+            config.seos.oid_ADF[07] = 0x07;
+            config.seos.oid_ADF[08] = 0x00;
+            config.seos.oid_ADF[09] = 0x00;
+            config.seos.oid_ADF[10] = 0x02;
+            config.seos.oid_ADF[11] = 0x00;
+            config.seos.oid_ADF[12] = 0x00;
+            config.seos.size_ADF = 13;
+            // Seos OID ADF settings (Fixed values)
+            //////////////////////////////////////
 
-            config.seos.oid_DataObjectID[0] = 0xD0;
-            config.seos.oid_DataObjectID[1] = 0xD1;
+            config.seos.oid_DataObjectID[0] = 0xC0;
+            config.seos.oid_DataObjectID[1] = 0xC1;
+            config.seos.oid_DataObjectID[2] = 0xC2;
+            config.seos.oid_DataObjectID[3] = 0xC3;
+            config.seos.oid_DataObjectID[4] = 0xC4;
+            config.seos.oid_DataObjectID[5] = 0xC5;
+            config.seos.oid_DataObjectID[6] = 0xC6;
+            config.seos.oid_DataObjectID[7] = 0xC7;
 
-            config.seos.size_DataObject[0] = 90;
-            config.seos.size_DataObject[1] = 100;
+            config.seos.size_DataObject[0] = 80;
+            config.seos.size_DataObject[1] = 384;
+            config.seos.size_DataObject[2] = 384;
+            config.seos.size_DataObject[3] = 384;
+            config.seos.size_DataObject[4] = 384;
+            config.seos.size_DataObject[5] = 40;
+            config.seos.size_DataObject[6] = 0;
+            config.seos.size_DataObject[7] = 0;
 
             config.seos.primaryKeyAuth[0] = 0x01;
             config.seos.primaryKeyAuth[1] = 0xFE;
@@ -3563,6 +3588,8 @@ namespace Suprema
                 case BS2DeviceTypeEnum.XSTATION_2_FP:   // Supported V1.2.0
                 case BS2DeviceTypeEnum.XSTATION_2:      // Supported V1.2.0
                 case BS2DeviceTypeEnum.BIOSTATION_3:    // Supported V1.1.0
+                case BS2DeviceTypeEnum.BIOSTATION_3_MAX:
+                case BS2DeviceTypeEnum.BIOSTATION_3_MAX_FP:
                     config.useVisualBarcode = Convert.ToByte(useBarcode);
                     if (useBarcode)
                     {
@@ -3812,10 +3839,27 @@ namespace Suprema
                 Console.Write(">> ");
                 config.port = Util.GetInput((ushort)554);
 
-                Console.WriteLine("Select video resolution (0 ~ 1, default:0)");
-                Console.WriteLine("0:180x320, 1:720x480");
+                BS2RTSPResolution defaultResolution = 0;
+                switch ((BS2DeviceTypeEnum)deviceInfo.type)
+                {
+                    case BS2DeviceTypeEnum.BIOSTATION_3:
+                    case BS2DeviceTypeEnum.BIOENTRY_W3:
+                        defaultResolution = BS2RTSPResolution.TYPE_2;
+                        break;
+                    case BS2DeviceTypeEnum.FACESTATION_F2:
+                    case BS2DeviceTypeEnum.FACESTATION_F2_FP:
+                    case BS2DeviceTypeEnum.BIOSTATION_3_MAX:
+                    case BS2DeviceTypeEnum.BIOSTATION_3_MAX_FP:
+                        defaultResolution = BS2RTSPResolution.TYPE_3;
+                        break;
+                    default:
+                        defaultResolution = BS2RTSPResolution.TYPE_1;
+                        break;
+                }
+
+                Console.WriteLine("Select video resolution [0:180x320, 1:720x480, 2:360x640] (default:{0})", defaultResolution);
                 Console.Write(">> ");
-                config.resolution = Util.GetInput((byte)0);
+                config.resolution = (byte)Util.GetInput((int)defaultResolution);
             }
             else
             {
@@ -4075,14 +4119,14 @@ namespace Suprema
             Console.WriteLine("     |--oid_ADF : {0}", BitConverter.ToString(config.seos.oid_ADF));
             Console.WriteLine("     |--size_ADF : {0}", config.seos.size_ADF);
             Console.WriteLine("     |--oid_DataObjectID : {0}", BitConverter.ToString(config.seos.oid_DataObjectID));
-            Console.WriteLine("     |++size_DataObject");
+            Console.WriteLine("     +--size_DataObject");
             for (int i = 0; i < 8; ++i)
             {
                 Console.WriteLine("     |--size{0} : {1}", i, config.seos.size_DataObject[i]);
             }
 
-            Console.WriteLine("     |--primaryKeyAuth : {0}", BitConverter.ToString(config.seos.primaryKeyAuth));
-            Console.WriteLine("     |--secondaryKeyAuth : {0}", BitConverter.ToString(config.seos.secondaryKeyAuth));
+            Console.WriteLine("     +--primaryKeyAuth : {0}", BitConverter.ToString(config.seos.primaryKeyAuth));
+            Console.WriteLine("     +--secondaryKeyAuth : {0}", BitConverter.ToString(config.seos.secondaryKeyAuth));
 
             Console.WriteLine("<<<< ");
         }

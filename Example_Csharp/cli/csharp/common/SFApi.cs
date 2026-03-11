@@ -17,49 +17,52 @@ namespace Suprema
     {
         public static Dictionary<BS2DeviceTypeEnum, string> productNameDictionary = new Dictionary<BS2DeviceTypeEnum, string>()
         {
-            {BS2DeviceTypeEnum.UNKNOWN,         "Unknown Device"},
-            {BS2DeviceTypeEnum.BIOENTRY_PLUS,   "BioEntry Plus"},
-            {BS2DeviceTypeEnum.BIOENTRY_W,      "BioEntry W"},
-            {BS2DeviceTypeEnum.BIOLITE_NET,     "BioLite Net"},
-            {BS2DeviceTypeEnum.XPASS,           "Xpass"},
-            {BS2DeviceTypeEnum.XPASS_S2,        "Xpass S2"},
-            {BS2DeviceTypeEnum.SECURE_IO_2,     "Secure IO 2"},
-            {BS2DeviceTypeEnum.DOOR_MODULE_20,  "Door module 20"},
-            {BS2DeviceTypeEnum.BIOSTATION_2,    "BioStation 2"},
-            {BS2DeviceTypeEnum.BIOSTATION_A2,   "BioStation A2"},
-            {BS2DeviceTypeEnum.FACESTATION_2,   "FaceStation 2"},
-            {BS2DeviceTypeEnum.IO_DEVICE,       "IO device"},
-            {BS2DeviceTypeEnum.BIOSTATION_L2,   "BioStation L2"},
-            {BS2DeviceTypeEnum.BIOENTRY_W2,     "BioEntry W2"},
-            //{BS2DeviceTypeEnum.CORESTATION,     "CoreStation" },		// Deprecated 2.6.0
-            {BS2DeviceTypeEnum.CORESTATION_40,  "CoreStation40" },
-            {BS2DeviceTypeEnum.OUTPUT_MODULE,   "Output Module"},
-            {BS2DeviceTypeEnum.INPUT_MODULE,    "Inout Module"},      
-            {BS2DeviceTypeEnum.BIOENTRY_P2,     "BioEntry P2"},
-            {BS2DeviceTypeEnum.BIOLITE_N2,      "BioLite N2"},
-            {BS2DeviceTypeEnum.XPASS2,          "XPass 2"},
-            {BS2DeviceTypeEnum.XPASS_S3,        "XPass S3"},
-            {BS2DeviceTypeEnum.BIOENTRY_R2,     "BioEntry R2"},
-            {BS2DeviceTypeEnum.XPASS_D2,        "XPass D2"},
-            {BS2DeviceTypeEnum.DOOR_MODULE_21,  "DoorModule 21"},
-            {BS2DeviceTypeEnum.XPASS_D2_KEYPAD, "XPass D2 Keypad"},
-            {BS2DeviceTypeEnum.FACELITE,        "FaceLite"},
-            {BS2DeviceTypeEnum.XPASS2_KEYPAD,   "XPass 2 Keypad"},
-            {BS2DeviceTypeEnum.XPASS_D2_REV,    "XPass D2 Rev"},
-            {BS2DeviceTypeEnum.XPASS_D2_KEYPAD_REV, "XPass D2 Keypad Rev"},
-            {BS2DeviceTypeEnum.FACESTATION_F2_FP, "FaceStation F2 FP"},     // FSF2 support
-            {BS2DeviceTypeEnum.FACESTATION_F2,  "FaceStation F2"},          // FSF2 support
-            {BS2DeviceTypeEnum.XSTATION_2_QR,   "X-Station 2 QR"},
-            {BS2DeviceTypeEnum.XSTATION_2,      "X-Station 2"},
-            {BS2DeviceTypeEnum.IM_120,         "Input Module 120"},
-            {BS2DeviceTypeEnum.XSTATION_2_FP,   "X-Station 2 FP"},
-            {BS2DeviceTypeEnum.BIOSTATION_3,    "BioStation 3"},
-            {BS2DeviceTypeEnum.THIRD_OSDP_DEVICE, "3rd party OSDP"},
-            {BS2DeviceTypeEnum.THIRD_OSDP_IO_DEVICE, "3rd party OSDP IO"},
-            {BS2DeviceTypeEnum.BIOSTATION_2A,   "BioStation 2A"},
-            {BS2DeviceTypeEnum.BIOENTRY_W3,     "BioEntry W3"},
-            {BS2DeviceTypeEnum.CORESTATION_20,     "CoreStation20"},
-            {BS2DeviceTypeEnum.DOOR_INTERFACE_24,     "Door Interface 24"},
+            {BS2DeviceTypeEnum.UNKNOWN,                 "Unknown Device"},
+            {BS2DeviceTypeEnum.BIOENTRY_PLUS,           "BioEntry Plus"},
+            {BS2DeviceTypeEnum.BIOENTRY_W,              "BioEntry W"},
+            {BS2DeviceTypeEnum.BIOLITE_NET,             "BioLite Net"},
+            {BS2DeviceTypeEnum.XPASS,                   "Xpass"},
+            {BS2DeviceTypeEnum.XPASS_S2,                "Xpass S2"},
+            {BS2DeviceTypeEnum.SECURE_IO_2,             "Secure IO 2"},
+            {BS2DeviceTypeEnum.DOOR_MODULE_20,          "Door module 20"},
+            {BS2DeviceTypeEnum.BIOSTATION_2,            "BioStation 2"},
+            {BS2DeviceTypeEnum.BIOSTATION_A2,           "BioStation A2"},
+            {BS2DeviceTypeEnum.FACESTATION_2,           "FaceStation 2"},
+            {BS2DeviceTypeEnum.IO_DEVICE,               "IO device"},
+            {BS2DeviceTypeEnum.BIOSTATION_L2,           "BioStation L2"},
+            {BS2DeviceTypeEnum.BIOENTRY_W2,             "BioEntry W2"},
+            //{BS2DeviceTypeEnum.CORESTATION,             "CoreStation" },		// Deprecated 2.6.0
+            {BS2DeviceTypeEnum.CORESTATION_40,          "CoreStation40" },
+            {BS2DeviceTypeEnum.OUTPUT_MODULE,           "Output Module"},
+            {BS2DeviceTypeEnum.INPUT_MODULE,            "Inout Module"},      
+            {BS2DeviceTypeEnum.BIOENTRY_P2,             "BioEntry P2"},
+            {BS2DeviceTypeEnum.BIOLITE_N2,              "BioLite N2"},
+            {BS2DeviceTypeEnum.XPASS2,                  "XPass 2"},
+            {BS2DeviceTypeEnum.XPASS_S3,                "XPass S3"},
+            {BS2DeviceTypeEnum.BIOENTRY_R2,             "BioEntry R2"},
+            {BS2DeviceTypeEnum.XPASS_D2,                "XPass D2"},
+            {BS2DeviceTypeEnum.DOOR_MODULE_21,          "DoorModule 21"},
+            {BS2DeviceTypeEnum.XPASS_D2_KEYPAD,         "XPass D2 Keypad"},
+            {BS2DeviceTypeEnum.FACELITE,                "FaceLite"},
+            {BS2DeviceTypeEnum.XPASS2_KEYPAD,           "XPass 2 Keypad"},
+            {BS2DeviceTypeEnum.XPASS_D2_REV,            "XPass D2 Rev"},
+            {BS2DeviceTypeEnum.XPASS_D2_KEYPAD_REV,     "XPass D2 Keypad Rev"},
+            {BS2DeviceTypeEnum.FACESTATION_F2_FP,       "FaceStation F2 FP"},     // FSF2 support
+            {BS2DeviceTypeEnum.FACESTATION_F2,          "FaceStation F2"},          // FSF2 support
+            {BS2DeviceTypeEnum.XSTATION_2_QR,           "X-Station 2 QR"},
+            {BS2DeviceTypeEnum.XSTATION_2,              "X-Station 2"},
+            {BS2DeviceTypeEnum.IM_120,                  "Input Module 120"},
+            {BS2DeviceTypeEnum.XSTATION_2_FP,           "X-Station 2 FP"},
+            {BS2DeviceTypeEnum.BIOSTATION_3,            "BioStation 3"},
+            {BS2DeviceTypeEnum.THIRD_OSDP_DEVICE,       "3rd party OSDP"},
+            {BS2DeviceTypeEnum.THIRD_OSDP_IO_DEVICE,    "3rd party OSDP IO"},
+            {BS2DeviceTypeEnum.BIOSTATION_2A,           "BioStation 2A"},
+            {BS2DeviceTypeEnum.BIOENTRY_W3,             "BioEntry W3"},
+            {BS2DeviceTypeEnum.CORESTATION_20,          "CoreStation20"},
+            {BS2DeviceTypeEnum.DOOR_INTERFACE_24,       "Door Interface 24"},
+            {BS2DeviceTypeEnum.BIOSTATION_3_MAX,        "BioStation 3 Max"},
+            {BS2DeviceTypeEnum.BIOSTATION_3_MAX_FP,     "BioStation 3 Max FP"},
+            {BS2DeviceTypeEnum.XPASS_Q2,                "XPass Q2"},
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -311,6 +314,21 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_WriteQRCode(IntPtr qrText, ref BS2CSNCard card);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_GetLockOverride(IntPtr context, UInt32 deviceId, IntPtr requests, UInt32 numOfRequests, out IntPtr responseObjs, out UInt32 numOfResponses);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_GetAllLockOverride(IntPtr context, UInt32 deviceId, out IntPtr responseObjs, out UInt32 numOfresponses);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_SetLockOverride(IntPtr context, UInt32 deviceId, IntPtr requests, UInt32 numOfRequests);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_RemoveLockOverride(IntPtr context, UInt32 deviceId, IntPtr requests, UInt32 numOfRequests);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_RemoveAllLockOverride(IntPtr context, UInt32 deviceId);
 
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Config API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -637,6 +655,12 @@ namespace Suprema
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_UnlockDoor(IntPtr context, UInt32 deviceId, byte flag, IntPtr doorIds, UInt32 doorIdCount);
 
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_TimedLockDoor(IntPtr context, UInt32 deviceId, byte flag, IntPtr doorIds, UInt32 doorIdCount, UInt32 timeout);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_TimedUnlockDoor(IntPtr context, UInt32 deviceId, byte flag, IntPtr doorIds, UInt32 doorIdCount, UInt32 timeout);
+
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Fingerprint API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetLastFingerprintImage(IntPtr context, UInt32 deviceId, out IntPtr imageObj, out UInt32 imageWidth, out UInt32 imageHeight);
@@ -677,6 +701,12 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetLogSmallBlobEx(IntPtr context, UInt32 deviceId, UInt16 eventMask, UInt32 eventId, UInt32 amount, out IntPtr logObjs, out UInt32 numLog);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_GetDeviceIOStatus(IntPtr context, UInt32 deviceId, IntPtr slaveIDs, UInt32 numOfSlave, out IntPtr statusObj, out UInt32 numOfStatus);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_GetAllDeviceIOStatus(IntPtr context, UInt32 deviceId, out IntPtr statusObj, out UInt32 numOfStatus);
 
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< MISC API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -806,6 +836,17 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_EnrollUserEx(IntPtr context, UInt32 deviceId, [In, Out] BS2UserBlobEx[] userBlobs, UInt32 uidCount, byte overwrite);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_GetUserOverride(IntPtr context, UInt32 deviceId, IntPtr userIDs, UInt32 numOfUsers, out IntPtr overrideObjs, out UInt32 numOfOverrides);
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_GetAllUserOverride(IntPtr context, UInt32 deviceId, out IntPtr overrideObjs, out UInt32 numOfOverrides);
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_SetUserOverride(IntPtr context, UInt32 deviceId, IntPtr overrides, UInt32 numOfOverrides);
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_RemoveUserOverride(IntPtr context, UInt32 deviceId, IntPtr userIDs, UInt32 numOfUsers);
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BS2_RemoveAllUserOverride(IntPtr context, UInt32 deviceId);
 
         /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Wiegand Control API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -1411,6 +1452,11 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetDefaultResponseTimeout(IntPtr context, out Int32 poMs);
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_SetDefaultLongResponseTimeout(IntPtr context, Int32 ms);
+
+        [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int BS2_GetDefaultLongResponseTimeout(IntPtr context, out Int32 poMs);
         //<=
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -1503,7 +1549,5 @@ namespace Suprema
 
         [DllImport("BS_SDK_V2.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int BS2_GetUserStatistic(IntPtr context, UInt32 deviceId, out BS2UserStatistic statistic);
-
-
     }
 }

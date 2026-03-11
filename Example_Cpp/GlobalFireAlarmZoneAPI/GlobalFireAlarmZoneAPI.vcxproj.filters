@@ -54,6 +54,9 @@
     <ClCompile Include="..\Common\Utility.cpp">
       <Filter>BSCommon</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\BS2EventStringUtil.cpp">
+      <Filter>BSCommon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GlobalFireAlarmZoneAPI.h">
@@ -102,6 +105,9 @@
       <Filter>BSCommon</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\Utility.h">
+      <Filter>BSCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\BS2EventStringUtil.h">
       <Filter>BSCommon</Filter>
     </ClInclude>
   </ItemGroup>

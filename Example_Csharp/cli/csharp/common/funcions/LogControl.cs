@@ -8,6 +8,8 @@ using System.Net;
 using System.Diagnostics;
 using System.Data.SQLite;
 
+#pragma warning disable CS0618
+
 namespace Suprema
 {
     public class LogControl : FunctionModule
@@ -17,6 +19,7 @@ namespace Suprema
 
         bool mAutoLogMonitoring = true;
 
+        /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
         public void onConnection(IntPtr sdkContext, UInt32 deviceID)
         {
             Console.WriteLine("[LogControl-CB] Device[{0, 10}] has been connected.", deviceID);
@@ -37,6 +40,7 @@ namespace Suprema
                 }
             }
         }
+        */
         public void onDisconnection(IntPtr sdkContext, UInt32 deviceID)
         {
             Console.WriteLine("[LogControl-CB] Device[{0, 10}] has been disconnected.", deviceID);
@@ -50,7 +54,7 @@ namespace Suprema
             {
                 Console.WriteLine("Not supported in slave device.");
                 return functionList;
-            }            
+            }
 
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get log", getLog));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Clear log", clearLog));
@@ -58,6 +62,7 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get image log", getImageLog));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get logBlob", getLogBlob));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("get logsmallblobEx", getLogSmallBlobWithTemperature));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Get device IO status", getDeviceIOStatus));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Synchronization between local and device log", syncLocalAndDeviceLog));
             return functionList;
         }
@@ -138,12 +143,14 @@ namespace Suprema
                 return;
             }
 
+            /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
             mAutoLogMonitoring = true;
             Console.WriteLine("Do you want to disable auto log monitoring? [y/n]");            
             if (Util.IsYes())
             {
                 mAutoLogMonitoring = false;
             }
+            */
 
             cbOnLogReceivedEx = null;
             cbOnLogReceived = new API.OnLogReceived(RealtimeLogReceived);
@@ -542,6 +549,39 @@ namespace Suprema
             while (runnging);
 
             connection.Close();
+        }
+
+        public void getDeviceIOStatus(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            List<UInt32> requests = new List<UInt32>();
+            List<BS2IOStatus> listResult = null;
+
+            Console.WriteLine("Do you want to get IO states of all currently connected devices? [Y/n]");
+            Console.Write(">>>> ");
+            if (!Util.IsYes())
+            {
+                Console.WriteLine("  Enter the device IDs to get [ID_1, ID_2 ...]");
+                Console.Write("  >> ");
+                char[] delims = {' ', ',', '.', ':', '\t'};
+                string[] strIDs = Console.ReadLine().Split(delims);
+                foreach (var id in strIDs)
+                {
+                    if (0 < id.Length)
+                    {
+                        UInt32 nID = 0;
+                        if (UInt32.TryParse(id, out nID))
+                            requests.Add(nID);
+                    }
+                }
+            }
+
+            if (CommonControl.getDeviceIOStatus(sdkContext, deviceID, ref requests, out listResult))
+            {
+                for (UInt32 idx = 0; idx < listResult.Count; idx++)
+                {
+                    CommonControl.print(listResult[(int)idx]);
+                }
+            }
         }
 
         private void NormalLogReceived(UInt32 deviceID, IntPtr log)

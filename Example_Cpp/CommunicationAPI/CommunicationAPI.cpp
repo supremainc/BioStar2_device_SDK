@@ -374,7 +374,7 @@ int osdpMenu(void* context, DeviceList& deviceList)
 	return sdkResult;
 }
 
-int runAPIs(void* context, const DeviceList& deviceList)
+int runAPIs(void* context, DeviceList& deviceList)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	int selectedTop(0);
@@ -395,6 +395,9 @@ int runAPIs(void* context, const DeviceList& deviceList)
 			return BS_SDK_SUCCESS;
 		case MENU_COMM_SET_KEEP_ALIVE:
 			sdkResult = cm.setKeepAliveTimeout();
+			break;
+		case MENU_COMM_CONN_DEVICE:
+			sdkResult = Utility::connectViaIP(context, deviceList);
 			break;
 		case MENU_COMM_GET_SERVER_PORT:
 			sdkResult = cm.getServerPort();

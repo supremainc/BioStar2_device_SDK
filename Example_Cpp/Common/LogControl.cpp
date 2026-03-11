@@ -147,45 +147,45 @@ int LogControl::getLogSmallBlobEx(BS2_DEVICE_ID id)
 	return sdkResult;
 }
 
-int LogControl::getDeviceIOStatus(BS2_DEVICE_ID id, const vector<BS2_DEVICE_ID>& request, vector<BS2IOStatus>& response)
-{
-	BS2IOStatus* statusObjs = NULL;
-	uint32_t numOfStatus = 0;
-	int sdkResult = BS_SDK_SUCCESS;
-
-	if (0 < request.size())
-	{
-		sdkResult = BS2_GetDeviceIOStatus(context_, id, request.data(), (uint32_t)request.size(), &statusObjs, &numOfStatus);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_GetDeviceIOStatus call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	}
-	else
-	{
-		sdkResult = BS2_GetAllDeviceIOStatus(context_, id, &statusObjs, &numOfStatus);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_GetAllDeviceIOStatus call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	}
-
-	if (statusObjs == NULL || 0 == numOfStatus)
-	{
-		TRACE("No IO status");
-		return sdkResult;
-	}
-
-	for (uint32_t idx = 0; idx < numOfStatus; idx++)
-	{
-		response.push_back(statusObjs[idx]);
-	}
-
-	BS2_ReleaseObject(statusObjs);
-	return sdkResult;
-}
+//int LogControl::getDeviceIOStatus(BS2_DEVICE_ID id, const vector<BS2_DEVICE_ID>& request, vector<BS2IOStatus>& response)
+//{
+//	BS2IOStatus* statusObjs = NULL;
+//	uint32_t numOfStatus = 0;
+//	int sdkResult = BS_SDK_SUCCESS;
+//
+//	if (0 < request.size())
+//	{
+//		sdkResult = BS2_GetDeviceIOStatus(context_, id, request.data(), (uint32_t)request.size(), &statusObjs, &numOfStatus);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//		{
+//			TRACE("BS2_GetDeviceIOStatus call failed: %d", sdkResult);
+//			return sdkResult;
+//		}
+//	}
+//	else
+//	{
+//		sdkResult = BS2_GetAllDeviceIOStatus(context_, id, &statusObjs, &numOfStatus);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//		{
+//			TRACE("BS2_GetAllDeviceIOStatus call failed: %d", sdkResult);
+//			return sdkResult;
+//		}
+//	}
+//
+//	if (statusObjs == NULL || 0 == numOfStatus)
+//	{
+//		TRACE("No IO status");
+//		return sdkResult;
+//	}
+//
+//	for (uint32_t idx = 0; idx < numOfStatus; idx++)
+//	{
+//		response.push_back(statusObjs[idx]);
+//	}
+//
+//	BS2_ReleaseObject(statusObjs);
+//	return sdkResult;
+//}
 
 void LogControl::print(const BS2Event& log)
 {
@@ -307,32 +307,32 @@ void LogControl::print(const BS2EventExtInfo& info)
 	TRACE("  subCode : %x", info.subCode);
 }
 
-string LogControl::getAllStatusOfPort(const BS2_IO_STATUS& portStatus)
-{
-	ostringstream str;
-	for (uint32_t idx = 0; idx < portStatus.count; idx++)
-	{
-		str << (uint32_t)portStatus.status[idx] << ", ";
-	}
+//string LogControl::getAllStatusOfPort(const BS2_IO_STATUS& portStatus)
+//{
+//	ostringstream str;
+//	for (uint32_t idx = 0; idx < portStatus.count; idx++)
+//	{
+//		str << (uint32_t)portStatus.status[idx] << ", ";
+//	}
+//
+//	return str.str();
+//}
 
-	return str.str();
-}
-
-void LogControl::print(const BS2IOStatus& status)
-{
-	TRACE("-- Device IO Status --");
-	ostringstream str;
-	for (int idx = 0; idx < status.numOfSupervisorInput; idx++)
-	{
-		str << status.supervisorInputStatus[idx] << ", ";
-	}
-
-	TRACE("  deviceID : %u", status.deviceID);
-	TRACE("  input[%u] : [%s]", status.input.count, LogControl::getAllStatusOfPort(status.input).c_str());
-	TRACE("  output[%u] : [%s]", status.output.count, LogControl::getAllStatusOfPort(status.output).c_str());
-	TRACE("  relay[%u] : [%s]", status.relay.count, LogControl::getAllStatusOfPort(status.relay).c_str());
-	TRACE("  tamper[%u] : [%s]", status.tamper.count, LogControl::getAllStatusOfPort(status.tamper).c_str());
-	TRACE("  auxIn[%u] : [%s]", status.auxIn.count, LogControl::getAllStatusOfPort(status.auxIn).c_str());
-	TRACE("  auxOut[%u] : [%s]", status.auxOut.count, LogControl::getAllStatusOfPort(status.auxOut).c_str());
-	TRACE("  supervisorInputStatus[%u] : [%s]", status.numOfSupervisorInput, str.str().c_str());
-}
+//void LogControl::print(const BS2IOStatus& status)
+//{
+//	TRACE("-- Device IO Status --");
+//	ostringstream str;
+//	for (int idx = 0; idx < status.numOfSupervisorInput; idx++)
+//	{
+//		str << status.supervisorInputStatus[idx] << ", ";
+//	}
+//
+//	TRACE("  deviceID : %u", status.deviceID);
+//	TRACE("  input[%u] : [%s]", status.input.count, LogControl::getAllStatusOfPort(status.input).c_str());
+//	TRACE("  output[%u] : [%s]", status.output.count, LogControl::getAllStatusOfPort(status.output).c_str());
+//	TRACE("  relay[%u] : [%s]", status.relay.count, LogControl::getAllStatusOfPort(status.relay).c_str());
+//	TRACE("  tamper[%u] : [%s]", status.tamper.count, LogControl::getAllStatusOfPort(status.tamper).c_str());
+//	TRACE("  auxIn[%u] : [%s]", status.auxIn.count, LogControl::getAllStatusOfPort(status.auxIn).c_str());
+//	TRACE("  auxOut[%u] : [%s]", status.auxOut.count, LogControl::getAllStatusOfPort(status.auxOut).c_str());
+//	TRACE("  supervisorInputStatus[%u] : [%s]", status.numOfSupervisorInput, str.str().c_str());
+//}

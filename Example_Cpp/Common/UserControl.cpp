@@ -2423,221 +2423,221 @@ int UserControl::getUserStatistic(BS2_DEVICE_ID id, BS2UserStatistic& statistic)
 	return sdkResult;
 }
 
-int UserControl::getMasterAdmin(BS2_DEVICE_ID id)
-{
-	BS2UserFaceExBlob masterAdmin;
-	memset(&masterAdmin, 0x0, sizeof(masterAdmin));
-	int sdkResult = BS2_GetMasterAdmin(context_, id, &masterAdmin);
-	if (BS_SDK_SUCCESS != sdkResult)
-	{
-		TRACE("BS2_GetMasterAdmin call failed: %d", sdkResult);
-		return sdkResult;
-	}
-
-	print(masterAdmin);
-
-	if (masterAdmin.cardObjs && 0 < masterAdmin.user.numCards)
-		BS2_ReleaseObject(masterAdmin.cardObjs);
-
-	if (masterAdmin.fingerObjs && 0 < masterAdmin.user.numFingers)
-		BS2_ReleaseObject(masterAdmin.fingerObjs);
-
-	if (0 < masterAdmin.user.numFaces)
-	{
-		if (masterAdmin.faceObjs)
-			BS2_ReleaseObject(masterAdmin.faceObjs);
-		else if (masterAdmin.faceExObjs)
-			BS2_ReleaseObject(masterAdmin.faceExObjs);
-	}
-
-	return sdkResult;
-}
-
-int UserControl::setMasterAdmin(BS2_DEVICE_ID id)
-{
-	BS2SimpleDeviceInfo deviceInfo = { 0, };
-	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
-
-	int sdkResult = BS2_GetDeviceInfoEx(context_, id, &deviceInfo, &deviceInfoEx);
-	if (BS_SDK_SUCCESS != sdkResult)
-	{
-		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
-		return sdkResult;
-	}
-
-	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
-
-	BS2UserFaceExBlob userBlob = { 0, };
-	BS2User& user = userBlob.user;
-
-	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob.pin, deviceInfo)))
-		return sdkResult;
-
-	user.numFingers = 0;
-	user.numCards = 0;
-	user.numFaces = 0;
-
-	if (faceExScanSupported)
-	{
-		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfoTemplateOnly(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
-			return sdkResult;
-	}
-
-	sdkResult = BS2_SetMasterAdmin(context_, id, &userBlob);
-	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_SetMasterAdmin call failed: %d", sdkResult);
-
-	if (userBlob.faceExObjs)
-	{
-		delete[] userBlob.faceExObjs;
-	}
-
-	return sdkResult;
-}
-
-int UserControl::getLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& request, vector<BS2LockOverride>& response)
-{
-	BS2LockOverride* lockOverrideObjs = NULL;
-	uint32_t numOfOverrides = 0;
-	int sdkResult = BS_SDK_SUCCESS;
-
-	if (0 < request.size())
-	{
-		sdkResult = BS2_GetLockOverride(context_, id, request.data(), (uint32_t)request.size(), &lockOverrideObjs, &numOfOverrides);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_GetLockOverride call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	}
-	else
-	{
-		sdkResult = BS2_GetAllLockOverride(context_, id, &lockOverrideObjs, &numOfOverrides);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_GetAllLockOverride call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	}
-
-	if (lockOverrideObjs == NULL || 0 == numOfOverrides)
-	{
-		TRACE("LockOverrides is empty");
-		return sdkResult;
-	}
-
-	response.clear();
-	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
-	{
-		response.push_back(lockOverrideObjs[idx]);
-	}
-
-	BS2_ReleaseObject(lockOverrideObjs);
-	return sdkResult;
-}
-
-int UserControl::setLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& overrides)
-{
-	if (0 == overrides.size())
-		return BS_SDK_SUCCESS;
-
-	int sdkResult = BS2_SetLockOverride(context_, id, overrides.data(), (uint32_t)overrides.size());
-	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_SetLockOverride call failed: %d", sdkResult);
-
-	return sdkResult;
-}
-
-int UserControl::removeLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& request)
-{
-	int sdkResult = BS_SDK_SUCCESS;
-	if (0 < request.size())
-	{
-		sdkResult = BS2_RemoveLockOverride(context_, id, request.data(), (uint32_t)request.size());
-		if (BS_SDK_SUCCESS != sdkResult)
-			TRACE("BS2_RemoveLockOverride call failed: %d", sdkResult);
-	}
-	else
-	{
-		sdkResult = BS2_RemoveAllLockOverride(context_, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			TRACE("BS2_RemoveAllLockOverride call failed: %d", sdkResult);
-	}
-
-	return sdkResult;
-}
-
-int UserControl::getUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request, vector<BS2UserOverride>& response)
-{
-	BS2UserOverride* overrideObjs = NULL;
-	uint32_t numOfOverrides = 0;
-	int sdkResult = BS_SDK_SUCCESS;
-
-	if (0 < request.size())
-	{
-		sdkResult = BS2_GetUserOverride(context_, id, request[0].data(), (uint32_t)request.size(), &overrideObjs, &numOfOverrides);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_GetUserOverride call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	}
-	else
-	{
-		sdkResult = BS2_GetAllUserOverride(context_, id, &overrideObjs, &numOfOverrides);
-		if (BS_SDK_SUCCESS != sdkResult)
-		{
-			TRACE("BS2_GetAllUserOverride call failed: %d", sdkResult);
-			return sdkResult;
-		}
-	}
-
-	if (overrideObjs == NULL || 0 == numOfOverrides)
-	{
-		TRACE("UserOverrides is empty");
-		return sdkResult;
-	}
-
-	response.clear();
-	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
-	{
-		response.push_back(overrideObjs[idx]);
-	}
-
-	BS2_ReleaseObject(overrideObjs);
-	return sdkResult;
-}
-
-int UserControl::setUserOverrides(BS2_DEVICE_ID id, const vector<BS2UserOverride>& overrides)
-{
-	if (0 == overrides.size())
-		return BS_SDK_SUCCESS;
-
-	int sdkResult = BS2_SetUserOverride(context_, id, overrides.data(), (uint32_t)overrides.size());
-	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_SetUserOverride call failed: %d", sdkResult);
-
-	return sdkResult;
-}
-
-int UserControl::removeUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request)
-{
-	int sdkResult = BS_SDK_SUCCESS;
-	if (0 < request.size())
-	{
-		sdkResult = BS2_RemoveUserOverride(context_, id, request[0].data(), (uint32_t)request.size());
-		if (BS_SDK_SUCCESS != sdkResult)
-			TRACE("BS2_RemoveUserOverride call failed: %d", sdkResult);
-	}
-	else
-	{
-		sdkResult = BS2_RemoveAllUserOverride(context_, id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			TRACE("BS2_RemoveAllUserOverride call failed: %d", sdkResult);
-	}
-
-	return sdkResult;
-}
+//int UserControl::getMasterAdmin(BS2_DEVICE_ID id)
+//{
+//	BS2UserFaceExBlob masterAdmin;
+//	memset(&masterAdmin, 0x0, sizeof(masterAdmin));
+//	int sdkResult = BS2_GetMasterAdmin(context_, id, &masterAdmin);
+//	if (BS_SDK_SUCCESS != sdkResult)
+//	{
+//		TRACE("BS2_GetMasterAdmin call failed: %d", sdkResult);
+//		return sdkResult;
+//	}
+//
+//	print(masterAdmin);
+//
+//	if (masterAdmin.cardObjs && 0 < masterAdmin.user.numCards)
+//		BS2_ReleaseObject(masterAdmin.cardObjs);
+//
+//	if (masterAdmin.fingerObjs && 0 < masterAdmin.user.numFingers)
+//		BS2_ReleaseObject(masterAdmin.fingerObjs);
+//
+//	if (0 < masterAdmin.user.numFaces)
+//	{
+//		if (masterAdmin.faceObjs)
+//			BS2_ReleaseObject(masterAdmin.faceObjs);
+//		else if (masterAdmin.faceExObjs)
+//			BS2_ReleaseObject(masterAdmin.faceExObjs);
+//	}
+//
+//	return sdkResult;
+//}
+//
+//int UserControl::setMasterAdmin(BS2_DEVICE_ID id)
+//{
+//	BS2SimpleDeviceInfo deviceInfo = { 0, };
+//	BS2SimpleDeviceInfoEx deviceInfoEx = { 0, };
+//
+//	int sdkResult = BS2_GetDeviceInfoEx(context_, id, &deviceInfo, &deviceInfoEx);
+//	if (BS_SDK_SUCCESS != sdkResult)
+//	{
+//		TRACE("BS2_GetDeviceInfoEx call failed: %d", sdkResult);
+//		return sdkResult;
+//	}
+//
+//	bool faceExScanSupported = (deviceInfoEx.supported & BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN) == BS2SimpleDeviceInfoEx::BS2_SUPPORT_FACE_EX_SCAN;
+//
+//	BS2UserFaceExBlob userBlob = { 0, };
+//	BS2User& user = userBlob.user;
+//
+//	if (BS_SDK_SUCCESS != (sdkResult = getUserBlobPINCode(userBlob.pin, deviceInfo)))
+//		return sdkResult;
+//
+//	user.numFingers = 0;
+//	user.numCards = 0;
+//	user.numFaces = 0;
+//
+//	if (faceExScanSupported)
+//	{
+//		if (BS_SDK_SUCCESS != (sdkResult = getUserBlobFaceInfoTemplateOnly(&userBlob.faceExObjs, user.numFaces, id, deviceInfoEx)))
+//			return sdkResult;
+//	}
+//
+//	sdkResult = BS2_SetMasterAdmin(context_, id, &userBlob);
+//	if (BS_SDK_SUCCESS != sdkResult)
+//		TRACE("BS2_SetMasterAdmin call failed: %d", sdkResult);
+//
+//	if (userBlob.faceExObjs)
+//	{
+//		delete[] userBlob.faceExObjs;
+//	}
+//
+//	return sdkResult;
+//}
+//
+//int UserControl::getLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& request, vector<BS2LockOverride>& response)
+//{
+//	BS2LockOverride* lockOverrideObjs = NULL;
+//	uint32_t numOfOverrides = 0;
+//	int sdkResult = BS_SDK_SUCCESS;
+//
+//	if (0 < request.size())
+//	{
+//		sdkResult = BS2_GetLockOverride(context_, id, request.data(), (uint32_t)request.size(), &lockOverrideObjs, &numOfOverrides);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//		{
+//			TRACE("BS2_GetLockOverride call failed: %d", sdkResult);
+//			return sdkResult;
+//		}
+//	}
+//	else
+//	{
+//		sdkResult = BS2_GetAllLockOverride(context_, id, &lockOverrideObjs, &numOfOverrides);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//		{
+//			TRACE("BS2_GetAllLockOverride call failed: %d", sdkResult);
+//			return sdkResult;
+//		}
+//	}
+//
+//	if (lockOverrideObjs == NULL || 0 == numOfOverrides)
+//	{
+//		TRACE("LockOverrides is empty");
+//		return sdkResult;
+//	}
+//
+//	response.clear();
+//	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
+//	{
+//		response.push_back(lockOverrideObjs[idx]);
+//	}
+//
+//	BS2_ReleaseObject(lockOverrideObjs);
+//	return sdkResult;
+//}
+//
+//int UserControl::setLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& overrides)
+//{
+//	if (0 == overrides.size())
+//		return BS_SDK_SUCCESS;
+//
+//	int sdkResult = BS2_SetLockOverride(context_, id, overrides.data(), (uint32_t)overrides.size());
+//	if (BS_SDK_SUCCESS != sdkResult)
+//		TRACE("BS2_SetLockOverride call failed: %d", sdkResult);
+//
+//	return sdkResult;
+//}
+//
+//int UserControl::removeLockOverrides(BS2_DEVICE_ID id, const vector<BS2LockOverride>& request)
+//{
+//	int sdkResult = BS_SDK_SUCCESS;
+//	if (0 < request.size())
+//	{
+//		sdkResult = BS2_RemoveLockOverride(context_, id, request.data(), (uint32_t)request.size());
+//		if (BS_SDK_SUCCESS != sdkResult)
+//			TRACE("BS2_RemoveLockOverride call failed: %d", sdkResult);
+//	}
+//	else
+//	{
+//		sdkResult = BS2_RemoveAllLockOverride(context_, id);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//			TRACE("BS2_RemoveAllLockOverride call failed: %d", sdkResult);
+//	}
+//
+//	return sdkResult;
+//}
+//
+//int UserControl::getUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request, vector<BS2UserOverride>& response)
+//{
+//	BS2UserOverride* overrideObjs = NULL;
+//	uint32_t numOfOverrides = 0;
+//	int sdkResult = BS_SDK_SUCCESS;
+//
+//	if (0 < request.size())
+//	{
+//		sdkResult = BS2_GetUserOverride(context_, id, request[0].data(), (uint32_t)request.size(), &overrideObjs, &numOfOverrides);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//		{
+//			TRACE("BS2_GetUserOverride call failed: %d", sdkResult);
+//			return sdkResult;
+//		}
+//	}
+//	else
+//	{
+//		sdkResult = BS2_GetAllUserOverride(context_, id, &overrideObjs, &numOfOverrides);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//		{
+//			TRACE("BS2_GetAllUserOverride call failed: %d", sdkResult);
+//			return sdkResult;
+//		}
+//	}
+//
+//	if (overrideObjs == NULL || 0 == numOfOverrides)
+//	{
+//		TRACE("UserOverrides is empty");
+//		return sdkResult;
+//	}
+//
+//	response.clear();
+//	for (uint32_t idx = 0; idx < numOfOverrides; idx++)
+//	{
+//		response.push_back(overrideObjs[idx]);
+//	}
+//
+//	BS2_ReleaseObject(overrideObjs);
+//	return sdkResult;
+//}
+//
+//int UserControl::setUserOverrides(BS2_DEVICE_ID id, const vector<BS2UserOverride>& overrides)
+//{
+//	if (0 == overrides.size())
+//		return BS_SDK_SUCCESS;
+//
+//	int sdkResult = BS2_SetUserOverride(context_, id, overrides.data(), (uint32_t)overrides.size());
+//	if (BS_SDK_SUCCESS != sdkResult)
+//		TRACE("BS2_SetUserOverride call failed: %d", sdkResult);
+//
+//	return sdkResult;
+//}
+//
+//int UserControl::removeUserOverrides(BS2_DEVICE_ID id, const vector<array<char, BS2_USER_ID_SIZE>>& request)
+//{
+//	int sdkResult = BS_SDK_SUCCESS;
+//	if (0 < request.size())
+//	{
+//		sdkResult = BS2_RemoveUserOverride(context_, id, request[0].data(), (uint32_t)request.size());
+//		if (BS_SDK_SUCCESS != sdkResult)
+//			TRACE("BS2_RemoveUserOverride call failed: %d", sdkResult);
+//	}
+//	else
+//	{
+//		sdkResult = BS2_RemoveAllUserOverride(context_, id);
+//		if (BS_SDK_SUCCESS != sdkResult)
+//			TRACE("BS2_RemoveAllUserOverride call failed: %d", sdkResult);
+//	}
+//
+//	return sdkResult;
+//}
 
 void UserControl::dumpHexa(const uint8_t* data, uint32_t size)
 {
@@ -2950,30 +2950,30 @@ void UserControl::print(const BS2UserStatistic& statistic)
 	TRACE("numPhrases:%u", statistic.numPhrases);
 }
 
-void UserControl::print(const BS2LockOverride& item, uint32_t idx)
-{
-	TRACE("-- Lock Override item [%u] --", idx);
-	TRACE("  cardID:%02x%02x%02x%02x%02x%02x%02x%02x",
-		item.cardID[BS2_CARD_DATA_SIZE - 8], 
-		item.cardID[BS2_CARD_DATA_SIZE - 7], 
-		item.cardID[BS2_CARD_DATA_SIZE - 6], 
-		item.cardID[BS2_CARD_DATA_SIZE - 5], 
-		item.cardID[BS2_CARD_DATA_SIZE - 4], 
-		item.cardID[BS2_CARD_DATA_SIZE - 3], 
-		item.cardID[BS2_CARD_DATA_SIZE - 2], 
-		item.cardID[BS2_CARD_DATA_SIZE - 1]);
-	TRACE("  issueCount:%u", item.issueCount);
-	TRACE("  type:%u", item.type);
-	TRACE("  size:%u", item.size);
-	TRACE("  userID:%s", item.userID);
-}
-
-void UserControl::print(const BS2UserOverride& item, uint32_t idx)
-{
-	TRACE("-- User Override item [%u] --", idx);
-	TRACE("userID:%s", item.userID);
-	TRACE("useExtendedAutoLockTimeout:%u", item.useExtendedAutoLockTimeout);
-}
+//void UserControl::print(const BS2LockOverride& item, uint32_t idx)
+//{
+//	TRACE("-- Lock Override item [%u] --", idx);
+//	TRACE("  cardID:%02x%02x%02x%02x%02x%02x%02x%02x",
+//		item.cardID[BS2_CARD_DATA_SIZE - 8], 
+//		item.cardID[BS2_CARD_DATA_SIZE - 7], 
+//		item.cardID[BS2_CARD_DATA_SIZE - 6], 
+//		item.cardID[BS2_CARD_DATA_SIZE - 5], 
+//		item.cardID[BS2_CARD_DATA_SIZE - 4], 
+//		item.cardID[BS2_CARD_DATA_SIZE - 3], 
+//		item.cardID[BS2_CARD_DATA_SIZE - 2], 
+//		item.cardID[BS2_CARD_DATA_SIZE - 1]);
+//	TRACE("  issueCount:%u", item.issueCount);
+//	TRACE("  type:%u", item.type);
+//	TRACE("  size:%u", item.size);
+//	TRACE("  userID:%s", item.userID);
+//}
+//
+//void UserControl::print(const BS2UserOverride& item, uint32_t idx)
+//{
+//	TRACE("-- User Override item [%u] --", idx);
+//	TRACE("userID:%s", item.userID);
+//	TRACE("useExtendedAutoLockTimeout:%u", item.useExtendedAutoLockTimeout);
+//}
 
 vector<unsigned char> UserControl::HexStringToByteArray(const string& hexString, size_t arraySize)
 {

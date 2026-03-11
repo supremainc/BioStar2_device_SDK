@@ -408,6 +408,29 @@ namespace Suprema
             return converted;
         }
 
+        public static byte[] HexStringToByteArray(string hexString, int arraySize)
+        {
+            byte[] result = new byte[arraySize];
+            Array.Clear(result, 0, arraySize);
+
+            if (hexString.Length % 2 != 0)
+            {
+                hexString = "0" + hexString;
+            }
+
+            int strLen = hexString.Length;
+            int byteLen = strLen / 2;
+
+            for (int i = 0; i < byteLen && i < arraySize; i++)
+            {
+                int strIndex = strLen - (i + 1) * 2;
+                string hexPair = hexString.Substring(strIndex, 2);
+                result[arraySize - 1 - i] = Convert.ToByte(hexPair, 16);
+            }
+
+            return result;
+        }
+
         public static bool GetTimestamp(string formatString, UInt32 defaultValue, out UInt32 timestamp)
         {
             string inputStr = Console.ReadLine();
@@ -664,6 +687,10 @@ namespace Suprema
                 case BS2EventCodeEnum.DOOR_HELD_OPEN_ALARM_CLEAR:
                 case BS2EventCodeEnum.DOOR_APB_ALARM:
                 case BS2EventCodeEnum.DOOR_APB_ALARM_CLEAR:
+        		case BS2EventCodeEnum.DOOR_RELEASE_NONE:
+        		case BS2EventCodeEnum.DOOR_LOCK_NONE:
+        		case BS2EventCodeEnum.DOOR_UNLOCK_NONE:
+        		case BS2EventCodeEnum.DOOR_SEND_UNLOCK_TIMER:
                     return GetDoorIdMsg(eventLog);
                 case BS2EventCodeEnum.ZONE_APB_ALARM:
                 case BS2EventCodeEnum.ZONE_APB_ALARM_CLEAR:
@@ -678,6 +705,9 @@ namespace Suprema
                 case BS2EventCodeEnum.ZONE_SCHEDULED_UNLOCK_END:
                 case BS2EventCodeEnum.ZONE_SCHEDULED_LOCK_ALARM:
                 case BS2EventCodeEnum.ZONE_SCHEDULED_LOCK_ALARM_CLEAR:
+        		case BS2EventCodeEnum.ZONE_APB_VIOLATION:
+        		case BS2EventCodeEnum.ZONE_TIMED_APB_VIOLATION:
+        		case BS2EventCodeEnum.ZONE_FIRE_ALARM_INPUT:
                     return GetZoneIdMsg(eventLog);
                 case BS2EventCodeEnum.SUPERVISED_INPUT_OPEN:
                 case BS2EventCodeEnum.SUPERVISED_INPUT_SHORT:
@@ -689,6 +719,7 @@ namespace Suprema
                 case BS2EventCodeEnum.USER_UPDATE_FAIL:
                 case BS2EventCodeEnum.USER_DELETE_SUCCESS:
                 case BS2EventCodeEnum.USER_DELETE_FAIL:
+        		case BS2EventCodeEnum.USER_DELETE_ALL_SUCCESS:
                 case BS2EventCodeEnum.USER_ISSUE_AOC_SUCCESS:
                 case BS2EventCodeEnum.USER_DUPLICATE_CREDENTIAL:
                 case BS2EventCodeEnum.USER_UPDATE_PARTIAL_SUCCESS:

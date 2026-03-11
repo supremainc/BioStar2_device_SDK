@@ -10,6 +10,8 @@ namespace Suprema
 {
     public class DoorControl : FunctionModule
     {
+        private API.OnLogReceived cbOnLogReceived = null;
+
         protected override List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> getFunctionList(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
         {
             List<KeyValuePair<string, Action<IntPtr, UInt32, bool>>> functionList = new List<KeyValuePair<string, Action<IntPtr, uint, bool>>>();
@@ -28,7 +30,9 @@ namespace Suprema
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Release door", releaseDoor));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Lock door", lockDoor));
             functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Unlock door", unlockDoor));
-            
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Start monitoring", startMonitoring));
+            functionList.Add(new KeyValuePair<string, Action<IntPtr, uint, bool>>("Stop monitoring", stopMonitoring));
+
             return functionList;
         }
 
@@ -325,7 +329,7 @@ namespace Suprema
                     door.sensor.switchType = Util.GetInput(0);
 
                     // [+ V2.7.0]
-                    Console.WriteLine("  When using Global APB, do you want to use the door sensor to check whether the user has entered or not? [y/n]");
+                    Console.WriteLine("  When using Global APB, do you want to use the door sensor to check whether the user has entered or not? [Y/n]");
                     Console.Write("  >>>> ");
                     door.sensor.apbUseDoorSensor = Util.IsYes() ? (byte)1 : (byte)0;
                 }
@@ -466,6 +470,10 @@ namespace Suprema
                     
                     //If you want to set up one door apb zone, please refer to ZoneControl section.
                 }
+
+                Console.WriteLine("  Enter the extended door open time in seconds: [Default: 10]");
+                Console.Write("  >>>> ");
+                door.extendedAutoLockTimeout = Util.GetInput((UInt16)BS2Environment.BS2_DEFAULT_EXTENDED_AUTO_LOCK_TIMEOUT);
 
                 doorList.Add(door);
             }
@@ -637,8 +645,11 @@ namespace Suprema
                     return;
                 }
 
-                Console.WriteLine("Trying to lock doors.");
-                BS2ErrorCode result = (BS2ErrorCode)API.BS2_LockDoor(sdkContext, deviceID, doorFlag, doorIDObj, (UInt32)doorIDList.Count);
+                Console.WriteLine("Enter the Normalize Timer in seconds [0: Infinite(default), 1~86400: Sec]");
+                Console.Write(">>>> ");
+                UInt32 timeout = Util.GetInput((UInt32)0);
+
+                CommonControl.lockDoor(sdkContext, deviceID, doorFlag, doorIDObj, (UInt32)doorIDList.Count, timeout);
 
                 Marshal.FreeHGlobal(doorIDObj);
             }
@@ -690,8 +701,11 @@ namespace Suprema
                     return;
                 }
 
-                Console.WriteLine("Trying to unlock doors.");
-                BS2ErrorCode result = (BS2ErrorCode)API.BS2_UnlockDoor(sdkContext, deviceID, doorFlag, doorIDObj, (UInt32)doorIDList.Count);
+                Console.WriteLine("Enter the Normalize Timer in seconds [0: Infinite(default), 1~86400: Sec]");
+                Console.Write(">>>> ");
+                UInt32 timeout = Util.GetInput((UInt32)0);
+
+                CommonControl.unlockDoor(sdkContext, deviceID, doorFlag, doorIDObj, (UInt32)doorIDList.Count, timeout);
 
                 Marshal.FreeHGlobal(doorIDObj);
             }
@@ -699,6 +713,36 @@ namespace Suprema
             {
                 Console.WriteLine("Invalid parameter");
             }
+        }
+
+        private void RealtimeLogReceived(UInt32 deviceID, IntPtr log)
+        {
+            if (log != IntPtr.Zero)
+            {
+                BS2Event eventLog = (BS2Event)Marshal.PtrToStructure(log, typeof(BS2Event));
+                Console.WriteLine(Util.GetLogMsg(eventLog));
+            }
+        }
+
+        void startMonitoring(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            cbOnLogReceived = new API.OnLogReceived(RealtimeLogReceived);
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_StartMonitoringLog(sdkContext, deviceID, cbOnLogReceived);
+            if (result == BS2ErrorCode.BS_SDK_SUCCESS)
+                Console.WriteLine("Activated log monitoring.");
+            else
+                Console.WriteLine("Got error({0}).", result);
+        }
+
+        void stopMonitoring(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)
+        {
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_StopMonitoringLog(sdkContext, deviceID);
+            if (result == BS2ErrorCode.BS_SDK_SUCCESS)
+                Console.WriteLine("Deactivated log monitoring.");
+            else
+                Console.WriteLine("Got error({0}).", result);
+
+            cbOnLogReceived = null;
         }
 
         void print(IntPtr sdkContext, BS2Door door)
@@ -730,6 +774,7 @@ namespace Suprema
             Console.WriteLine("     |--dualAuthScheduleID[{0}]", door.dualAuthScheduleID);
             Console.WriteLine("     |--dualAuthDevice[{0}]", door.dualAuthDevice);
             Console.WriteLine("     |--dualAuthApprovalType[{0}]", (BS2DualAuthApprovalEnum)door.dualAuthApprovalType);
+            Console.WriteLine("     |--extendedAutoLockTimeout[{0}s]", door.extendedAutoLockTimeout);
             Console.WriteLine("     |--dualAuthTimeout[{0}ms]", door.dualAuthTimeout);
             if (door.numDualAuthApprovalGroups > 0)
             {

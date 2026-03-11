@@ -20,19 +20,23 @@ namespace Suprema
         private readonly object locker = new object();
         private EventWaitHandle eventWaitHandle = new AutoResetEvent(false);
         private Queue<UInt32> deviceIDQueue = new Queue<UInt32>();
+        /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
         private static string m_ip;
         private static UInt16 m_port = (UInt16)BS2Environment.BS2_TCP_DEVICE_PORT_DEFAULT;
+        */
         public ReconnectionTask(IntPtr sdkContext)
         {
             this.sdkContext = sdkContext;
             thread = new Thread(run);
         }
 
+        /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
         public static void setIpPort(string ip, UInt16 port)
         {
             m_ip = ip;
             m_port = port;
         }
+        */
 
         public void enqueue(UInt32 deviceID)
         {
@@ -107,6 +111,9 @@ namespace Suprema
 
                 if (deviceID != 0)
                 {
+                    Console.WriteLine("trying to reconnect Device[{0, 10}].", deviceID);
+
+                    /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
                     Console.WriteLine("trying to reconnect DeviceID[{0, 10}] IP:[{1}]port:[{2}].", deviceID, m_ip, m_port);
 
                     BS2ErrorCode result = new BS2ErrorCode();
@@ -123,6 +130,7 @@ namespace Suprema
                         Thread.Sleep(1000);
                     }
                     Marshal.FreeHGlobal(ptrIPAddr);
+                    */
 
                     /*
                     BS2ErrorCode result = (BS2ErrorCode)API.BS2_ConnectDevice(sdkContext, deviceID);
@@ -139,6 +147,20 @@ namespace Suprema
                         }
                     }*/
 
+                    //원본
+                    BS2ErrorCode result = (BS2ErrorCode)API.BS2_ConnectDevice(sdkContext, deviceID);
+                    if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                    {
+                        if (result != BS2ErrorCode.BS_SDK_ERROR_CANNOT_CONNECT_SOCKET)
+                        {
+                            Console.WriteLine("Can't connect to device(errorCode : {0}).", result);
+                            return;
+                        }
+                        else
+                        {
+                            enqueue(deviceID);
+                        }
+                    }
                 }
                 else
                 {
@@ -151,7 +173,9 @@ namespace Suprema
 
     public abstract class UnitTest
     {
+        /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
         public delegate void connectionPtr(IntPtr sdkcontext, uint deviceID);
+        */
 
         private string title;
         private API.OnDeviceFound cbOnDeviceFound = null;
@@ -159,8 +183,10 @@ namespace Suprema
         private API.OnDeviceConnected cbOnDeviceConnected = null;
         private API.OnDeviceDisconnected cbOnDeviceDisconnected = null;
 
+        /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
         private connectionPtr cbOnDeviceConnectedImpl = null;
         private connectionPtr cbOnDeviceDisconnectedImpl = null;
+        */
 
         protected IntPtr sdkContext = IntPtr.Zero;
 #if !SDK_AUTO_CONNECTION
@@ -202,11 +228,13 @@ namespace Suprema
             }
         }
 
+        /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
         public void setConnectionCb(connectionPtr cbConn, connectionPtr cbDisconn)
         {
             cbOnDeviceConnectedImpl = cbConn;
             cbOnDeviceDisconnectedImpl = cbDisconn;
         }
+        */
 
         public UnitTest()
         {
@@ -320,7 +348,50 @@ namespace Suprema
                 {
                     //bSsl = true;
                 }
+            }
 
+            const int MILLI_SEC = 1000;
+            Int32 resTimeout = 0;
+            result = (BS2ErrorCode)API.BS2_GetDefaultResponseTimeout(sdkContext, out resTimeout);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("GetDefaultResponseTimeout: Got error({0}).", result);
+                API.BS2_ReleaseContext(sdkContext);
+                sdkContext = IntPtr.Zero;
+                return;
+            }
+
+            Console.WriteLine("Set the default response time. [{0} Sec. (Default)]", resTimeout / MILLI_SEC);
+            Console.Write(">>>> ");
+            resTimeout = (Int32)(Util.GetInput((UInt32)resTimeout));
+            result = (BS2ErrorCode)API.BS2_SetDefaultResponseTimeout(sdkContext, resTimeout * MILLI_SEC);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("SetDefaultResponseTimeout: Got error({0}).", result);
+                API.BS2_ReleaseContext(sdkContext);
+                sdkContext = IntPtr.Zero;
+                return;
+            }
+
+            result = (BS2ErrorCode)API.BS2_GetDefaultLongResponseTimeout(sdkContext, out resTimeout);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("BS2_GetDefaultLongResponseTimeout: Got error({0}).", result);
+                API.BS2_ReleaseContext(sdkContext);
+                sdkContext = IntPtr.Zero;
+                return;
+            }
+
+            Console.WriteLine("Set the default response time (long time command). [{0} Sec. (Default)]", resTimeout / MILLI_SEC);
+            Console.Write(">>>> ");
+            resTimeout = (Int32)(Util.GetInput((UInt32)resTimeout));
+            result = (BS2ErrorCode)API.BS2_SetDefaultLongResponseTimeout(sdkContext, resTimeout * MILLI_SEC);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("BS2_SetDefaultLongResponseTimeout: Got error({0}).", result);
+                API.BS2_ReleaseContext(sdkContext);
+                sdkContext = IntPtr.Zero;
+                return;
             }
 
             Console.WriteLine("+-----------------------------------------------------------+");
@@ -665,9 +736,12 @@ namespace Suprema
                 return false;
             }
             Marshal.FreeHGlobal(ptrIPAddr);
+
+            /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
 #if !SDK_AUTO_CONNECTION
             ReconnectionTask.setIpPort(deviceIpAddress, port);
 #endif
+            */
             Console.WriteLine(">>>> Successfully connected to the device[{0}].", deviceID);
             return true;
         }
@@ -741,13 +815,12 @@ namespace Suprema
         void DeviceConnected(UInt32 deviceID)
         {
             Console.WriteLine("[CB] Device[{0, 10}] has been connected.", deviceID);
+            /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
             if (cbOnDeviceConnectedImpl != null)
             {
                 cbOnDeviceConnectedImpl(sdkContext, deviceID);
-            } else
-            {
-                Console.WriteLine("cbOnDeviceConnectedImpl is null");
             }
+            */
         }
 
         void DeviceDisconnected(UInt32 deviceID)
@@ -758,16 +831,14 @@ namespace Suprema
             {
                 Console.WriteLine("enqueue");
                 reconnectionTask.enqueue(deviceID);
-
             }
 #endif
+            /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
             if (cbOnDeviceDisconnectedImpl != null)
             {
                 cbOnDeviceDisconnectedImpl(sdkContext, deviceID);
-            } else
-            {
-                Console.WriteLine("cbOnDeviceDisconnectedImpl is null");
-            }         
+            }
+            */
         }
 
         UInt32 PreferMethodHandle(UInt32 deviceID)

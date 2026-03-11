@@ -450,16 +450,16 @@ string Utility::getStringOfDeviceType(BS2_DEVICE_TYPE type)
 		return "BS2a";
 	case BS2_DEVICE_TYPE_BIOENTRY_W3:
 		return "BEW3";
-	case BS2_DEVICE_TYPE_CORESTATION_20:
-		return "CS-20";
-	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
-		return "DI-24";
-	case BS2_DEVICE_TYPE_BIOSTATION_3_MAX:
-		return "BS3M";
-	case BS2_DEVICE_TYPE_BIOSTATION_3_MAX_FP:
-		return "BS3M-Fp";
-	case BS2_DEVICE_TYPE_XPASS_Q2:
-		return "XPQ2";
+	//case BS2_DEVICE_TYPE_CORESTATION_20:
+	//	return "CS-20";
+	//case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
+	//	return "DI-24";
+	//case BS2_DEVICE_TYPE_BIOSTATION_3_MAX:
+	//	return "BS3M";
+	//case BS2_DEVICE_TYPE_BIOSTATION_3_MAX_FP:
+	//	return "BS3M-Fp";
+	//case BS2_DEVICE_TYPE_XPASS_Q2:
+	//	return "XPQ2";
 	case BS2_DEVICE_TYPE_UNKNOWN:
 	default:
 		break;
@@ -929,8 +929,8 @@ int Utility::connectSlave(void* context, DeviceInfo& device, bool isSlave, BS2_D
 	switch (device.type_)
 	{
 	case BS2_DEVICE_TYPE_CORESTATION_40:
-	case BS2_DEVICE_TYPE_CORESTATION_20:
-	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
+	//case BS2_DEVICE_TYPE_CORESTATION_20:
+	//case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
 		BS2_DEVICE_ID hostID;
 		if (isSlave) hostID = slaveID;
 		else hostID = device.id_;
@@ -1041,8 +1041,8 @@ int Utility::searchAndAddSlave(void* context, DeviceList& deviceList)
 	switch (type)
 	{
 	case BS2_DEVICE_TYPE_CORESTATION_40:
-	case BS2_DEVICE_TYPE_CORESTATION_20:
-	case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
+	//case BS2_DEVICE_TYPE_CORESTATION_20:
+	//case BS2_DEVICE_TYPE_DOOR_INTERFACE_24:
 		sdkResult = Utility::searchCSTSlave(context, deviceList, hostID, isSlave);
 		break;
 
@@ -1418,19 +1418,19 @@ void Utility::displayCSTSlaveList(const vector<BS2Rs485SlaveDeviceEX>& devices)
 {
 	int index = 0;
 	printf("%2u - Skip\n", index);
-	for (const auto& device : devices)
-	{
-		const BS2Rs485SlaveDeviceEX& info = device;
-		bool isGrandSlave = (info.parentID > 255);	// don't care the channelInfo of grand slave.
+	//for (const auto& device : devices)
+	//{
+	//	const BS2Rs485SlaveDeviceEX& info = device;
+	//	bool isGrandSlave = (info.parentID > 255);	// don't care the channelInfo of grand slave.
 
-		printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d, ",
-			++index,
-			info.deviceID,
-			Utility::getStringOfDeviceType(info.deviceType).c_str(),
-			info.enableOSDP, info.connected);
-		if (isGrandSlave) printf("MasterID: % 10u\n", info.parentID);
-		else printf(" Channel:%u\n", info.channelInfo);
-	}
+	//	printf("%2u - Device:%10u, Type:%-10s, OSDP:%d, Connected:%d, ",
+	//		++index,
+	//		info.deviceID,
+	//		Utility::getStringOfDeviceType(info.deviceType).c_str(),
+	//		info.enableOSDP, info.connected);
+	//	if (isGrandSlave) printf("MasterID: % 10u\n", info.parentID);
+	//	else printf(" Channel:%u\n", info.channelInfo);
+	//}
 }
 
 void Utility::displayWiegandList(const vector<BS2_DEVICE_ID>& devices)

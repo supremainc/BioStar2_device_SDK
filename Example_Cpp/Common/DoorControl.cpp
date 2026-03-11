@@ -87,12 +87,12 @@ int DoorControl::lockDoor(BS2_DEVICE_ID id, const vector<BS2_DOOR_ID>& doorIDs, 
 		if (BS_SDK_SUCCESS != sdkResult)
 			TRACE("BS2_LockDoor call failed: %d", sdkResult);
 	}
-	else
-	{
-		sdkResult = BS2_TimedLockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), timeout);
-		if (BS_SDK_SUCCESS != sdkResult)
-			TRACE("BS2_TimedLockDoor call failed: %d", sdkResult);
-	}
+	//else
+	//{
+	//	sdkResult = BS2_TimedLockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), timeout);
+	//	if (BS_SDK_SUCCESS != sdkResult)
+	//		TRACE("BS2_TimedLockDoor call failed: %d", sdkResult);
+	//}
 
 	return sdkResult;
 }
@@ -109,12 +109,12 @@ int DoorControl::unlockDoor(BS2_DEVICE_ID id, const vector<BS2_DOOR_ID>& doorIDs
 		if (BS_SDK_SUCCESS != sdkResult)
 			TRACE("BS2_UnlockDoor call failed: %d", sdkResult);
 	}
-	else
-	{
-		sdkResult = BS2_TimedUnlockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), timeout);
-		if (BS_SDK_SUCCESS != sdkResult)
-			TRACE("BS2_TimedUnlockDoor call failed: %d", sdkResult);
-	}
+	//else
+	//{
+	//	sdkResult = BS2_TimedUnlockDoor(context_, id, doorFlag, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), timeout);
+	//	if (BS_SDK_SUCCESS != sdkResult)
+	//		TRACE("BS2_TimedUnlockDoor call failed: %d", sdkResult);
+	//}
 
 	return sdkResult;
 }
@@ -184,7 +184,7 @@ void DoorControl::print(const BS2Door& door)
 	TRACE("dualAuthScheduleID : %u", door.dualAuthScheduleID);
 	TRACE("dualAuthDevice : %u", door.dualAuthDevice);
 	TRACE("dualAuthApprovalType : %u", door.dualAuthApprovalType);
-	TRACE("extendedAutoLockTimeout : %u", door.extendedAutoLockTimeout);
+	//TRACE("extendedAutoLockTimeout : %u", door.extendedAutoLockTimeout);
 	TRACE("dualAuthTimeout : %u", door.dualAuthTimeout);
 	TRACE("numDualAuthApprovalGroups : %u", door.numDualAuthApprovalGroups);
 	for (int idx = 0; idx < door.numDualAuthApprovalGroups; idx++)

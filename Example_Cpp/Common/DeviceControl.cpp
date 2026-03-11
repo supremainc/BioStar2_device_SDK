@@ -556,29 +556,29 @@ void DeviceControl::print(const BS2DeviceCapabilities& info)
 	TRACE("customSmartCardFelicaSupported : %u", info.customSmartCardFelicaSupported);
 	TRACE("ignoreInputAfterWiegandOut : %u", info.ignoreInputAfterWiegandOut);
 	TRACE("setSlaveBaudrateSupported : %u", info.setSlaveBaudrateSupported);
-	TRACE("rtspResolutionChangeSupported : %u", info.rtspResolutionChangeSupported);
-	TRACE("voipResolutionChangeSupported : %u", info.voipResolutionChangeSupported);
-	TRACE("voipTransportChangeSupported : %u", info.voipTransportChangeSupported);
-	TRACE("authMsgUserInfoSupported : %u", info.authMsgUserInfoSupported);
-	TRACE("scrambleKeyboardModeSupported : %u", info.scrambleKeyboardModeSupported);
+	//TRACE("rtspResolutionChangeSupported : %u", info.rtspResolutionChangeSupported);
+	//TRACE("voipResolutionChangeSupported : %u", info.voipResolutionChangeSupported);
+	//TRACE("voipTransportChangeSupported : %u", info.voipTransportChangeSupported);
+	//TRACE("authMsgUserInfoSupported : %u", info.authMsgUserInfoSupported);
+	//TRACE("scrambleKeyboardModeSupported : %u", info.scrambleKeyboardModeSupported);
 
-	TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
+	//TRACE("visualFaceTemplateVersion : %u", info.visualFaceTemplateVersion);
 
-	TRACE("authDenyMaskSupported : %u", info.authDenyMaskSupported);
-	TRACE("mifareExSupported : %u",	info.mifareExSupported);
-	TRACE("lockOverrideSupported : %u", info.lockOverrideSupported);
-	TRACE("doorModeOverrideSupported : %u", info.doorModeOverrideSupported);
-	TRACE("alternateAccessTimerSupported : %u", info.alternateAccessTimerSupported);
-	TRACE("realtimeIOStatusReportSupported : %u", info.realtimeIOStatusReportSupported);
-	TRACE("dynamicSlaveDeviceNumSupported : %u", info.dynamicSlaveDeviceNumSupported);
-    TRACE("secureTamperSupported : %u", info.secureTamperSupported);
+	//TRACE("authDenyMaskSupported : %u", info.authDenyMaskSupported);
+	//TRACE("mifareExSupported : %u",	info.mifareExSupported);
+	//TRACE("lockOverrideSupported : %u", info.lockOverrideSupported);
+	//TRACE("doorModeOverrideSupported : %u", info.doorModeOverrideSupported);
+	//TRACE("alternateAccessTimerSupported : %u", info.alternateAccessTimerSupported);
+	//TRACE("realtimeIOStatusReportSupported : %u", info.realtimeIOStatusReportSupported);
+	//TRACE("dynamicSlaveDeviceNumSupported : %u", info.dynamicSlaveDeviceNumSupported);
+ //   TRACE("secureTamperSupported : %u", info.secureTamperSupported);
 
-	TRACE("customSmartcardSlaveSupported : %u", info.customSmartcardSlaveSupported);
-	TRACE("serverPrivateMsgSupported : %u", info.serverPrivateMsgSupported);
-	TRACE("facilityCodeSupported : %u", info.facilityCodeSupported);
-	TRACE("masterAdminSupported : %u", info.masterAdminSupported);
-	TRACE("adminTwoStepAuthSupported : %u", info.adminTwoStepAuthSupported);
-	TRACE("qrDetectGuideLedSupported : %u", info.qrDetectGuideLedSupported);
+	//TRACE("customSmartcardSlaveSupported : %u", info.customSmartcardSlaveSupported);
+	//TRACE("serverPrivateMsgSupported : %u", info.serverPrivateMsgSupported);
+	//TRACE("facilityCodeSupported : %u", info.facilityCodeSupported);
+	//TRACE("masterAdminSupported : %u", info.masterAdminSupported);
+	//TRACE("adminTwoStepAuthSupported : %u", info.adminTwoStepAuthSupported);
+	//TRACE("qrDetectGuideLedSupported : %u", info.qrDetectGuideLedSupported);
 }
 
 #if 0

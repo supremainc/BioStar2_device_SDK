@@ -51,8 +51,8 @@ public:
 	int setRS485Config(BS2_DEVICE_ID id, const BS2Rs485Config& config);
 	int getRS485ConfigEx(BS2_DEVICE_ID id, BS2Rs485ConfigEX& config);
 	int setRS485ConfigEx(BS2_DEVICE_ID id, const BS2Rs485ConfigEX& config);
-	int getRS485ConfigExDynamic(BS2_DEVICE_ID id, BS2Rs485ConfigEXDynamic& config);
-	int setRS485ConfigExDynamic(BS2_DEVICE_ID id, const BS2Rs485ConfigEXDynamic& config);
+	//int getRS485ConfigExDynamic(BS2_DEVICE_ID id, BS2Rs485ConfigEXDynamic& config);
+	//int setRS485ConfigExDynamic(BS2_DEVICE_ID id, const BS2Rs485ConfigEXDynamic& config);
 	int getInputConfigEx(BS2_DEVICE_ID id, BS2InputConfigEx& config);
 	int setInputConfigEx(BS2_DEVICE_ID id, const BS2InputConfigEx& config);
 	int getRelayActionConfig(BS2_DEVICE_ID id, BS2RelayActionConfig& config);
@@ -75,8 +75,8 @@ public:
 	int setOsdpStandardActionConfig(BS2_DEVICE_ID id, const BS2OsdpStandardActionConfig& config) const;
 	int getCustomCardConfig(BS2_DEVICE_ID id, BS2CustomCardConfig& config) const;
 	int setCustomCardConfig(BS2_DEVICE_ID id, const BS2CustomCardConfig& config) const;
-	int getFacilityCodeConfig(BS2_DEVICE_ID id, BS2FacilityCodeConfig & config) const;
-	int setFacilityCodeConfig(BS2_DEVICE_ID id, const BS2FacilityCodeConfig& config) const;
+	//int getFacilityCodeConfig(BS2_DEVICE_ID id, BS2FacilityCodeConfig & config) const;
+	//int setFacilityCodeConfig(BS2_DEVICE_ID id, const BS2FacilityCodeConfig& config) const;
 
 	int getOperatorInAuthConfig(BS2_DEVICE_ID id, std::vector<BS2AuthOperatorLevel>& oprList);
 	int setOperatorInAuthConfig(BS2_DEVICE_ID id, const std::vector<BS2AuthOperatorLevel>& oprList);
@@ -116,15 +116,15 @@ public:
 	static void print(const BS2BarcodeConfig& config);
 	static void print(const BS2Rs485Config& config);
 	static void print(const BS2Rs485ConfigEX& config);
-	static void print(const BS2Rs485ConfigEXDynamic& config);
+	//static void print(const BS2Rs485ConfigEXDynamic& config);
 	static void printRS485Status(const BS2Rs485Config& config);
 	static void printRS485Status(const BS2Rs485ConfigEX& config);
 	static void print(const BS2Rs485Channel& channel);
 	static void print(const BS2Rs485ChannelEX& channel);
-	static void print(const BS2Rs485ChannelEXDynamic& channel);
+	//static void print(const BS2Rs485ChannelEXDynamic& channel);
 	static void print(const BS2Rs485SlaveDevice& device);
 	static void print(const BS2Rs485SlaveDeviceEX& device);
-	static void print(const BS2InputConfigEx& config);
+	//static void print(const BS2InputConfigEx& config);
 	static void print(const BS2RelayActionConfig& config);
 	static void print(const BS2WlanConfig& config);
 	static void print(const std::vector<BS2AuthOperatorLevel>& list);
@@ -143,11 +143,11 @@ public:
 	static void print(const BS2OsdpStandardConfig& config);
 	static void print(const BS2OsdpStandardActionConfig& config);
 	static void print(const BS2CustomMifareCard& card);
-	static void print(const BS2CustomMifareCardEx& card);
+	//static void print(const BS2CustomMifareCardEx& card);
 	static void print(const BS2CustomDesFireCard& card);
 	static void print(const BS2DesFireAppLevelKey& key);
 	static void print(const BS2CustomCardConfig& config);
-	static void print(const BS2FacilityCodeConfig& config);
+	//static void print(const BS2FacilityCodeConfig& config);
 	static uint32_t printOSDPDeviceID(const BS2OsdpStandardConfig& config);
 	static bool getOsdpID(const BS2OsdpStandardConfig& config, uint32_t osdpDeviceID, uint8_t& osdpID);
 

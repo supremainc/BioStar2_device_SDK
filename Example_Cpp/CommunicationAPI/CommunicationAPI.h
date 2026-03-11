@@ -115,6 +115,7 @@ enum EN_MENU_API
 {
 	MENU_COMM_BREAK = MENU_BREAK,
 	MENU_COMM_SET_KEEP_ALIVE = 1,
+	MENU_COMM_CONN_DEVICE,
 
 	MENU_COMM_GET_SERVER_PORT,
 	MENU_COMM_SET_SERVER_PORT,
@@ -195,6 +196,7 @@ std::vector<MENU_ITEM> menuInfoAPI =
 	
 	{MENU_SEPARATOR,						""},
 	{MENU_COMM_SET_KEEP_ALIVE,				"Set keep alive timeout"},
+	{MENU_COMM_CONN_DEVICE,					"Connect Device"},
 
 	{MENU_COMM_GET_SERVER_PORT,				"Get server port (IPV4)"},
 	{MENU_COMM_SET_SERVER_PORT,				"Set server port (IPV4)"},
@@ -284,7 +286,7 @@ bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone);
 void connectTestDevice(void* context, DeviceList& deviceList);
 int slaveMenu(void* context, DeviceList& deviceList);
 int osdpMenu(void* context, DeviceList& deviceList);
-int runAPIs(void* context, const DeviceList& deviceList);
+int runAPIs(void* context, DeviceList& deviceList);
 int enrollUserFaceEx_2_CS40(void* context, const DeviceList& deviceList);
 int updateConnectModeDevice2Server(void* context, BS2_DEVICE_ID id);
 int updateConnectModeServer2Device(void* context, BS2_DEVICE_ID id);

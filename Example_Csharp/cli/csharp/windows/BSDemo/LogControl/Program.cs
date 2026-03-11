@@ -7,13 +7,15 @@ namespace BSDemo
     {
         private LogControl lc = new LogControl();
 
+        /* Double connection issue when testing eventconfig  by charlie. 2026.03.05
         Program()
         {
             setConnectionCb(lc.onConnection, lc.onDisconnection);
         }
+        */
 
         protected override void runImpl(UInt32 deviceID)
-        {           
+        {
             lc.execute(sdkContext, deviceID, true);
         }
 

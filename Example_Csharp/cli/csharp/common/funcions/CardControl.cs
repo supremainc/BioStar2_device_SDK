@@ -300,6 +300,17 @@ namespace Suprema
                     Console.WriteLine("Enter the pin code which you want to set");
                     Console.Write(">>>> ");
                     string pinCodeStr = Console.ReadLine();
+                    if (BS2Environment.BS2_PIN_HASH_SIZE < pinCodeStr.Length)
+                    {
+                        Console.WriteLine("PIN code is too long");
+                        return;
+                    }
+                    else if (pinCodeStr.Length < BS2Environment.BS2_MIN_PIN_LEN)
+                    {
+                        Console.WriteLine($"PIN code is too short (min:{BS2Environment.BS2_MIN_PIN_LEN}");
+                        return;
+                    }
+
                     IntPtr pinChar = Marshal.StringToHGlobalAnsi(pinCodeStr);
                     IntPtr pinCode = Marshal.AllocHGlobal(BS2Environment.BS2_PIN_HASH_SIZE);
                     //result = (BS2ErrorCode)API.BS2_MakePinCode(sdkContext, pinCodeStr, pinCode);

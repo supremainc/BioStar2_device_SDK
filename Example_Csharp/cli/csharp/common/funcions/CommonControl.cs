@@ -14,6 +14,12 @@ namespace Suprema
     {
         public static readonly string[] kTRIGGER_TYPE = {"none", "event", "input", "schedule"};
         public static readonly string[] kACTION_TYPE = {"none","lock device", "unlock device", "reboot device", "release alarm", "general input", "relay", "output", "sound", "display", "buzzer", "led", "fire alarm input", "auth success", "auth fail", "lift"};
+        private static API.OnReadyToScan cbCardOnReadyToScan = null;
+
+        private static void ReadyToScanForCard(UInt32 deviceID, UInt32 sequence)
+        {
+            Console.WriteLine("Place your card on the device.");
+        }
 
         public static bool getTriggerActionConfig(IntPtr sdkContext, UInt32 deviceID, out BS2TriggerActionConfig config)
         {
@@ -750,6 +756,273 @@ namespace Suprema
             return BS2ErrorCode.BS_SDK_SUCCESS == result;
         }
 
+        public static BS2Card? scanCard(IntPtr sdkContext, UInt32 deviceID)
+        {
+            BS2Card card;
+
+            cbCardOnReadyToScan = new API.OnReadyToScan(ReadyToScanForCard);
+            Console.WriteLine("Trying to scan card.");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_ScanCard(sdkContext, deviceID, out card, cbCardOnReadyToScan);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            cbCardOnReadyToScan = null;
+            return card;
+        }
+
+        public static bool getUserIDs(IntPtr sdkContext, UInt32 deviceID, out List<byte[]> listUserIDs)
+        {
+            IntPtr outUidObjs = IntPtr.Zero;
+            UInt32 numUserIds = 0;
+            int structSize = BS2Environment.BS2_USER_ID_SIZE;
+
+            listUserIDs = new List<byte[]>();
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetUserList(sdkContext, deviceID, out outUidObjs, out numUserIds, null);
+            if (result == BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                IntPtr currUid = outUidObjs;
+                for (int i = 0; i < numUserIds; i++)
+                {
+                    byte[] userId = new byte[structSize];
+                    Marshal.Copy(currUid, userId, 0, structSize);
+
+                    listUserIDs.Add(userId);
+                    currUid += structSize;
+                }
+
+                API.BS2_ReleaseObject(outUidObjs);
+            }
+            else
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return false;
+            }
+
+            return 0 < listUserIDs.Count;
+        }
+
+        public static bool getLockOverrides(IntPtr sdkContext, UInt32 deviceID, ref List<BS2LockOverride> requests, out List<BS2LockOverride> listResponse)
+        {
+            Console.WriteLine("Trying to get LockOverrides");
+
+            Type structType = typeof(BS2LockOverride);
+            int structSize = Marshal.SizeOf(structType);
+
+            IntPtr responseObjs = IntPtr.Zero;
+            UInt32 numOfResponses = 0;
+            listResponse = new List<BS2LockOverride>();
+
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+            if (requests != null && 0 < requests.Count)
+            {
+                IntPtr requestObjs = Marshal.AllocHGlobal(structSize * requests.Count);
+                IntPtr curPtr = requestObjs;
+                foreach (BS2LockOverride item in requests)
+                {
+                    Marshal.StructureToPtr(item, curPtr, false);
+                    curPtr += structSize;
+                }
+
+                result = (BS2ErrorCode)API.BS2_GetLockOverride(sdkContext, deviceID, requestObjs, (UInt32)requests.Count, out responseObjs, out numOfResponses);
+
+                Marshal.FreeHGlobal(requestObjs);
+            }
+            else
+            {
+                result = (BS2ErrorCode)API.BS2_GetAllLockOverride(sdkContext, deviceID, out responseObjs, out numOfResponses);
+            }
+
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return false;
+            }
+
+            IntPtr currResponse = responseObjs;
+            for (int i = 0; i < numOfResponses; i++)
+            {
+                BS2LockOverride item = (BS2LockOverride)Marshal.PtrToStructure(currResponse, structType);
+                listResponse.Add(item);
+                currResponse += structSize;
+            }
+
+            API.BS2_ReleaseObject(responseObjs);
+
+            return true;
+        }
+
+        public static bool setLockOverrides(IntPtr sdkContext, UInt32 deviceID, ref List<BS2LockOverride> overrides)
+        {
+            Console.WriteLine("Trying to set LockOverrides");
+
+            int structSize = Marshal.SizeOf(typeof(BS2LockOverride));
+            IntPtr overrideObjs = Marshal.AllocHGlobal(structSize * overrides.Count);
+            IntPtr curPtr = overrideObjs;
+            foreach (BS2LockOverride item in overrides)
+            {
+                Marshal.StructureToPtr(item, curPtr, false);
+                curPtr += structSize;
+            }
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetLockOverride(sdkContext, deviceID, overrideObjs, (UInt32)overrides.Count);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            Marshal.FreeHGlobal(overrideObjs);
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static bool removeLockOverrides(IntPtr sdkContext, UInt32 deviceID, ref List<BS2LockOverride> requests)
+        {
+            Console.WriteLine("Trying to remove LockOverrides");
+
+            Type structType = typeof(BS2LockOverride);
+            int structSize = Marshal.SizeOf(structType);
+
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+            if (requests != null && 0 < requests.Count)
+            {
+                IntPtr requestObjs = Marshal.AllocHGlobal(structSize * requests.Count);
+                IntPtr curPtr = requestObjs;
+                foreach (BS2LockOverride item in requests)
+                {
+                    Marshal.StructureToPtr(item, curPtr, false);
+                    curPtr += structSize;
+                }
+
+                result = (BS2ErrorCode)API.BS2_RemoveLockOverride(sdkContext, deviceID, requestObjs, (UInt32)requests.Count);
+
+                Marshal.FreeHGlobal(requestObjs);
+            }
+            else
+            {
+                result = (BS2ErrorCode)API.BS2_RemoveAllLockOverride(sdkContext, deviceID);
+            }
+
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool getUserOverrides(IntPtr sdkContext, UInt32 deviceID, ref List<byte[]> requests, out List<BS2UserOverride> listResponse)
+        {
+            Console.WriteLine("Trying to get UserOverrides");
+
+            Type structType = typeof(BS2UserOverride);
+            int structSize = Marshal.SizeOf(structType);
+
+            IntPtr responseObjs = IntPtr.Zero;
+            UInt32 numOfResponses = 0;
+            listResponse = new List<BS2UserOverride>();
+
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+            if (requests != null && 0 < requests.Count)
+            {
+                int reqTypeSize = BS2Environment.BS2_USER_ID_SIZE;
+                IntPtr requestObjs = Marshal.AllocHGlobal(reqTypeSize * requests.Count);
+                IntPtr curPtr = requestObjs;
+                foreach (byte[] item in requests)
+                {
+                    Marshal.Copy(item, 0, curPtr, reqTypeSize);
+                    curPtr = IntPtr.Add(curPtr, reqTypeSize);
+                }
+
+                result = (BS2ErrorCode)API.BS2_GetUserOverride(sdkContext, deviceID, requestObjs, (UInt32)requests.Count, out responseObjs, out numOfResponses);
+
+                Marshal.FreeHGlobal(requestObjs);
+            }
+            else
+            {
+                result = (BS2ErrorCode)API.BS2_GetAllUserOverride(sdkContext, deviceID, out responseObjs, out numOfResponses);
+            }
+
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return false;
+            }
+
+            IntPtr currResponse = responseObjs;
+            for (int i = 0; i < numOfResponses; i++)
+            {
+                BS2UserOverride item = (BS2UserOverride)Marshal.PtrToStructure(currResponse, structType);
+                listResponse.Add(item);
+                currResponse = IntPtr.Add(currResponse, structSize);
+            }
+
+            API.BS2_ReleaseObject(responseObjs);
+
+            return true;
+        }
+
+        public static bool setUserOverrides(IntPtr sdkContext, UInt32 deviceID, ref List<BS2UserOverride> overrides)
+        {
+            Console.WriteLine("Trying to set UserOverrides");
+
+            int structSize = Marshal.SizeOf(typeof(BS2UserOverride));
+            IntPtr overrideObjs = Marshal.AllocHGlobal(structSize * overrides.Count);
+            IntPtr curPtr = overrideObjs;
+            foreach (BS2UserOverride item in overrides)
+            {
+                Marshal.StructureToPtr(item, curPtr, false);
+                curPtr = IntPtr.Add(curPtr, structSize);
+            }
+
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetUserOverride(sdkContext, deviceID, overrideObjs, (UInt32)overrides.Count);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            Marshal.FreeHGlobal(overrideObjs);
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static bool removeUserOverrides(IntPtr sdkContext, UInt32 deviceID, ref List<byte[]> requests)
+        {
+            Console.WriteLine("Trying to remove UserOverrides");
+
+            int structSize = BS2Environment.BS2_USER_ID_SIZE;
+
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+            if (requests != null && 0 < requests.Count)
+            {
+                IntPtr requestObjs = Marshal.AllocHGlobal(structSize * requests.Count);
+                IntPtr curPtr = requestObjs;
+                foreach (byte[] item in requests)
+                {
+                    Marshal.Copy(item, 0, curPtr, structSize);
+                    curPtr = IntPtr.Add(curPtr, structSize);
+                }
+
+                result = (BS2ErrorCode)API.BS2_RemoveUserOverride(sdkContext, deviceID, requestObjs, (UInt32)requests.Count);
+
+                Marshal.FreeHGlobal(requestObjs);
+            }
+            else
+            {
+                result = (BS2ErrorCode)API.BS2_RemoveAllUserOverride(sdkContext, deviceID);
+            }
+
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return false;
+            }
+
+            return true;
+        }
+
         public static void enterSmartcardKey(byte[] dst)
         {
             int index = 0;
@@ -768,6 +1041,280 @@ namespace Suprema
                 dst[index] = 0xFF;
             }
         }
+
+        public static bool lockDoor(IntPtr sdkContext, UInt32 deviceID, byte doorFlag, IntPtr doorIDObjs, UInt32 doorIDCount, UInt32 timeout = 0)
+        {
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+            if (0 == timeout)
+            {
+                Console.WriteLine("Trying to lock doors.");
+                result = (BS2ErrorCode)API.BS2_LockDoor(sdkContext, deviceID, doorFlag, doorIDObjs, doorIDCount);
+            }
+            else
+            {
+                Console.WriteLine("Trying to timed lock doors.");
+                result = (BS2ErrorCode)API.BS2_TimedLockDoor(sdkContext, deviceID, doorFlag, doorIDObjs, doorIDCount, timeout);
+            }
+
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static bool unlockDoor(IntPtr sdkContext, UInt32 deviceID, byte doorFlag, IntPtr doorIDObjs, UInt32 doorIDCount, UInt32 timeout = 0)
+        {
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+            if (0 == timeout)
+            {
+                Console.WriteLine("Trying to unlock doors.");
+                result = (BS2ErrorCode)API.BS2_UnlockDoor(sdkContext, deviceID, doorFlag, doorIDObjs, doorIDCount);
+            }
+            else
+            {
+                Console.WriteLine("Trying to timed unlock doors.");
+                result = (BS2ErrorCode)API.BS2_TimedUnlockDoor(sdkContext, deviceID, doorFlag, doorIDObjs, doorIDCount, timeout);
+            }
+
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+            }
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static bool getDeviceIOStatus(IntPtr sdkContext, UInt32 deviceID, ref List<UInt32> requests, out List<BS2IOStatus> listResponse)
+        {
+            Console.WriteLine("Trying to get DeviceIO Status");
+
+            Type responseType = typeof(BS2IOStatus);
+            int responseTypeSize = Marshal.SizeOf(responseType);
+
+            IntPtr responseObjs = IntPtr.Zero;
+            UInt32 numOfResponses = 0;
+            listResponse = new List<BS2IOStatus>();
+
+            BS2ErrorCode result = BS2ErrorCode.BS_SDK_SUCCESS;
+            if (requests != null && 0 < requests.Count)
+            {
+                int reqTypeSize = sizeof(UInt32);
+                IntPtr requestObjs = Marshal.AllocHGlobal(reqTypeSize * requests.Count);
+                for (int idx = 0; idx < requests.Count; idx++)
+                {
+                    Marshal.WriteInt32(requestObjs, idx * reqTypeSize, (int)requests[idx]);
+                }
+
+                result = (BS2ErrorCode)API.BS2_GetDeviceIOStatus(sdkContext, deviceID, requestObjs, (UInt32)requests.Count, out responseObjs, out numOfResponses);
+
+                Marshal.FreeHGlobal(requestObjs);
+            }
+            else
+            {
+                result = (BS2ErrorCode)API.BS2_GetAllDeviceIOStatus(sdkContext, deviceID, out responseObjs, out numOfResponses);
+            }
+
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+            {
+                Console.WriteLine("Got error({0}).", result);
+                return false;
+            }
+
+            IntPtr currResponse = responseObjs;
+            for (int i = 0; i < numOfResponses; i++)
+            {
+                BS2IOStatus item = (BS2IOStatus)Marshal.PtrToStructure(currResponse, responseType);
+                listResponse.Add(item);
+                currResponse = IntPtr.Add(currResponse, responseTypeSize);
+            }
+
+            API.BS2_ReleaseObject(responseObjs);
+
+            return true;
+        }
+
+        public static bool getIPConfig(IntPtr sdkContext, UInt32 deviceID, out BS2IpConfig config)
+        {
+            Console.WriteLine("Trying to get IPConfig");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_GetIPConfig(sdkContext, deviceID, out config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                Console.WriteLine("Got error({0}).", result);
+            else
+                Console.WriteLine("Call success.");
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
+        public static bool setIPConfig(IntPtr sdkContext, UInt32 deviceID, ref BS2IpConfig config)
+        {
+            Console.WriteLine("useDhcp ? [{0}]", config.useDHCP != 0 ? "Y/n" : "y/N");
+            Console.Write(">>>> ");
+            bool bInput = config.useDHCP != 0 ? Util.IsYes() : !Util.IsNo();
+            config.useDHCP = (byte)(bInput ? 1 : 0);
+
+            Console.WriteLine("useDns ? [{0}]", config.useDNS != 0 ? "Y/n" : "y/N");
+            Console.Write(">>>> ");
+            bInput = config.useDNS != 0 ? Util.IsYes() : !Util.IsNo();
+            config.useDNS = (byte)(bInput ? 1 : 0);
+
+            string strInput;
+            byte[] bytesInput = null;
+            if (config.useDHCP == 0)
+            {
+                Console.WriteLine("ipAddress ? [(Blank:{0})]", Encoding.UTF8.GetString(config.ipAddress));
+                Console.Write(">>>> ");
+                strInput = Console.ReadLine();
+                if (strInput.Length == 0)
+                {
+                    Console.WriteLine("   Do you want to keep the value? [Y(keep) / n(clear)");
+                    Console.Write("   >>>> ");
+                    if (!Util.IsYes())
+                    {
+                        Array.Clear(config.ipAddress, 0, config.ipAddress.Length);
+                    }
+                }
+                else
+                {
+                    Array.Clear(config.ipAddress, 0, config.ipAddress.Length);
+                    bytesInput = Encoding.UTF8.GetBytes(strInput);
+                    Array.Copy(bytesInput, 0, config.ipAddress, 0, Math.Min(bytesInput.Length, config.ipAddress.Length));
+                }
+                if (Encoding.UTF8.GetString(config.ipAddress).Length > 0)
+                {
+                    IPAddress dummy;
+                    if (IPAddress.TryParse(Encoding.UTF8.GetString(config.ipAddress).TrimEnd('\0'), out dummy) == false)
+                    {
+                        Console.WriteLine("Wrong ipAddress: {0})", Encoding.UTF8.GetString(config.ipAddress));
+                        return false;
+                    }
+                }
+
+                Console.WriteLine("gateway ? [(Blank:{0})]", Encoding.UTF8.GetString(config.gateway));
+                Console.Write(">>>> ");
+                strInput = Console.ReadLine();
+                bytesInput = null;
+                if (strInput.Length == 0)
+                {
+                    Console.WriteLine("   Do you want to keep the value? [Y(keep) / n(clear)]");
+                    Console.Write("   >>>> ");
+                    if (!Util.IsYes())
+                    {
+                        Array.Clear(config.gateway, 0, config.gateway.Length);
+                    }
+                }
+                else
+                {
+                    Array.Clear(config.gateway, 0, config.gateway.Length);
+                    bytesInput = Encoding.UTF8.GetBytes(strInput);
+                    Array.Copy(bytesInput, 0, config.gateway, 0, Math.Min(bytesInput.Length, config.gateway.Length));
+                }
+                if (Encoding.UTF8.GetString(config.gateway).Length > 0)
+                {
+                    IPAddress dummy;
+                    if (IPAddress.TryParse(Encoding.UTF8.GetString(config.gateway).TrimEnd('\0'), out dummy) == false)
+                    {
+                        Console.WriteLine("Wrong gateway: {0})", Encoding.UTF8.GetString(config.gateway));
+                        return false;
+                    }
+                }
+
+                Console.WriteLine("subnetMask ? [(Blank:{0})]", Encoding.UTF8.GetString(config.subnetMask));
+                Console.Write(">>>> ");
+                strInput = Console.ReadLine();
+                bytesInput = null;
+                if (strInput.Length == 0)
+                {
+                    Console.WriteLine("   Do you want to keep the value? [Y(keep) / n(clear)]");
+                    Console.Write("   >>>> ");
+                    if (!Util.IsYes())
+                    {
+                        Array.Clear(config.subnetMask, 0, config.subnetMask.Length);
+                    }
+                }
+                else
+                {
+                    Array.Clear(config.subnetMask, 0, config.subnetMask.Length);
+                    bytesInput = Encoding.UTF8.GetBytes(strInput);
+                    Array.Copy(bytesInput, 0, config.subnetMask, 0, Math.Min(bytesInput.Length, config.subnetMask.Length));
+                }
+                if (Encoding.UTF8.GetString(config.subnetMask).Length > 0)
+                {
+                    IPAddress dummy;
+                    if (IPAddress.TryParse(Encoding.UTF8.GetString(config.subnetMask).TrimEnd('\0'), out dummy) == false)
+                    {
+                        Console.WriteLine("Wrong subnetMask: {0})", Encoding.UTF8.GetString(config.subnetMask));
+                        return false;
+                    }
+                }
+            }
+
+            Console.WriteLine("port ? [1~65535 (Blank:{0})]", BS2Environment.BS2_TCP_DEVICE_PORT_DEFAULT);
+            Console.Write(">>>> ");
+            int nInput = Util.GetInput(BS2Environment.BS2_TCP_DEVICE_PORT_DEFAULT);
+            config.port = (UInt16)nInput;
+
+            Console.WriteLine("Do you want to use server to device connection mode? [Y/n]");
+            Console.Write(">>>> ");
+            if (Util.IsYes())
+                config.connectionMode = (byte)BS2ConnectionModeEnum.SERVER_TO_DEVICE;
+            else
+                config.connectionMode = (byte)BS2ConnectionModeEnum.DEVICE_TO_SERVER;
+
+            //if (config.connectionMode == (byte)BS2ConnectionModeEnum.DEVICE_TO_SERVER)
+            //{
+                Console.WriteLine("serverAddr ? [(Blank:{0})]", Encoding.UTF8.GetString(config.serverAddr));
+                Console.Write(">>>> ");
+                strInput = Console.ReadLine();
+                bytesInput = null;
+                if (strInput.Length == 0)
+                {
+                    Console.WriteLine("   Do you want to keep the value? [Y(keep) / n(clear)]");
+                    Console.Write("   >>>> ");
+                    if (!Util.IsYes())
+                    {
+                        Array.Clear(config.serverAddr, 0, config.serverAddr.Length);
+                    }
+                }
+                else
+                {
+                    Array.Clear(config.serverAddr, 0, config.serverAddr.Length);
+                    bytesInput = Encoding.UTF8.GetBytes(strInput);
+                    Array.Copy(bytesInput, 0, config.serverAddr, 0, Math.Min(bytesInput.Length, config.serverAddr.Length));
+                }
+                //if (Encoding.UTF8.GetString(config.serverAddr).TrimEnd('\0').Length > 0)
+                //{
+                //    IPAddress dummy;
+                //    if (IPAddress.TryParse(Encoding.UTF8.GetString(config.serverAddr).TrimEnd('\0'), out dummy) == false)
+                //    {
+                //        Console.WriteLine("Wrong serverAddr: {0})", Encoding.UTF8.GetString(config.serverAddr));
+                //        return false;
+                //    }
+                //}
+                config.serverAddr[0] = Convert.ToByte('\0');
+
+                Console.WriteLine("serverPort ? [1~65535 (Blank:{0})]", BS2Environment.BS2_TCP_SERVER_PORT_DEFAULT);
+                Console.Write(">>>> ");
+                nInput = Util.GetInput(BS2Environment.BS2_TCP_SERVER_PORT_DEFAULT);
+                config.serverPort = (UInt16)nInput;
+
+                Console.WriteLine("sslServerPort ? [1~65535 (Blank:{0})]", BS2Environment.BS2_TCP_SSL_SERVER_PORT_DEFAULT);
+                Console.Write(">>>> ");
+                nInput = Util.GetInput(BS2Environment.BS2_TCP_SSL_SERVER_PORT_DEFAULT);
+                config.sslServerPort = (UInt16)nInput;
+            //}
+
+            Console.WriteLine("Trying to set IPConfig");
+            BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetIPConfig(sdkContext, deviceID, ref config);
+            if (result != BS2ErrorCode.BS_SDK_SUCCESS)
+                Console.WriteLine("Got error({0}).", result);
+            else
+                Console.WriteLine("Set IP configuration succeeded.");
+
+            return BS2ErrorCode.BS_SDK_SUCCESS == result;
+        }
+
 
         public static void print(ref BS2TriggerActionConfig config)
         {
@@ -1258,10 +1805,20 @@ namespace Suprema
             Console.WriteLine("     |--visualFaceTemplateVersion : {0}", info.visualFaceTemplateVersion);
 
             Console.WriteLine("     |--authDenyMaskSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_AUTHDENYMASK));
-            Console.WriteLine("     |--mifareCardConfigExSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX));
+            Console.WriteLine("     |--mifareExSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_MIFARECARDCONFIGEX));
+		    Console.WriteLine("     |--lockOverrideSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_LOCK_OVERRIDE));
+		    Console.WriteLine("     |--doorModeOverrideSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_DOORMODE_OVERRIDE));
+		    Console.WriteLine("     |--alternateAccessTimerSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_ALTERNATE_ACCESSTIMER));
+		    Console.WriteLine("     |--realtimeIOStatusReportSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_REALTIME_IOSTATUS));
+		    Console.WriteLine("     |--dynamicSlaveDeviceNumSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_DYNAMIC_SLAVEDEVICE));
+    	    Console.WriteLine("     |--secureTamperSupported : {0}", Convert.ToBoolean(info.functionSupported4 & (byte)BS2CapabilityFunctionSupport4.FUNCTION4_SUPPORT_SECURETAMPER));
 
-            Console.WriteLine("     |--masterAdminSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_MASTERADMIN));
-            Console.WriteLine("     |--adminTwoStepAuthSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_ADMINTWOSTEPAUTH));
+			Console.WriteLine("     |--customSmartcardSlaveSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_CUSTOM_SMARTCARDSLAVE));
+			Console.WriteLine("     |--serverPrivateMsgSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_SERVER_PRIVATEMSG));
+			Console.WriteLine("     |--facilityCodeSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_FACILITYCODE));
+			Console.WriteLine("     |--masterAdminSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_MASTER_ADMIN));
+			Console.WriteLine("     |--adminTwoStepAuthSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_ADMIN_TWOSTEP_AUTH));
+			Console.WriteLine("     |--qrDetectGuideLedSupported : {0}", Convert.ToBoolean(info.functionSupported5 & (byte)BS2CapabilityFunctionSupport5.FUNCTION5_SUPPORT_QR_DETECT_GUIDELED));
         }
 
         public static void print(ref BS2DesFireCardConfigEx config)
@@ -1287,6 +1844,79 @@ namespace Suprema
             Console.WriteLine($"     |--kernelVer : {config.kernelVer.major}.{config.kernelVer.minor}.{config.kernelVer.ext}");
             Console.WriteLine($"     |--bscoreVer : {config.bscoreVer.major}.{config.bscoreVer.minor}.{config.bscoreVer.ext}");
             Console.WriteLine($"     |--firmwareVer : {config.firmwareVer.major}.{config.firmwareVer.minor}.{config.firmwareVer.ext}");
+            Console.WriteLine("<<<< ");
+        }
+
+        public static void print(BS2LockOverride result, UInt32 index)
+        {
+            Console.WriteLine("<<<< Lock Overrides item[{0}]", index);
+            Console.WriteLine("     |--cardID : [{0:X2}{1:X2}{2:X2}{3:X2}{4:X2}{5:X2}{6:X2}{7:X2}]",
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 8],
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 7],
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 6],
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 5],
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 4],
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 3],
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 2],
+                    result.cardID[BS2Environment.BS2_CARD_DATA_SIZE - 1]);
+            Console.WriteLine("     |--issueCount : {0}", result.issueCount);
+            Console.WriteLine("     |--cardType : {0}", result.cardType);
+            Console.WriteLine("     |--size : {0}", result.size);
+            Console.WriteLine("     |--userID : {0}", Encoding.ASCII.GetString(result.userID ?? new byte[0]).TrimEnd('\0'));
+        }
+
+        public static void print(BS2UserOverride result, UInt32 index)
+        {
+            Console.WriteLine("<<<< User Overrides item[{0}]", index);
+            Console.WriteLine("     |--userID : {0}", Encoding.ASCII.GetString(result.userID ?? new byte[0]).TrimEnd('\0'));
+            Console.WriteLine("     |--useExtendedAutoLockTimeout : {0}", result.useExtendedAutoLockTimeout);
+        }
+
+        public static string getAllStatusOfPort(ref BS2_IO_STATUS portStates)
+        {
+            StringBuilder states = new StringBuilder();
+            for (int idx = 0; idx < portStates.count; idx++)
+            {
+                states.Append(Convert.ToString(portStates.status[idx])).Append(", ");
+            }
+
+            return states.ToString();
+        }
+
+        public static void print(BS2IOStatus status)
+        {
+            StringBuilder siStates = new StringBuilder();
+            for (int idx = 0; idx < status.numOfSupervisorInput; idx++)
+            {
+                siStates.Append(Convert.ToString(status.supervisorInputStatus[idx])).Append(", ");
+            }
+
+            Console.WriteLine("<<<< Device IO Status");
+            Console.WriteLine("     |--deviceID : {0}", status.deviceID);
+            Console.WriteLine("     |--input[{0}] : [{1}]", status.input.count, getAllStatusOfPort(ref status.input));
+            Console.WriteLine("     |--output[{0}] : [{1}]", status.output.count, getAllStatusOfPort(ref status.output));
+            Console.WriteLine("     |--relay[{0}] : [{1}]", status.relay.count, getAllStatusOfPort(ref status.relay));
+            Console.WriteLine("     |--tamper[{0}] : [{1}]", status.tamper.count, getAllStatusOfPort(ref status.tamper));
+            Console.WriteLine("     |--auxIn[{0}] : [{1}]", status.auxIn.count, getAllStatusOfPort(ref status.auxIn));
+            Console.WriteLine("     |--auxOut[{0}] : [{1}]", status.auxOut.count, getAllStatusOfPort(ref status.auxOut));
+            Console.WriteLine("     |--supervisorInputStatus[{0}] : [{1}]", status.numOfSupervisorInput, siStates.ToString());
+        }
+
+        public static void print(ref BS2IpConfig config)
+        {
+            Console.WriteLine(">>>> IP configuration ");
+            Console.WriteLine("     |--connectionMode : {0}", config.connectionMode);
+            Console.WriteLine("     |--useDHCP : {0}", config.useDHCP);
+            Console.WriteLine("     |--useDNS : {0}", config.useDNS);
+            Console.WriteLine("     |--ipAddress : {0}", Encoding.UTF8.GetString(config.ipAddress), BitConverter.ToString(config.ipAddress));
+            Console.WriteLine("     |--gateway : {0}", Encoding.UTF8.GetString(config.gateway), BitConverter.ToString(config.gateway));
+            Console.WriteLine("     |--subnetMask : {0}", Encoding.UTF8.GetString(config.subnetMask), BitConverter.ToString(config.subnetMask));
+            Console.WriteLine("     |--serverAddr : {0}", Encoding.UTF8.GetString(config.serverAddr), BitConverter.ToString(config.serverAddr));
+            Console.WriteLine("     |--port : {0}", config.port);
+            Console.WriteLine("     |--serverPort : {0}", config.serverPort);
+            Console.WriteLine("     |--mtuSize : {0}", config.mtuSize);
+            Console.WriteLine("     |--baseband : {0}", config.baseband);
+            Console.WriteLine("     |--sslServerPort : {0}", config.sslServerPort);
             Console.WriteLine("<<<< ");
         }
     }

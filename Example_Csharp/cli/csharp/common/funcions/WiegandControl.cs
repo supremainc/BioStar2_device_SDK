@@ -172,194 +172,164 @@ namespace Suprema
             /*=======================H10301 26 bit format=======================*/
             configWiegandMulti.formats[0].formatID = 1;
             configWiegandMulti.formats[0].format.length = 26;
-            configWiegandMulti.formats[0].format.idFields = new byte[128];
-            configWiegandMulti.formats[0].format.parityFields = new byte[128];
-            configWiegandMulti.formats[0].format.parityType = new byte[4];
-            configWiegandMulti.formats[0].format.parityPos = new byte[4];
 
-            configWiegandMulti.formats[0].format.idFields[28] = 0x01;
-            configWiegandMulti.formats[0].format.idFields[29] = 0xFE;
-            configWiegandMulti.formats[0].format.idFields[61] = 0x01;
-            configWiegandMulti.formats[0].format.idFields[62] = 0xFF;
-            configWiegandMulti.formats[0].format.idFields[63] = 0xFE;
+            configWiegandMulti.formats[0].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0x01;
+            configWiegandMulti.formats[0].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFE;
 
+            configWiegandMulti.formats[0].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0x01;
+            configWiegandMulti.formats[0].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[0].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
+
+            configWiegandMulti.formats[0].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0x01;
+            configWiegandMulti.formats[0].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFF;
+            configWiegandMulti.formats[0].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xE0;
             configWiegandMulti.formats[0].format.parityType[0] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_EVEN;
-            configWiegandMulti.formats[0].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
-
             configWiegandMulti.formats[0].format.parityPos[0] = 0;
+
+            configWiegandMulti.formats[0].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0x1F;
+            configWiegandMulti.formats[0].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
+            configWiegandMulti.formats[0].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
             configWiegandMulti.formats[0].format.parityPos[1] = 25;
-
-            configWiegandMulti.formats[0].format.parityFields[28] = 0x01;
-            configWiegandMulti.formats[0].format.parityFields[29] = 0xFF;
-            configWiegandMulti.formats[0].format.parityFields[30] = 0xE0;
-
-            configWiegandMulti.formats[0].format.parityFields[62] = 0x1F;
-            configWiegandMulti.formats[0].format.parityFields[63] = 0xFE;
-            
 
 
             /*=======================H10302 37 bit format=======================*/
             configWiegandMulti.formats[1].formatID = 2;
             configWiegandMulti.formats[1].format.length = 37;                            //Set the length of the format. H10302 is a 37 bit format
-            configWiegandMulti.formats[1].format.idFields = new byte[128];
-            configWiegandMulti.formats[1].format.parityFields = new byte[128];
-            configWiegandMulti.formats[1].format.parityType = new byte[4];
-            configWiegandMulti.formats[1].format.parityPos = new byte[4];
 
             // H10302 uses only 1 field. The first field is from [0] ~ [31]
             // If you convert the bits used on the field in binary, it is as below. 35 bit as card ID.
             // 0000 1111 / 1111 1111 / 1111 1111 / 1111 1111 / 1111 1110        -> 0F / FF / FF / FF / FE
             //     27    /     28    /     29    /    30     /    31
-            configWiegandMulti.formats[1].format.idFields[27] = 0x0F;
-            configWiegandMulti.formats[1].format.idFields[28] = 0xFF;
-            configWiegandMulti.formats[1].format.idFields[29] = 0xFF;
-            configWiegandMulti.formats[1].format.idFields[30] = 0xFF;
-            configWiegandMulti.formats[1].format.idFields[31] = 0xFE;
-
-
-            configWiegandMulti.formats[1].format.parityType[0] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_EVEN;                        // The first parity bit is an even parity bit.
-            configWiegandMulti.formats[1].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;                         // The second parity bit is an odd parity bit.
-
-            configWiegandMulti.formats[1].format.parityPos[0] = 0;                         // The first parity bit's position is the first bit. So, it will be 0.
-            configWiegandMulti.formats[1].format.parityPos[1] = 36;                        // The second parity bit's position is the last bit. So, it will be 36.
-
+            configWiegandMulti.formats[1].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x0F;
+            configWiegandMulti.formats[1].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
+            configWiegandMulti.formats[1].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFF;
+            configWiegandMulti.formats[1].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[1].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
 
             // According to H10302, the first even parity calculates the bits starting from 1 ~ 18
             // 000 0<parity bit 1111 / 1111 1111 / 1111 1100                -> 0F / FF / FC
             //           27         /     28    /     29
-            configWiegandMulti.formats[1].format.parityFields[27] = 0x0F;
-            configWiegandMulti.formats[1].format.parityFields[28] = 0xFF;
-            configWiegandMulti.formats[1].format.parityFields[29] = 0xFC;
+            configWiegandMulti.formats[1].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x0F;
+            configWiegandMulti.formats[1].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
+            configWiegandMulti.formats[1].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFC;
+            configWiegandMulti.formats[1].format.parityType[0] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_EVEN;                        // The first parity bit is an even parity bit.
+            configWiegandMulti.formats[1].format.parityPos[0] = 0;                         // The first parity bit's position is the first bit. So, it will be 0.
 
             // The second parity calculates the bits starting from 18 ~ 35. Since this is for the second parity bit,
             // parityFields[32] ~ [63] is used.
             // 0000 0111 / 1111 1111 / 1111 111 0<parity bit
             //     61    /     62    /     63
-            configWiegandMulti.formats[1].format.parityFields[61] = 0x07;
-            configWiegandMulti.formats[1].format.parityFields[62] = 0xFF;
-            configWiegandMulti.formats[1].format.parityFields[63] = 0xFE;
+            configWiegandMulti.formats[1].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0x07;
+            configWiegandMulti.formats[1].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[1].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
+            configWiegandMulti.formats[1].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;                         // The second parity bit is an odd parity bit.
+            configWiegandMulti.formats[1].format.parityPos[1] = 36;                        // The second parity bit's position is the last bit. So, it will be 36.
 
 
             
             /*=======================H10304 37 bit format=======================*/
             configWiegandMulti.formats[2].formatID = 3;
             configWiegandMulti.formats[2].format.length = 37;
-            configWiegandMulti.formats[2].format.idFields = new byte[128];
-            configWiegandMulti.formats[2].format.parityFields = new byte[128];
-            configWiegandMulti.formats[2].format.parityType = new byte[4];
-            configWiegandMulti.formats[2].format.parityPos = new byte[4];
 
-            configWiegandMulti.formats[2].format.idFields[59] = 0x0F;
-            configWiegandMulti.formats[2].format.idFields[60] = 0xFF;
-            configWiegandMulti.formats[2].format.idFields[61] = 0xF0;
+            configWiegandMulti.formats[2].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x0F;
+            configWiegandMulti.formats[2].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
+            configWiegandMulti.formats[2].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xF0;
 
-            configWiegandMulti.formats[2].format.idFields[29] = 0x0F;
-            configWiegandMulti.formats[2].format.idFields[30] = 0xFF;
-            configWiegandMulti.formats[2].format.idFields[31] = 0xFE;
+            configWiegandMulti.formats[2].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0x0F;
+            configWiegandMulti.formats[2].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[2].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
 
+
+            configWiegandMulti.formats[2].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x0F;
+            configWiegandMulti.formats[2].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
+            configWiegandMulti.formats[2].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFC;
             configWiegandMulti.formats[2].format.parityType[0] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_EVEN;
-            configWiegandMulti.formats[2].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
-
             configWiegandMulti.formats[2].format.parityPos[0] = 0;
-            configWiegandMulti.formats[2].format.parityPos[1] = 36;
-
-            configWiegandMulti.formats[2].format.parityFields[27] = 0x0F;
-            configWiegandMulti.formats[2].format.parityFields[28] = 0xFF;
-            configWiegandMulti.formats[2].format.parityFields[29] = 0xFC;
  
-            configWiegandMulti.formats[2].format.parityFields[61] = 0x07;
-            configWiegandMulti.formats[2].format.parityFields[62] = 0xFF;
-            configWiegandMulti.formats[2].format.parityFields[63] = 0xFE;
+            configWiegandMulti.formats[2].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0x07;
+            configWiegandMulti.formats[2].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[2].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
+            configWiegandMulti.formats[2].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
+            configWiegandMulti.formats[2].format.parityPos[1] = 36;
 
 
             /*=======================Corporate 1000 35 bit format=======================*/
             configWiegandMulti.formats[3].formatID = 4;
             configWiegandMulti.formats[3].format.length = 35;
-            configWiegandMulti.formats[3].format.idFields = new byte[128];
-            configWiegandMulti.formats[3].format.parityFields = new byte[128];
-            configWiegandMulti.formats[3].format.parityType = new byte[4];
-            configWiegandMulti.formats[3].format.parityPos = new byte[4];
 
-            configWiegandMulti.formats[3].format.idFields[27] = 0x01;
-            configWiegandMulti.formats[3].format.idFields[28] = 0xFF;
-            configWiegandMulti.formats[3].format.idFields[29] = 0xE0;
+            configWiegandMulti.formats[3].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x01;
+            configWiegandMulti.formats[3].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
+            configWiegandMulti.formats[3].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xE0;
 
-            configWiegandMulti.formats[3].format.idFields[61] = 0x1F;
-            configWiegandMulti.formats[3].format.idFields[62] = 0xFF;
-            configWiegandMulti.formats[3].format.idFields[63] = 0xFE;
-
+            configWiegandMulti.formats[3].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0x1F;
+            configWiegandMulti.formats[3].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[3].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
+            
+            configWiegandMulti.formats[3].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x01;
+            configWiegandMulti.formats[3].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xB6;
+            configWiegandMulti.formats[3].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xDB;
+            configWiegandMulti.formats[3].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0x6D;
+            configWiegandMulti.formats[3].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xB6;
             configWiegandMulti.formats[3].format.parityType[0] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_EVEN;
-            configWiegandMulti.formats[3].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
-            configWiegandMulti.formats[3].format.parityType[2] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
-
             configWiegandMulti.formats[3].format.parityPos[0] = 1;
+
+            configWiegandMulti.formats[3].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x03;
+            configWiegandMulti.formats[3].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0x6D;
+            configWiegandMulti.formats[3].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xB6;
+            configWiegandMulti.formats[3].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xDB;
+            configWiegandMulti.formats[3].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0x6C;
+            configWiegandMulti.formats[3].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
             configWiegandMulti.formats[3].format.parityPos[1] = 34;
+
+            configWiegandMulti.formats[3].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x03;
+            configWiegandMulti.formats[3].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
+            configWiegandMulti.formats[3].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFF;
+            configWiegandMulti.formats[3].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[3].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFF;
+            configWiegandMulti.formats[3].format.parityType[2] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
             configWiegandMulti.formats[3].format.parityPos[2] = 0;
-
-            configWiegandMulti.formats[3].format.parityFields[27] = 0x01;
-            configWiegandMulti.formats[3].format.parityFields[28] = 0xB6;
-            configWiegandMulti.formats[3].format.parityFields[29] = 0xDB;
-            configWiegandMulti.formats[3].format.parityFields[30] = 0x6D;
-            configWiegandMulti.formats[3].format.parityFields[31] = 0xB6;
-
-            configWiegandMulti.formats[3].format.parityFields[59] = 0x03;
-            configWiegandMulti.formats[3].format.parityFields[60] = 0x6D;
-            configWiegandMulti.formats[3].format.parityFields[61] = 0xB6;
-            configWiegandMulti.formats[3].format.parityFields[62] = 0xDB;
-            configWiegandMulti.formats[3].format.parityFields[63] = 0x6C;
-
-            configWiegandMulti.formats[3].format.parityFields[91] = 0x03;
-            configWiegandMulti.formats[3].format.parityFields[92] = 0xFF;
-            configWiegandMulti.formats[3].format.parityFields[93] = 0xFF;
-            configWiegandMulti.formats[3].format.parityFields[94] = 0xFF;
-            configWiegandMulti.formats[3].format.parityFields[95] = 0xFF;
 
 
 
             /*=======================Corporate 1000 48 bit format=======================*/
             configWiegandMulti.formats[4].formatID = 5;
             configWiegandMulti.formats[4].format.length = 48;
-            configWiegandMulti.formats[4].format.idFields = new byte[128];
-            configWiegandMulti.formats[4].format.parityFields = new byte[128];
-            configWiegandMulti.formats[4].format.parityType = new byte[4];
-            configWiegandMulti.formats[4].format.parityPos = new byte[4];
 
-            configWiegandMulti.formats[4].format.idFields[26] = 0x3F;
-            configWiegandMulti.formats[4].format.idFields[27] = 0xFF;
-            configWiegandMulti.formats[4].format.idFields[28] = 0xFF;
+            configWiegandMulti.formats[4].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 26] = 0x3F;
+            configWiegandMulti.formats[4].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0xFF;
+            configWiegandMulti.formats[4].format.idFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
 
-            configWiegandMulti.formats[4].format.idFields[61] = 0xFF;
-            configWiegandMulti.formats[4].format.idFields[62] = 0xFF;
-            configWiegandMulti.formats[4].format.idFields[63] = 0xFE;
+            configWiegandMulti.formats[4].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFF;
+            configWiegandMulti.formats[4].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[4].format.idFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFE;
 
+
+            configWiegandMulti.formats[4].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 26] = 0x1B;
+            configWiegandMulti.formats[4].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0x6D;
+            configWiegandMulti.formats[4].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xB6;
+            configWiegandMulti.formats[4].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xDB;
+            configWiegandMulti.formats[4].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0x6D;
+            configWiegandMulti.formats[4].format.parityFields[0 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xB6;
             configWiegandMulti.formats[4].format.parityType[0] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_EVEN;
-            configWiegandMulti.formats[4].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
-            configWiegandMulti.formats[4].format.parityType[2] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
-
             configWiegandMulti.formats[4].format.parityPos[0] = 1;
+
+            configWiegandMulti.formats[4].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 26] = 0x36;
+            configWiegandMulti.formats[4].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0xDB;
+            configWiegandMulti.formats[4].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0x6D;
+            configWiegandMulti.formats[4].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xB6;
+            configWiegandMulti.formats[4].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xDB;
+            configWiegandMulti.formats[4].format.parityFields[1 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0x6C;
+            configWiegandMulti.formats[4].format.parityType[1] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
             configWiegandMulti.formats[4].format.parityPos[1] = 47;
+
+            configWiegandMulti.formats[4].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 26] = 0x7F;
+            configWiegandMulti.formats[4].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 27] = 0xFF;
+            configWiegandMulti.formats[4].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 28] = 0xFF;
+            configWiegandMulti.formats[4].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 29] = 0xFF;
+            configWiegandMulti.formats[4].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 30] = 0xFF;
+            configWiegandMulti.formats[4].format.parityFields[2 * BS2Environment.BS2_WIEGAND_FIELD_SIZE + 31] = 0xFF;
+            configWiegandMulti.formats[4].format.parityType[2] = (byte)BS2ParityTypeEnum.BS2_WIEGAND_PARITY_ODD;
             configWiegandMulti.formats[4].format.parityPos[2] = 0;
-
-            configWiegandMulti.formats[4].format.parityFields[26] = 0x1B;
-            configWiegandMulti.formats[4].format.parityFields[27] = 0x6D;
-            configWiegandMulti.formats[4].format.parityFields[28] = 0xB6;
-            configWiegandMulti.formats[4].format.parityFields[29] = 0xDB;
-            configWiegandMulti.formats[4].format.parityFields[30] = 0x6D;
-            configWiegandMulti.formats[4].format.parityFields[31] = 0xB6;
-
-            configWiegandMulti.formats[4].format.parityFields[58] = 0x36;
-            configWiegandMulti.formats[4].format.parityFields[59] = 0xDB;
-            configWiegandMulti.formats[4].format.parityFields[60] = 0x6D;
-            configWiegandMulti.formats[4].format.parityFields[61] = 0xB6;
-            configWiegandMulti.formats[4].format.parityFields[62] = 0xDB;
-            configWiegandMulti.formats[4].format.parityFields[63] = 0x6C;
-
-            configWiegandMulti.formats[4].format.parityFields[90] = 0x7F;
-            configWiegandMulti.formats[4].format.parityFields[91] = 0xFF;
-            configWiegandMulti.formats[4].format.parityFields[92] = 0xFF;
-            configWiegandMulti.formats[4].format.parityFields[93] = 0xFF;
-            configWiegandMulti.formats[4].format.parityFields[94] = 0xFF;
-            configWiegandMulti.formats[4].format.parityFields[95] = 0xFF;
 
             BS2ErrorCode result = (BS2ErrorCode)API.BS2_SetWiegandMultiConfig(sdkContext, deviceID, ref configWiegandMulti);
             if (result != BS2ErrorCode.BS_SDK_SUCCESS)
@@ -367,8 +337,6 @@ namespace Suprema
                 Console.WriteLine("Got error({0}).", result);
                 return;
             }
-
-            
         }
 
         public void setWiegandConfig(IntPtr sdkContext, UInt32 deviceID, bool isMasterDevice)

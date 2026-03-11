@@ -164,13 +164,13 @@ int CommControl::addSlaveDevice(BS2_DEVICE_ID id, const vector<BS2Rs485SlaveDevi
 
 int CommControl::setSlaveBaudrate(BS2_DEVICE_ID masterID, BS2_DEVICE_ID slaveID, uint32_t baudrate)
 {
-	int sdkResult = BS2_SetSlaveBaudrate(context_, masterID, slaveID, baudrate);
-	if (BS_SDK_SUCCESS != sdkResult)
-	{
-		TRACE("BS2_SetSlaveBaudrate call failed: %d", sdkResult);
-	}
+	//int sdkResult = BS2_SetSlaveBaudrate(context_, masterID, slaveID, baudrate);
+	//if (BS_SDK_SUCCESS != sdkResult)
+	//{
+	//	TRACE("BS2_SetSlaveBaudrate call failed: %d", sdkResult);
+	//}
 
-	return sdkResult;
+	return 1;
 }
 
 int CommControl::searchCSTSlaveDevice(BS2_DEVICE_ID id, uint32_t channelPort, vector<BS2Rs485SlaveDeviceEX>& slaveList)
@@ -617,32 +617,32 @@ int CommControl::getDefaultLongResponseTimeout()
 {
 	long ms = 0L;
 
-	int sdkResult = BS2_GetDefaultLongResponseTimeout(context_, &ms);
-	if (BS_SDK_SUCCESS != sdkResult)
-	{
-		TRACE("BS2_GetDefaultLongResponseTimeout call failed: %d", sdkResult);
-	}
-	else
-	{
-		ms /= 1000;
-		cout << "DefaultLongResponseTimeout is " << ms << endl;
-	}
+	//int sdkResult = BS2_GetDefaultLongResponseTimeout(context_, &ms);
+	//if (BS_SDK_SUCCESS != sdkResult)
+	//{
+	//	TRACE("BS2_GetDefaultLongResponseTimeout call failed: %d", sdkResult);
+	//}
+	//else
+	//{
+	//	ms /= 1000;
+	//	cout << "DefaultLongResponseTimeout is " << ms << endl;
+	//}
 
-	return sdkResult;
+	return 1;
 }
 
 int CommControl::setDefaultLongResponseTimeout()
 {
 	const long MILLI_SEC = 1000;
 
-	long sec = Utility::getInput<long>("How many seconds?");
-	sec *= MILLI_SEC;
+	//long sec = Utility::getInput<long>("How many seconds?");
+	//sec *= MILLI_SEC;
 
-	int sdkResult = BS2_SetDefaultLongResponseTimeout(context_, sec);
-	if (BS_SDK_SUCCESS != sdkResult)
-		TRACE("BS2_SetDefaultLongResponseTimeout call failed: %d", sdkResult);
+	//int sdkResult = BS2_SetDefaultLongResponseTimeout(context_, sec);
+	//if (BS_SDK_SUCCESS != sdkResult)
+	//	TRACE("BS2_SetDefaultLongResponseTimeout call failed: %d", sdkResult);
 
-	return sdkResult;
+	return 1;
 }
 
 int CommControl::getSocketRetryCount(uint32_t& count)
