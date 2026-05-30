@@ -477,6 +477,12 @@ int runDoorAPIs(void* context, DeviceInfo& device)
 		case MENU_DOOR_GETSTATUS:
 			sdkResult = getStatus(context, device);
 			break;
+		case MENU_DOOR_START_MONITOR_STATUSEX:
+			sdkResult = startMonitorDoorStatusEx(context);
+			break;
+		case MENU_DOOR_STOP_MONITOR_STATUSEX:
+			sdkResult = stopMonitorDoorStatusEx(context);
+			break;
 		default:
 			break;
 		}
@@ -3883,6 +3889,50 @@ int getStatus(void* context, const DeviceInfo& device)
 		dc.print(item, idx++);
 
 	return sdkResult;
+}
+
+// Callback for BS2_SetDoorStatusExListener.
+// statusData/statusDataSize are valid only during this call. We copy the
+// payload into a local BS2DoorOperatorStatus before printing and never keep
+// the pointer past the callback body. Do NOT call BS2_ReleaseObject on it.
+void onDoorStatusExChanged(BS2_DEVICE_ID deviceId, BS2_DOOR_STATUS_EX_TYPE statusType,
+	const void* statusData, uint32_t statusDataSize)
+{
+	switch (statusType)
+	{
+	case BS2_DOOR_STATUS_EX_TYPE_OPERATOR:
+		if (statusData && statusDataSize >= sizeof(BS2DoorOperatorStatus))
+		{
+			BS2DoorOperatorStatus opStatus = { 0, };
+			memcpy(&opStatus, statusData, sizeof(BS2DoorOperatorStatus));
+			TRACE(">>>> DoorStatusEx OPERATOR deviceID:%u", deviceId);
+			DoorControl::print(opStatus);
+		}
+		else
+		{
+			TRACE(">>>> DoorStatusEx OPERATOR payload too small: deviceID:%u size:%u",
+				deviceId, statusDataSize);
+		}
+		break;
+
+	default:
+		// Unknown statusType — forward-compat. Log only.
+		TRACE(">>>> DoorStatusEx unknown statusType:%u deviceID:%u size:%u",
+			statusType, deviceId, statusDataSize);
+		break;
+	}
+}
+
+int startMonitorDoorStatusEx(void* context)
+{
+	DoorControl dc(context);
+	return dc.setDoorStatusExListener(onDoorStatusExChanged);
+}
+
+int stopMonitorDoorStatusEx(void* context)
+{
+	DoorControl dc(context);
+	return dc.setDoorStatusExListener(NULL);
 }
 
 int getDeviceIOStatus(void* context, const DeviceInfo& device)

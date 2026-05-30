@@ -217,4 +217,22 @@ typedef struct {
 	BS2AntiPassbackZone		apbZone;		///< 1408 bytes
 } BS2Door;
 
+enum {
+	BS2_DOOR_STATUS_EX_TYPE_NONE		= 0,
+	BS2_DOOR_STATUS_EX_TYPE_OPERATOR	= 1,	///< payload = BS2DoorOperatorStatus
+};
+
+typedef uint8_t BS2_DOOR_STATUS_EX_TYPE;
+
+typedef struct {
+	BS2DoorStatus status;
+
+	char operatorID[BS2_USER_ID_SIZE];
+	uint32_t timeLimitSS;
+	BS2_TIMESTAMP actionTime;
+
+	BS2_BOOL byServer;
+	uint8_t  reserved[71];
+} BS2DoorOperatorStatus;
+
 #endif	// __BS2_DOOR_H__

@@ -334,3 +334,27 @@ void DoorControl::print(const BS2DoorStatus& status, uint32_t idx)
 	TRACE("  alarmFlags:%u", status.alarmFlags);
 	TRACE("  lastOpenTime:%s", Utility::convertTimeUTC2String(status.lastOpenTime).c_str());
 }
+
+void DoorControl::print(const BS2DoorOperatorStatus& opStatus)
+{
+	char opID[BS2_USER_ID_SIZE + 1] = { 0, };
+	memcpy(opID, opStatus.operatorID, BS2_USER_ID_SIZE);
+
+	TRACE("-- BS2DoorOperatorStatus --");
+	TRACE("  operatorID:%s", opID);
+	TRACE("  timeLimitSS:%u", opStatus.timeLimitSS);
+	TRACE("  actionTime:%s", Utility::convertTimeUTC2String(opStatus.actionTime).c_str());
+	TRACE("  byServer:%u", opStatus.byServer);
+	print(opStatus.status, 0);
+}
+
+int DoorControl::setDoorStatusExListener(OnDoorStatusExChanged fpDoorStatusExChanged)
+{
+	int sdkResult = BS2_SetDoorStatusExListener(context_, fpDoorStatusExChanged);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_SetDoorStatusExListener call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}

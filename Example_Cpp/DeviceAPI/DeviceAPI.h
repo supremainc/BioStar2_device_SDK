@@ -273,18 +273,22 @@ enum EN_MENU_DOOR
 	MENU_DOOR_LOCK,
 	MENU_DOOR_UNLOCK,
 	MENU_DOOR_GETSTATUS,
+	MENU_DOOR_START_MONITOR_STATUSEX,
+	MENU_DOOR_STOP_MONITOR_STATUSEX,
 };
 
 std::vector<MENU_ITEM> menuInfoDoorAPI =
 {
-	{MENU_DOOR_BREAK,			"Back"},
-	{MENU_SEPARATOR,			""},
-	{MENU_DOOR_GET_DOOR,		"Get doors"},
-	{MENU_DOOR_SET_DOOR,		"Set doors"},
-	{MENU_DOOR_REM_DOORALL, 	"Remove all doors"},
-	{MENU_DOOR_LOCK,			"(Timed) Lock doors"},
-	{MENU_DOOR_UNLOCK,			"(Timed) Unlock doors"},
-	{MENU_DOOR_GETSTATUS,		"Get status"},
+	{MENU_DOOR_BREAK,					"Back"},
+	{MENU_SEPARATOR,					""},
+	{MENU_DOOR_GET_DOOR,				"Get doors"},
+	{MENU_DOOR_SET_DOOR,				"Set doors"},
+	{MENU_DOOR_REM_DOORALL,				"Remove all doors"},
+	{MENU_DOOR_LOCK,					"(Timed) Lock doors"},
+	{MENU_DOOR_UNLOCK,					"(Timed) Unlock doors"},
+	{MENU_DOOR_GETSTATUS,				"Get status"},
+	{MENU_DOOR_START_MONITOR_STATUSEX,	"Start door status ex monitoring"},
+	{MENU_DOOR_STOP_MONITOR_STATUSEX,	"Stop door status ex monitoring"},
 };
 
 enum EN_MENU_LOG
@@ -394,5 +398,9 @@ int setDoors(void* context, const DeviceInfo& device);
 int lockDoor(void* context, const DeviceInfo& device);
 int unlockDoor(void* context, const DeviceInfo& device);
 int getStatus(void* context, const DeviceInfo& device);
+int startMonitorDoorStatusEx(void* context);
+int stopMonitorDoorStatusEx(void* context);
+void onDoorStatusExChanged(BS2_DEVICE_ID deviceId, BS2_DOOR_STATUS_EX_TYPE statusType,
+	const void* statusData, uint32_t statusDataSize);
 
 int getDeviceIOStatus(void* context, const DeviceInfo& device);

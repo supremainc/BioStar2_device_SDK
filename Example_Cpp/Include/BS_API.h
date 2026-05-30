@@ -545,6 +545,8 @@ typedef void (*OnCheckGlobalAPBViolationByDoorOpen)(BS2_DEVICE_ID deviceId, BS2_
 typedef void (*OnUpdateGlobalAPBViolationByDoorOpen)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID_1, const char* userID_2, bool isDualAuth);
 typedef void (*OnUserPhrase)(BS2_DEVICE_ID deviceId, BS2_PACKET_SEQ seq, const char* userID);
 typedef void (*OnOsdpStandardDeviceStatusChanged)(BS2_DEVICE_ID deviceId, const BS2OsdpStandardDeviceNotify* notifyData);
+// Door status extension notification.
+typedef void (*OnDoorStatusExChanged)(BS2_DEVICE_ID deviceId, BS2_DOOR_STATUS_EX_TYPE statusType, const void* statusData, uint32_t statusDataSize);
 
 typedef uint32_t (*PreferMethod)(BS2_DEVICE_ID deviceID);
 typedef const char* (*GetRootCaFilePath)(BS2_DEVICE_ID deviceID);
@@ -1006,6 +1008,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveOsdpStandardDevice(void* conte
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetOsdpStandardDeviceCapability(void* context, BS2_DEVICE_ID osdpDeviceId, BS2OsdpStandardDeviceCapability* capability);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardDeviceSecurityKey(void* context, BS2_DEVICE_ID masterOrSlaveId, const BS2OsdpStandardDeviceSecurityKey* key);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetOsdpStandardDeviceStatusListener(void* context, OnOsdpStandardDeviceStatusChanged ptrOsdpStandardDeviceStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDoorStatusExListener(void* context, OnDoorStatusExChanged ptrDoorStatusEx);
 
 // Device license
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_EnableDeviceLicense(void* context, BS2_DEVICE_ID deviceId, const BS2LicenseBlob* licenseBlob, BS2LicenseResult** outResultObj, uint32_t* outNumOfResult);
