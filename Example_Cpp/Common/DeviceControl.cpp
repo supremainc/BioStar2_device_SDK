@@ -395,6 +395,66 @@ int DeviceControl::runAction(BS2_DEVICE_ID id, const BS2Action& action)
 	return sdkResult;
 }
 
+int DeviceControl::getAuthFailStatus(BS2_DEVICE_ID id, const std::vector<BS2_DEVICE_ID>& slaveIDs, std::vector<BS2AuthFailStatus>& status)
+{
+	BS2AuthFailStatus* statusObjs = NULL;
+	uint32_t numOfStatus(0);
+
+	int sdkResult = BS_SDK_SUCCESS;
+	if (slaveIDs.empty())
+	{
+		sdkResult = BS2_GetAllAuthFailStatus(context_, id, &statusObjs, &numOfStatus);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetAllAuthFailStatus call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+	else
+	{
+		sdkResult = BS2_GetAuthFailStatus(context_, id, (BS2_DEVICE_ID*)slaveIDs.data(), static_cast<uint32_t>(slaveIDs.size()), &statusObjs, &numOfStatus);
+		if (BS_SDK_SUCCESS != sdkResult)
+		{
+			TRACE("BS2_GetAuthFailStatus call failed: %d", sdkResult);
+			return sdkResult;
+		}
+	}
+
+	if (statusObjs == NULL || 0 == numOfStatus)
+	{
+		TRACE("BS2AuthFailStatus is empty.");
+		return sdkResult;
+	}
+
+	status.clear();
+	for (uint32_t idx = 0; idx < numOfStatus; idx++)
+	{
+		status.push_back(statusObjs[idx]);
+	}
+
+	BS2_ReleaseObject(statusObjs);
+	return sdkResult;
+}
+
+int DeviceControl::releaseAuthFailLockout(BS2_DEVICE_ID id, const std::vector<BS2_DEVICE_ID>& slaveIDs)
+{
+	int sdkResult = BS_SDK_SUCCESS;
+	if (slaveIDs.empty())
+	{
+		sdkResult = BS2_ReleaseAllAuthFailLockout(context_, id);
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_ReleaseAllAuthFailLockout call failed: %d", sdkResult);
+	}
+	else
+	{
+		sdkResult = BS2_ReleaseAuthFailLockout(context_, id, (BS2_DEVICE_ID*)slaveIDs.data(), static_cast<uint32_t>(slaveIDs.size()));
+		if (BS_SDK_SUCCESS != sdkResult)
+			TRACE("BS2_ReleaseAuthFailLockout call failed: %d", sdkResult);
+	}
+
+	return sdkResult;
+}
+
 void DeviceControl::print(const BS2SimpleDeviceInfo& info)
 {
 	TRACE("==[BS2SimpleDeviceInfo]==");

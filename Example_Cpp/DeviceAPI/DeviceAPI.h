@@ -133,6 +133,9 @@ enum EN_MENU_DEV
 	MENU_DEV_GET_CUSTOMCARDCONFIG,
 	MENU_DEV_SET_CUSTOMCARDCONFIG,
 
+	MENU_DEV_GET_CUSTOMFELICACARDCONFIG,
+	MENU_DEV_SET_CUSTOMFELICACARDCONFIG,
+
 	MENU_DEV_UPD_DEVICE_VOLUME,
 	MENU_DEV_RUN_ACTION,
 
@@ -144,6 +147,11 @@ enum EN_MENU_DEV
 
 	MENU_DEV_GET_FACILITYCODECONFIG,
 	MENU_DEV_SET_FACILITYCODECONFIG,
+
+	MENU_DEV_GET_AUTHFAIL_STATUS,
+	MENU_DEV_GET_ALL_AUTHFAIL_STATUS,
+	MENU_DEV_RELEASE_AUTHFAIL_LOCKOUT,
+	MENU_DEV_RELEASE_ALL_AUTHFAIL_LOCKOUT,
 };
 
 std::vector<MENU_ITEM> menuInfoDeviceAPI =
@@ -249,6 +257,8 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_CUSTOMCARDCONFIG,		"BS2_GetCustomCardConfig"},
 	{MENU_DEV_SET_CUSTOMCARDCONFIG,		"BS2_SetCustomCardConfig"},
+	{MENU_DEV_GET_CUSTOMFELICACARDCONFIG,	"BS2_GetCustomFelicaCardConfig"},
+	{MENU_DEV_SET_CUSTOMFELICACARDCONFIG,	"BS2_SetCustomFelicaCardConfig"},
 
 	{MENU_DEV_UPD_DEVICE_VOLUME,		"Update device volume"},
 	{MENU_DEV_RUN_ACTION,				"Run action"},
@@ -261,6 +271,11 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 
 	{MENU_DEV_GET_FACILITYCODECONFIG,	"BS2_GetFacilityCodeConfig" },
 	{MENU_DEV_SET_FACILITYCODECONFIG,	"BS2_SetFacilityCodeConfig" },
+
+	{MENU_DEV_GET_AUTHFAIL_STATUS,			"BS2_GetAuthFailStatus" },
+	{MENU_DEV_GET_ALL_AUTHFAIL_STATUS,		"BS2_GetAllAuthFailStatus" },
+	{MENU_DEV_RELEASE_AUTHFAIL_LOCKOUT,		"BS2_ReleaseAuthFailLockout" },
+	{MENU_DEV_RELEASE_ALL_AUTHFAIL_LOCKOUT,	"BS2_ReleaseAllAuthFailLockout" },
 };
 
 enum EN_MENU_DOOR
@@ -406,3 +421,8 @@ void onDoorStatusExChanged(BS2_DEVICE_ID deviceId, BS2_DOOR_STATUS_EX_TYPE statu
 	const void* statusData, uint32_t statusDataSize);
 
 int getDeviceIOStatus(void* context, const DeviceInfo& device);
+
+int getAuthFailStatus(void* context, const DeviceInfo& device);
+int getAllAuthFailStatus(void* context, const DeviceInfo& device);
+int releaseAuthFailLockout(void* context, const DeviceInfo& device);
+int releaseAllAuthFailLockout(void* context, const DeviceInfo& device);

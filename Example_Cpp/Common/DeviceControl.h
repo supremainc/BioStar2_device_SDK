@@ -34,6 +34,11 @@ public:
 	int queryDeviceLicense(BS2_DEVICE_ID id, BS2_LICENSE_TYPE licenseType, std::vector<BS2LicenseResult>& licenseResult);
 	int runAction(BS2_DEVICE_ID id, const BS2Action& action);
 
+	// Auth-fail lockout status / release (BS2_CMD_GET_AUTHFAIL_STATUS / BS2_CMD_RELEASE_AUTHFAIL_LOCKOUT).
+	// Pass empty slaveIDs to target all devices (option=1, param1=0).
+	int getAuthFailStatus(BS2_DEVICE_ID id, const std::vector<BS2_DEVICE_ID>& slaveIDs, std::vector<BS2AuthFailStatus>& status);
+	int releaseAuthFailLockout(BS2_DEVICE_ID id, const std::vector<BS2_DEVICE_ID>& slaveIDs);
+
 	static void print(const BS2SimpleDeviceInfo& info);
 	static void print(const BS2SimpleDeviceInfoEx& info);
 	static void print(const BS2IPv6DeviceInfo& info);

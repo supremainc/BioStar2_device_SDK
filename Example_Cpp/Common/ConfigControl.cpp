@@ -591,6 +591,24 @@ int ConfigControl::setCustomCardConfig(BS2_DEVICE_ID id, const BS2CustomCardConf
 	return sdkResult;
 }
 
+int ConfigControl::getCustomFelicaCardConfig(BS2_DEVICE_ID id, BS2CustomFelicaCardConfig& config) const
+{
+	int sdkResult = BS2_GetCustomFelicaCardConfig(context_, id, &config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_GetCustomFelicaCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
+int ConfigControl::setCustomFelicaCardConfig(BS2_DEVICE_ID id, const BS2CustomFelicaCardConfig& config) const
+{
+	int sdkResult = BS2_SetCustomFelicaCardConfig(context_, id, const_cast<BS2CustomFelicaCardConfig*>(&config));
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetCustomFelicaCardConfig call failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 //int ConfigControl::getFacilityCodeConfig(BS2_DEVICE_ID id, BS2FacilityCodeConfig& config) const
 //{
 //	int sdkResult = BS2_GetFacilityCodeConfig(context_, id, &config);
@@ -1578,6 +1596,7 @@ void ConfigControl::printCard(const BS2DesFireCard& card)
 	TRACE("+--desfire.fileID : %u", card.fileID);
 	TRACE("+--desfire.encryptionType : %u", card.encryptionType);
 	TRACE("+--desfire.operationMode : %u", card.operationMode);
+	TRACE("+--desfire.lockEV2SM : %u", card.lockEV2SM);
 }
 
 void ConfigControl::print(const BS2CardConfig& config)
@@ -1825,6 +1844,33 @@ void ConfigControl::print(const BS2CustomCardConfig& config)
 	//print(config.mifareEx);
 	TRACE("|--smartCardByteOrder : %u", config.smartCardByteOrder);
 	TRACE("+--formatID : %u", config.formatID);
+}
+
+void ConfigControl::print(const BS2CustomFelicaCardConfig& config)
+{
+	TRACE("==[BS2CustomFelicaCardConfig]==");
+	TRACE("+--systemCode : 0x%04X", config.systemCode);
+	TRACE("|--encryptionType : %u", config.encryptionType);
+	TRACE("|--blockList :");
+	for (uint32_t idx = 0; idx < sizeof(config.blockList) / sizeof(config.blockList[0]); ++idx)
+	{
+		TRACE("|  +--[%u] serviceCode=0x%04X blockNum=%u data.skipByte=%u data.dataSize=%u",
+		      idx,
+		      config.blockList[idx].serviceCode,
+		      config.blockList[idx].blockNum,
+		      config.blockList[idx].data.skipByte,
+		      config.blockList[idx].data.dataSize);
+	}
+	TRACE("|--serviceKey : %s", Utility::getHexaString(config.serviceKey, sizeof(config.serviceKey)).c_str());
+	TRACE("|--groupKey : %s", Utility::getHexaString(config.groupKey, sizeof(config.groupKey)).c_str());
+	TRACE("|--diversificationCode : %s", Utility::getHexaString(config.diversificationCode, sizeof(config.diversificationCode)).c_str());
+	TRACE("|--liteMasterKey : %s", Utility::getHexaString(config.liteMasterKey, sizeof(config.liteMasterKey)).c_str());
+	TRACE("|--areaCodeList[16] : 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X "
+	      "0x%04X 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X",
+	      config.areaCodeList[0], config.areaCodeList[1], config.areaCodeList[2], config.areaCodeList[3],
+	      config.areaCodeList[4], config.areaCodeList[5], config.areaCodeList[6], config.areaCodeList[7],
+	      config.areaCodeList[8], config.areaCodeList[9], config.areaCodeList[10], config.areaCodeList[11],
+	      config.areaCodeList[12], config.areaCodeList[13], config.areaCodeList[14], config.areaCodeList[15]);
 }
 
 //void ConfigControl::print(const BS2FacilityCodeConfig& config)

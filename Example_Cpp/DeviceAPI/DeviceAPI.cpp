@@ -406,6 +406,12 @@ int runDeviceAPIs(void* context, DeviceInfo& device)
 		case MENU_DEV_SET_CUSTOMCARDCONFIG:
 			sdkResult = setCustomCardConfig(context, device);
 			break;
+		case MENU_DEV_GET_CUSTOMFELICACARDCONFIG:
+			sdkResult = getCustomFelicaCardConfig(context, device);
+			break;
+		case MENU_DEV_SET_CUSTOMFELICACARDCONFIG:
+			sdkResult = setCustomFelicaCardConfig(context, device);
+			break;
 		case MENU_DEV_UPD_DEVICE_VOLUME:
 			sdkResult = updateDeviceVolume(context, device);
 			break;
@@ -429,6 +435,18 @@ int runDeviceAPIs(void* context, DeviceInfo& device)
 			break;
 		case MENU_DEV_SET_FACILITYCODECONFIG:
 			sdkResult = setFacilityCodeConfig(context, device);
+			break;
+		case MENU_DEV_GET_AUTHFAIL_STATUS:
+			sdkResult = getAuthFailStatus(context, device);
+			break;
+		case MENU_DEV_GET_ALL_AUTHFAIL_STATUS:
+			sdkResult = getAllAuthFailStatus(context, device);
+			break;
+		case MENU_DEV_RELEASE_AUTHFAIL_LOCKOUT:
+			sdkResult = releaseAuthFailLockout(context, device);
+			break;
+		case MENU_DEV_RELEASE_ALL_AUTHFAIL_LOCKOUT:
+			sdkResult = releaseAllAuthFailLockout(context, device);
 			break;
 		default:
 			break;
@@ -3337,6 +3355,9 @@ int setCardConfig(void* context, const DeviceInfo& device)
 		msg = "Please enter a operation mode for desfire card. (0: Legacy, 1: Advanced(AppLevelKey))";
 		config.desfire.operationMode = (uint8_t)Utility::getInput<uint32_t>(msg);
 
+		msg = "Please enter lock EV2 secure messaging for desfire card. (0: default, 1: only EV2SM)";
+		config.desfire.lockEV2SM = (uint8_t)Utility::getInput<uint32_t>(msg);
+
 		if (DESFIRECARD_OPERATION_MODE_LEGACY == config.desfire.operationMode)
 		{
 			memset(&config.desfire.primaryKey, 0x0, sizeof(config.desfire.primaryKey));
@@ -3650,6 +3671,122 @@ int setCustomCardConfig(void* context, const DeviceInfo& device)
 	return sdkResult;
 }
 
+int getCustomFelicaCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CustomFelicaCardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardFelicaSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	sdkResult = cc.getCustomFelicaCardConfig(id, config);
+	if (BS_SDK_SUCCESS == sdkResult)
+		ConfigControl::print(config);
+
+	return sdkResult;
+}
+
+int setCustomFelicaCardConfig(void* context, const DeviceInfo& device)
+{
+	ConfigControl cc(context);
+	DeviceControl dc(context);
+	BS2DeviceCapabilities capabilies = { 0, };
+	BS2CustomFelicaCardConfig config = { 0, };
+
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+
+	int sdkResult = dc.getDeviceCapabilities(id, capabilies);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	if (!capabilies.customSmartCardFelicaSupported)
+	{
+		TRACE("Not supported function.");
+		return BS_SDK_ERROR_NOT_SUPPORTED;
+	}
+
+	// Seed from current config so reserved/unused bytes are preserved.
+	// Key fields are not returned by the device. If you Set values taken
+	// from a round-trip Get/Set without re-collecting keys, the device's
+	// existing keys will be lost. The administrator must always re-enter
+	// keys before sending.
+	sdkResult = cc.getCustomFelicaCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	ostringstream oss;
+	string msg;
+
+	msg = "Please enter the system code (hex, e.g. 88B4).";
+	config.systemCode = (uint16_t)Utility::getInput<uint32_t>(msg);
+
+	msg = "Please enter the encryption type. (0: default, 1: ...)";
+	config.encryptionType = (uint8_t)Utility::getInput<uint32_t>(msg);
+
+	const uint32_t blockCount = (uint32_t)(sizeof(config.blockList) / sizeof(config.blockList[0]));
+	for (uint32_t idx = 0; idx < blockCount; ++idx)
+	{
+		oss.str(""); oss << "blockList[" << idx << "].serviceCode (hex)";
+		config.blockList[idx].serviceCode = (uint16_t)Utility::getInput<uint32_t>(oss.str());
+
+		oss.str(""); oss << "blockList[" << idx << "].blockNum";
+		config.blockList[idx].blockNum = (uint8_t)Utility::getInput<uint32_t>(oss.str());
+
+		oss.str(""); oss << "blockList[" << idx << "].data.skipByte";
+		config.blockList[idx].data.skipByte = (uint8_t)Utility::getInput<uint32_t>(oss.str());
+
+		oss.str(""); oss << "blockList[" << idx << "].data.dataSize";
+		config.blockList[idx].data.dataSize = (uint8_t)Utility::getInput<uint32_t>(oss.str());
+	}
+
+	memset(&config.serviceKey, 0x0, sizeof(config.serviceKey));
+	oss.str("");
+	oss << "Please enter the hexadecimal " << sizeof(config.serviceKey) << "-bytes serviceKey for felica card." << endl;
+	oss << " [Like 12 34 56 ... EF]" << endl;
+	Utility::getLineHexaString<uint8_t>(oss.str(), config.serviceKey, sizeof(config.serviceKey));
+
+	memset(&config.groupKey, 0x0, sizeof(config.groupKey));
+	oss.str("");
+	oss << "Please enter the hexadecimal " << sizeof(config.groupKey) << "-bytes groupKey for felica card." << endl;
+	oss << " [Like 12 34 56 ... EF]" << endl;
+	Utility::getLineHexaString<uint8_t>(oss.str(), config.groupKey, sizeof(config.groupKey));
+
+	for (uint32_t idx = 0; idx < sizeof(config.areaCodeList) / sizeof(config.areaCodeList[0]); ++idx)
+	{
+		oss.str(""); oss << "areaCodeList[" << idx << "] (hex, 0 to skip)";
+		config.areaCodeList[idx] = (uint16_t)Utility::getInput<uint32_t>(oss.str());
+	}
+
+	memset(&config.diversificationCode, 0x0, sizeof(config.diversificationCode));
+	oss.str("");
+	oss << "Please enter the hexadecimal " << sizeof(config.diversificationCode) << "-bytes diversificationCode for felica card." << endl;
+	oss << " [Like 12 34 56 ... EF]" << endl;
+	Utility::getLineHexaString<uint8_t>(oss.str(), config.diversificationCode, sizeof(config.diversificationCode));
+
+	memset(&config.liteMasterKey, 0x0, sizeof(config.liteMasterKey));
+	oss.str("");
+	oss << "Please enter the hexadecimal " << sizeof(config.liteMasterKey) << "-bytes liteMasterKey for felica card." << endl;
+	oss << " [Like 12 34 56 ... EF]" << endl;
+	Utility::getLineHexaString<uint8_t>(oss.str(), config.liteMasterKey, sizeof(config.liteMasterKey));
+
+	sdkResult = cc.setCustomFelicaCardConfig(id, config);
+	if (BS_SDK_SUCCESS != sdkResult)
+		TRACE("BS2_SetCustomFelicaCardConfig failed: %d", sdkResult);
+
+	return sdkResult;
+}
+
 int runAction(void* context, const DeviceInfo& device)
 {
 	DeviceControl dc(context);
@@ -3956,4 +4093,68 @@ int getDeviceIOStatus(void* context, const DeviceInfo& device)
 	//}
 
 	return 1;
+}
+
+static void printAuthFailStatus(const std::vector<BS2AuthFailStatus>& statusList)
+{
+	TRACE("Total %zu BS2AuthFailStatus received.", statusList.size());
+	for (const BS2AuthFailStatus& s : statusList)
+	{
+		TRACE("  deviceID:%u isLockouted:%u lockoutLevel:%u numOfDetails:%u",
+			s.deviceID, s.isLockouted, s.lockoutLevel, s.numOfDetails);
+		uint8_t shown = (s.numOfDetails < MAX_AUTH_FAIL_STATUS_DETAIL_COUNT) ? s.numOfDetails : MAX_AUTH_FAIL_STATUS_DETAIL_COUNT;
+		for (uint8_t i = 0; i < shown; i++)
+		{
+			const BS2AuthFailStatusDetail& d = s.details[i];
+			// Native unions expose BS2_DATETIME (External/protocol) side only.
+			TRACE("    [%u] lockoutType:0x%04X remaining:%u startTime:%u occurred:%u lastLockoutTime:%u",
+				i, d.lockoutType, d.remaining_count, d.startTime, d.numOfOccurred, d.lastLockoutTime);
+		}
+	}
+}
+
+int getAuthFailStatus(void* context, const DeviceInfo& device)
+{
+	DeviceControl dc(context);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	vector<BS2_DEVICE_ID> slaveIDs = Utility::getLineNumbers<uint32_t>("  Enter slave device IDs [ID_1, ID_2 ...] ", ',');
+	vector<BS2AuthFailStatus> status;
+	int sdkResult = dc.getAuthFailStatus(id, slaveIDs, status);
+	if (BS_SDK_SUCCESS == sdkResult)
+		printAuthFailStatus(status);
+	return sdkResult;
+}
+
+int getAllAuthFailStatus(void* context, const DeviceInfo& device)
+{
+	DeviceControl dc(context);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	vector<BS2_DEVICE_ID> slaveIDs;
+	vector<BS2AuthFailStatus> status;
+	int sdkResult = dc.getAuthFailStatus(id, slaveIDs, status);
+	if (BS_SDK_SUCCESS == sdkResult)
+		printAuthFailStatus(status);
+	return sdkResult;
+}
+
+int releaseAuthFailLockout(void* context, const DeviceInfo& device)
+{
+	DeviceControl dc(context);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	vector<BS2_DEVICE_ID> slaveIDs = Utility::getLineNumbers<uint32_t>("  Enter slave device IDs [ID_1, ID_2 ...] ", ',');
+	int sdkResult = dc.releaseAuthFailLockout(id, slaveIDs);
+	if (BS_SDK_SUCCESS == sdkResult)
+		TRACE("BS2_ReleaseAuthFailLockout succeeded.");
+	return sdkResult;
+}
+
+int releaseAllAuthFailLockout(void* context, const DeviceInfo& device)
+{
+	DeviceControl dc(context);
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+	vector<BS2_DEVICE_ID> slaveIDs;
+	int sdkResult = dc.releaseAuthFailLockout(id, slaveIDs);
+	if (BS_SDK_SUCCESS == sdkResult)
+		TRACE("BS2_ReleaseAllAuthFailLockout succeeded.");
+	return sdkResult;
 }
