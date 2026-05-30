@@ -100,7 +100,8 @@ typedef struct {
 	uint8_t fileID;
 	uint8_t encryptionType;                 // 0: DES/3DES, 1: AES
 	uint8_t operationMode;                  // 0: legacy(use picc master key), 1: new mode(use app master, file read, file write key)
-	uint8_t reserved[2];
+	uint8_t lockEV2SM;
+	uint8_t reserved[1];
 } BS2DesFireCard;                           //40 Bytes
 
 /**
@@ -226,12 +227,40 @@ typedef struct {
 } BS2CustomDesFireCard;                           ///<96 Bytes
 
 
+/*
+* BS2CustomFelicaCardConfig
+*/
+typedef struct {
+	uint16_t systemCode;				///< 2 byte
+	uint16_t reserved;					///< 2 byte
+	struct BlockList{
+		uint16_t serviceCode;			///< 2 byte
+		uint8_t	 blockNum;				///< 1 byte
+		uint8_t	 reserved;				///< 1 byte
+		struct Data{
+			uint8_t skipByte;
+			uint8_t dataSize;
+			uint8_t reserved[6];
+		} data;							///< 8 byte
+		uint8_t	 reserved1[8];			///< 8 byte
+	} blockList[8];						///< 8 x 20 = 160 byte
+
+	uint8_t serviceKey[16];				///< 16 byte
+	uint8_t groupKey[16];				///< 16 byte
+	uint16_t areaCodeList[16];			///< 16 byte (entries)
+	uint8_t diversificationCode[16];	///< 16 byte
+	uint8_t liteMasterKey[24];			///< 24 byte
+	uint8_t encryptionType;				///< 1 byte
+
+	uint8_t reserved1[91];				///< 91 byte
+} BS2CustomFelicaCardConfig;
+
 /**
  *  BS2CustomCardConfig
  */
 typedef struct {
 	BS2_CARD_DATA_TYPE dataType;               ///< 1 byte
-	BS2_BOOL useSecondaryKey;                  ///< 1 byte	
+	BS2_BOOL useSecondaryKey;                  ///< 1 byte
 	uint8_t reserved1[2];						///< 2 bytes (packing)
 
 	BS2CustomMifareCard mifare;                      ///< 24 bytes

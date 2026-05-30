@@ -374,6 +374,8 @@ int getCardConfig(void* context, const DeviceInfo& device);
 int setCardConfig(void* context, const DeviceInfo& device);
 int getCustomCardConfig(void* context, const DeviceInfo& device);
 int setCustomCardConfig(void* context, const DeviceInfo& device);
+int getCustomFelicaCardConfig(void* context, const DeviceInfo& device);
+int setCustomFelicaCardConfig(void* context, const DeviceInfo& device);
 void setTriggerAction(const DeviceInfo& device, BS2TriggerAction& triggerAction);
 void setTrigger(const DeviceInfo& device, BS2Trigger& trigger);
 void setEventTrigger(BS2EventTrigger& eventTrigger);

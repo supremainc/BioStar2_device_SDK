@@ -103,4 +103,8 @@ typedef struct {
 	uint8_t reserved4[256];		///< 256 bytes (reserved)
 } BS2AuthConfigExt;
 
+enum{
+	MAX_COUNT_OF_AUTH_FAIL = 15,
+};
+
 #endif	// __BS2_AUTH_CONFIG_EXT_H__

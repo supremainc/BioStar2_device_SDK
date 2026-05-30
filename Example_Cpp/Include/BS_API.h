@@ -73,6 +73,7 @@
 #include "BSCommon/data/BS2UserOverride.h"
 #include "BSCommon/data/BS2LockOverride.h"
 #include "BSCommon/data/BS2IO.h"
+#include "BSCommon/data/BS2AuthFailStatus.h"
  //[Admin 1000] 
 #include "BSCommon/protocol/BS2UdpDiscover.h"
 #include "BSCommon/protocol/BS2SystemInfo.h"
@@ -873,6 +874,16 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ComputeCRC16CCITT(unsigned char* dat
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCardModel(char* modelName, BS2_CARD_MODEL* cardModel);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceCapabilities(void* context, BS2_DEVICE_ID deviceId, BS2DeviceCapabilities* capabilities);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RunAction(void* context, BS2_DEVICE_ID deviceId, const BS2Action* action);
+
+// Auth fail lockout
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAuthFailStatus(void* context, BS2_DEVICE_ID deviceId, const BS2_DEVICE_ID* slaveIDs, uint32_t numOfSlave, BS2AuthFailStatus** statusObj, uint32_t* numOfStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllAuthFailStatus(void* context, BS2_DEVICE_ID deviceId, BS2AuthFailStatus** statusObj, uint32_t* numOfStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ReleaseAuthFailLockout(void* context, BS2_DEVICE_ID deviceId, const BS2_DEVICE_ID* slaveIDs, uint32_t numOfSlave);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_ReleaseAllAuthFailLockout(void* context, BS2_DEVICE_ID deviceId);
+
+// Custom Felica card config
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetCustomFelicaCardConfig(void* const context, BS2_DEVICE_ID deviceId, BS2CustomFelicaCardConfig* config);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetCustomFelicaCardConfig(void* const context, BS2_DEVICE_ID deviceId, const BS2CustomFelicaCardConfig* config);
 
 // Slave Control api
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetSlaveDevice(void* context, BS2_DEVICE_ID deviceId, BS2Rs485SlaveDevice** slaveDeviceObj, uint32_t* slaveDeviceCount);
