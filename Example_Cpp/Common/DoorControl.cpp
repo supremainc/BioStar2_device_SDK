@@ -160,6 +160,8 @@ int DoorControl::getDoorOperatorStatus(BS2_DEVICE_ID id, const vector<BS2_DOOR_I
 	if (statusObjs == NULL || 0 == numOfStatus)
 	{
 		TRACE("BS2DoorOperatorStatus is empty.");
+		if (statusObjs != NULL)
+			BS2_ReleaseObject(statusObjs);
 		return sdkResult;
 	}
 
@@ -187,6 +189,8 @@ int DoorControl::getAllDoorOperatorStatus(BS2_DEVICE_ID id, vector<BS2DoorOperat
 	if (statusObjs == NULL || 0 == numOfStatus)
 	{
 		TRACE("BS2DoorOperatorStatus is empty.");
+		if (statusObjs != NULL)
+			BS2_ReleaseObject(statusObjs);
 		return sdkResult;
 	}
 
