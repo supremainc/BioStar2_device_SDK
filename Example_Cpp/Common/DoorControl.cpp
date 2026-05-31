@@ -146,6 +146,60 @@ int DoorControl::getDoorStatus(BS2_DEVICE_ID id, const vector<BS2_DOOR_ID>& door
 	return sdkResult;
 }
 
+int DoorControl::getDoorOperatorStatus(BS2_DEVICE_ID id, const vector<BS2_DOOR_ID>& doorIDs, vector<BS2DoorOperatorStatus>& opStatus)
+{
+	BS2DoorOperatorStatus* statusObjs = NULL;
+	uint32_t numOfStatus(0);
+	int sdkResult = BS2_GetDoorOperatorStatus(context_, id, (BS2_DOOR_ID*)doorIDs.data(), static_cast<uint32_t>(doorIDs.size()), &statusObjs, &numOfStatus);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetDoorOperatorStatus call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	if (statusObjs == NULL || 0 == numOfStatus)
+	{
+		TRACE("BS2DoorOperatorStatus is empty.");
+		return sdkResult;
+	}
+
+	opStatus.clear();
+	for (uint32_t idx = 0; idx < numOfStatus; idx++)
+	{
+		opStatus.push_back(statusObjs[idx]);
+	}
+
+	BS2_ReleaseObject(statusObjs);
+	return sdkResult;
+}
+
+int DoorControl::getAllDoorOperatorStatus(BS2_DEVICE_ID id, vector<BS2DoorOperatorStatus>& opStatus)
+{
+	BS2DoorOperatorStatus* statusObjs = NULL;
+	uint32_t numOfStatus(0);
+	int sdkResult = BS2_GetAllDoorOperatorStatus(context_, id, &statusObjs, &numOfStatus);
+	if (BS_SDK_SUCCESS != sdkResult)
+	{
+		TRACE("BS2_GetAllDoorOperatorStatus call failed: %d", sdkResult);
+		return sdkResult;
+	}
+
+	if (statusObjs == NULL || 0 == numOfStatus)
+	{
+		TRACE("BS2DoorOperatorStatus is empty.");
+		return sdkResult;
+	}
+
+	opStatus.clear();
+	for (uint32_t idx = 0; idx < numOfStatus; idx++)
+	{
+		opStatus.push_back(statusObjs[idx]);
+	}
+
+	BS2_ReleaseObject(statusObjs);
+	return sdkResult;
+}
+
 void DoorControl::print(const BS2Door& door)
 {
 	TRACE("==[BS2Door]==");

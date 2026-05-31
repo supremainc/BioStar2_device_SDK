@@ -795,6 +795,8 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoor(void* context, BS2_DEVICE_ID
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllDoor(void* context, BS2_DEVICE_ID deviceId, BS2Door** doorObj, uint32_t* numDoor);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoorStatus(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2DoorStatus** doorStatusObj, uint32_t* numDoorStatus);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllDoorStatus(void* context, BS2_DEVICE_ID deviceId, BS2DoorStatus** doorStatusObj, uint32_t* numDoorStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDoorOperatorStatus(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount, BS2DoorOperatorStatus** statusObj, uint32_t* numStatus);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetAllDoorOperatorStatus(void* context, BS2_DEVICE_ID deviceId, BS2DoorOperatorStatus** statusObj, uint32_t* numStatus);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDoor(void* context, BS2_DEVICE_ID deviceId, BS2Door* doors, uint32_t doorCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetDoorAlarm(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ALARM_FLAG flag, BS2_DOOR_ID* doorIds, uint32_t doorIdCount);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_RemoveDoor(void* context, BS2_DEVICE_ID deviceId, BS2_DOOR_ID* doorIds, uint32_t doorIdCount);

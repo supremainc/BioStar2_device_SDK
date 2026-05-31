@@ -495,6 +495,12 @@ int runDoorAPIs(void* context, DeviceInfo& device)
 		case MENU_DOOR_GETSTATUS:
 			sdkResult = getStatus(context, device);
 			break;
+		case MENU_DOOR_GET_OPERATOR_STATUS:
+			sdkResult = getOperatorStatus(context, device);
+			break;
+		case MENU_DOOR_GET_ALL_OPERATOR_STATUS:
+			sdkResult = getAllOperatorStatus(context, device);
+			break;
 		case MENU_DOOR_START_MONITOR_STATUSEX:
 			sdkResult = startMonitorDoorStatusEx(context);
 			break;
@@ -4024,6 +4030,64 @@ int getStatus(void* context, const DeviceInfo& device)
 	uint32_t idx(0);
 	for (auto item : listStatus)
 		dc.print(item, idx++);
+
+	return sdkResult;
+}
+
+int getOperatorStatus(void* context, const DeviceInfo& device)
+{
+	vector<BS2_DOOR_ID> listDoors;
+	vector<BS2DoorOperatorStatus> listStatus;
+	int sdkResult = BS_SDK_SUCCESS;
+	DoorControl dc(context);
+
+#ifdef _DEBUG
+	BS2_DEVICE_ID id = device.id_;
+#else
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+#endif
+
+#ifdef _DEBUG
+	listDoors.push_back(1);
+#else
+	uint32_t numOfDoors = Utility::getDefaultInput<uint32_t>("How many door operator status do you want to get?", 1);
+	for (uint32_t idx = 0; idx < numOfDoors; idx++)
+	{
+		BS2_DOOR_ID doorID = Utility::getInput<BS2_DOOR_ID>("Enter a door ID:");
+		listDoors.push_back(doorID);
+	}
+#endif
+
+	if (0 < listDoors.size())
+	{
+		sdkResult = dc.getDoorOperatorStatus(id, listDoors, listStatus);
+		if (BS_SDK_SUCCESS != sdkResult)
+			return sdkResult;
+	}
+
+	for (auto item : listStatus)
+		dc.print(item);
+
+	return sdkResult;
+}
+
+int getAllOperatorStatus(void* context, const DeviceInfo& device)
+{
+	vector<BS2DoorOperatorStatus> listStatus;
+	DoorControl dc(context);
+
+#ifdef _DEBUG
+	BS2_DEVICE_ID id = device.id_;
+#else
+	BS2_DEVICE_ID id = Utility::getSelectedDeviceID(device);
+#endif
+
+	int sdkResult = dc.getAllDoorOperatorStatus(id, listStatus);
+	if (BS_SDK_SUCCESS != sdkResult)
+		return sdkResult;
+
+	for (auto item : listStatus)
+		dc.print(item);
 
 	return sdkResult;
 }

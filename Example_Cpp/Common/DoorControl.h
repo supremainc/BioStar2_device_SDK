@@ -19,6 +19,8 @@ public:
 	int lockDoor(BS2_DEVICE_ID id, const std::vector<BS2_DOOR_ID>& doorIDs, BS2_DOOR_FLAG doorFlag, uint32_t timeout);
 	int unlockDoor(BS2_DEVICE_ID id, const std::vector<BS2_DOOR_ID>& doorIDs, BS2_DOOR_FLAG doorFlag, uint32_t timeout);
 	int getDoorStatus(BS2_DEVICE_ID id, const std::vector<BS2_DOOR_ID>& doorIDs, std::vector<BS2DoorStatus>& doorStatus);
+	int getDoorOperatorStatus(BS2_DEVICE_ID id, const std::vector<BS2_DOOR_ID>& doorIDs, std::vector<BS2DoorOperatorStatus>& opStatus);
+	int getAllDoorOperatorStatus(BS2_DEVICE_ID id, std::vector<BS2DoorOperatorStatus>& opStatus);
 	int setDoorStatusExListener(OnDoorStatusExChanged fpDoorStatusExChanged);
 
 	void print(const BS2Door& door);

@@ -288,6 +288,8 @@ enum EN_MENU_DOOR
 	MENU_DOOR_LOCK,
 	MENU_DOOR_UNLOCK,
 	MENU_DOOR_GETSTATUS,
+	MENU_DOOR_GET_OPERATOR_STATUS,
+	MENU_DOOR_GET_ALL_OPERATOR_STATUS,
 	MENU_DOOR_START_MONITOR_STATUSEX,
 	MENU_DOOR_STOP_MONITOR_STATUSEX,
 };
@@ -302,6 +304,8 @@ std::vector<MENU_ITEM> menuInfoDoorAPI =
 	{MENU_DOOR_LOCK,					"(Timed) Lock doors"},
 	{MENU_DOOR_UNLOCK,					"(Timed) Unlock doors"},
 	{MENU_DOOR_GETSTATUS,				"Get status"},
+	{MENU_DOOR_GET_OPERATOR_STATUS,		"Get operator status (selected doors)"},
+	{MENU_DOOR_GET_ALL_OPERATOR_STATUS,	"Get operator status (all doors)"},
 	{MENU_DOOR_START_MONITOR_STATUSEX,	"Start door status ex monitoring"},
 	{MENU_DOOR_STOP_MONITOR_STATUSEX,	"Stop door status ex monitoring"},
 };
@@ -415,6 +419,8 @@ int setDoors(void* context, const DeviceInfo& device);
 int lockDoor(void* context, const DeviceInfo& device);
 int unlockDoor(void* context, const DeviceInfo& device);
 int getStatus(void* context, const DeviceInfo& device);
+int getOperatorStatus(void* context, const DeviceInfo& device);
+int getAllOperatorStatus(void* context, const DeviceInfo& device);
 int startMonitorDoorStatusEx(void* context);
 int stopMonitorDoorStatusEx(void* context);
 void onDoorStatusExChanged(BS2_DEVICE_ID deviceId, BS2_DOOR_STATUS_EX_TYPE statusType,
