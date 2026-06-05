@@ -709,7 +709,7 @@ int ConfigControl::getOperatorInAuthConfig(BS2_DEVICE_ID id, vector<BS2AuthOpera
 
 	for (int idx = 0; idx < config.numOperators; idx++)
 	{
-		BS2AuthOperatorLevel opr;
+		BS2AuthOperatorLevel opr = { 0 };
 		memcpy(&config.operators[idx], &opr, sizeof(BS2AuthOperatorLevel));
 		oprList.push_back(opr);
 	}
