@@ -801,7 +801,8 @@ int Utility::searchAndConnect(void* context, DeviceList& deviceList)
 {
 	vector<BS2SimpleDeviceInfo> searchedList;
 	CommControl cm(context);
-	int sdkResult = cm.searchDevices(searchedList);
+	string devIp = Utility::getLine("Please enter the host or device IP");
+	int sdkResult = cm.searchDevices(searchedList, devIp.c_str());
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
