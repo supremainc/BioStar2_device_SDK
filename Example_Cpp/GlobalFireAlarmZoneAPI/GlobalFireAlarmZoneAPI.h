@@ -66,7 +66,7 @@ using DoorList = std::map<BS2_DEVICE_ID, std::vector<BS2Door>>;
 
 int setSSLHandler();
 bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone);
-void connectTestDevice(void* context, DeviceList& deviceList);
+void connectTestDevice(void* context, DeviceList& deviceList, bool modeEx);
 int runAPIs(void* context, const DeviceList& deviceList);
 int getDoors(void* context, const DeviceList& devices, DoorList& doors);
 int makeFAZDoors(void* context, const DeviceList& devices, DoorList& doors);

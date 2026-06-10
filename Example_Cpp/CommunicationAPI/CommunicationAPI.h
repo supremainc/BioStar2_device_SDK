@@ -283,7 +283,7 @@ std::vector<MENU_ITEM> menuInfoUSBAPI =
 
 int setSSLHandler();
 bool getDeviceLogs(BS2_DEVICE_ID id, int& timezone);
-void connectTestDevice(void* context, DeviceList& deviceList);
+void connectTestDevice(void* context, DeviceList& deviceList, bool modeEx);
 int slaveMenu(void* context, DeviceList& deviceList);
 int osdpMenu(void* context, DeviceList& deviceList);
 int runAPIs(void* context, DeviceList& deviceList);

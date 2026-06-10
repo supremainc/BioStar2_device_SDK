@@ -15,6 +15,13 @@ enum RS485_HOST_CHANNEL
 	RS485_HOST_CH_MAX,
 };
 
+enum SEARCH_TYPE
+{
+	SEARCH_TYPE_NONE = 0,
+	SEARCH_TYPE_WITH_DEVICE_IP = 1,
+	SEARCH_TYPE_WITH_HOST_IP = 2,
+};
+
 
 class CommControl
 {
@@ -26,7 +33,7 @@ public:
 public:
 	int setSearchTimeout(uint32_t sec);
 	int searchDevices(std::vector<BS2_DEVICE_ID>& devices);
-	int searchDevices(std::vector<BS2SimpleDeviceInfo>& devices, std::string hostIP = "");
+	int searchDevices(std::vector<BS2SimpleDeviceInfo>& devices, SEARCH_TYPE searchType = SEARCH_TYPE_NONE, std::string ip = "");
 	int connectDevice(BS2_DEVICE_ID id);
 	int connectDevice(BS2_DEVICE_ID& id, std::string ip, BS2_PORT port = BS2_TCP_DEVICE_PORT_DEFAULT);
 	int disconnectDevice(BS2_DEVICE_ID id);

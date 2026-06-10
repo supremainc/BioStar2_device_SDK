@@ -327,7 +327,7 @@ std::vector<MENU_ITEM> menuInfoLogAPI =
 	{MENU_LOG_GET_DEVICEIO_STATUS,	"Get device IO status" },
 };
 
-void connectTestDevice(void* context);
+void connectTestDevice(void* context, bool modeEx);
 int runAPIs(void* context, DeviceInfo& device);
 int runDeviceAPIs(void* context, DeviceInfo& device);
 int runDoorAPIs(void* context, DeviceInfo& device);

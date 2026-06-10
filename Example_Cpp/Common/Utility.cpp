@@ -757,52 +757,28 @@ void Utility::selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& maste
 	masterID = selectedID_;
 }
 
-#if OLD_CODE
-int Utility::searchAndConnect(void* context, DeviceList& deviceList)
+int Utility::searchAndConnect(void* context, DeviceList& deviceList, bool modeEx)
 {
 	vector<BS2SimpleDeviceInfo> searchedList;
 	CommControl cm(context);
-	int sdkResult = cm.searchDevices(searchedList);
-	if (BS_SDK_SUCCESS != sdkResult)
-		return sdkResult;
+	int sdkResult = BS_SDK_SUCCESS;
+	SEARCH_TYPE searchType = SEARCH_TYPE_NONE;
+	string ip;
 
-	Utility::displayDeviceList(searchedList);
-
-	uint32_t selected(0);
-	if (MENU_BREAK != (selected = Utility::getSelectedIndex()) && selected <= searchedList.size())
+	if (modeEx)
 	{
-		uint32_t ip = searchedList[selected - 1].ipv4Address;
-		string ipAddr = Utility::getIPAddress(ip);
-		BS2_PORT port = searchedList[selected - 1].port;
-		BS2_DEVICE_ID id = searchedList[selected - 1].id;
-		BS2_DEVICE_TYPE type = searchedList[selected - 1].type;
-
-		TRACE("Now connect to device (ID:%u, IP:%s, Port:%u)", id, ipAddr.c_str(), port);
-
-		sdkResult = cm.connectDevice(id);
-		if (BS_SDK_SUCCESS != sdkResult)
-			return sdkResult;
-
-		int timezone(0);
-		ConfigControl cc(context);
-		if (BS_SDK_SUCCESS != (sdkResult = cc.getTimezone(id, timezone)))
-		{
-			cm.disconnectDevice(id);
-			return sdkResult;
-		}
-
-		deviceList.appendDevice(id, type, ip, port, timezone);
+		searchType = SEARCH_TYPE_WITH_HOST_IP;
 	}
+	else
+	{
+		if (Utility::isYes("Do you want to search with device IP?"))
+		{
+			ip = Utility::getLine("Please enter the device IP");
+			searchType = SEARCH_TYPE_WITH_DEVICE_IP;
+		}
+	}
+	sdkResult = cm.searchDevices(searchedList, searchType, ip);
 
-	return sdkResult;
-}
-#else
-int Utility::searchAndConnect(void* context, DeviceList& deviceList)
-{
-	vector<BS2SimpleDeviceInfo> searchedList;
-	CommControl cm(context);
-	string devIp = Utility::getLine("Please enter the host or device IP");
-	int sdkResult = cm.searchDevices(searchedList, devIp.c_str());
 	if (BS_SDK_SUCCESS != sdkResult)
 		return sdkResult;
 
@@ -840,7 +816,6 @@ int Utility::searchAndConnect(void* context, DeviceList& deviceList)
 
 	return sdkResult;
 }
-#endif
 
 int Utility::connectViaIP(void* context, DeviceInfo& device)
 {

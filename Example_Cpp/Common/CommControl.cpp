@@ -59,18 +59,31 @@ int CommControl::searchDevices(vector<BS2_DEVICE_ID>& devices)
 	return sdkResult;
 }
 
-int CommControl::searchDevices(vector<BS2SimpleDeviceInfo>& devices, string hostIP)
+int CommControl::searchDevices(std::vector<BS2SimpleDeviceInfo>& devices, SEARCH_TYPE searchType /* = SEARCH_TYPE_NONE */, std::string ip /* = "" */)
 {
 	BS2_DEVICE_ID* devicesIDObj = NULL;
 	uint32_t numOfDevices(0);
 
-	int sdkResult = (0 == hostIP.size()) ?
-		BS2_SearchDevices(context_) :
-		BS2_SearchDevicesEx(context_, hostIP.c_str());
+	int sdkResult = BS_SDK_SUCCESS;
+	string funcName;
+	switch (searchType)
+	{
+	case SEARCH_TYPE_NONE:
+	case SEARCH_TYPE_WITH_HOST_IP:
+		sdkResult = BS2_SearchDevices(context_);
+		funcName = "BS2_SearchDevices";
+		break;
+	case SEARCH_TYPE_WITH_DEVICE_IP:
+		sdkResult = BS2_SearchDeviceByIP(context_, ip.c_str());
+		funcName = "BS2_SearchDeviceByIP";
+		break;
+	default:
+		return BS_SDK_ERROR_INVALID_PARAM;
+	}
 
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
-		TRACE("BS2_SearchDevices call failed: %d", sdkResult);
+		TRACE("%s call failed: %d", funcName.c_str(), sdkResult);
 		return sdkResult;
 	}
 

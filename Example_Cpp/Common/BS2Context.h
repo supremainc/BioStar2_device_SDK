@@ -29,7 +29,7 @@ public:
 	static void setDebugFileLog(uint32_t level, uint32_t module, const char* path, int maxFileSize = 0);
 
 	static void onDebugMessage(uint32_t level, uint32_t module, const char* msg);
-	int initSDK(BS2_PORT port = BS2_TCP_SERVER_PORT_DEFAULT);
+	int initSDK(bool& modeEx, BS2_PORT port = BS2_TCP_SERVER_PORT_DEFAULT);
 	void* getContext() {return context_;}
 	int setDeviceEventListener(OnDeviceAccepted fpAccepted, OnDeviceConnected fpConnected, OnDeviceDisconnected fpDisconnected);
 	int setNotificationListener(OnAlarmFired fpAlarmFired, OnInputDetected fpInputDetected, OnConfigChanged fpConfigChanged);

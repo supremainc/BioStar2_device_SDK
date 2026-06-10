@@ -169,7 +169,8 @@ int main(int argc, char* argv[])
 	}
 
 	// Create SDK context and initialize
-	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
+	bool modeEx = false;
+	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK(modeEx))
 	{
 		BS2Context::getInstance()->releaseInstance();
 		return -1;
@@ -179,7 +180,7 @@ int main(int argc, char* argv[])
 
 	BS2Context::getInstance()->setDeviceEventListener(onDeviceAccepted, onDeviceConnected, onDeviceDisconnected);
 
-	connectTestDevice(sdkContext, deviceList);
+	connectTestDevice(sdkContext, deviceList, modeEx);
 
 	BS2Context::getInstance()->releaseInstance();
 	return 0;
@@ -197,7 +198,7 @@ int setSSLHandler()
 	return BS_SDK_SUCCESS;
 }
 
-void connectTestDevice(void* context, DeviceList& deviceList)
+void connectTestDevice(void* context, DeviceList& deviceList, bool modeEx)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	bool menuBreak = false;
@@ -241,7 +242,7 @@ void connectTestDevice(void* context, DeviceList& deviceList)
 			menuBreak = true;
 			break;
 		case MENU_TOP_SEARCH_N_CONN:
-			sdkResult = Utility::searchAndConnect(context, deviceList);
+			sdkResult = Utility::searchAndConnect(context, deviceList, modeEx);
 			break;
 		case MENU_TOP_DIRECT_IPADDR:
 			sdkResult = Utility::connectViaIP(context, deviceList);
