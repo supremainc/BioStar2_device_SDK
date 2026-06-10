@@ -84,7 +84,8 @@ int main(int argc, char* argv[])
 	sdkContext = BS2Context::getInstance()->getContext();
 
 	// Create SDK context and initialize
-	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
+	bool modeEx = false;
+	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK(modeEx))
 	{
 		BS2Context::getInstance()->releaseInstance();
 		return -1;
@@ -92,13 +93,13 @@ int main(int argc, char* argv[])
 
 	BS2Context::getInstance()->setDeviceEventListener(NULL, onDeviceConnected, onDeviceDisconnected);
 
-	connectTestDevice(sdkContext);
+	connectTestDevice(sdkContext, modeEx);
 
 	BS2Context::getInstance()->releaseInstance();
 	return 0;
 }
 
-void connectTestDevice(void* context)
+void connectTestDevice(void* context, bool modeEx)
 {
 	int sdkResult = BS_SDK_SUCCESS;
 	bool isDirectConnect = Utility::isNo("Would you like to search for devices?");
@@ -112,7 +113,7 @@ void connectTestDevice(void* context)
 	}
 	else 
 	{		
-		sdkResult = Utility::searchAndConnect(sdkContext, deviceList);
+		sdkResult = Utility::searchAndConnect(sdkContext, deviceList, modeEx);
 		if (BS_SDK_SUCCESS != sdkResult)
 			return;
 		deviceInfo = *deviceList.getAllDevices().begin()->second.get();

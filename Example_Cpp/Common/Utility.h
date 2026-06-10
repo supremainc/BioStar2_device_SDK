@@ -135,7 +135,7 @@ public:
 	static BS2_DEVICE_ID selectSlaveID();
 	static bool selectDeviceIDAndType(const DeviceList& deviceList, bool includeSlave, BS2_DEVICE_ID& selectedID, BS2_DEVICE_TYPE& selectedType);
 	static void selectDeviceIDs(const DeviceList& deviceList, BS2_DEVICE_ID& masterID, std::vector<BS2_DEVICE_ID>& selectedDevices, bool includeSlave, bool includeWiegand);
-	static int searchAndConnect(void* context, DeviceList& deviceList);
+	static int searchAndConnect(void* context, DeviceList& deviceList, bool modeEx);
 	static int connectViaIP(void* context, DeviceInfo& device);
 	static int connectViaIP(void* context, DeviceList& deviceList);
 	static int connectSlave(void* context, DeviceInfo& device, bool isSlave=false, BS2_DEVICE_ID slaveID=0);

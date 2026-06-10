@@ -642,6 +642,7 @@ BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetBarcodeScanListener(void* context
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SetServerPort(void* context, BS2_PORT serverPort);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchDevices(void* context);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchDevicesEx(void* context, const char* hostipAddr);
+BS_API_EXPORT int BS_CALLING_CONVENTION BS2_SearchDeviceByIP(void* context, const char* deviceIpAddr);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDevices(void* context, BS2_DEVICE_ID** deviceListObj, uint32_t* numDevice);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceInfo(void* context, BS2_DEVICE_ID deviceId, BS2SimpleDeviceInfo* deviceInfo);
 BS_API_EXPORT int BS_CALLING_CONVENTION BS2_GetDeviceInfoEx(void* context, BS2_DEVICE_ID deviceId, BS2SimpleDeviceInfo* deviceInfo, BS2SimpleDeviceInfoEx* deviceInfoEx);

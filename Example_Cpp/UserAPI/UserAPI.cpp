@@ -71,7 +71,8 @@ int main(int argc, char* argv[])
 	sdkContext = BS2Context::getInstance()->getContext();
 
 	// Create SDK context and initialize
-	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK())
+	bool modeEx = false;
+	if (BS_SDK_SUCCESS != BS2Context::getInstance()->initSDK(modeEx))
 	{
 		BS2Context::getInstance()->releaseInstance();
 		return -1;
@@ -79,13 +80,13 @@ int main(int argc, char* argv[])
 
 	BS2Context::getInstance()->setDeviceEventListener(NULL, onDeviceConnected, onDeviceDisconnected);
 
-	connectTestDevice(sdkContext);
+	connectTestDevice(sdkContext, modeEx);
 
 	BS2Context::getInstance()->releaseInstance();
 	return 0;
 }
 
-void connectTestDevice(void* context)
+void connectTestDevice(void* context, bool modeEx)
 {
 	memset(&deviceInfo, 0x0, sizeof(DeviceInfo));
 	int sdkResult = Utility::connectViaIP(context, deviceInfo);

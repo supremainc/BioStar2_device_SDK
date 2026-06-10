@@ -103,7 +103,7 @@ std::vector<MENU_ITEM> menuInfoDeviceAPI =
 };
 
 
-void connectTestDevice(void* context);
+void connectTestDevice(void* context, bool modeEx);
 int runAPIs(void* context, const DeviceInfo& device);
 int getLastFingerprintImage(UserControl& uc, BS2_DEVICE_ID id);
 int scanCard(UserControl& uc, BS2_DEVICE_ID id);

@@ -197,8 +197,9 @@ void BS2Context::releaseInstance()
 }
 
 
-int BS2Context::initSDK(BS2_PORT port)
+int BS2Context::initSDK(bool& modeEx, BS2_PORT port)
 {
+	modeEx = false;
 	int sdkResult = setServerPort(port);
 	if (BS_SDK_SUCCESS != sdkResult)
 	{
@@ -231,6 +232,7 @@ int BS2Context::initSDK(BS2_PORT port)
 				BS2_ReleaseContext(context_);
 				context_ = NULL;
 			}
+			modeEx = true;
 		}
 		else
 		{
